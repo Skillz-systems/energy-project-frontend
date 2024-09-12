@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import LogoComponent from "./Components/LogoComponent/LogoComponent";
+import "./index.css";
 
 function App() {
   return (

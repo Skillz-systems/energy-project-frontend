@@ -17,18 +17,36 @@
   position: relative;
 }
 
-html,
-body {
-  margin: 0;
-  outline: 0;
-  padding: 0;
-}
-
 * {
   box-sizing: border-box;
   margin: 0;
   outline: 0;
   padding: 0;
+}
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+  -webkit-text-fill-color: #000 !important;
+}
+
+input:-webkit-autofill:focus,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+}
+
+.autofill-parent input:-webkit-autofill {
+  background-clip: content-box !important;
+  box-shadow: 0 0 0 1000px rgba(0, 123, 255, 0.1) inset; /* A subtle autofill background */
+}
+
+.autofill-parent input:-webkit-autofill + div {
+  background-color: rgba(
+    0,
+    123,
+    255,
+    0.1
+  ); /* Make the parent div have the same autofill background */
 }
 
 .test {
