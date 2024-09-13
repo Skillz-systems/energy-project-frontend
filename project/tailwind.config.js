@@ -14,9 +14,14 @@ export default {
         textGrey: "#828DA9",
         strokeGrey: "#9DA3AA",
         strokeGreyTwo: "#E0E0E0",
+        strokeGreyThree: "#EAEEF2",
       },
       backgroundImage: {
         primaryGradient: "linear-gradient(to right, #982214, #F8CB48)",
+      },
+      boxShadow: {
+        innerCustom: "inset 1px 2px 4px rgba(0, 0, 0, 0.15)",
+        menuCustom: "8px 12px 40px rgba(0, 0, 0, 0.15)",
       },
     },
   },
