@@ -37,16 +37,24 @@ input:-webkit-autofill:active {
 
 .autofill-parent input:-webkit-autofill {
   background-clip: content-box !important;
-  box-shadow: 0 0 0 1000px rgba(0, 123, 255, 0.1) inset; /* A subtle autofill background */
+  box-shadow: 0 0 0 1000px rgba(0, 123, 255, 0.1) inset;
 }
 
 .autofill-parent input:-webkit-autofill + div {
-  background-color: rgba(
-    0,
-    123,
-    255,
-    0.1
-  ); /* Make the parent div have the same autofill background */
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+@keyframes slide-in-right {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.5s ease-out forwards;
 }
 
 .test {
