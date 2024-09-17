@@ -1,7 +1,14 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "compilerOptions": {
+    "jsx": "react-jsx",  // This is the important part to enable JSX
+    "esModuleInterop": true,  // Already present to handle imports
+    "moduleResolution": "node",  // Ensures that module resolution works properly
+    "target": "ES2020",  // or any other target, depending on your app's requirements
+    "module": "ESNext",  // To support modern ECMAScript modules
+    "lib": ["ES2020", "DOM"],
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true
+  },
+  "include": ["src"]
 }
