@@ -12,8 +12,10 @@ export default {
       colors: {
         primary: "#63130C",
         textGrey: "#828DA9",
+        textBlack: "#050505",
         strokeGrey: "#9DA3AA",
         strokeGreyTwo: "#E0E0E0",
+        strokeCream: "#D3C6A1",
       },
       backgroundImage: {
         primaryGradient: "linear-gradient(to right, #982214, #F8CB48)",

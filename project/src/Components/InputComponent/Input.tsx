@@ -20,6 +20,7 @@ type AllowedInputTypes =
 export type InputType = {
   type: AllowedInputTypes;
   name: string;
+  label: string;
   value?: string | number;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
@@ -37,9 +38,10 @@ export type InputType = {
 export const Input = ({
   type = "text",
   name,
+  label,
   value,
   onChange,
-  placeholder = "Enter your placeholder",
+  placeholder = "Enter your firstname",
   onClick,
   disabled = false,
   required = false,
@@ -61,18 +63,28 @@ export const Input = ({
     "url",
     "date",
   ];
+  const [displayLabel, setDisplayLabel] = useState<boolean>(false);
 
   if (similarTypes.includes(type)) {
     return (
       <div
-        className={` autofill-parent
+        className={`relative autofill-parent
         ${type === "hidden" ? "hidden" : "flex"} 
         ${style} ${iconPosition === "left" ? "flex-row" : "flex-row-reverse"} 
         ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
-        items-center  w-full max-w-[400px] h-[48px] px-[1.1em] py-[1.25em] 
-        gap-3 rounded-3xl text-sm text-textGrey italic border-[0.6px] border-strokeGrey
+        items-center w-full max-w-[400px] h-[48px] px-[1.1em] py-[1.25em] 
+        gap-2 rounded-3xl border-[0.6px] border-strokeGrey
         transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent `}
       >
+        {displayLabel && (
+          <span
+            className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] 
+            transition-opacity duration-500 ease-in-out
+            ${displayLabel ? "opacity-100" : "opacity-0"}`}
+          >
+            {label.toUpperCase()}
+          </span>
+        )}
         {icon && <span className={`${iconStyle}`}>{icon}</span>}
         {required && (
           <span className="mb-2 text-lg text-red-600">
@@ -87,12 +99,14 @@ export const Input = ({
           onChange={onChange}
           placeholder={placeholder}
           onClick={onClick}
+          onFocus={() => setDisplayLabel(true)}
+          onBlur={() => setDisplayLabel(false)}
           disabled={disabled}
           required={required}
           checked={checked}
           readOnly={readOnly}
           min={0}
-          className="w-full"
+          className="w-full text-sm font-semibold text-textBlack placeholder:text-textGrey placeholder:font-normal placeholder:italic"
         />
       </div>
     );
@@ -285,11 +299,11 @@ export const SelectInput = ({
 
 //   return (
 //     <div
-//       className={`relative flex items-center 
-//         ${style} 
-//         ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"} 
-//         w-full max-w-[400px] h-[48px] px-[1.1em] py-[1.25em] 
-//         rounded-3xl text-sm text-textGrey border-[0.6px] border-strokeGrey 
+//       className={`relative flex items-center
+//         ${style}
+//         ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
+//         w-full max-w-[400px] h-[48px] px-[1.1em] py-[1.25em]
+//         rounded-3xl text-sm text-textGrey border-[0.6px] border-strokeGrey
 //         transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
 //         cursor-pointer`}
 //       onClick={handleToggleDropdown} // Clicking the container toggles dropdown
@@ -338,7 +352,6 @@ export const SelectInput = ({
 //   );
 // };
 // ALTERNATE SELECT COMPONENT END
-
 
 export type ToggleInputType = {
   onChange: (checked: boolean) => void;
