@@ -1,16 +1,19 @@
 
-
-import LogoComponent from './Components/LogoComponent';
+import ProceedButton from "./Components/ProceedButtonComponent";
 import "./index.css";
 
-function App() {
 
+const App: React.FC = () => {
+  const handleClick = () => {
+    alert('Button clicked!');
+  };
 
   return (
-    <div className="w-screen h-screen bg-black">
-      <LogoComponent variant="auth" /> 
+    <div className="p-4">
+      <ProceedButton onClick={handleClick} text="Proceed" />
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
+
