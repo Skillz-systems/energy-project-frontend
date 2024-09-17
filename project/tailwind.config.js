@@ -14,6 +14,7 @@ export default {
         textBlack: "#050505",
         textGrey: "#828DA9",
         textDarkGrey: "#49526A",
+        textDarkBrown: "#32290E",
         strokeGrey: "#9DA3AA",
         strokeGreyTwo: "#E0E0E0",
         strokeGreyThree: "#EAEEF2",
