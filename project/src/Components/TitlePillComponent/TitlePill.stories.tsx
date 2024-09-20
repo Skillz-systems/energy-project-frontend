@@ -15,7 +15,7 @@ export const titlePill = TitlePillTemplate.bind({});
 titlePill.args = {
   icon: sale,
   iconBgColor: "bg-[#FDEEC2]",
-  topText: "ALL",
+  topText: "All",
   bottomText: "SALES",
   value: "2240",
 };

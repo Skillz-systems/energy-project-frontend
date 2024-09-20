@@ -1,16 +1,21 @@
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import buttonIcon from "../../assets/menu/menu.svg";
 import { Link } from "react-router-dom";
+import useDefaultNavigation from "../../hooks/useDefaultNavigation";
 
 export type MenuButtonType = {
   buttonStyle: string;
-  sections: { title: string; icon: string; link: string }[];
+  sections: { title: string; icon: any; link: string }[];
 };
 
 export const MenuButton = (props: MenuButtonType) => {
+  const location = useLocation();
   const { buttonStyle, sections } = props;
   const [dialog, setDialog] = useState<boolean>(false);
-
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  useDefaultNavigation(sections);
+  
   return (
     <div className="relative">
       <div
@@ -33,8 +38,27 @@ export const MenuButton = (props: MenuButtonType) => {
         <div className="absolute top-12 left-0 z-50 flex flex-col w-full bg-white p-4 gap-[10px] max-w-[200px] rounded-[20px] shadow-menuCustom">
           {sections.map((section, index) => (
             <div key={index}>
-              <div className="flex items-center w-full h-[28px] px-2 py-2 gap-1 border-[0.6px] border-strokeGreyThree rounded-full transition-all hover:cursor-pointer hover:bg-primaryGradient text-textGrey hover:text-white">
-                <div dangerouslySetInnerHTML={{ __html: section.icon }} />
+              <div
+                className={`flex items-center w-full h-[28px] px-2 py-2 gap-1 border-[0.6px] border-strokeGreyThree rounded-full transition-all hover:cursor-pointer
+                   ${
+                     location.pathname === section.link
+                       ? "bg-primaryGradient text-white"
+                       : "text-textGrey hover:text-textBlack"
+                   }`}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              >
+                <section.icon
+                  stroke={
+                    location.pathname === section.link
+                      ? "white"
+                      : hoveredIndex === index
+                      ? "#050505"
+                      : "#828DA9"
+                  }
+                  width="16"
+                  height="16"
+                />
                 <Link to={section.link} className="">
                   {section.title}
                 </Link>
