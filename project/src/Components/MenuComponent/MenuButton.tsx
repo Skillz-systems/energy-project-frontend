@@ -4,12 +4,13 @@ import { Link } from "react-router-dom";
 
 export type MenuButtonType = {
   buttonStyle: string;
-  sections: { title: string; icon: string; link: string }[];
+  sections: { title: string; icon: any; link: string }[];
 };
 
 export const MenuButton = (props: MenuButtonType) => {
   const { buttonStyle, sections } = props;
   const [dialog, setDialog] = useState<boolean>(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
     <div className="relative">
@@ -33,8 +34,16 @@ export const MenuButton = (props: MenuButtonType) => {
         <div className="absolute top-12 left-0 z-50 flex flex-col w-full bg-white p-4 gap-[10px] max-w-[200px] rounded-[20px] shadow-menuCustom">
           {sections.map((section, index) => (
             <div key={index}>
-              <div className="flex items-center w-full h-[28px] px-2 py-2 gap-1 border-[0.6px] border-strokeGreyThree rounded-full transition-all hover:cursor-pointer hover:bg-primaryGradient text-textGrey hover:text-white">
-                <div dangerouslySetInnerHTML={{ __html: section.icon }} />
+              <div
+                className="flex items-center w-full h-[28px] px-2 py-2 gap-1 border-[0.6px] border-strokeGreyThree rounded-full transition-all hover:cursor-pointer hover:bg-primaryGradient text-textGrey hover:text-white"
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              >
+                <section.icon
+                  stroke={hoveredIndex === index ? "#FFFFFF" : "#828DA9"}
+                  width="16"
+                  height="16"
+                />
                 <Link to={section.link} className="">
                   {section.title}
                 </Link>
