@@ -30,6 +30,7 @@ export const GenericInput = InputTemplate.bind({});
 GenericInput.args = {
   type: "text",
   name: "name",
+  label: "Firstname",
   value: "",
   onChange: () => {},
   required: false,

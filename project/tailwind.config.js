@@ -17,7 +17,7 @@ export default {
         textDarkBrown: "#32290E",
         strokeGrey: "#9DA3AA",
         strokeGreyTwo: "#E0E0E0",
-        strokeGreyThree: "#EAEEF2",
+        strokeCream: "#D3C6A1",
       },
       backgroundImage: {
         primaryGradient: "linear-gradient(to right, #982214, #F8CB48)",
