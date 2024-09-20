@@ -11,14 +11,18 @@ export const TitlePill = (props: TitlePillType) => {
 
   return (
     <div className="flex items-center justify-between gap-1 bg-white max-w-[189px] h-[40px] pl-1 pr-[20px] py-1 border-[0.6px] border-[#A5873033] rounded-full shadow-titlePillCustom">
-      <div
-        className={`flex items-center justify-center w-[32px] h-[32px] rounded-full ${iconBgColor}`}
-      >
-        <img src={icon} alt="Pill Icon" className="w-[20px] h-[20px]" />
-      </div>
-      <div className="flex flex-col gap-0.5">
-        <p className="text-[10px] leading-3 text-textDarkGrey font-semibold">{topText}</p>
-        <p className="text-sm leading-3 text-textGrey">{bottomText}</p>
+      <div className="flex items-center gap-2">
+        <div
+          className={`flex items-center justify-center w-[32px] h-[32px] rounded-full ${iconBgColor}`}
+        >
+          <img src={icon} alt="Pill Icon" className="w-[20px] h-[20px]" />
+        </div>
+        <div className="flex flex-col gap-0.5">
+          <p className="text-[10px] leading-3 text-textDarkGrey font-semibold">
+            {topText}
+          </p>
+          <p className="text-sm leading-3 text-textGrey">{bottomText}</p>
+        </div>
       </div>
       <p className="text-xl font-medium text-textBlack">{value}</p>
     </div>
