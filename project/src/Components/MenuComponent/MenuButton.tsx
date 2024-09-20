@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import buttonIcon from "../../assets/menu/menu.svg";
 import { Link } from "react-router-dom";
+import useDefaultNavigation from "../../hooks/useDefaultNavigation";
 
 export type MenuButtonType = {
   buttonStyle: string;
@@ -13,7 +14,8 @@ export const MenuButton = (props: MenuButtonType) => {
   const { buttonStyle, sections } = props;
   const [dialog, setDialog] = useState<boolean>(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
+  useDefaultNavigation(sections);
+  
   return (
     <div className="relative">
       <div
