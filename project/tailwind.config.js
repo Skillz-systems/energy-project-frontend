@@ -18,6 +18,7 @@ export default {
         strokeGrey: "#9DA3AA",
         strokeGreyTwo: "#E0E0E0",
         strokeGreyThree: "#EAEEF2",
+        strokeCream: "#D3C6A1",
         error: "#EA91B4",
       },
       backgroundImage: {
