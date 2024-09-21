@@ -8,10 +8,10 @@ export default {
 } as Meta;
 
 const DropDownTemplate: StoryFn<DropDownType> = (args) => {
-
   return (
     <div className="flex items-center justify-center">
-        <DropDown {...args} />
+      <p className="mr-4">Click on the dropdown</p>
+      <DropDown {...args} />
     </div>
   );
 };
