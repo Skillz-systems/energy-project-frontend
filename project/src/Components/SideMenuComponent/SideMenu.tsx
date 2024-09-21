@@ -1,11 +1,12 @@
 import { useLocation, Link } from "react-router-dom";
 import useDefaultNavigation from "../../hooks/useDefaultNavigation";
+import { formatNumber } from "../../hooks/useFormatNumberWithSuffix";
 
 export type SideMenuType = {
   navigationList: {
     title: string;
     link: string;
-    count: string | number;
+    count: number;
   }[];
 };
 
@@ -44,7 +45,7 @@ export const SideMenu = (props: SideMenuType) => {
                 : "bg-[#EAEEF2] text-textDarkGrey border-strokeGrey group-hover:bg-[#FEF5DA] group-hover:text-textDarkBrown group-hover:border-textDarkBrown"
             }`}
           >
-            {item.count}
+            {formatNumber(item.count)}
           </span>
         </Link>
       ))}
