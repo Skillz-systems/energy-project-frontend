@@ -10,12 +10,13 @@ const LoginForm = () => {
   const isEmailValid = email.includes('@');
   const isPasswordValid = password.length > 6;
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.MouseEvent<HTMLImageElement>) => {
     e.preventDefault();
+    if (!isEmailValid || !isPasswordValid || isSubmitting) return;
+
     setIsSubmitting(true);
     setErrorMessage('');
 
-    // Simulate API request
     try {
       const response = await fetch('/api/login', {
         method: 'POST',
@@ -28,7 +29,6 @@ const LoginForm = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Redirect or handle success
         console.log('Login successful');
       } else {
         setErrorMessage(data.message || 'Login failed');
@@ -41,69 +41,80 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-yellow-100 via-pink-100 to-purple-200">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-full max-w-md">
+    <div
+      className="min-h-screen flex items-center justify-center bg-cover bg-center px-4 sm:px-6 lg:px-8"
+      style={{ backgroundImage: "url('/Images/image.png')" }}
+    >
+      <form
+        className="p-8 w-full max-w-md flex flex-col items-center"
+      >
         <div className="text-center mb-6">
-          <img src="/logo.png" alt="Company Logo" className="h-16 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold">Welcome Back</h2>
-          <p className="text-gray-600">Sign In to Access your Workplace</p>
-        </div>
-
-        {/* Email Input */}
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-gray-700">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={`mt-1 block w-full px-3 py-2 border ${!isEmailValid && email ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
-            required
+          <img
+            src="./Images/logo.png"
+            className="h-[120px] w-[120px] mx-auto mb-6"
           />
-          {!isEmailValid && email && <p className="text-red-500 text-sm">Please enter a valid email address.</p>}
         </div>
 
-        {/* Password Input */}
-        <div className="mb-4 relative">
-          <label htmlFor="password" className="block text-gray-700">
-            Password
-          </label>
-          <input
-            type={passwordVisible ? 'text' : 'password'}
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={`mt-1 block w-full px-3 py-2 border ${!isPasswordValid && password ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
-            required
+        <div className="text-center mt-8">
+          <h2 className="text-[32px] font-medium text-red-950 w-[230px] h-[32px] font-['lora']  leading-8">Welcome Back</h2>
+          <p className="text-[12px] text-gray-600 font-['Red_Hat_Display'] w-[219px] h-[20px] italic font-normal">Sign In to Access your Workplace</p>
+        </div>
+
+        <div className="w-full flex flex-col items-center mt-16">
+          <div className="mb-4 w-[400px]">
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              className={`w-full h-[48px] px-3 py-2 border text-[12px] italic leading-5 font-normal font-['Red_Hat_Display'] ${!isEmailValid && email ? 'border-red-500' : 'border-gray-300'} rounded-full shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm`}
+              required
+            />
+            {!isEmailValid && email && (
+              <p className="text-red-500 text-xs mt-1">Please enter a valid email address.</p>
+            )}
+          </div>
+
+          <div className="mb-12 relative w-[400px]">
+            <input
+              type={passwordVisible ? 'text' : 'password'}
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className={`w-full h-[48px] px-3 py-2 text-[12px] italic leading-5 font-normal font-['Red_Hat_Display'] border ${!isPasswordValid && password ? 'border-red-500' : 'border-gray-300'} rounded-full shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm`}
+              required
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-3 text-xs"
+              onClick={() => setPasswordVisible(!passwordVisible)}
+            >
+              {passwordVisible ? 'Hide' : 'Show'}
+            </button>
+            {!isPasswordValid && password && (
+              <p className="text-red-500 text-xs mt-1">Password must be at least 6 characters.</p>
+            )}
+          </div>
+
+          {errorMessage && (
+            <p className="text-red-500 text-sm mb-4">{errorMessage}</p>
+          )}
+
+          <img
+            src="./Images/Arrow button.png" 
+            className={`cursor-pointer ${(!isEmailValid || !isPasswordValid || isSubmitting) ? 'opacity-50' : ''}`}
+            onClick={handleSubmit} 
+            style={{ width: '64px', height: '64px' }} 
           />
-          <button
-            type="button"
-            className="absolute right-3 top-3"
-            onClick={() => setPasswordVisible(!passwordVisible)}
-          >
-            {passwordVisible ? 'Hide' : 'Show'}
-          </button>
-          {!isPasswordValid && password && <p className="text-red-500 text-sm">Password must be at least 6 characters.</p>}
+
+          <div className="mt-8 w-[400px] text-center">
+            <a href="/forgot-password" className="text-white hover:underline text-xs">
+              Forgot Password?
+            </a>
+          </div>
         </div>
-
-        {/* Forgot Password */}
-        <div className="mb-4 text-right">
-          <a href="/forgot-password" className="text-indigo-600 hover:underline">Forgot Password?</a>
-        </div>
-
-        {/* Error Message */}
-        {errorMessage && <p className="text-red-500 text-sm mb-4">{errorMessage}</p>}
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className={`w-full py-2 px-4 bg-indigo-600 text-white rounded-md ${!isEmailValid || !isPasswordValid || isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-indigo-700'}`}
-          disabled={!isEmailValid || !isPasswordValid || isSubmitting}
-        >
-          {isSubmitting ? 'Logging in...' : 'Sign In'}
-        </button>
       </form>
     </div>
   );
