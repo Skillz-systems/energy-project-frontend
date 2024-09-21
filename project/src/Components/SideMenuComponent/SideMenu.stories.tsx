@@ -19,17 +19,17 @@ sideMenu.args = {
     {
       title: "All Customer",
       link: "/all-customers",
-      count: "22,000",
+      count: "5,050,200",
     },
     {
       title: "New Customers",
       link: "/new-customers",
-      count: "102",
+      count: 102,
     },
     {
       title: "Defaulting Customers",
       link: "/defaulting-customers",
-      count: "45",
+      count: 120000,
     },
     {
       title: "Barred Customers",
