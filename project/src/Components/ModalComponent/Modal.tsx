@@ -52,12 +52,12 @@ export const Modal = ({
   // Conditional layout styles
   const layoutClasses =
     layout === "right"
-      ? `h-[97vh] mr-1.5 ${sizeClasses[size]} bg-white shadow-lg transition-transform transform translate-x-full rounded-md animate-slide-in-right`
+      ? `h-[97vh] mr-1.5 z-30 ${sizeClasses[size]} bg-white shadow-lg transition-transform transform translate-x-full rounded-md animate-slide-in-right`
       : `absolute bg-white shadow-md rounded-md ${sizeClasses[size]} transform -translate-y-full mt-2`;
 
   const wrapperClasses =
     layout === "right"
-      ? "fixed inset-0 z-50 flex items-center justify-end"
+      ? "fixed inset-0 z-30 flex items-center justify-end"
       : "relative inline-block";
 
   return (
