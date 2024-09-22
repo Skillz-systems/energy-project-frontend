@@ -53,8 +53,21 @@ input:-webkit-autofill:active {
   }
 }
 
+@keyframes slide-out-right {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 .animate-slide-in-right {
-  animation: slide-in-right 0.5s ease-out forwards;
+  animation: slide-in-right 0.25s ease-out forwards;
+}
+
+.animate-slide-out-right {
+  animation: slide-out-right 0.25s ease-out forwards;
 }
 
 .test {
