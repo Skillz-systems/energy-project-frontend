@@ -13,5 +13,5 @@ const TableTemplate: StoryFn<TableType> = (args) => {
 
 export const table = TableTemplate.bind({});
 table.args = {
-  tableName: "ALL CUSTOMERS"
+  tableTitle: "ALL CUSTOMERS"
 };

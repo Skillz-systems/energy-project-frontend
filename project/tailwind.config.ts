@@ -13,6 +13,7 @@ export default {
         primary: "#63130C",
         textBlack: "#050505",
         textGrey: "#828DA9",
+        textLightGrey: "#9BA4BA",
         textDarkGrey: "#49526A",
         textDarkBrown: "#32290E",
         strokeGrey: "#9DA3AA",
@@ -24,6 +25,7 @@ export default {
       },
       backgroundImage: {
         primaryGradient: "linear-gradient(to right, #982214, #F8CB48)",
+        paleGrayGradient: "linear-gradient(to right, #F6F8FA, #FFFFFF)",
       },
       boxShadow: {
         innerCustom: "inset 1px 2px 4px rgba(0, 0, 0, 0.15)",
