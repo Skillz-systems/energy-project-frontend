@@ -78,7 +78,8 @@ export const Modal = ({
   const wrapperClasses = clsx(
     layout === "right"
       ? "fixed inset-0 z-50 flex items-center justify-end"
-      : "relative inline-block";
+      : "relative inline-block"
+  );
 
   return (
     <div className={wrapperClasses}>
