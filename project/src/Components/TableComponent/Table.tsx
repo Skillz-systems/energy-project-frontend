@@ -1,9 +1,17 @@
 import React from "react";
 
 export type TableType = {
-  name: string;
+  tableName: string;
 };
 
 export const Table = (props: TableType) => {
-  return <div>Table</div>;
+  const { tableName } = props;
+  return (
+    <div className="w-full">
+      <header>
+        <h2>{tableName}</h2>
+      </header>
+      <table></table>
+    </div>
+  );
 };
