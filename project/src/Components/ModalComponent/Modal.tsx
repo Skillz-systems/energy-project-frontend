@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { MdCancel } from "react-icons/md";
+import clsx from "clsx";
 
 export type ModalType = {
   isOpen: boolean;
@@ -7,6 +8,7 @@ export type ModalType = {
   children: React.ReactNode;
   size?: "small" | "medium" | "large";
   layout?: "right" | "default";
+  bodyStyle?: string;
 };
 
 export const Modal = ({
@@ -15,21 +17,20 @@ export const Modal = ({
   children,
   size = "medium",
   layout = "default",
+  bodyStyle,
 }: ModalType) => {
+  const [isClosing, setIsClosing] = useState<boolean>(false);
+
   // Close modal on ESC key
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
+      if (event.key === "Escape") handleClose();
     };
-
     document.addEventListener("keydown", handleKeyDown);
-
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onClose]);
+  });
 
   // Prevent background scroll when modal is open
   useEffect(() => {
@@ -40,7 +41,21 @@ export const Modal = ({
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  // Slide out animation trigger before closing
+  const handleClose = () => {
+    if (isOpen) {
+      setIsClosing(true);
+      setTimeout(
+        () => {
+          setIsClosing(false);
+          onClose();
+        },
+        layout === "right" ? 250 : 0
+      );
+    }
+  };
+
+  if (!isOpen && !isClosing) return null;
 
   // Modal size mapping
   const sizeClasses = {
@@ -50,41 +65,53 @@ export const Modal = ({
   };
 
   // Conditional layout styles
-  const layoutClasses =
-    layout === "right"
-      ? `h-[97vh] mr-1.5 z-30 ${sizeClasses[size]} bg-white shadow-lg transition-transform transform translate-x-full rounded-md animate-slide-in-right`
-      : `absolute bg-white shadow-md rounded-md ${sizeClasses[size]} transform -translate-y-full mt-2`;
+  const layoutClasses = clsx(
+    layout === "right" &&
+      "h-[97vh] mr-1.5 bg-white shadow-lg transition-transform transform rounded-md",
+    sizeClasses[size],
+    {
+      "animate-slide-out-right": isClosing,
+      "animate-slide-in-right": !isClosing && layout === "right",
+      "translate-x-full": !isClosing && layout === "right",
+      "-translate-y-full mt-2": layout !== "right",
+    }
+  );
 
-  const wrapperClasses =
+  const wrapperClasses = clsx(
     layout === "right"
-      ? "fixed inset-0 z-30 flex items-center justify-end"
-      : "relative inline-block";
+      ? "fixed inset-0 z-50 flex items-center justify-end"
+      : "relative inline-block"
+  );
 
   return (
     <div className={wrapperClasses}>
       <div
         className="fixed inset-0 transition-opacity bg-black opacity-50"
-        onClick={onClose}
+        onClick={handleClose}
         aria-hidden="true"
       ></div>
 
       {layout === "right" ? (
         <div className={layoutClasses} role="dialog" aria-modal="true">
-          <div className="flex items-center justify-end p-2 h-[40px] border-b-[0.6px] border-b-strokeGreyThree">
+          <header className="flex items-center justify-end p-2 h-[40px] border-b-[0.6px] border-b-strokeGreyThree">
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="flex items-center justify-center w-[24px] h-[24px] bg-white border border-strokeGreyTwo rounded-full top-4 right-4"
               aria-label="Close modal"
               title="Close modal"
             >
               <MdCancel className="text-error" />
             </button>
-          </div>
+          </header>
 
-          <div className="h-full overflow-auto">{children}</div>
+          <section className={`${bodyStyle} h-full overflow-auto`}>
+            {children}
+          </section>
         </div>
       ) : (
-        <div className="h-full overflow-auto">{children}</div>
+        <section className={`${bodyStyle}h-full overflow-auto`}>
+          {children}
+        </section>
       )}
     </div>
   );
