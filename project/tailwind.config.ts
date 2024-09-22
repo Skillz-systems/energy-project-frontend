@@ -18,8 +18,9 @@ export default {
         strokeGrey: "#9DA3AA",
         strokeGreyTwo: "#E0E0E0",
         strokeGreyThree: "#EAEEF2",
-        error: "#EA91B4",
         strokeCream: "#D3C6A1",
+        error: "#EA91B4",
+        paleLightBlue: "#EFF2FF",
       },
       backgroundImage: {
         primaryGradient: "linear-gradient(to right, #982214, #F8CB48)",
