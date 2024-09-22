@@ -10,7 +10,6 @@ export default {
 const DropDownTemplate: StoryFn<DropDownType> = (args) => {
   return (
     <div className="flex items-center justify-center">
-      <p className="mr-4">Click on the dropdown</p>
       <DropDown {...args} />
     </div>
   );
@@ -18,6 +17,7 @@ const DropDownTemplate: StoryFn<DropDownType> = (args) => {
 
 export const dropDown = DropDownTemplate.bind({});
 dropDown.args = {
+  name: "Location",
   items: ["All Status", "Recharge", "One-Time", "Installment"],
   onClickLink: (index: number) => {
     console.log("INDEX:", index);
