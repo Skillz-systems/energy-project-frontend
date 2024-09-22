@@ -43,14 +43,16 @@ export const Modal = ({
 
   // Slide out animation trigger before closing
   const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(
-      () => {
-        setIsClosing(false);
-        onClose();
-      },
-      layout === "right" ? 250 : 0
-    );
+    if (isOpen) {
+      setIsClosing(true);
+      setTimeout(
+        () => {
+          setIsClosing(false);
+          onClose();
+        },
+        layout === "right" ? 250 : 0
+      );
+    }
   };
 
   if (!isOpen && !isClosing) return null;
