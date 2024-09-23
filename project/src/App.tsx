@@ -1,20 +1,20 @@
-import { Route, Routes } from "react-router-dom";
-import LogoComponent from "./Components/LogoComponent/LogoComponent";
-import LoginForm from "./Pages/LoginPage";
+import React from "react";
+
 import "./index.css";
+import TopNavComponent from "./Components/TopNavComponent/TopNavComponent";
 
 function App() {
   return (
-    <Routes>
-      {/* Show LoginForm on the root path "/" */}
-      <Route path="/" element={<LoginForm />} />
-
-      {/* Route for "/logo" */}
-      <Route path="/logo" element={<LogoComponent />} />
-
-      {/* Optional: Catch-all route for unmatched paths */}
-      <Route path="*" element={<h1>404 - Page Not Found</h1>} />
-    </Routes>
+    <div>
+      {/* Render only the Header component */}
+      <TopNavComponent 
+        logoSrc="logo.png"
+        userProfileSrc="user-profile.png"
+        userRole="Super Admin"
+        date="29th, July 2024"
+        notificationsCount={7}
+      />
+    </div>
   );
 }
 
