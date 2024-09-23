@@ -21,7 +21,10 @@ export default {
         strokeGreyThree: "#EAEEF2",
         strokeCream: "#D3C6A1",
         error: "#EA91B4",
+        errorTwo: "#FC4C5D",
         paleLightBlue: "#EFF2FF",
+        brightBlue: "#007AFF",
+        success: "#00AF50",
       },
       backgroundImage: {
         primaryGradient: "linear-gradient(to right, #982214, #F8CB48)",

@@ -11,10 +11,19 @@ export type TableType = {
     isDate?: boolean;
     onDateClick?: (date: string) => void;
   }[];
+  columnList: {
+    title: string;
+    key: string;
+    valueIsAComponent?: boolean;
+    customValue?: (value: string | number) => JSX.Element;
+    width?: string;
+    rightIcon?: React.ReactNode;
+  }[];
+  tableData: any[];
 };
 
 export const Table = (props: TableType) => {
-  const { tableTitle, filterList } = props;
+  const { tableTitle, filterList, columnList, tableData } = props;
   return (
     <div className="flex flex-col w-full gap-2">
       <header className="flex items-center justify-between gap-2 p-[8px_8px_8px_16px] bg-paleGrayGradient border-[0.6px] border-strokeGreyThree rounded-full">
@@ -30,7 +39,45 @@ export const Table = (props: TableType) => {
           ))}
         </div>
       </header>
-      <table></table>
+      <table className="w-full p-[16px_16px_0px_16px] border-[0.6px] border-strokeGreyThree rounded-[20px]">
+        <thead>
+          <tr className="h-[32px]">
+            {columnList.map((column, index) => (
+              <th
+                key={index}
+                className="p-2 text-xs font-light text-left text-textDarkGrey border-b-[0.2px] border-[#E0E0E0]"
+              >
+                <div className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-strokeGreyTwo rounded-full"></span>
+                  <span>{column.title}</span>
+                </div>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {tableData.map((row, rowIndex) => (
+            <tr key={rowIndex} className="h-[40px]">
+              {columnList.map((column, colIndex) => {
+                const cellValue = row[column.key];
+
+                return (
+                  <td
+                    key={colIndex}
+                    className="px-2 text-xs text-textDarkGrey border-b-[0.2px] border-[#E0E0E0]"
+                  >
+                    {column.valueIsAComponent && column.customValue ? (
+                      column.customValue(cellValue)
+                    ) : (
+                      <span>{cellValue || "-"}</span>
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
