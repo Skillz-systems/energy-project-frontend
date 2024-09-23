@@ -1,18 +1,18 @@
-import React from "react";
+import React from 'react';
+import PageBanner from './PageBannerComponent/PageBannerComponent';
 
-import "./index.css";
-import TopNavComponent from "./Components/TopNavComponent/TopNavComponent";
 
 function App() {
   return (
-    <div>
-      {/* Render only the Header component */}
-      <TopNavComponent 
-        logoSrc="logo.png"
-        userProfileSrc="user-profile.png"
-        userRole="Super Admin"
-        date="29th, July 2024"
-        notificationsCount={7}
+    <div className="App">
+      <PageBanner
+        title="Welcome to Our Platform"
+        subtitle="Bringing you the best services."
+        backgroundImage="/path-to-your-background-image.jpg"
+        backgroundColor="#1a202c"
+        buttonText="Get Started"
+        buttonLink="#"
+        overlayOpacity={0.6}
       />
     </div>
   );
