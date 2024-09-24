@@ -1,19 +1,16 @@
+// App.tsx
 import React from 'react';
-import PageBanner from './PageBannerComponent/PageBannerComponent';
 
+import { FaPlus, FaTrash, FaEdit } from 'react-icons/fa';
+import ActionButton from './Components/ActionButtonComponent/ActionButton';
 
 function App() {
+  const handleClick = () => alert('Button clicked!');
+
   return (
-    <div className="App">
-      <PageBanner
-        title="Welcome to Our Platform"
-        subtitle="Bringing you the best services."
-        backgroundImage="/path-to-your-background-image.jpg"
-        backgroundColor="#1a202c"
-        buttonText="Get Started"
-        buttonLink="#"
-        overlayOpacity={0.6}
-      />
+    <div className="p-4 space-y-4 ">
+      <ActionButton label="New Email" icon={<FaPlus />} onClick={handleClick} />
+      
     </div>
   );
 }
