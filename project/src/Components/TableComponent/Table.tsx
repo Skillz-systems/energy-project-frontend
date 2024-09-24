@@ -20,7 +20,7 @@ export type TableType = {
     title: string;
     key: string;
     valueIsAComponent?: boolean;
-    customValue?: (value: string | number) => JSX.Element;
+    customValue?: (value?: string | number) => JSX.Element;
     width?: string;
     rightIcon?: React.ReactNode;
   }[];

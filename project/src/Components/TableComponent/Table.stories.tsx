@@ -127,7 +127,18 @@ defaultStyle.args = {
       },
       rightIcon: <img src={statusIcon} alt="status icon" className="ml-auto" />,
     },
-    { title: "ACTIONS", key: "actions" },
+    {
+      title: "ACTIONS",
+      key: "actions",
+      valueIsAComponent: true,
+      customValue: () => {
+        return (
+          <span className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer">
+            View
+          </span>
+        );
+      },
+    },
   ],
   tableData: generateCustomerEntries(50),
 };
