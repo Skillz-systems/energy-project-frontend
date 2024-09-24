@@ -25,6 +25,9 @@ export default {
         paleLightBlue: "#EFF2FF",
         brightBlue: "#007AFF",
         success: "#00AF50",
+        successTwo: "#E3FAD6",
+        disabled: "#E2E4EB",
+        blackBrown: "#1E0604"
       },
       backgroundImage: {
         primaryGradient: "linear-gradient(to right, #982214, #F8CB48)",
