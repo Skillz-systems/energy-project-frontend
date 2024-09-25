@@ -1,41 +1,24 @@
-import React from 'react';
-
-import { FaHome, FaBell } from 'react-icons/fa';  
-import Icon from './Components/IconComponent';
-
+import Icon from "./Components/IconComponent";
+import { FaHome,  } from 'react-icons/fa';
 
 
 const App: React.FC = () => {
   return (
-    <div className="ml-8">
-  
+    <div className="p-8">
+     
       <Icon
-        icon="fas fa-home"  
+        icon={FaHome}  
         title="Home"
-        size="large"  
-        color="blue"  
-        position="left"  
-        onClick={() => alert('Home icon clicked!')} 
+        size="medium"
+        color="blue"
+        position="right"
+        onClick={() => alert('Home icon clicked!')}
+        className="bg-gray-100 p-4 rounded-lg"
+        titleClassName="text-blue-500"
+        iconClassName="text-blue-700"
       />
 
-      <Icon 
-        icon={FaBell}  
-        title="Notifications"
-        size={24}  
-        color="red"  
-        position="right"  
-        onClick={() => alert('Notifications icon clicked!')} 
-      />
-
-      
-      <Icon
-        icon="fas fa-cog"  
-        size="small" 
-        color="green" 
-        onClick={() => alert('Settings icon clicked!')}  
-      />
-
-      
+     
     </div>
   );
 };
