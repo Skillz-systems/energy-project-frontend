@@ -1,16 +1,16 @@
+import React from 'react';
+import HeaderBadge from './Components/HeaderBadgeComponent/HeaderBadgeComponent';
 
-
-import LogoComponent from './Components/LogoComponent';
-import "./index.css";
 
 function App() {
-
-
   return (
-    <div className="w-screen h-screen bg-black">
-      <LogoComponent variant="auth" /> 
+    <div>
+      <HeaderBadge 
+        pageName="Inventory"
+        imageSrc="/Images/Inventory.png" 
+      />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
