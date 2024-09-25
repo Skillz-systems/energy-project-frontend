@@ -1,17 +1,17 @@
 import React from 'react';
 
 interface IconProps {
-  icon: React.ElementType | string;  // Accepts either a component or a string identifier
-  title?: string;
-  size?: 'small' | 'medium' | 'large' | number;  // Allows predefined or custom numeric size
-  color?: string;  // Optional icon color
+  icon: React.ElementType | string;  // The icon component or identifier
+  title?: string;  // Optional title
+  size?: 'small' | 'medium' | 'large' | number;  // Predefined sizes or custom numeric size
+  color?: string;  // Optional color for the icon
   position?: 'left' | 'right' | 'top' | 'bottom';  // Title positioning relative to icon
   onClick?: () => void;  // Optional click handler
   className?: string;  // Additional class names for styling
 }
 
 const Icon: React.FC<IconProps> = ({
-  icon: IconComponent,  // The icon component or identifier
+  icon: IconComponent,  // The icon (either a string or a React component)
   title,
   size = 'medium',
   color = 'currentColor',
@@ -19,14 +19,14 @@ const Icon: React.FC<IconProps> = ({
   onClick,
   className,
 }) => {
-  // Map predefined size values to CSS classes or inline styles
+  // Define size classes for Tailwind CSS and handle custom numeric size
   const sizeClasses = {
     small: 'text-sm',
     medium: 'text-base',
     large: 'text-lg',
   };
 
-  // Flex classes to position the title relative to the icon
+  // Define position classes for flex layout
   const positionClasses = {
     left: 'flex-row-reverse',
     right: 'flex-row',
@@ -34,7 +34,7 @@ const Icon: React.FC<IconProps> = ({
     bottom: 'flex-col-reverse',
   };
 
-  // Determine the icon size (either class-based or inline style)
+  // Handle size either via class or inline style
   const iconSize = typeof size === 'number' ? { fontSize: `${size}px` } : { className: sizeClasses[size] };
 
   return (
@@ -43,19 +43,27 @@ const Icon: React.FC<IconProps> = ({
       onClick={onClick}
       role="button"
       aria-label={title || 'icon'}
-      tabIndex={onClick ? 0 : undefined}  // Make the element focusable if clickable
+      tabIndex={onClick ? 0 : undefined}  // Allow focus for clickable icons
     >
+      {/* Render string-based icons (e.g., Font Awesome or custom SVG) */}
       {typeof IconComponent === 'string' ? (
-        // Handle custom SVG or Font Awesome icons using <i> or <svg> with the string identifier
-        <i className={`${IconComponent} ${iconSize.className || ''}`} style={iconSize} />
+        <i
+          className={`${IconComponent} ${iconSize.className || ''}`}
+          style={{ ...iconSize, color }}  // Added support for color for string-based icons
+        />
       ) : (
-        // Render the passed React component dynamically (e.g., Material UI icon)
-        <IconComponent style={iconSize} className={color} />
+        // Render React components (e.g., Material UI Icons)
+        <IconComponent
+          style={{ ...iconSize, color }}  // Apply inline styles for color and size
+          className={color}  // Allow Tailwind color classes if applicable
+        />
       )}
 
-      {/* Conditionally render the title */}
+      {/* Conditionally render the title with appropriate spacing */}
       {title && (
-        <span className={`${sizeClasses[size as keyof typeof sizeClasses]} ml-2`}>
+        <span
+          className={`${sizeClasses[size as keyof typeof sizeClasses]} ml-2`}
+        >
           {title}
         </span>
       )}
