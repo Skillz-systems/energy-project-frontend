@@ -4,7 +4,7 @@ import { MenuButton, MenuButtonType } from "./MenuButton";
 import { navData } from "./navInfo";
 
 export default {
-  title: "Components/Menu",
+  title: "Components/MenuButton",
   component: MenuButton,
 } as Meta;
 

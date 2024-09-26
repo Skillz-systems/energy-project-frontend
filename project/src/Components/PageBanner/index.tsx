@@ -31,7 +31,7 @@ const PageBanner: React.FC<PageBannerProps> = ({
     >
       {backgroundImage && (
         <div
-          className="absolute inset-0 bg-black"
+          className="absolute inset-0 bg-black z-0"
           style={{ opacity: overlayOpacity }}
         ></div>
       )}
