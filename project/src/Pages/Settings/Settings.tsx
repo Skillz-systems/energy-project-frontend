@@ -21,17 +21,14 @@ const Settings = () => {
     {
       title: "Profile",
       link: "/settings/profile",
-      count: "5,050,200",
     },
     {
       title: "Role and Permissions",
       link: "/settings/role-permissions",
-      count: 102,
     },
     {
       title: "Change Password",
       link: "/settings/change-password",
-      count: 120000,
     },
     {
       title: "Users",
