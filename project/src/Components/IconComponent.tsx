@@ -2,73 +2,53 @@ import React from 'react';
 import clsx from 'clsx';
 
 interface IconProps {
-  icon: React.ElementType | string;  
-  title?: string;  
-  size?: 'small' | 'medium' | 'large' | number;  
-  color?: string;  
-  position?: 'left' | 'right' | 'top' | 'bottom';  
-  onClick?: () => void;  
-  className?: string;  
-  titleClassName?: string;  
-  iconClassName?: string;  
+  icon: React.ElementType | string;  // Can be either a component (icon) or a string (image source)
+  title?: string;
+  size?: number;  // Use number for font-size directly
+  color?: string;
+  onClick?: () => void;
+  className?: string;
+  titleClassName?: string;
+  iconClassName?: string;
 }
 
 const Icon: React.FC<IconProps> = ({
-  icon: IconComponent,  
+  icon: IconComponent,
   title,
-  size = 'medium',
+  size = 16, // Default size in pixels
   color = 'currentColor',
-  position = 'right',
   onClick,
   className,
   titleClassName,
   iconClassName,
 }) => {
-  
-  const sizeClasses = {
-    small: 'text-sm',
-    medium: 'text-base',
-    large: 'text-lg',
-  };
-
-
-  const positionClasses = {
-    left: 'flex-row-reverse',
-    right: 'flex-row',
-    top: 'flex-col',
-    bottom: 'flex-col-reverse',
-  };
-
-  
-  const iconSize = typeof size === 'number' ? { fontSize: `${size}px` } : sizeClasses[size];
 
   return (
     <div
-      className={clsx('flex items-center cursor-pointer', positionClasses[position], className)} 
+      className={clsx('flex items-center cursor-pointer', className)}  // No need for positionClasses anymore
       onClick={onClick}
       role="button"
       aria-label={title || 'icon'}
-      tabIndex={onClick ? 0 : undefined}  
+      tabIndex={onClick ? 0 : undefined}
     >
-     
+      {/* Check if IconComponent is a string (image path) or a component */}
       {typeof IconComponent === 'string' ? (
-        <i
-          className={clsx(IconComponent, iconSize, iconClassName)}  
-          style={{ color }}  
+        <img
+          src={IconComponent}
+          alt={title || 'icon image'}
+          className={clsx(iconClassName)} // Handle image class styling via iconClassName
+          style={{ width: size, height: size }} // Image size handled by props
         />
       ) : (
-        
         <IconComponent
-          style={{ fontSize: typeof size === 'number' ? `${size}px` : undefined, color }}  
-          className={clsx(iconClassName)} 
+          style={{ fontSize: `${size}px`, color }}  // Font size and color for the icon
+          className={clsx(iconClassName)} // Icon component class styling
         />
       )}
 
-      
+      {/* Render title if provided */}
       {title && (
-        <span
-          className={clsx(sizeClasses[size as keyof typeof sizeClasses], 'ml-2', titleClassName)}  
-        >
+        <span className={clsx(titleClassName)}>
           {title}
         </span>
       )}
