@@ -1,12 +1,24 @@
-import React from 'react';
+import React from "react";
+import { Route, Routes } from "react-router-dom";
+import ProceedButton from "./Components/ProceedButtonComponent";
+import LogoComponent from "./Components/LogoComponent/LogoComponent";
 import Header from './Components/Header';
+import "./index.css";
 
-const App = () => {
+function App() {
+  const handleClick = () => {
+    alert("Button clicked!");
+  };
   return (
-    <div className=" p-4">
-      <Header />
-    </div>
+    <Routes>
+      <Route path="/logo" element={<LogoComponent />} />
+      <Route
+        path="/proceedButton"
+        element={<ProceedButton onClick={handleClick} />}
+      />
+      <Route path="/header" element={<Header />} />
+    </Routes>
   );
-};
+}
 
 export default App;
