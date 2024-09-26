@@ -2,7 +2,7 @@ import React from 'react';
 import UserProfile from './UserProfile';
 
 const Header = () => {
-  const profileImage = 'path/to/your/profile-image.jpg'; // Replace with actual path
+  const profileImage = "@assets/Images/logo.png"; // Replace with actual path
   const userRole = 'Super Admin';
 
   return (
