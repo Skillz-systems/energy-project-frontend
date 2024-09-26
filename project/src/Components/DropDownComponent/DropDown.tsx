@@ -1,6 +1,5 @@
 import { useState } from "react";
 import drop from "../../assets/table/dropdown.svg";
-import search from "../../assets/table/searchdropdown.svg";
 import dateIcon from "../../assets/table/date.svg";
 import { Modal } from "../ModalComponent/Modal";
 import DatePicker from "react-datepicker";
@@ -27,7 +26,6 @@ export const DropDown = (props: DropDownType) => {
     onClickLink,
     buttonImgStyle,
     dropDownContainerStyle,
-    isSearch,
     isDate,
     onDateClick,
   } = props;
@@ -56,9 +54,9 @@ export const DropDown = (props: DropDownType) => {
   };
 
   return (
-    <div className={`relative flex w-max`}>
+    <div className="relative flex w-max">
       <button
-        className={`flex items-center justify-between gap-2 pl-2 pr-1 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full ${isSearch ? "w-[100px]" : "w-max"}`}
+        className="flex items-center justify-between w-max gap-2 pl-2 pr-1 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full"
         onClick={handleClick}
       >
         <span className="text-xs font-medium text-textGrey">
@@ -71,7 +69,7 @@ export const DropDown = (props: DropDownType) => {
             : name}
         </span>
         <img
-          src={isSearch ? search : isDate ? dateIcon : drop}
+          src={isDate ? dateIcon : drop}
           alt="DropdownIcon"
           className={`w-4 h-4 ${buttonImgStyle || ""}`}
         />

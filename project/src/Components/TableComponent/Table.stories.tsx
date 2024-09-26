@@ -56,14 +56,8 @@ defaultStyle.args = {
     },
     {
       name: "Search",
-      items: [
-        "All Status",
-        "Active Agents",
-        "Reported Agents",
-        "Barred Agents",
-      ],
-      onClickLink: (index: number) => {
-        console.log("INDEX:", index);
+      onSearch: (query: string) => {
+        console.log("Query:", query);
       },
       isSearch: true,
     },
@@ -156,14 +150,8 @@ cardStyle.args = {
     },
     {
       name: "Search",
-      items: [
-        "All Status",
-        "Active Agents",
-        "Reported Agents",
-        "Barred Agents",
-      ],
-      onClickLink: (index: number) => {
-        console.log("INDEX:", index);
+      onSearch: (query: string) => {
+        console.log("Query:", query);
       },
       isSearch: true,
     },
@@ -174,13 +162,7 @@ cardStyle.args = {
       isDate: true,
     },
   ],
-  columnList: [
-    { title: "S/N", key: "no" },
-    { title: "NAME", key: "name" },
-    { title: "AGE", key: "age" },
-    { title: "TITLE", key: "title" },
-  ],
-  tableStyle: "flex flex-wrap items-center gap-4",
+  tableClassname: "flex flex-wrap items-center gap-4",
   tableData: generateAgentEntries(50),
   tableType: "card",
   cardComponent: (

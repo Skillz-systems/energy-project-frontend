@@ -20,6 +20,11 @@ export const Pagination = ({
     onPageChange(newPage);
   };
 
+  const handleEntriesPerPageChange = (newEntriesPerPage: number) => {
+    onPageChange(1); // Reset to page 1
+    onEntriesPerPageChange(newEntriesPerPage);
+  };
+
   const multiplesOfTen = Array.from({ length: 10 }, (_, i) => (i + 1) * 10);
 
   // Calculate pages to show with ellipsis logic
@@ -62,6 +67,7 @@ export const Pagination = ({
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
+          aria-disabled={currentPage === 1}
           className={`${
             currentPage === 1
               ? " bg-disabled hover:cursor-not-allowed"
@@ -78,6 +84,7 @@ export const Pagination = ({
               <button
                 key={index}
                 onClick={() => handlePageChange(page)}
+                aria-current={currentPage === page ? "page" : undefined}
                 className={`${
                   currentPage === page
                     ? "bg-disabled text-blackBrown font-bold border border-blackBrown"
@@ -98,6 +105,7 @@ export const Pagination = ({
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
+          aria-disabled={currentPage === totalPages}
           className={`${
             currentPage === totalPages
               ? "bg-disabled hover:cursor-not-allowed"
@@ -113,7 +121,7 @@ export const Pagination = ({
         <span className="text-xs text-textLightGrey">Showing</span>
         <select
           value={entriesPerPage}
-          onChange={(e) => onEntriesPerPageChange(Number(e.target.value))}
+          onChange={(e) => handleEntriesPerPageChange(Number(e.target.value))}
           className="text-sm text-textDarkGrey pl-1 h-[24px] border border-strokeGreyThree rounded-full"
         >
           {multiplesOfTen.map((num) => (
