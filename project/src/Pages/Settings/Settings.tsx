@@ -3,6 +3,7 @@ import { SideMenu } from "../../Components/SideMenuComponent/SideMenu";
 import Profile from "../../Components/Settings/Profile";
 import LoadingSpinner from "../../Components/Loaders/LoadingSpinner";
 import { Suspense, lazy } from "react";
+import React from "react";
 
 const RoleAndPermissions = lazy(
   () => import("../../Components/Settings/RoleAndPermissions")

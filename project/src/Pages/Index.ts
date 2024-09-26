@@ -1,1 +1,2 @@
-export { default as Settings } from "./Settings/Settings.tsx";
+export { default as Settings } from "./Settings/Settings";
+export { default as LoginForm } from "./Login/LoginPage";
