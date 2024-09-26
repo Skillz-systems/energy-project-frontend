@@ -43,7 +43,7 @@ const Settings = () => {
         <section className="flex items-center justify-between px-8 py-4">
           PLACE HEADER BADGE COMPONENT HERE
         </section>
-        <div className="flex w-full p-8 gap-4">
+        <div className="flex flex-col md:flex-row w-full p-8 gap-4">
           <aside className="w-max">
             <SideMenu navigationList={navigationList} />
           </aside>

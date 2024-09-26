@@ -1,6 +1,7 @@
 import { ChangeEvent, MouseEvent, ReactNode } from "react";
 import { CgAsterisk, CgChevronDown } from "react-icons/cg";
 import { useState } from "react";
+import React from "react";
 
 type AllowedInputTypes =
   | "text"
@@ -65,7 +66,6 @@ export const Input = ({
     "url",
     "date",
   ];
-  const [displayLabel, setDisplayLabel] = useState<boolean>(false);
 
   if (similarTypes.includes(type)) {
     return (
@@ -79,11 +79,11 @@ export const Input = ({
         gap-2 rounded-3xl border-[0.6px] border-strokeGrey
         transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent `}
         >
-          {displayLabel && (
+          {value && (
             <span
               className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] 
             transition-opacity duration-500 ease-in-out
-            ${displayLabel ? "opacity-100" : "opacity-0"}`}
+            ${value ? "opacity-100" : "opacity-0"}`}
             >
               {label.toUpperCase()}
             </span>
@@ -102,8 +102,6 @@ export const Input = ({
             onChange={onChange}
             placeholder={placeholder}
             onClick={onClick}
-            onFocus={() => setDisplayLabel(true)}
-            onBlur={() => setDisplayLabel(false)}
             disabled={disabled}
             required={required}
             checked={checked}
@@ -113,7 +111,9 @@ export const Input = ({
           />
         </div>
         {errorMessage && (
-          <p className="mt-1 px-[1.1em] text-sm text-errorTwo font-medium">errorMessage</p>
+          <p className="mt-1 px-[1.1em] text-sm text-errorTwo font-medium">
+            errorMessage
+          </p>
         )}
       </>
     );
