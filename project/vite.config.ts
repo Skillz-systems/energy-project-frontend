@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import { resolve } from 'path';
+import tailwindcss from "tailwindcss";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -12,13 +13,6 @@ export default defineConfig({
     },
   },
   plugins: [react()],
-  test: {
-    environment: 'jsdom',
-    setupFiles: ['./src/test.js'],
-    testMatch: ['./src/**/*.test.jsx'],
-    css: true,
-    globals: true,
-  },
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
@@ -27,4 +21,9 @@ export default defineConfig({
   optimizeDeps: {
     include: ['@mui/icons-material', '@mui/material'],
   },
-});
+  css: {
+    postcss: {
+      plugins: [tailwindcss()],
+    },
+  },
+})
