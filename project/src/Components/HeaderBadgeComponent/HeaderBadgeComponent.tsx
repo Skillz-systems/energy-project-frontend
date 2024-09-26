@@ -1,7 +1,5 @@
 import React from 'react';
 
-
-
 // Define the props type for the component
 interface HeaderBadgeProps {
     pageName: string;
