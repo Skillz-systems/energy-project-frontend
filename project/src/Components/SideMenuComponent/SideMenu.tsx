@@ -32,7 +32,7 @@ export const SideMenu = (props: SideMenuType) => {
             className={`text-xs font-medium transition-all ${
               location.pathname === item.link
                 ? "text-white"
-                : "text-textGrey group-hover:font-thin"
+                : "text-textGrey group-hover:font-normal"
             }`}
           >
             {item.title}
