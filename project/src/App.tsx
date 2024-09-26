@@ -12,8 +12,8 @@ function App() {
     <Routes>
       <Route path="/logo" element={<LogoComponent />} />
       <Route
-        path="/logo"
-        element={<ProceedButton onClick={handleClick} text="Proceed" />}
+        path="/proceedButton"
+        element={<ProceedButton onClick={handleClick} />}
       />
     </Routes>
   );

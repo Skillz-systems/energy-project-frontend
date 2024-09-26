@@ -1,5 +1,5 @@
 import React from 'react';
-import ArrowButton from '../assets/images/ArrowButton.png';
+import ArrowButton from '../assets/Images/ArrowButton.png';
 
 interface ButtonProps {
   onClick: () => void;
@@ -16,7 +16,6 @@ const ProceedButton: React.FC<ButtonProps> = ({ onClick, className }) => {
         src={ArrowButton}
         alt="Proceed Arrow"
         className="w-[64px] h-[64px] transition-transform duration-300 hover:scale-110 hover:shadow-lg hover:bg-white"
-
       />
     </button>
   );
