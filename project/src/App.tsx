@@ -1,12 +1,14 @@
 import React from "react";
+import { FaPlus } from "react-icons/fa";
+import ActionButton from "./Components/ActionButtonComponent/ActionButton";
 import UserProfile from "./Components/UserProfile";
-
 import PageBanner from "./Components/PageBanner";
 import { Route, Routes } from "react-router-dom";
-
 import "./index.css";
 
 function App() {
+  const handleClick = () => alert("Button clicked!");
+
   return (
     <Routes>
       <Route
@@ -18,6 +20,16 @@ function App() {
             parentClassName="custom-parent"
             imageClassname="custom-image"
             titleClassname="custom-title"
+          />
+        }
+      />
+      <Route
+        path="/actionButton"
+        element={
+          <ActionButton
+            label="New Email"
+            icon={<FaPlus />}
+            onClick={handleClick}
           />
         }
       />
