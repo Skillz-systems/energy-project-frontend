@@ -2,4 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    font-family: "Red Hat Display", sans-serif;
+  }
+}
 
+#root {
+  padding: 0;
+  margin: 0;
+  outline: 0;
+  box-sizing: border-box;
+  min-height: 100vh;
+  position: relative;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  outline: 0;
+  padding: 0;
+}
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+  -webkit-text-fill-color: #000 !important;
+}
+
+input:-webkit-autofill:focus,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+}
+
+.autofill-parent input:-webkit-autofill {
+  background-clip: content-box !important;
+  box-shadow: 0 0 0 1000px rgba(0, 123, 255, 0.1) inset;
+}
+
+.autofill-parent input:-webkit-autofill + div {
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+@keyframes slide-in-right {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out-right {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.25s ease-out forwards;
+}
+
+.animate-slide-out-right {
+  animation: slide-out-right 0.25s ease-out forwards;
+}
+
+.test {
+  border: 1px solid red;
+}
