@@ -1,22 +1,30 @@
 import React from "react";
+
+import UserProfile from "./Components/UserProfile";
+
 import { Route, Routes } from "react-router-dom";
-import ProceedButton from "./Components/ProceedButtonComponent";
-import LogoComponent from "./Components/LogoComponent/LogoComponent";
-import Header from './Components/Header';
+
 import "./index.css";
 
 function App() {
-  const handleClick = () => {
-    alert("Button clicked!");
-  };
   return (
     <Routes>
-      <Route path="/logo" element={<LogoComponent />} />
+     
       <Route
-        path="/proceedButton"
-        element={<ProceedButton onClick={handleClick} />}
+        path="/"
+        element={
+          <UserProfile
+            profileImage="https://via.placeholder.com/150" 
+            userRole="Super Admin"
+            parentClassName="custom-parent"
+            imageClassname="custom-image"
+            titleClassname="custom-title"
+          />
+        }
       />
-      <Route path="/header" element={<Header />} />
+
+      
+      
     </Routes>
   );
 }

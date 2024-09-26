@@ -1,20 +1,32 @@
 import React from 'react';
 
 interface UserProfileProps {
-  profileImage: string;
+  profileImage?: string; 
   userRole: string;
+  titleClassname?: string;
+  imageClassname?: string;
+  parentClassName?: string;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ profileImage, userRole }) => {
+const UserProfile: React.FC<UserProfileProps> = ({
+  profileImage,
+  userRole,
+  titleClassname = '',
+  imageClassname = '',
+  parentClassName = '',
+}) => {
+  
+  const defaultAvatar = '';
+
   return (
-    <div className="flex items-center bg-amber-50 rounded-full p-2">
+    <div className={`flex items-center bg-yellow-100 rounded-full max-w-[135px] max-h-[34px] mt-4 gap-1 ml-1 border-2 border-amber-100 ${parentClassName}`}>
       <img
-        src={profileImage}
+        src={profileImage || defaultAvatar}
         alt="Profile"
-        className="w-[24px] h-[24px] rounded-full object-cover border-2 border-amber-50 shadow-sm"
+        className={`w-[24px] h-[24px] rounded-full object-cover border-2 border-amber-100 shadow-sm ${imageClassname}`}
       />
-      <div className="ml-1 bg-amber-900 text-white rounded-full px-3 py-1  flex items-center justify-center">
-        <span className="text-sm font-medium font-['red_hat_display']">{userRole}</span>
+      <div className=" bg-amber-950 text-white rounded-full px-2 py-1 flex items-center justify-center ">
+        <span className={`text-sm font-medium font-['Red_Hat_Display'] truncate leading-[14.4px] ${titleClassname}`}>{userRole}</span>
       </div>
     </div>
   );
