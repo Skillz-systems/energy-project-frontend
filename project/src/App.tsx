@@ -13,11 +13,9 @@ function App() {
         element={
           <Icon
             icon={FaUser}  // Using FaUser icon from react-icons
-            size={24}  // Icon size in pixels
-            color="blue"  // Icon color
             title="User Icon"  // Title displayed next to the icon
-            className="custom-icon-wrapper"  // Wrapper class for styling
-            iconClassName="custom-icon"  // Icon-specific class for styling
+            className="custom-icon-wrapper bg-red-300 w-fit"  // Wrapper class for styling
+            iconClassName="custom-icon text-2xl text-[blue]"  // Icon-specific class for styling
             titleClassName="custom-title"  // Title-specific class for styling
             onClick={() => console.log("Icon clicked")}  // Click handler for the icon
           />

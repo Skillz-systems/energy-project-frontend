@@ -4,7 +4,6 @@ import clsx from 'clsx';
 interface IconProps {
   icon: React.ElementType | string;  // Can be either a component (icon) or a string (image source)
   title?: string;
-  size?: number;  // Use number for font-size directly
   color?: string;
   onClick?: () => void;
   className?: string;
@@ -15,8 +14,6 @@ interface IconProps {
 const Icon: React.FC<IconProps> = ({
   icon: IconComponent,
   title,
-  size = 16, // Default size in pixels
-  color = 'currentColor',
   onClick,
   className,
   titleClassName,
@@ -37,12 +34,10 @@ const Icon: React.FC<IconProps> = ({
           src={IconComponent}
           alt={title || 'icon image'}
           className={clsx(iconClassName)} // Handle image class styling via iconClassName
-          style={{ width: size, height: size }} // Image size handled by props
         />
       ) : (
         <IconComponent
-          style={{ fontSize: `${size}px`, color }}  // Font size and color for the icon
-          className={clsx(iconClassName)} // Icon component class styling
+          className={clsx("text-base", iconClassName)} // Icon component class styling
         />
       )}
 
