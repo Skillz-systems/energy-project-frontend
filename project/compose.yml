@@ -13,7 +13,7 @@ services:
       dockerfile: Dockerfile
 
     # specify the port mapping from host to the container
-    # this is similar to the -p flag in `docker run` command
+    #   this is similar to the -p flag in `docker run` command
     # first port is the port on host machine and the second is the port inside the container
     ports:
       - 5173:5173
