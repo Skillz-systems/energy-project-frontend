@@ -6,7 +6,7 @@ import { Route, Routes } from "react-router-dom";
 
 import "./index.css";
 
-function App() {
+function App() {  
   return (
     <Routes>
      
