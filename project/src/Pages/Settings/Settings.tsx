@@ -21,17 +21,14 @@ const Settings = () => {
     {
       title: "Profile",
       link: "/settings/profile",
-      count: "5,050,200",
     },
     {
       title: "Role and Permissions",
       link: "/settings/role-permissions",
-      count: 102,
     },
     {
       title: "Change Password",
       link: "/settings/change-password",
-      count: 120000,
     },
     {
       title: "Users",
@@ -49,19 +46,7 @@ const Settings = () => {
         <section className="flex items-center justify-between px-8 py-4">
           PLACE HEADER BADGE COMPONENT HERE
         </section>
-        {location.pathname === "/settings/users" ? (
-          <section className="flex items-center justify-between bg-paleGrayGradient px-8 py-4 h-[64px]">
-            <TitlePill
-              parentClass="w-full max-w-[172px]"
-              icon={settings}
-              iconBgColor="bg-[#FDEEC2]"
-              topText="All"
-              bottomText="USERS"
-              value="120"
-            />
-          </section>
-        ) : null}
-        <div className="flex w-full p-8 gap-4">
+        <div className="flex flex-col md:flex-row w-full p-8 gap-4">
           <aside className="w-max">
             <SideMenu navigationList={navigationList} />
           </aside>
