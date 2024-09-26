@@ -1,3 +1,4 @@
+import React from "react";
 import { Meta, StoryFn } from "@storybook/react";
 import { TitlePill, TitlePillType } from "./TitlePill";
 import sale from "../../assets/titlepill/sale.svg";

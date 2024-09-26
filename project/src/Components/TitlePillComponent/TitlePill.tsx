@@ -1,3 +1,5 @@
+import React from "react";
+
 export type TitlePillType = {
   icon: string;
   iconBgColor: string;

@@ -1,8 +1,9 @@
 import React from "react";
-import PageBanner from './Components/PageBanner';
 import { Route, Routes } from "react-router-dom";
+import PageBanner from "./Components/PageBanner";
 import ProceedButton from "./Components/ProceedButtonComponent";
 import LogoComponent from "./Components/LogoComponent/LogoComponent";
+import HeaderBadge from "./Components/HeaderBadgeComponent/HeaderBadgeComponent";
 import "./index.css";
 
 function App() {
@@ -15,6 +16,17 @@ function App() {
       <Route
         path="/proceedButton"
         element={<ProceedButton onClick={handleClick} />}
+      />
+      <Route
+        path="/headerBadge"
+        element={
+          <div>
+            <HeaderBadge
+              pageName="Inventory"
+              imageSrc="/Images/Inventory.png"
+            />
+          </div>
+        }
       />
       <Route
         path="/pageBanner"
