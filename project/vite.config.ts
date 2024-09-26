@@ -18,13 +18,6 @@ export default defineConfig({
       plugins: [tailwindcss()],
     },
   },
-  test: {
-    environment: "jsdom",
-    setupFiles: ["./src/test.js"],
-    testMatch: ["./src/**/*.test.jsx"],
-    css: true,
-    globals: true,
-  },
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),

@@ -1,19 +1,22 @@
-
+import React from "react";
+import { Route, Routes } from "react-router-dom";
 import ProceedButton from "./Components/ProceedButtonComponent";
+import LogoComponent from "./Components/LogoComponent/LogoComponent";
 import "./index.css";
 
-
-const App: React.FC = () => {
+function App() {
   const handleClick = () => {
-    alert('Button clicked!');
+    alert("Button clicked!");
   };
-
   return (
-    <div className="p-4">
-      <ProceedButton onClick={handleClick} text="Proceed" />
-    </div>
+    <Routes>
+      <Route path="/logo" element={<LogoComponent />} />
+      <Route
+        path="/logo"
+        element={<ProceedButton onClick={handleClick} text="Proceed" />}
+      />
+    </Routes>
   );
-};
+}
 
 export default App;
-
