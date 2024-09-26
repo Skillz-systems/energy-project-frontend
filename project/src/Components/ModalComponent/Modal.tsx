@@ -86,7 +86,7 @@ export const Modal = ({
   return (
     <div className={wrapperClasses}>
       <div
-        className="fixed inset-0 transition-opacity bg-black opacity-50"
+        className="fixed inset-0 z-40 transition-opacity bg-black opacity-50"
         onClick={handleClose}
         aria-hidden="true"
       ></div>
