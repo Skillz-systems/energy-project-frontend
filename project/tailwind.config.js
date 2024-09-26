@@ -11,8 +11,9 @@ export default {
       },
       colors: {
         primary: "#63130C",
-        textGrey: "#828DA9",
         textBlack: "#050505",
+        textGrey: "#828DA9",
+        textDarkGrey: "#49526A",
         strokeGrey: "#9DA3AA",
         strokeGreyTwo: "#E0E0E0",
         strokeCream: "#D3C6A1",
@@ -23,6 +24,7 @@ export default {
       boxShadow: {
         innerCustom: "inset 1px 2px 4px rgba(0, 0, 0, 0.15)",
         menuCustom: "8px 12px 40px rgba(0, 0, 0, 0.15)",
+        titlePillCustom: "1px 2px 10px rgba(0, 0, 0, 0.05)",
       },
     },
   },
