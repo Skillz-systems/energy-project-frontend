@@ -30,7 +30,7 @@ export type TableType = {
   tableClassname?: string;
   tableData: Record<string, any>[];
   tableType?: "default" | "card";
-  cardComponent: (data: any[]) => React.ReactNode;
+  cardComponent?: (data: any[]) => React.ReactNode;
 };
 
 export const Table = (props: TableType) => {
@@ -206,7 +206,7 @@ export const Table = (props: TableType) => {
                 </tbody>
               </table>
             ) : (
-              cardComponent(paginatedData)
+              cardComponent && cardComponent(paginatedData)
             )}
             <Pagination
               totalEntries={totalEntries}

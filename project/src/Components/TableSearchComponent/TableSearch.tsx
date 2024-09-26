@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import search from "../../assets/table/searchdropdown.svg";
 
 export type TableSearchType = {

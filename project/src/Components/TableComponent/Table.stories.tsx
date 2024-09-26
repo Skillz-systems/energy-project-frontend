@@ -1,3 +1,4 @@
+import React from "react";
 import { Meta, StoryFn } from "@storybook/react";
 import { Table, TableType } from "./Table";
 import { GoDotFill } from "react-icons/go";

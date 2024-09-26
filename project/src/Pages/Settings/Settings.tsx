@@ -1,9 +1,11 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { SideMenu } from "../../Components/SideMenuComponent/SideMenu";
 import Profile from "../../Components/Settings/Profile";
 import LoadingSpinner from "../../Components/Loaders/LoadingSpinner";
 import { Suspense, lazy } from "react";
 import React from "react";
+import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
+import settings from "../../assets/settings/settings.svg";
 
 const RoleAndPermissions = lazy(
   () => import("../../Components/Settings/RoleAndPermissions")
@@ -14,6 +16,7 @@ const ChangePassword = lazy(
 const Users = lazy(() => import("../../Components/Settings/Users"));
 
 const Settings = () => {
+  const location = useLocation();
   const navigationList = [
     {
       title: "Profile",
@@ -46,6 +49,18 @@ const Settings = () => {
         <section className="flex items-center justify-between px-8 py-4">
           PLACE HEADER BADGE COMPONENT HERE
         </section>
+        {location.pathname === "/settings/users" ? (
+          <section className="flex items-center justify-between bg-paleGrayGradient px-8 py-4 h-[64px]">
+            <TitlePill
+              parentClass="w-full max-w-[172px]"
+              icon={settings}
+              iconBgColor="bg-[#FDEEC2]"
+              topText="All"
+              bottomText="USERS"
+              value="120"
+            />
+          </section>
+        ) : null}
         <div className="flex w-full p-8 gap-4">
           <aside className="w-max">
             <SideMenu navigationList={navigationList} />

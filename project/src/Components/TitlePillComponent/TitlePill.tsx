@@ -1,6 +1,7 @@
 import React from "react";
 
 export type TitlePillType = {
+  parentClass: string;
   icon: string;
   iconBgColor: string;
   topText: string;
@@ -9,10 +10,12 @@ export type TitlePillType = {
 };
 
 export const TitlePill = (props: TitlePillType) => {
-  const { icon, iconBgColor, topText, bottomText, value } = props;
+  const { parentClass, icon, iconBgColor, topText, bottomText, value } = props;
 
   return (
-    <div className="flex items-center justify-between gap-1 bg-white max-w-[189px] h-[40px] pl-1 pr-[20px] py-1 border-[0.6px] border-[#A5873033] rounded-full shadow-titlePillCustom">
+    <div
+      className={`${parentClass} flex items-center justify-between gap-1 bg-white h-[40px] pl-1 pr-[20px] py-1 border-[0.6px] border-[#A5873033] rounded-full shadow-titlePillCustom`}
+    >
       <div className="flex items-center gap-2">
         <div
           className={`flex items-center justify-center w-[32px] h-[32px] rounded-full ${iconBgColor}`}
