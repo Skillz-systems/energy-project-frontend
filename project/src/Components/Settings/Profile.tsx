@@ -1,79 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { z } from "zod";
+import React, { useState } from "react";
 import lightCheckeredBg from "../../assets/lightCheckeredBg.png";
 import role from "../../assets/table/role.svg";
 import addButton from "../../assets/settings/addbutton.svg";
 import editButton from "../../assets/settings/editbutton.svg";
 import sampleButton from "../../assets/settings/samplebutton.svg";
-import { useApiCall, useGetRequest } from "../../utils/useApiCall";
 import { MdCancel } from "react-icons/md";
-import { toast } from "react-toastify";
-
-// Define validation schema using Zod
-const schema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email("Invalid email").min(1, "Email is required"),
-  phoneNumber: z.string().min(1, "Phone number is required"),
-  address: z.string().optional(),
-});
 
 const Profile = () => {
   const [displayInput, setDisplayInput] = useState<boolean>(false);
-  const [formData, setFormData] = useState({
-    userId: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneNumber: "",
-    address: "",
-    designation: "",
-  });
-
-  const { apiCall } = useApiCall();
-
-  // Fetch user details from the API
-  const { data, error, isLoading } = useGetRequest("/user/details");
-
-  useEffect(() => {
-    if (data) {
-      setFormData({
-        userId: data.userId || "",
-        firstName: data.firstName || "",
-        lastName: data.lastName || "",
-        email: data.email || "",
-        phoneNumber: data.phoneNumber || "",
-        address: data.address || "",
-        designation: data.designation || "",
-      });
-    }
-  }, [data]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    // Validate form data
-    try {
-      schema.parse(formData);
-      await apiCall({
-        endpoint: "/user/update",
-        method: "post",
-        data: formData,
-        successMessage: "Profile updated successfully!",
-      });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        error.errors.forEach((err) => toast.error(err.message));
-      } else {
-        toast.error("An error occurred while updating your profile.");
-      }
-    }
-  };
 
   const DetailComponent = ({
     label,
@@ -81,14 +15,20 @@ const Profile = () => {
     value,
     required,
     readOnly,
+    parentClass,
+    valueClass,
   }: {
     label: string;
     name: string;
     value: string | number;
     required: boolean;
     readOnly: boolean;
+    parentClass?: string;
+    valueClass?: string;
   }) => (
-    <div className="flex items-center justify-between bg-white w-full h-[44px] text-textDarkGrey text-xs p-2.5 border-[0.6px] border-strokeGreyThree rounded-full">
+    <div
+      className={`${parentClass} flex items-center justify-between bg-white w-full h-[44px] text-textDarkGrey text-xs p-2.5 border-[0.6px] border-strokeGreyThree rounded-full`}
+    >
       <span className="flex items-center justify-center bg-[#F6F8FA] text-textBlack text-xs p-2 h-[24px] rounded-full">
         {label}
       </span>
@@ -97,14 +37,16 @@ const Profile = () => {
           type="text"
           name={name}
           value={value}
-          onChange={handleInputChange}
+          onChange={() => {}}
           placeholder={`Enter your ${name}`}
           required={required}
           readOnly={readOnly}
           className="px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
         />
       ) : value ? (
-        <span className="text-xs font-bold text-textDarkGrey">{value}</span>
+        <span className={`${valueClass} text-xs font-bold text-textDarkGrey`}>
+          {value}
+        </span>
       ) : (
         <img
           src={addButton}
@@ -117,13 +59,10 @@ const Profile = () => {
     </div>
   );
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error fetching user details</div>;
-
   return (
     <form
       className="relative flex flex-col justify-end bg-white p-4 w-full max-w-[700px] min-h-[414px] border-[0.6px] border-strokeGreyThree rounded-[20px]"
-      onSubmit={handleSubmit}
+      // onSubmit={}
     >
       <img
         src={lightCheckeredBg}
@@ -164,35 +103,35 @@ const Profile = () => {
           <DetailComponent
             label="First Name"
             name="firstName"
-            value={formData.firstName}
+            value={"John"}
             required={true}
             readOnly={false}
           />
           <DetailComponent
             label="Last Name"
             name="lastName"
-            value={formData.lastName}
+            value={"Okor"}
             required={true}
             readOnly={false}
           />
           <DetailComponent
             label="Email"
             name="email"
-            value={formData.email}
+            value={"JohnOkor@gmail.com"}
             required={true}
             readOnly={false}
           />
           <DetailComponent
             label="Phone Number"
             name="phoneNumber"
-            value={formData.phoneNumber}
+            value={"082636323"}
             required={true}
             readOnly={false}
           />
           <DetailComponent
             label="Address"
             name="address"
-            value={formData.address}
+            value={""}
             required={false}
             readOnly={false}
           />
@@ -200,7 +139,7 @@ const Profile = () => {
         <DetailComponent
           label="Designation"
           name="designation"
-          value="Super Admin"
+          value={"Super Admin"}
           required={false}
           readOnly={false}
           parentClass="z-10"
