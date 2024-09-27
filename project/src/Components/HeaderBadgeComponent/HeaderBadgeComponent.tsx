@@ -3,20 +3,32 @@ import React from 'react';
 interface HeaderBadgeProps {
     pageName: string;
     imageSrc: string;
+    parentClassName?: string;
+    imageClassName?: string;
+    titleClassName?: string;
 }
 
-const HeaderBadge: React.FC<HeaderBadgeProps> = ({ pageName, imageSrc }) => {
+const HeaderBadge: React.FC<HeaderBadgeProps> = ({
+    pageName,
+    imageSrc,
+    parentClassName = '',
+    imageClassName = '',
+    titleClassName = '',
+}) => {
     return (
-        <div className="flex flex-col md:flex-row justify-between items-center bg-gray-100 p-4 shadow-sm rounded-lg h-auto gap-4 md:gap-8">
-          
-            <div className="text-base md:text-xl font-semibold text-gray-400 font-['Lora'] text-center md:text-left max-w-full">
+        <div
+            className={`flex flex-row justify-between items-center bg-gray-100 p-4 shadow-sm rounded-lg h-auto gap-4 md:gap-8 ${parentClassName}`}
+        >
+            <div
+                className={`text-base md:text-xl font-semibold text-gray-400 font-['Lora'] text-center md:text-left max-w-full ${titleClassName}`}
+            >
                 {pageName}
             </div>
 
-            <div className="mt-2 md:mt-0 w-full flex justify-center md:w-auto">
+            <div className="w-auto flex justify-center">
                 <img
                     src={imageSrc}
-                    className="max-w-xs md:max-w-md object-contain"
+                    className={`w-16 md:w-32 object-contain ${imageClassName}`}
                     alt="Header Image"
                 />
             </div>
