@@ -174,7 +174,7 @@ export const Table = (props: TableType) => {
                           <td
                             key={colIndex}
                             className="px-2 text-xs text-textDarkGrey border-b-[0.2px] border-[#E0E0E0]"
-                            onMouseOver={() =>
+                            onMouseEnter={() =>
                               setHoveredCell({ rowIndex, colIndex })
                             }
                             onMouseLeave={() => setHoveredCell(null)}

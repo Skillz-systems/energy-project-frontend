@@ -1,12 +1,13 @@
 import { useLocation, Link } from "react-router-dom";
 import useDefaultNavigation from "../../hooks/useDefaultNavigation";
 import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
+import React from "react";
 
 export type SideMenuType = {
   navigationList: {
     title: string;
     link: string;
-    count: number | string;
+    count?: number | string;
   }[];
 };
 
@@ -32,21 +33,23 @@ export const SideMenu = (props: SideMenuType) => {
             className={`text-xs font-medium transition-all ${
               location.pathname === item.link
                 ? "text-white"
-                : "text-textGrey group-hover:font-thin"
+                : "text-textGrey group-hover:font-normal"
             }`}
           >
             {item.title}
           </p>
-          <span
-            className={`flex items-center justify-center max-w-max px-1 border-[0.2px] text-xs rounded-full transition-all
-            ${
-              location.pathname === item.link
-                ? "bg-[#FEF5DA] text-textDarkBrown border-textDarkBrown"
-                : "bg-[#EAEEF2] text-textDarkGrey border-strokeGrey group-hover:bg-[#FEF5DA] group-hover:text-textDarkBrown group-hover:border-textDarkBrown"
-            }`}
-          >
-            {formatNumberWithSuffix(item.count)}
-          </span>
+          {item.count ? (
+            <span
+              className={`flex items-center justify-center max-w-max px-1 border-[0.2px] text-xs rounded-full transition-all
+              ${
+                location.pathname === item.link
+                  ? "bg-[#FEF5DA] text-textDarkBrown border-textDarkBrown"
+                  : "bg-[#EAEEF2] text-textDarkGrey border-strokeGrey group-hover:bg-[#FEF5DA] group-hover:text-textDarkBrown group-hover:border-textDarkBrown"
+              }`}
+            >
+              {formatNumberWithSuffix(item.count)}
+            </span>
+          ) : null}
         </Link>
       ))}
     </div>
