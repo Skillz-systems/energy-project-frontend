@@ -16,7 +16,7 @@ const LogoComponent = ({ variant = 'nav' }: LogoProps) => {
       <img
         src={logo}
         alt="Company Logo"
-        className={variant === 'nav' ? logoStyles.nav : logoStyles.auth}  // Apply appropriate styles
+        className={variant === 'nav' ? logoStyles.nav : logoStyles.auth}  
       />
     </div>
   );

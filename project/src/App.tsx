@@ -1,16 +1,17 @@
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
-
-import LogoComponent from './Components/LogoComponent';
 import "./index.css";
+import LogoComponent from "./Components/LogoComponent";
 
 function App() {
-
-
   return (
-    <div className="w-screen h-screen bg-black">
-      <LogoComponent variant="auth" /> 
-    </div>
-  )
+    <Router>
+      <Routes>
+        <Route path="/logo" element={<LogoComponent />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
