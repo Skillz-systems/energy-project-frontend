@@ -1,22 +1,17 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import PageBanner from "./Components/PageBanner";
-import ProceedButton from "./Components/ProceedButtonComponent";
+
 import LogoComponent from "./Components/LogoComponent/LogoComponent";
 import HeaderBadge from "./Components/HeaderBadgeComponent/HeaderBadgeComponent";
 import "./index.css";
 
 function App() {
-  const handleClick = () => {
-    alert("Button clicked!");
-  };
+ 
   return (
     <Routes>
       <Route path="/logo" element={<LogoComponent />} />
-      <Route
-        path="/proceedButton"
-        element={<ProceedButton onClick={handleClick} />}
-      />
+      
       <Route
         path="/headerBadge"
         element={
