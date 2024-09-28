@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
 @layer base {
   body {
     font-family: "Red Hat Display", sans-serif;
@@ -37,16 +43,82 @@ input:-webkit-autofill:active {
 
 .autofill-parent input:-webkit-autofill {
   background-clip: content-box !important;
-  box-shadow: 0 0 0 1000px rgba(0, 123, 255, 0.1) inset; /* A subtle autofill background */
+  box-shadow: 0 0 0 1000px rgba(0, 123, 255, 0.1) inset;
 }
 
 .autofill-parent input:-webkit-autofill + div {
-  background-color: rgba(
-    0,
-    123,
-    255,
-    0.1
-  ); /* Make the parent div have the same autofill background */
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+@keyframes slide-in-right {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out-right {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.25s ease-out forwards;
+}
+
+.animate-slide-out-right {
+  animation: slide-out-right 0.25s ease-out forwards;
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 20px;
+}
+
+.loader {
+  width: 50px;
+  --b: 8px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  padding: 1px;
+  background: conic-gradient(#0000 10%, #49526a) content-box;
+
+  /* Apply both webkit and standard mask properties */
+  -webkit-mask: repeating-conic-gradient(
+      #0000 0deg,
+      #000 1deg 20deg,
+      #0000 21deg 36deg
+    ),
+    radial-gradient(
+      farthest-side,
+      #0000 calc(100% - var(--b) - 1px),
+      #000 calc(100% - var(--b))
+    );
+  mask: repeating-conic-gradient(#0000 0deg, #000 1deg 20deg, #0000 21deg 36deg),
+    radial-gradient(
+      farthest-side,
+      #0000 calc(100% - var(--b) - 1px),
+      #000 calc(100% - var(--b))
+    );
+
+  /* Adjust mask composite */
+  -webkit-mask-composite: destination-in;
+  mask-composite: intersect;
+  animation: l4 1s infinite steps(10);
+}
+
+@keyframes l4 {
+  to {
+    transform: rotate(1turn);
+  }
 }
 
 .test {

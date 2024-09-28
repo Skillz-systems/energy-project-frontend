@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import buttonIcon from "../../assets/menu/menu.svg";
-import { Link } from "react-router-dom";
+import useDefaultNavigation from "../../hooks/useDefaultNavigation";
 
 export type MenuButtonType = {
   buttonStyle: string;
@@ -10,9 +10,16 @@ export type MenuButtonType = {
 
 export const MenuButton = (props: MenuButtonType) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { buttonStyle, sections } = props;
   const [dialog, setDialog] = useState<boolean>(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  useDefaultNavigation(sections);
+
+  const prefetchRoute = (path: string) => {
+    // Prefetch route to preload resources
+    navigate(path, { replace: true });
+  };
 
   return (
     <div className="relative">
@@ -43,7 +50,10 @@ export const MenuButton = (props: MenuButtonType) => {
                        ? "bg-primaryGradient text-white"
                        : "text-textGrey hover:text-textBlack"
                    }`}
-                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseEnter={() => {
+                  setHoveredIndex(index);
+                  prefetchRoute(section.link);
+                }}
                 onMouseLeave={() => setHoveredIndex(null)}
               >
                 <section.icon
