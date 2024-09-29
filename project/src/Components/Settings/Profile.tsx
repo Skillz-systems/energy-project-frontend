@@ -27,7 +27,7 @@ const Profile = () => {
     valueClass?: string;
   }) => (
     <div
-      className={`${parentClass} flex items-center justify-between bg-white w-full h-[44px] text-textDarkGrey text-xs p-2.5 border-[0.6px] border-strokeGreyThree rounded-full`}
+      className={`${parentClass} flex items-center justify-between bg-white w-full text-textDarkGrey text-xs rounded-full`}
     >
       <span className="flex items-center justify-center bg-[#F6F8FA] text-textBlack text-xs p-2 h-[24px] rounded-full">
         {label}
@@ -61,7 +61,7 @@ const Profile = () => {
 
   return (
     <form
-      className="relative flex flex-col justify-end bg-white p-4 w-full max-w-[700px] min-h-[414px] border-[0.6px] border-strokeGreyThree rounded-[20px]"
+      className="relative flex flex-col justify-end bg-white p-4 w-full max-w-[700px] min-h-[414px] rounded-[20px]"
       // onSubmit={}
     >
       <img
@@ -94,6 +94,7 @@ const Profile = () => {
           value={14020209}
           required={true}
           readOnly={true}
+          parentClass="h-[44px] p-2.5 border-[0.6px] border-strokeGreyThree"
         />
         <div className="flex flex-col gap-2 p-2.5 w-full border-[0.6px] border-strokeGreyThree rounded-[20px]">
           <p className="flex gap-1 w-max text-xs text-textLightGrey font-medium pb-2">
@@ -142,7 +143,7 @@ const Profile = () => {
           value={"Super Admin"}
           required={false}
           readOnly={false}
-          parentClass="z-10"
+          parentClass="z-10 p-2.5 h-[44px] border-[0.6px] border-strokeGreyThree"
           valueClass="flex items-center justify-center bg-paleLightBlue text-textBlack font-semibold p-2 h-[24px] rounded-full"
         />
         <div className="flex items-center justify-center w-full pt-10 pb-5">
