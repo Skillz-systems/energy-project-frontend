@@ -1,8 +1,8 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
-import { resolve } from "path";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+import { resolve } from 'path';
 import tailwindcss from "tailwindcss";
- 
+
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
@@ -13,14 +13,17 @@ export default defineConfig({
     },
   },
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
+  optimizeDeps: {
+    include: ['@mui/icons-material', '@mui/material'],
+  },
   css: {
     postcss: {
       plugins: [tailwindcss()],
     },
   },
-  resolve: {
-    alias: {
-      "@": resolve(__dirname, "src"),
-    },
-  },
-});
+})

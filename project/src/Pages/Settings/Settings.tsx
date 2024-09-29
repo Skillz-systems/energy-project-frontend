@@ -6,6 +6,10 @@ import { Suspense, lazy } from "react";
 import React from "react";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import settings from "../../assets/settings/settings.svg";
+import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
+import circleAction from "../../assets/settings/addCircle.svg";
+import threedots from "../../assets/settings/3dots.svg";
+import { DropDown } from "@/Components/DropDownComponent/DropDown";
 
 const RoleAndPermissions = lazy(
   () => import("../../Components/Settings/RoleAndPermissions")
@@ -37,8 +41,23 @@ const Settings = () => {
     },
   ];
 
+  const dropDownList = {
+    items: ["Add new user", "Export List"],
+    onClickLink: (index: number) => {
+      console.log("INDEX:", index);
+    },
+    customButton: (
+      <img
+        src={threedots}
+        alt="Edit Modal"
+        width="32px"
+        className="cursor-pointer"
+      />
+    ),
+  };
+
   return (
-    <main className="flex flex-col items-center w-full">
+    <main className="flex flex-col items-center w-full overflow-hidden">
       <div className="w-full max-w-[1440px]">
         <header className="flex items-center justify-between px-8 py-4">
           PLACE TOP NAV COMPONENT HERE
@@ -47,7 +66,7 @@ const Settings = () => {
           PLACE HEADER BADGE COMPONENT HERE
         </section>
         {location.pathname === "/settings/users" ? (
-          <section className="flex items-center justify-between bg-paleGrayGradient px-8 py-4 h-[64px]">
+          <section className="flex items-center justify-between w-full bg-paleGrayGradient px-8 py-4 h-[64px]">
             <TitlePill
               parentClass="w-full max-w-[172px]"
               icon={settings}
@@ -56,6 +75,13 @@ const Settings = () => {
               bottomText="USERS"
               value="120"
             />
+            <div className="flex items-center gap-2">
+              <ActionButton
+                label="New User"
+                icon={<img src={circleAction} />}
+              />
+              <DropDown {...dropDownList} />
+            </div>
           </section>
         ) : null}
         <div className="flex w-full p-8 gap-4">
