@@ -109,7 +109,7 @@ export const Modal = ({
           </section>
         </div>
       ) : (
-        <section className={`${bodyStyle}h-full overflow-auto`}>
+        <section className={`${bodyStyle} h-full overflow-auto`}>
           {children}
         </section>
       )}

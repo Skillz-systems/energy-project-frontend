@@ -4,6 +4,7 @@ import dateIcon from "../../assets/table/date.svg";
 import { Modal } from "../ModalComponent/Modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import React from "react";
 
 export type DropDownType = {
   name?: string;
@@ -14,6 +15,7 @@ export type DropDownType = {
   isSearch?: boolean;
   isDate?: boolean;
   onDateClick?: (date: string) => void;
+  customButton?: React.ReactNode;
 };
 
 export const DropDown = (props: DropDownType) => {
@@ -28,6 +30,7 @@ export const DropDown = (props: DropDownType) => {
     dropDownContainerStyle,
     isDate,
     onDateClick,
+    customButton,
   } = props;
   const [linkIndex, setLinkIndex] = useState<number>(0);
 
@@ -55,25 +58,31 @@ export const DropDown = (props: DropDownType) => {
 
   return (
     <div className="relative flex w-max">
-      <button
-        className="flex items-center justify-between w-max gap-2 pl-2 pr-1 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full"
-        onClick={handleClick}
-      >
-        <span className="text-xs font-medium text-textGrey">
-          {isDate && selectedDate
-            ? selectedDate.toLocaleDateString("default", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })
-            : name}
-        </span>
-        <img
-          src={isDate ? dateIcon : drop}
-          alt="DropdownIcon"
-          className={`w-4 h-4 ${buttonImgStyle || ""}`}
-        />
-      </button>
+      {customButton ? (
+        <div onClick={handleClick} className="w-max">
+          {customButton}
+        </div>
+      ) : (
+        <button
+          className="flex items-center justify-between w-max gap-2 pl-2 pr-1 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full"
+          onClick={handleClick}
+        >
+          <span className="text-xs font-medium text-textGrey">
+            {isDate && selectedDate
+              ? selectedDate.toLocaleDateString("default", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
+              : name}
+          </span>
+          <img
+            src={isDate ? dateIcon : drop}
+            alt="DropdownIcon"
+            className={`w-4 h-4 ${buttonImgStyle || ""}`}
+          />
+        </button>
+      )}
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
         {isDate ? (
           <div className="absolute top-[35px] right-0 z-50">
