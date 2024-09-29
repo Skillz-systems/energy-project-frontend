@@ -12,8 +12,6 @@ on:
 jobs:
   deploy-test:
     runs-on: ubuntu-latest
-
-    services:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
