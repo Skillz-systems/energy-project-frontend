@@ -1,13 +1,13 @@
 name: energy-project-frontend-dev-deploy
 
 on:
-  push:
+  # push:
     # branches:
     #   - main
-  # pull_request:
-  #   branches:
-  #     - dev
-  #   types: [closed]
+  pull_request:
+    branches:
+      - dev
+    types: [closed]
 
 jobs:
   deploy-test:
