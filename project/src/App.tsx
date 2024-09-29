@@ -1,30 +1,47 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
-import { Settings } from "./Pages/Index";
-import Icon from "./Components/IconComponent";
-import { FaUser } from "react-icons/fa";
-
+import { Navigate, Route, Routes } from "react-router-dom";
+import { LoginForm, Settings, PageNotFound } from "./Pages/Index";
 import "./index.css";
+import { ErrorProvider } from "./Context/ErrorContext";
+import ErrorBoundary from "./Context/ErrorBoundary";
+import ProtectedRoute from "./Context/ProtectedRoute";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/settings/*" element={<Settings />} />
-
-      <Route
-        path="/"
-        element={
-          <Icon
-            icon={FaUser}
-            title="User Icon"
-            className="custom-icon-wrapper bg-red-300 w-fit"
-            iconClassName="custom-icon text-2xl text-[blue]"
-            titleClassName="custom-title"
-            onClick={() => console.log("Icon clicked")}
+    <>
+      <ErrorProvider>
+        <Routes>
+          {/* Wrap Routes that require protection */}
+          <Route
+            path="/settings/*"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary>
+                  <Settings />
+                </ErrorBoundary>
+              </ProtectedRoute>
+            }
           />
-        }
-      />
-    </Routes>
+
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
+          {/* Route that does not require protection */}
+          <Route
+            path="/login"
+            element={
+              <ErrorBoundary>
+                <LoginForm />
+              </ErrorBoundary>
+            }
+          />
+
+          <Route path="*" element={<PageNotFound />} />
+        </Routes>
+        <ToastContainer />
+      </ErrorProvider>
+    </>
   );
 }
 
