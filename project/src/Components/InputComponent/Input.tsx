@@ -33,6 +33,7 @@ export type InputType = {
   icon?: ReactNode;
   iconStyle?: string;
   iconPosition?: "left" | "right";
+  // iconCTA?
   style?: string;
   errorMessage?: string;
 };
@@ -219,6 +220,7 @@ export type SelectInputType = {
   icon?: ReactNode;
   iconStyle?: string;
   iconPosition?: "left" | "right";
+  // selectmultipl
 };
 
 export const SelectInput = ({

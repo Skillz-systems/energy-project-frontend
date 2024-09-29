@@ -28,10 +28,10 @@ const ToggleTemplate: StoryFn<ToggleInputType> = (args) => (
 
 export const GenericInput = InputTemplate.bind({});
 GenericInput.args = {
-  type: "text",
+  type: "password",
   name: "name",
-  label: "Firstname",
-  value: "",
+  label: "Password",
+  value: "hdgsgsdd",
   onChange: () => {},
   required: false,
   style: "",

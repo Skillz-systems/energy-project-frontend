@@ -19,4 +19,5 @@ titlePill.args = {
   topText: "All",
   bottomText: "SALES",
   value: "2240",
+  parentClass:"max-w-[180px]"
 };
