@@ -32,6 +32,7 @@ export default {
       backgroundImage: {
         primaryGradient: "linear-gradient(to right, #982214, #F8CB48)",
         paleGrayGradient: "linear-gradient(to right, #F6F8FA, #FFFFFF)",
+        paleGrayGradientLeft: "linear-gradient(to left, #F6F8FA, #FFFFFF)",
       },
       boxShadow: {
         innerCustom: "inset 1px 2px 4px rgba(0, 0, 0, 0.15)",

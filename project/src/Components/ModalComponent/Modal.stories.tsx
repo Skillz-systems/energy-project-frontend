@@ -1,6 +1,6 @@
+import React, { useState } from "react";
 import { Meta, StoryFn } from "@storybook/react";
 import { Modal, ModalType } from "./Modal";
-import { useState } from "react";
 
 export default {
   title: "Components/Modal",

@@ -208,6 +208,7 @@ export type SelectOption = {
 };
 
 export type SelectInputType = {
+  label: string;
   name: string;
   options: SelectOption[];
   value: string;
@@ -222,6 +223,7 @@ export type SelectInputType = {
 };
 
 export const SelectInput = ({
+  label,
   name,
   options,
   value,
@@ -246,11 +248,25 @@ export const SelectInput = ({
         ${style} 
         ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"} 
         w-full max-w-[400px] h-[48px] px-[1.1em] py-[1.25em] 
-        rounded-3xl text-sm text-textGrey border-[0.6px] border-strokeGrey 
+        rounded-3xl text-sm text-textGrey border-[0.6px]
         transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
-        cursor-pointer`}
+        cursor-pointer ${value ? "border-strokeCream" : "border-strokeGrey"}`}
       onClick={() => setIsOpen(!isOpen)}
     >
+      {value && (
+        <span
+          className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] 
+            transition-opacity duration-500 ease-in-out
+            ${value ? "opacity-100" : "opacity-0"}`}
+        >
+          {label.toUpperCase()}
+        </span>
+      )}
+      {required && (
+        <span className="mb-1.5 text-lg text-red-600">
+          <CgAsterisk />
+        </span>
+      )}
       <select
         name={name}
         value={value}
@@ -375,8 +391,11 @@ export const ToggleInput = ({
 
   const handleToggle = () => {
     if (!disabled) {
-      setIsChecked((prev) => !prev);
-      onChange(!isChecked);
+      setIsChecked((prev) => {
+        const newChecked = !prev;
+        onChange(newChecked);
+        return newChecked;
+      });
     }
   };
 
@@ -388,13 +407,15 @@ export const ToggleInput = ({
       onClick={handleToggle}
     >
       <div
-        className={`absolute inset-y-1 inset-x-1 rounded-full transition-colors duration-300 ${
-          isChecked ? "bg-blue-500" : "bg-gray-300"
+        className={`absolute inset-y-1 inset-x-1 rounded-full transition-colors duration-300 border-[0.4px] ${
+          isChecked
+            ? "bg-[#FFF3D5] border-[#A58730]"
+            : "bg-[#F6F8FA] border-[#CCD0DC]"
         }`}
       ></div>
       <div
-        className={`absolute top-2.5 left-2.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${
-          isChecked ? "transform translate-x-6" : ""
+        className={`absolute top-2.5 left-2.5 w-5 h-5 rounded-full shadow-md transition-transform duration-300 ${
+          isChecked ? "transform translate-x-6 bg-[#A58730]" : "bg-[#CCD0DC]"
         }`}
       ></div>
     </div>
