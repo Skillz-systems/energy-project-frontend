@@ -1,8 +1,8 @@
 import React from "react";
 
-const ErrorPage = ({ errorInformation }: { errorInformation: string  }) => {
+const ErrorPage = ({ errorInformation }: { errorInformation: string }) => {
   return (
-    <div className="flex flex-col items-center justify-center h-screen space-y-10 bg-slate-200 font-lexend">
+    <div className="flex flex-col items-center justify-center h-screen space-y-10 bg-slate-200">
       <h1 className="text-4xl font-bold">Oops. Something went wrong</h1>
       <div className="flex items-center justify-center w-[60%]">
         <p className="text-right w-[40%] font-bold text-4xl py-4 pr-6 mr-[0.75em] border-r border-gray-600">
@@ -18,7 +18,7 @@ const ErrorPage = ({ errorInformation }: { errorInformation: string  }) => {
         <b>Revenue Hub Portal Administrator.</b>
       </p>
       <button
-        className="border-1.5 border-color-text-one py-2 px-8 rounded hover:bg-color-text-one hover:text-slate-200"
+        className="border-1.5 border-[#050505] py-2 px-8 rounded hover:bg-[#050505] hover:text-slate-200"
         onClick={() => {
           window.location.reload();
         }}
