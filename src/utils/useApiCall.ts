@@ -5,8 +5,9 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // Create an axios instance
+const baseURL = process.env.VITE_API_URL
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL as string,
+  baseURL: baseURL as string,
 });
 
 // SWR fetcher function with axios
@@ -48,7 +49,7 @@ export const useApiCall = () => {
     headers = {},
     successMessage = "Successful",
   }: ApiCallOptions): Promise<T> => {
-    const baseURL = `${import.meta.env.VITE_API_URL}/api`;
+    const baseURL = `${process.env.VITE_API_URL}/api`;
 
     const requestConfig: AxiosRequestConfig = {
       baseURL,

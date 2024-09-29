@@ -11,6 +11,7 @@ import customer from "../../assets/table/customer.svg";
 import call from "../../assets/table/call.svg";
 import message from "../../assets/table/message.svg";
 import setting from "../../assets/table/setting.svg";
+import React from 'react';
 
 export default {
   title: "Components/Table",
@@ -204,13 +205,12 @@ const AgentsCard = ({
           </p>
         </span>
         <span
-          className={`flex items-center text-xs justify-center gap-0.5 bg-[#F6F8FA] px-2 py-1 border-[0.4px] border-strokeGreyTwo h-[24px] rounded-full ${
-            status === "active"
+          className={`flex items-center text-xs justify-center gap-0.5 bg-[#F6F8FA] px-2 py-1 border-[0.4px] border-strokeGreyTwo h-[24px] rounded-full ${status === "active"
               ? "text-success"
               : status === "barred"
-              ? "text-errorTwo"
-              : "text-brightBlue"
-          }`}
+                ? "text-errorTwo"
+                : "text-brightBlue"
+            }`}
         >
           <GoDotFill /> {status.toUpperCase()}
         </span>

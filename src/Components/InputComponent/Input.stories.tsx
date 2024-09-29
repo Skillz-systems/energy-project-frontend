@@ -1,4 +1,5 @@
 import { Meta, StoryFn } from "@storybook/react";
+import React from 'react';
 import {
   Input,
   InputType,
@@ -32,7 +33,7 @@ GenericInput.args = {
   name: "name",
   label: "Firstname",
   value: "",
-  onChange: () => {},
+  onChange: () => { },
   required: false,
   style: "",
 };
@@ -77,7 +78,7 @@ CustomSelectInput.args = {
     },
   ],
   value: "Tersoo",
-  onChange: () => {},
+  onChange: () => { },
   required: false,
   style: "",
 };

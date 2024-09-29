@@ -1,18 +1,18 @@
 
 import logo from '../assets/images/logo.png';
-
+import React from 'react';
 interface LogoProps {
-  variant?: 'nav' | 'auth'; 
+  variant?: 'nav' | 'auth';
 }
 
 const LogoComponent = ({ variant = 'nav' }: LogoProps) => {
   const logoStyles = {
-    nav: 'w-[32px] h-[32px] rounded-md', 
-    auth: 'w-[120px] h-[120px] rounded-full', 
+    nav: 'w-[32px] h-[32px] rounded-md',
+    auth: 'w-[120px] h-[120px] rounded-full',
   };
 
   return (
-    <div className="w-full h-full flex items-center justify-center"> 
+    <div className="w-full h-full flex items-center justify-center">
       <img
         src={logo}
         alt="Company Logo"

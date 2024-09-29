@@ -1,7 +1,8 @@
 
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import LogoComponent from './Components/LogoComponent';
+import LogoComponent from './LogoComponent';
+import React from 'react';
 
 
 describe('LogoComponent', () => {

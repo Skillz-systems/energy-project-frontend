@@ -1,9 +1,10 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import drop from "../../assets/table/dropdown.svg";
 import dateIcon from "../../assets/table/date.svg";
 import { Modal } from "../ModalComponent/Modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+
 
 export type DropDownType = {
   name?: string;
@@ -62,10 +63,10 @@ export const DropDown = (props: DropDownType) => {
         <span className="text-xs font-medium text-textGrey">
           {isDate && selectedDate
             ? selectedDate.toLocaleDateString("default", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })
             : name}
         </span>
         <img
@@ -92,11 +93,10 @@ export const DropDown = (props: DropDownType) => {
               <li
                 key={index}
                 className={`flex items-center justify-between h-[24px] px-2 py-2.5 text-xs rounded-full cursor-pointer 
-                ${
-                  linkIndex === index
+                ${linkIndex === index
                     ? "bg-paleLightBlue text-textBlack"
                     : "hover:bg-gray-100 text-textDarkGrey"
-                }`}
+                  }`}
                 onClick={() => handleOptionClick(index)}
               >
                 {item}

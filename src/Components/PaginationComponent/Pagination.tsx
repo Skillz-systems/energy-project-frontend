@@ -1,3 +1,4 @@
+import React from 'react';
 type PaginationProps = {
   totalEntries: number;
   entriesPerPage: number;
@@ -68,11 +69,10 @@ export const Pagination = ({
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
           aria-disabled={currentPage === 1}
-          className={`${
-            currentPage === 1
+          className={`${currentPage === 1
               ? " bg-disabled hover:cursor-not-allowed"
               : "bg-transparent hover:cursor-pointer"
-          } text-sm text-textLightGrey px-2.5 border border-strokeGreyThree rounded-full`}
+            } text-sm text-textLightGrey px-2.5 border border-strokeGreyThree rounded-full`}
         >
           Prev
         </button>
@@ -85,11 +85,10 @@ export const Pagination = ({
                 key={index}
                 onClick={() => handlePageChange(page)}
                 aria-current={currentPage === page ? "page" : undefined}
-                className={`${
-                  currentPage === page
+                className={`${currentPage === page
                     ? "bg-disabled text-blackBrown font-bold border border-blackBrown"
                     : "text-textLightGrey border border-strokeGreyThree"
-                } text-sm px-2.5 rounded-full`}
+                  } text-sm px-2.5 rounded-full`}
               >
                 {page}
               </button>
@@ -106,11 +105,10 @@ export const Pagination = ({
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
           aria-disabled={currentPage === totalPages}
-          className={`${
-            currentPage === totalPages
+          className={`${currentPage === totalPages
               ? "bg-disabled hover:cursor-not-allowed"
               : "bg-transparent hover:cursor-pointer"
-          } text-sm text-textLightGrey px-2.5 border border-strokeGreyThree rounded-full`}
+            } text-sm text-textLightGrey px-2.5 border border-strokeGreyThree rounded-full`}
         >
           Next
         </button>

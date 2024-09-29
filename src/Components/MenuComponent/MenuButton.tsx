@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import buttonIcon from "../../assets/menu/menu.svg";
 import useDefaultNavigation from "../../hooks/useDefaultNavigation";
@@ -45,11 +45,10 @@ export const MenuButton = (props: MenuButtonType) => {
             <div key={index}>
               <div
                 className={`flex items-center w-full h-[28px] px-2 py-2 gap-1 border-[0.6px] border-strokeGreyThree rounded-full transition-all hover:cursor-pointer
-                   ${
-                     location.pathname === section.link
-                       ? "bg-primaryGradient text-white"
-                       : "text-textGrey hover:text-textBlack"
-                   }`}
+                   ${location.pathname === section.link
+                    ? "bg-primaryGradient text-white"
+                    : "text-textGrey hover:text-textBlack"
+                  }`}
                 onMouseEnter={() => {
                   setHoveredIndex(index);
                   prefetchRoute(section.link);
@@ -61,8 +60,8 @@ export const MenuButton = (props: MenuButtonType) => {
                     location.pathname === section.link
                       ? "white"
                       : hoveredIndex === index
-                      ? "#050505"
-                      : "#828DA9"
+                        ? "#050505"
+                        : "#828DA9"
                   }
                   width="16"
                   height="16"
