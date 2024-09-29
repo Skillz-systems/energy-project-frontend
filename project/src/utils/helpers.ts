@@ -16,3 +16,7 @@ export function copyToClipboard(value: any) {
       console.error("Failed to copy text: ", err);
     });
 }
+
+// Utility to generate the type of the data dynamically
+export const generateType = <T>(data: T): T => data;
+// type ApiResponseType = ReturnType<typeof generateType<typeof data>>;

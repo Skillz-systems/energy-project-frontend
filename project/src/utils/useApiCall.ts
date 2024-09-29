@@ -1,5 +1,5 @@
 import useTokens from "../hooks/useTokens";
-import axios, { AxiosRequestConfig, AxiosError, AxiosResponse } from "axios";
+import axios, { AxiosRequestConfig, AxiosError } from "axios";
 import useSWR from "swr";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -10,10 +10,7 @@ const apiClient = axios.create({
 });
 
 // SWR fetcher function with axios
-const fetcher = async (
-  url: string,
-  token: string
-): Promise<AxiosResponse<any>> => {
+const fetcher = async (url: string, token: string): Promise<any> => {
   try {
     const response = await apiClient.get(url, {
       headers: {
