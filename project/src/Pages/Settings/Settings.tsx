@@ -6,6 +6,8 @@ import { Suspense, lazy } from "react";
 import React from "react";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import settings from "../../assets/settings/settings.svg";
+import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
+import circleAction from "../../assets/settings/addCircle.svg";
 
 const RoleAndPermissions = lazy(
   () => import("../../Components/Settings/RoleAndPermissions")
@@ -56,6 +58,7 @@ const Settings = () => {
               bottomText="USERS"
               value="120"
             />
+            <ActionButton label="New User" icon={<img src={circleAction} />} />
           </section>
         ) : null}
         <div className="flex w-full p-8 gap-4">
