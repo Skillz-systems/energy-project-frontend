@@ -1,4 +1,3 @@
-import React from "react";
 import { Table } from "../TableComponent/Table";
 import role from "../../assets/table/role.svg";
 import clock from "../../assets/table/clock.svg";

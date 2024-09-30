@@ -94,7 +94,7 @@ const RoleAndPermissions = () => {
 
   return (
     <>
-      <div className="relative flex flex-col justify-end bg-white p-4 w-full max-w-[700px] min-h-[414px] border-[0.6px] border-strokeGreyThree rounded-[20px]">
+      <div className="relative flex flex-col justify-end bg-white p-4 w-full max-w-[610px] md:max-w-[700px] min-h-[414px] border-[0.6px] border-strokeGreyThree rounded-[20px] overflow-x-auto">
         <img
           src={lightCheckeredBg}
           alt="Light Checkered Background"
@@ -111,7 +111,7 @@ const RoleAndPermissions = () => {
             }}
           />
         </div>
-        <div className="z-10 flex flex-col gap-4 mt-[160px] p-[16px_16px_0px_16px] border-[0.6px] border-strokeGreyThree rounded-[20px]">
+        <div className="z-10 flex flex-col gap-4 mt-[60px] md:mt-[160px] p-[16px_16px_0px_16px] border-[0.6px] border-strokeGreyThree rounded-[20px]">
           <div className="flex items-center justify-between w-full ">
             {columnList.map((column, index) => (
               <span

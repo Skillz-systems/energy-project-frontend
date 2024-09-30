@@ -9,6 +9,8 @@ import ActionButton from "../../Components/ActionButtonComponent/ActionButton";
 import circleAction from "../../assets/settings/addCircle.svg";
 import threedots from "../../assets/settings/3dots.svg";
 import { DropDown } from "../../Components/DropDownComponent/DropDown";
+import HeaderBadge from "../../Components/HeaderBadgeComponent/HeaderBadge";
+import settingsbadge from "../../assets/settings/settingsbadge.png";
 
 const RoleAndPermissions = lazy(
   () => import("../../Components/Settings/RoleAndPermissions")
@@ -61,13 +63,11 @@ const Settings = () => {
         <header className="flex items-center justify-between px-8 py-4">
           PLACE TOP NAV COMPONENT HERE
         </header>
-        <section className="flex items-center justify-between px-8 py-4">
-          PLACE HEADER BADGE COMPONENT HERE
-        </section>
+        <HeaderBadge pageName="Settings" image={settingsbadge} />
         {location.pathname === "/settings/users" ? (
-          <section className="flex items-center justify-between w-full bg-paleGrayGradient px-8 py-4 h-[64px]">
+          <section className="flex items-center justify-between w-full bg-paleGrayGradient px-4 md:px-8 py-4 gap-2 h-[64px]">
             <TitlePill
-              parentClass="w-full max-w-[172px]"
+              parentClass="w-full max-w-[150px] sm:max-w-[172px]"
               icon={settings}
               iconBgColor="bg-[#FDEEC2]"
               topText="All"
@@ -83,7 +83,7 @@ const Settings = () => {
             </div>
           </section>
         ) : null}
-        <div className="flex w-full p-8 gap-4">
+        <div className="flex flex-col w-full px-4 py-8 gap-4 md:flex-row md:p-8">
           <aside className="w-max">
             <SideMenu navigationList={navigationList} />
           </aside>

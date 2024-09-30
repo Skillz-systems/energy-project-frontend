@@ -61,7 +61,7 @@ const Profile = () => {
 
   return (
     <form
-      className="relative flex flex-col justify-end bg-white p-4 w-full max-w-[700px] min-h-[414px] rounded-[20px]"
+      className="relative flex flex-col justify-end bg-white p-2 md:p-4 w-full max-w-[700px] min-h-[414px] rounded-[20px]"
       // onSubmit={}
     >
       <img
@@ -87,7 +87,7 @@ const Profile = () => {
           </button>
         )}
       </div>
-      <div className="z-10 flex flex-col gap-4 mt-[160px]">
+      <div className="z-10 flex flex-col gap-4 mt-[60px] md:mt-[160px]">
         <DetailComponent
           label="User ID"
           name="userId"
