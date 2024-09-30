@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // Create an axios instance
-const baseURL = process.env.VITE_API_URL
+const baseURL = import.meta.env.VITE_API_URL;
 const apiClient = axios.create({
   baseURL: baseURL as string,
 });
@@ -46,7 +46,8 @@ export const useApiCall = () => {
     headers = {},
     successMessage = "Successful",
   }: ApiCallOptions): Promise<T> => {
-    const baseURL = `${process.env.VITE_API_URL}/api`;
+    const url = import.meta.env.VITE_API_URL;
+    const baseURL = `${url}/api`;
 
     const requestConfig: AxiosRequestConfig = {
       baseURL,
