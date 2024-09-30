@@ -3,7 +3,7 @@ import { SideMenu } from "../../Components/SideMenuComponent/SideMenu";
 import Profile from "../../Components/Settings/Profile";
 import LoadingSpinner from "../../Components/Loaders/LoadingSpinner";
 import { Suspense, lazy } from "react";
-// import { TitlePill } from "../../Components/TitlePillComponent/TitlePill";
+import { TitlePill } from "../../Components/TitlePillComponent/TitlePill";
 import settings from "../../assets/settings/settings.svg";
 import ActionButton from "../../Components/ActionButtonComponent/ActionButton";
 import circleAction from "../../assets/settings/addCircle.svg";
