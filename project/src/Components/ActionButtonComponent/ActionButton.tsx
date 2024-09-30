@@ -1,4 +1,3 @@
-// ActionButton.tsx
 import React from 'react';
 import { ReactNode } from 'react';
 
@@ -11,6 +10,11 @@ interface ActionButtonProps {
   disabled?: boolean;
   loading?: boolean;
   ariaLabel?: string;
+  iconAlignment?: 'left' | 'right';
+  padding?: string;
+  margin?: string;
+  gap?: string;
+  height?: string;
 }
 
 const ActionButton: React.FC<ActionButtonProps> = ({
@@ -22,24 +26,33 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   disabled = false,
   loading = false,
   ariaLabel,
+  iconAlignment = 'left',
+  padding = 'px-4 py-2', 
+  margin = '0',
+  gap = '4px',
+  height = "h-8",
 }) => {
-  const baseStyle =
-    'rounded-full flex items-center justify-center transition duration-200 ease-in-out shadow-md';
+  const baseStyle = `
+    rounded-full flex items-center justify-center transition duration-200 ease-in-out shadow-md
+    ${padding} ${margin}
+    ${gap}
+    ${height}
+  `;
+
   const variantStyles = {
-    primary: 'bg-yellow-100 hover:bg-yellow-100 text-green ',
-    secondary: 'bg-gray-300 hover:bg-gray-400 text-black',
+    primary: 'bg-yellow-200 hover:bg-yellow-300 text-dark-gray',
+    secondary: 'bg-gray-300 hover:bg-red-600 text-black',
     danger: 'bg-red-500 hover:bg-red-600 text-white',
     success: 'bg-green-500 hover:bg-green-600 text-white',
   };
+
   const sizeStyles = {
-    small: 'px-3 py-1.5 text-xs',
-    medium: 'px-5 py-2.5 text-sm',
-    large: 'px-7 py-3 text-lg',
+    small: 'text-xs',
+    medium: 'text-sm',
+    large: 'text-lg',
   };
 
-
-  const buttonClass = `${baseStyle} ${variantStyles[variant]} ${sizeStyles[size]} ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
-    }`;
+  const buttonClass = `${baseStyle} ${variantStyles[variant]} ${sizeStyles[size]} ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`;
 
   return (
     <button
@@ -47,6 +60,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
       onClick={onClick}
       disabled={disabled || loading}
       aria-label={ariaLabel}
+      style={{ width: 'auto' }} 
     >
       {loading ? (
         <svg
@@ -70,12 +84,10 @@ const ActionButton: React.FC<ActionButtonProps> = ({
           ></path>
         </svg>
       ) : (
-        <div className='flex items-center'>
-          {icon && <span className="mr-2 text-xs">{icon}</span>}
-          {label && <span className='font-medium text-[10px] font-["Red_Hat_Display"] leading-3  tracking-wide'>{label}</span>}
+        <div className={`flex items-center ${iconAlignment === 'right' ? 'flex-row-reverse' : ''}`}>
+          {icon && <span className="mr-1">{icon}</span>}
+          {label && <span className="font-medium text-[10px] font-['Red_Hat_Display'] leading-3 tracking-wide">{label}</span>}
         </div>
-
-
       )}
     </button>
   );

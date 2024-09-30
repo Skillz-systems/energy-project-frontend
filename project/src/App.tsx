@@ -1,17 +1,16 @@
-// App.tsx
-import React from 'react';
 
-import { FaPlus, FaTrash, FaEdit } from 'react-icons/fa';
-import ActionButton from './Components/ActionButtonComponent/ActionButton';
+import { Route, Routes, Navigate } from "react-router-dom";
+import "./index.css";
+import Action from "./Components/ActionButtonComponent/Action";
+
+
 
 function App() {
-  const handleClick = () => alert('Button clicked!');
-
   return (
-    <div className="p-4 space-y-4 ">
-      <ActionButton label="New Email" icon={<FaPlus />} onClick={handleClick} />
-      
-    </div>
+    <Routes>
+      <Route path="/ActionButton" element={<Action/>} />
+      <Route path="*" element={<Navigate to="/Action" replace />} />
+    </Routes>
   );
 }
 
