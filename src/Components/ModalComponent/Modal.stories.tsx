@@ -1,10 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Meta, StoryFn } from "@storybook/react";
 import { Modal, ModalType } from "./Modal";
-<<<<<<< HEAD:project/src/Components/ModalComponent/Modal.stories.tsx
-=======
-import React, { useState } from "react";
->>>>>>> fc08606f7be0fc0b11f32e2803ee43d632dcb724:src/Components/ModalComponent/Modal.stories.tsx
 
 export default {
   title: "Components/Modal",

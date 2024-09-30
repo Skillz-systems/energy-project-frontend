@@ -1,4 +1,3 @@
-import React from "react";
 import { Meta, StoryFn } from "@storybook/react";
 import { Table, TableType } from "./Table";
 import { GoDotFill } from "react-icons/go";
@@ -12,7 +11,6 @@ import customer from "../../assets/table/customer.svg";
 import call from "../../assets/table/call.svg";
 import message from "../../assets/table/message.svg";
 import setting from "../../assets/table/setting.svg";
-import React from 'react';
 
 export default {
   title: "Components/Table",

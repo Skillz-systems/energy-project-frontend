@@ -4,8 +4,6 @@ import dateIcon from "../../assets/table/date.svg";
 import { Modal } from "../ModalComponent/Modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import React from "react";
-
 
 export type DropDownType = {
   name?: string;
@@ -59,7 +57,6 @@ export const DropDown = (props: DropDownType) => {
 
   return (
     <div className="relative flex w-max">
-<<<<<<< HEAD:project/src/Components/DropDownComponent/DropDown.tsx
       {customButton ? (
         <div onClick={handleClick} className="w-max">
           {customButton}
@@ -85,27 +82,6 @@ export const DropDown = (props: DropDownType) => {
           />
         </button>
       )}
-=======
-      <button
-        className="flex items-center justify-between w-max gap-2 pl-2 pr-1 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full"
-        onClick={handleClick}
-      >
-        <span className="text-xs font-medium text-textGrey">
-          {isDate && selectedDate
-            ? selectedDate.toLocaleDateString("default", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })
-            : name}
-        </span>
-        <img
-          src={isDate ? dateIcon : drop}
-          alt="DropdownIcon"
-          className={`w-4 h-4 ${buttonImgStyle || ""}`}
-        />
-      </button>
->>>>>>> fc08606f7be0fc0b11f32e2803ee43d632dcb724:src/Components/DropDownComponent/DropDown.tsx
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
         {isDate ? (
           <div className="absolute top-[35px] right-0 z-50">

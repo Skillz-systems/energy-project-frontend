@@ -1,4 +1,3 @@
-import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { LoginForm, Settings, PageNotFound } from "./Pages/Index";
 import "./index.css";

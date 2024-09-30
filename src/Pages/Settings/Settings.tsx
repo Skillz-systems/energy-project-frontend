@@ -3,13 +3,12 @@ import { SideMenu } from "../../Components/SideMenuComponent/SideMenu";
 import Profile from "../../Components/Settings/Profile";
 import LoadingSpinner from "../../Components/Loaders/LoadingSpinner";
 import { Suspense, lazy } from "react";
-import React from "react";
-import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
+// import { TitlePill } from "../../Components/TitlePillComponent/TitlePill";
 import settings from "../../assets/settings/settings.svg";
-import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
+import ActionButton from "../../Components/ActionButtonComponent/ActionButton";
 import circleAction from "../../assets/settings/addCircle.svg";
 import threedots from "../../assets/settings/3dots.svg";
-import { DropDown } from "@/Components/DropDownComponent/DropDown";
+import { DropDown } from "../../Components/DropDownComponent/DropDown";
 
 const RoleAndPermissions = lazy(
   () => import("../../Components/Settings/RoleAndPermissions")

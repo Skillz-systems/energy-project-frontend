@@ -1,7 +1,6 @@
 import { ChangeEvent, MouseEvent, ReactNode } from "react";
 import { CgAsterisk, CgChevronDown } from "react-icons/cg";
 import { useState } from "react";
-import React from "react";
 
 type AllowedInputTypes =
   | "text"

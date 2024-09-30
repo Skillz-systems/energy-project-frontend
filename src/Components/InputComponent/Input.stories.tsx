@@ -1,6 +1,5 @@
 import React from "react";
 import { Meta, StoryFn } from "@storybook/react";
-import React from 'react';
 import {
   Input,
   InputType,
@@ -32,15 +31,9 @@ export const GenericInput = InputTemplate.bind({});
 GenericInput.args = {
   type: "password",
   name: "name",
-<<<<<<< HEAD:project/src/Components/InputComponent/Input.stories.tsx
-  label: "Password",
-  value: "hdgsgsdd",
-  onChange: () => {},
-=======
   label: "Firstname",
   value: "",
-  onChange: () => { },
->>>>>>> fc08606f7be0fc0b11f32e2803ee43d632dcb724:src/Components/InputComponent/Input.stories.tsx
+  onChange: () => {},
   required: false,
   style: "",
 };
@@ -86,7 +79,7 @@ CustomSelectInput.args = {
     },
   ],
   value: "Tersoo",
-  onChange: () => { },
+  onChange: () => {},
   required: false,
   style: "",
 };
