@@ -109,11 +109,13 @@ const handleApiError = (error: AxiosError | Error) => {
           break;
         case 401:
           toast.error("Unauthorized: Please log in again.");
+          window.location.href = "/login";
           break;
         case 403:
           toast.error(
             "Forbidden: You don't have permission to perform this action."
           );
+          window.location.href = "/login";
           break;
         case 404:
           toast.error("Not Found: The requested resource does not exist.");
