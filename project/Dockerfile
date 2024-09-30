@@ -1,34 +1,22 @@
-# Set the base image to create the image for a React app
+# Set the base image
 FROM node:20-alpine
 
-# Create a user with permissions to run the app
+# Create a user
 RUN addgroup -S app && adduser -S -G app app
 
-# Set the working directory to /app
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json to the working directory
+# Copy package.json and package-lock.json first (to leverage Docker cache)
 COPY package*.json ./
 
-# Change ownership of the /app directory and node_modules to the app user
-RUN chown -R app:app /app
-
-# Install dependencies as root (needed to avoid permission issues during installation)
-USER node
-
-# Install dependencies
+# Install dependencies inside the container
 RUN npm install
 
-# Ensure app user has access to node_modules
-RUN chown -R app:app /app/node_modules
+# Copy all project files (excluding node_modules)
+COPY . .
 
-# Switch to app user for the rest of the build process
-USER app
-
-# Copy the rest of the files, ensuring ownership is correct
-COPY --chown=app:app . .
-
-# Expose port 5173
+# Expose the port
 EXPOSE 5173
 
 # Command to run the app
