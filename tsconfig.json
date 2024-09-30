@@ -8,15 +8,25 @@
   ],
   "compilerOptions": {
     "noEmit": true,
-    "allowImportingTsExtensions": true, 
-    "target": "esnext",              // Target modern JavaScript
-    "module": "esnext",              // Use ES module system
-    "moduleResolution": "node",      // Resolve modules in Node.js style
-    "jsx": "react-jsx",              // For React with automatic JSX runtime
-    "esModuleInterop": true,         // For CommonJS interop
+    "allowImportingTsExtensions": true,
+    "target": "esnext", // Target modern JavaScript
+    "module": "esnext", // Use ES module system
+    "moduleResolution": "node", // Resolve modules in Node.js style
+    "jsx": "react-jsx", // For React with automatic JSX runtime
+    "esModuleInterop": true, // For CommonJS interop
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "typeRoots": ["node_modules/@types"],
-    "types": ["node", "vite/client"]
+    "types": ["vite/client"],
+
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+    // "types": ["node", "vite/client"]
   }
 }
