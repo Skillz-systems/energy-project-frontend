@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import lightCheckeredBg from "../../assets/lightCheckeredBg.png";
 import role from "../../assets/table/role.svg";
 import addButton from "../../assets/settings/addbutton.svg";
@@ -74,14 +74,14 @@ const Profile = () => {
           <img
             src={editButton}
             alt="Edit Button"
-            className="w-[24px] h-[24px] hover:cursor-pointer"
+            className="w-[24px] h-[24px] hover:cursor-pointer hover:opacity-80"
             onClick={() => setDisplayInput(!displayInput)}
           />
         ) : (
           <button
             type="button"
             onClick={() => setDisplayInput(!displayInput)}
-            className="flex items-center justify-center w-[24px] h-[24px] bg-white border border-errorTwo rounded-full"
+            className="flex items-center justify-center w-[24px] h-[24px] bg-white border border-errorTwo rounded-full hover:opacity-80"
           >
             <MdCancel className="text-errorTwo" />
           </button>

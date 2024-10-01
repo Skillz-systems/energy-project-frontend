@@ -1,7 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import useDefaultNavigation from "../../hooks/useDefaultNavigation";
 import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
-import React from "react";
 
 export type SideMenuType = {
   navigationList: {
@@ -9,15 +8,18 @@ export type SideMenuType = {
     link: string;
     count?: number | string;
   }[];
+  parentClass?: string;
 };
 
 export const SideMenu = (props: SideMenuType) => {
   const location = useLocation();
-  const { navigationList } = props;
+  const { navigationList, parentClass } = props;
   useDefaultNavigation(navigationList);
 
   return (
-    <div className="flex flex-col items-center justify-center bg-white p-4 gap-4 w-[216px] border border-strokeGreyThree rounded-[20px]">
+    <div
+      className={`${parentClass} flex flex-col items-center justify-center bg-white p-4 gap-4 w-[216px] border border-strokeGreyThree rounded-[20px]`}
+    >
       {navigationList.map((item, index) => (
         <Link
           to={item.link}

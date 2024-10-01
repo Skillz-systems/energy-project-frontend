@@ -84,8 +84,8 @@ const Settings = () => {
           </section>
         ) : null}
         <div className="flex flex-col w-full px-4 py-8 gap-4 md:flex-row md:p-8">
-          <aside className="w-max">
-            <SideMenu navigationList={navigationList} />
+          <aside className="w-max h-max">
+            <SideMenu navigationList={navigationList} parentClass="sticky top-0" />
           </aside>
           <section className="relative items-start justify-center flex min-h-[415px] w-full">
             <Suspense
