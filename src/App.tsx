@@ -1,5 +1,10 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import { LoginForm, Settings, PageNotFound } from "./Pages/Index";
+import {
+  LoginPage,
+  Settings,
+  PageNotFound,
+  CreatePassword,
+} from "./Pages/Index";
 import "./index.css";
 import { ErrorProvider } from "./Context/ErrorContext";
 import ErrorBoundary from "./Context/ErrorBoundary";
@@ -31,7 +36,16 @@ function App() {
             path="/login"
             element={
               <ErrorBoundary>
-                <LoginForm />
+                <LoginPage />
+              </ErrorBoundary>
+            }
+          />
+
+          <Route
+            path="/create-password/:id/:token/"
+            element={
+              <ErrorBoundary>
+                <CreatePassword />
               </ErrorBoundary>
             }
           />

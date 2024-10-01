@@ -8,7 +8,6 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const [countdown, setCountdown] = useState<number>(3);
   const [redirect, setRedirect] = useState<boolean>(false);
 
   const { token } = useTokens();
@@ -16,29 +15,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   useEffect(() => {
     if (!token) {
-      toast.warning(
-        `You are not Logged In. Redirecting to login page in ${countdown} seconds...`
-      );
-
-      const countdownInterval = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev === 1) {
-            clearInterval(countdownInterval);
-            setRedirect(true);
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => clearInterval(countdownInterval);
+      setRedirect(true);
+      toast.warning(`You are not Logged In!`);
     }
-  }, [token, countdown]);
+  }, [token]);
 
   if (redirect) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return <>{children}</>;
+  if (!token) {
+    return <div></div>;
+  } else {
+    return <>{children}</>;
+  }
 };
 
 export default ProtectedRoute;

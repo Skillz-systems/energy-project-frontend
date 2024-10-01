@@ -29,9 +29,8 @@ export type InputType = {
   required: boolean;
   checked?: boolean;
   readOnly?: boolean;
-  icon?: ReactNode;
-  iconStyle?: string;
-  iconPosition?: "left" | "right";
+  iconLeft?: ReactNode;
+  iconRight?: ReactNode;
   // iconCTA?
   style?: string;
   errorMessage?: string;
@@ -49,9 +48,8 @@ export const Input = ({
   required = false,
   checked,
   readOnly = false,
-  icon,
-  iconStyle,
-  iconPosition = "left",
+  iconLeft,
+  iconRight,
   style,
   errorMessage,
 }: InputType) => {
@@ -73,7 +71,7 @@ export const Input = ({
         <div
           className={`relative autofill-parent
           ${type === "hidden" ? "hidden" : "flex"} 
-        ${style} ${iconPosition === "left" ? "flex-row" : "flex-row-reverse"} 
+        ${style} 
         ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
         items-center w-full max-w-[400px] h-[48px] px-[1.1em] py-[1.25em] 
         gap-2 rounded-3xl border-[0.6px] border-strokeGrey
@@ -88,7 +86,7 @@ export const Input = ({
               {label.toUpperCase()}
             </span>
           )}
-          {icon && <span className={`${iconStyle}`}>{icon}</span>}
+          {iconLeft && iconLeft}
           {required && (
             <span className="mb-2 text-lg text-red-600">
               <CgAsterisk />
@@ -109,6 +107,7 @@ export const Input = ({
             min={0}
             className="w-full text-sm font-semibold text-textBlack placeholder:text-textGrey placeholder:font-normal placeholder:italic"
           />
+          {iconRight && iconRight}
         </div>
         {errorMessage && (
           <p className="mt-1 px-[1.1em] text-sm text-errorTwo font-medium">
