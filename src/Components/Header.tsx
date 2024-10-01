@@ -1,5 +1,5 @@
 import React from 'react';
-import UserProfile from './UserProfile';
+import UserProfile from './UserPill';
 
 const Header = () => {
   const profileImage = "@assets/Images/logo.png"; // Replace with actual path

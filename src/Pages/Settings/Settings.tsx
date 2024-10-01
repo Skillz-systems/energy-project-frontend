@@ -11,6 +11,7 @@ import threedots from "../../assets/settings/3dots.svg";
 import { DropDown } from "../../Components/DropDownComponent/DropDown";
 import HeaderBadge from "../../Components/HeaderBadgeComponent/HeaderBadge";
 import settingsbadge from "../../assets/settings/settingsbadge.png";
+import TopNavComponent from "../../Components/TopNavComponent/TopNavComponent";
 
 const RoleAndPermissions = lazy(
   () => import("../../Components/Settings/RoleAndPermissions")
@@ -60,9 +61,7 @@ const Settings = () => {
   return (
     <main className="flex flex-col items-center w-full overflow-hidden">
       <div className="w-full max-w-[1440px]">
-        <header className="flex items-center justify-between px-8 py-4">
-          PLACE TOP NAV COMPONENT HERE
-        </header>
+        <TopNavComponent />
         <HeaderBadge pageName="Settings" image={settingsbadge} />
         {location.pathname === "/settings/users" ? (
           <section className="flex items-center justify-between w-full bg-paleGrayGradient px-4 md:px-8 py-4 gap-2 h-[64px]">
@@ -85,7 +84,10 @@ const Settings = () => {
         ) : null}
         <div className="flex flex-col w-full px-4 py-8 gap-4 md:flex-row md:p-8">
           <aside className="w-max h-max">
-            <SideMenu navigationList={navigationList} parentClass="sticky top-0" />
+            <SideMenu
+              navigationList={navigationList}
+              parentClass="sticky top-0"
+            />
           </aside>
           <section className="relative items-start justify-center flex min-h-[415px] w-full">
             <Suspense

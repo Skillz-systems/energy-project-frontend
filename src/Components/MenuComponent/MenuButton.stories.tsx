@@ -2,7 +2,6 @@ import { MemoryRouter } from "react-router-dom";
 import { Meta, StoryFn } from "@storybook/react";
 import { MenuButton, MenuButtonType } from "./MenuButton";
 import { navData } from "./navInfo";
-import React from 'react';
 
 export default {
   title: "Components/MenuButton",
