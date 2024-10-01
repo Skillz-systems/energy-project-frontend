@@ -2,7 +2,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import { SideMenu } from "../../Components/SideMenuComponent/SideMenu";
 import Profile from "../../Components/Settings/Profile";
 import LoadingSpinner from "../../Components/Loaders/LoadingSpinner";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useState } from "react";
 import { TitlePill } from "../../Components/TitlePillComponent/TitlePill";
 import settings from "../../assets/settings/settings.svg";
 import ActionButton from "../../Components/ActionButtonComponent/ActionButton";
@@ -12,6 +12,10 @@ import { DropDown } from "../../Components/DropDownComponent/DropDown";
 import HeaderBadge from "../../Components/HeaderBadgeComponent/HeaderBadge";
 import settingsbadge from "../../assets/settings/settingsbadge.png";
 import TopNavComponent from "../../Components/TopNavComponent/TopNavComponent";
+import { Modal } from "../../Components/ModalComponent/Modal";
+import { Input } from "../../Components/InputComponent/Input";
+import ProceedButton from "../../Components/ProceedButtonComponent/ProceedButtonComponent";
+import { useApiCall } from "../../utils/useApiCall";
 
 const RoleAndPermissions = lazy(
   () => import("../../Components/Settings/RoleAndPermissions")
@@ -22,7 +26,20 @@ const ChangePassword = lazy(
 const Users = lazy(() => import("../../Components/Settings/Users"));
 
 const Settings = () => {
-  const location = useLocation();
+  const { apiCall } = useApiCall();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    firstname: "",
+    lastname: "",
+    phone: "",
+    role: "",
+    location: "",
+  });
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const userlocation = useLocation();
   const navigationList = [
     {
       title: "Profile",
@@ -58,58 +75,198 @@ const Settings = () => {
     ),
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await apiCall({
+        endpoint: "/v1/auth/create-user",
+        method: "post",
+        data: formData,
+        successMessage: "User created successfully!",
+      });
+
+      console.log("User creation response:", response);
+    } catch (error) {
+      console.error("User creation failed:", error);
+    }
+    setLoading(false);
+  };
+
+  const { email, password, firstname, lastname, phone, role, location } =
+    formData;
+
+  const isFormFilled =
+    email || password || firstname || lastname || phone || role || location;
+
   return (
-    <main className="flex flex-col items-center w-full overflow-hidden">
-      <div className="w-full max-w-[1440px]">
-        <TopNavComponent />
-        <HeaderBadge pageName="Settings" image={settingsbadge} />
-        {location.pathname === "/settings/users" ? (
-          <section className="flex items-center justify-between w-full bg-paleGrayGradient px-4 md:px-8 py-4 gap-2 h-[64px]">
-            <TitlePill
-              parentClass="w-full max-w-[150px] sm:max-w-[172px]"
-              icon={settings}
-              iconBgColor="bg-[#FDEEC2]"
-              topText="All"
-              bottomText="USERS"
-              value="120"
-            />
-            <div className="flex items-center gap-2">
-              <ActionButton
-                label="New User"
-                icon={<img src={circleAction} />}
+    <>
+      <main className="flex flex-col items-center w-full overflow-hidden">
+        <div className="w-full max-w-[1440px]">
+          <TopNavComponent />
+          <HeaderBadge pageName="Settings" image={settingsbadge} />
+          {userlocation.pathname === "/settings/users" ? (
+            <section className="flex items-center justify-between w-full bg-paleGrayGradient px-4 md:px-8 py-4 gap-2 h-[64px]">
+              <TitlePill
+                parentClass="w-full max-w-[150px] sm:max-w-[172px]"
+                icon={settings}
+                iconBgColor="bg-[#FDEEC2]"
+                topText="All"
+                bottomText="USERS"
+                value="120"
               />
-              <DropDown {...dropDownList} />
-            </div>
-          </section>
-        ) : null}
-        <div className="flex flex-col w-full px-4 py-8 gap-4 md:flex-row md:p-8">
-          <aside className="w-max h-max">
-            <SideMenu
-              navigationList={navigationList}
-              parentClass="sticky top-0"
-            />
-          </aside>
-          <section className="relative items-start justify-center flex min-h-[415px] w-full">
-            <Suspense
-              fallback={
-                <LoadingSpinner parentClass="absolute top-[50%] w-full" />
-              }
-            >
-              <Routes>
-                <Route index element={<Profile />} />
-                <Route path="profile" element={<Profile />} />
-                <Route
-                  path="role-permissions"
-                  element={<RoleAndPermissions />}
+              <div className="flex items-center gap-2">
+                <ActionButton
+                  label="New User"
+                  icon={<img src={circleAction} />}
+                  onClick={() => setIsOpen(true)}
                 />
-                <Route path="change-password" element={<ChangePassword />} />
-                <Route path="users" element={<Users />} />
-              </Routes>
-            </Suspense>
-          </section>
+                <DropDown {...dropDownList} />
+              </div>
+            </section>
+          ) : null}
+          <div className="flex flex-col w-full px-4 py-8 gap-4 md:flex-row md:p-8">
+            <aside className="w-max h-max">
+              <SideMenu
+                navigationList={navigationList}
+                parentClass="sticky top-0"
+              />
+            </aside>
+            <section className="relative items-start justify-center flex min-h-[415px] w-full">
+              <Suspense
+                fallback={
+                  <LoadingSpinner parentClass="absolute top-[50%] w-full" />
+                }
+              >
+                <Routes>
+                  <Route index element={<Profile />} />
+                  <Route path="profile" element={<Profile />} />
+                  <Route
+                    path="role-permissions"
+                    element={<RoleAndPermissions />}
+                  />
+                  <Route path="change-password" element={<ChangePassword />} />
+                  <Route path="users" element={<Users />} />
+                </Routes>
+              </Suspense>
+            </section>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        layout="right"
+        bodyStyle="pb-[100px]"
+      >
+        <form
+          className="flex flex-col items-center bg-white"
+          onSubmit={handleSubmit}
+        >
+          <div
+            className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${
+              isFormFilled
+                ? "bg-paleCreamGradientLeft"
+                : "bg-paleGrayGradientLeft"
+            }`}
+          >
+            <h2
+              style={{ textShadow: "1px 1px grey" }}
+              className="text-xl text-textBlack font-semibold font-secondary"
+            >
+              New User
+            </h2>
+          </div>
+          <div className="flex flex-col items-center justify-center w-full gap-4 py-8">
+            <Input
+              type="text"
+              name="firstname"
+              label="FIRST NAME"
+              value={firstname}
+              onChange={handleInputChange}
+              placeholder="First Name"
+              required={true}
+              style={`${
+                isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+              }`}
+            />
+            <Input
+              type="text"
+              name="lastname"
+              label="LAST NAME"
+              value={lastname}
+              onChange={handleInputChange}
+              placeholder="Last Name"
+              required={true}
+              style={`${
+                isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+              }`}
+            />
+            <Input
+              type="email"
+              name="email"
+              label="EMAIL"
+              value={email}
+              onChange={handleInputChange}
+              placeholder="Email"
+              required={true}
+              style={`${
+                isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+              }`}
+            />
+            <Input
+              type="text"
+              name="phone"
+              label="PHONE NUMBER"
+              value={phone}
+              onChange={handleInputChange}
+              placeholder="Phone Number"
+              required={true}
+              style={`${
+                isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+              }`}
+            />
+            <Input
+              type="text"
+              name="role"
+              label="ROLE"
+              value={role}
+              onChange={handleInputChange}
+              placeholder="Role"
+              required={true}
+              style={`${
+                isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+              }`}
+            />
+            <Input
+              type="text"
+              name="location"
+              label="LOCATION"
+              value={location}
+              onChange={handleInputChange}
+              placeholder="Location"
+              required={true}
+              style={`${
+                isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+              }`}
+            />
+          </div>
+          <ProceedButton
+            type="submit"
+            loading={loading}
+            variant={isFormFilled ? "gradient" : "gray"}
+          />
+        </form>
+      </Modal>
+    </>
   );
 };
 

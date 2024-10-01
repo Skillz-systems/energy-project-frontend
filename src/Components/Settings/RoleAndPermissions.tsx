@@ -4,11 +4,11 @@ import addCircleGold from "../../assets/settings/addCircleGold.svg";
 import { GoDotFill } from "react-icons/go";
 import { Modal } from "../ModalComponent/Modal";
 import { SelectInput, ToggleInput } from "../InputComponent/Input";
-import sampleButton from "../../assets/settings/samplebutton.svg";
 import oblongedit from "../../assets/settings/oblongedit.svg";
 import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
 import role from "../../assets/table/role.svg";
 import roletwo from "../../assets/table/roletwo.svg";
+import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 
 const columnList = ["TITLE", "ASSIGNED USERS", "PERMISSIONS", "ACTIONS"];
 const columnWidth = ["w-[15%]", "w-[22.5%]", "w-[50%]", "w-[12.5%]"];
@@ -60,6 +60,7 @@ const RoleAndPermissions = () => {
   const [permissionsState, setPermissionsState] = useState(
     permissionsStateInitial
   );
+  const [loading, setLoading] = useState<boolean>(false);
   const [activeNav, setActiveNav] = useState<number>(0);
 
   // Handle permission toggle change
@@ -79,9 +80,12 @@ const RoleAndPermissions = () => {
   // Handle form submission
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
+    setLoading(true);
+
     // Log the role and permissions state
     console.log("Selected Role:", selectedRole);
     console.log("Permissions:", permissionsState);
+    setLoading(false);
   };
 
   const PermissionComponent = ({ permission }: { permission: string }) => {
@@ -147,6 +151,8 @@ const RoleAndPermissions = () => {
     "support",
     "communication",
   ];
+
+  const isFormFilled = selectedRole;
 
   return (
     <>
@@ -233,7 +239,13 @@ const RoleAndPermissions = () => {
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} layout="right">
         {modalInfo === "edit-permissions" ? (
           <form className="flex flex-col bg-white" onSubmit={handleSubmit}>
-            <div className="flex items-center justify-center px-4 min-h-[64px] bg-paleGrayGradientLeft border-b-[0.6px] border-strokeGreyThree">
+            <div
+              className={`flex items-center justify-center px-4 min-h-[64px] bg-paleGrayGradientLeft border-b-[0.6px] border-strokeGreyThree ${
+                isFormFilled
+                  ? "bg-paleCreamGradientLeft"
+                  : "bg-paleGrayGradientLeft"
+              }`}
+            >
               <h2
                 style={{ textShadow: "1px 1px grey" }}
                 className="text-xl text-textBlack font-semibold font-secondary"
@@ -266,9 +278,11 @@ const RoleAndPermissions = () => {
                 ))}
               </div>
               <div className="flex items-center justify-center w-full pt-10 pb-5">
-                <button type="submit" className="cursor-pointer">
-                  <img src={sampleButton} alt="Submit" width="54px" />
-                </button>
+                <ProceedButton
+                  type="submit"
+                  loading={loading}
+                  variant={isFormFilled ? "gradient" : "gray"}
+                />
               </div>
             </div>
           </form>

@@ -27,12 +27,13 @@ export default {
         success: "#00AF50",
         successTwo: "#E3FAD6",
         disabled: "#E2E4EB",
-        blackBrown: "#1E0604"
+        blackBrown: "#1E0604",
       },
       backgroundImage: {
         primaryGradient: "linear-gradient(to right, #982214, #F8CB48)",
         paleGrayGradient: "linear-gradient(to right, #F6F8FA, #FFFFFF)",
         paleGrayGradientLeft: "linear-gradient(to left, #F6F8FA, #FFFFFF)",
+        paleCreamGradientLeft: "linear-gradient(to left, #FEF5DA, #FFFFFF)",
       },
       boxShadow: {
         innerCustom: "inset 1px 2px 4px rgba(0, 0, 0, 0.15)",

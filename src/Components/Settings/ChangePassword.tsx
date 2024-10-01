@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { z } from "zod";
 import lightCheckeredBg from "../../assets/lightCheckeredBg.png";
 import { Input } from "../InputComponent/Input";
-import sampleButton from "../../assets/settings/samplebutton.svg";
 import { useApiCall } from "../../utils/useApiCall";
+import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 
 const changePasswordSchema = z
   .object({
@@ -38,6 +38,7 @@ const ChangePassword = () => {
     newPassword: "",
     confirmPassword: "",
   });
+  const [loading, setLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,6 +50,7 @@ const ChangePassword = () => {
     e.preventDefault();
     setErrors({});
 
+    setLoading(true);
     try {
       // Validate form data using Zod schema
       changePasswordSchema.parse(formData);
@@ -72,7 +74,11 @@ const ChangePassword = () => {
         });
       }
     }
+    setLoading(false);
   };
+
+  const isFormFilled =
+    formData.oldPassword || formData.newPassword || formData.confirmPassword;
 
   return (
     <form
@@ -96,7 +102,7 @@ const ChangePassword = () => {
           onChange={handleChange}
           required={true}
           placeholder="OLD PASSWORD"
-          style="max-w-none"
+          style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"} max-w-none`}
           errorMessage={errors.oldPassword}
         />
         <Input
@@ -107,7 +113,7 @@ const ChangePassword = () => {
           onChange={handleChange}
           required={true}
           placeholder="ENTER NEW PASSWORD"
-          style="max-w-none"
+          style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"} max-w-none`}
           errorMessage={errors.newPassword}
         />
         <Input
@@ -118,13 +124,15 @@ const ChangePassword = () => {
           onChange={handleChange}
           required={true}
           placeholder="CONFIRM NEW PASSWORD"
-          style="max-w-none"
+          style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"} max-w-none`}
           errorMessage={errors.confirmPassword}
         />
         <div className="flex items-center justify-center w-full pt-10 pb-5">
-          <button type="submit" className="cursor-pointer">
-            <img src={sampleButton} alt="Submit" width="54px" />
-          </button>
+          <ProceedButton
+            type="submit"
+            loading={loading}
+            variant={isFormFilled ? "gradient" : "gray"}
+          />
         </div>
       </div>
     </form>

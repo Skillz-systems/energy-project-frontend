@@ -74,7 +74,7 @@ export const Input = ({
         ${style} 
         ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
         items-center w-full max-w-[400px] h-[48px] px-[1.1em] py-[1.25em] 
-        gap-2 rounded-3xl border-[0.6px] border-strokeGrey
+        gap-2 rounded-3xl border-[0.6px]
         transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent `}
         >
           {value && (

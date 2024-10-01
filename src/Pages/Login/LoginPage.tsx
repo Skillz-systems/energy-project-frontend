@@ -99,7 +99,9 @@ const LoginPage = () => {
             placeholder="Email"
             required={true}
             errorMessage=""
-            style={`mb-4 ${email || password ? "border-[#D3C6A1]" : ""}`}
+            style={`mb-4 ${
+              email || password ? "border-[#D3C6A1]" : "border-strokeGrey"
+            }`}
           />
           {!isForgotPassword ? (
             <Input
@@ -111,7 +113,9 @@ const LoginPage = () => {
               placeholder="Password"
               required={true}
               errorMessage=""
-              style={`${email || password ? "border-[#D3C6A1]" : ""}`}
+              style={`${
+                email || password ? "border-[#D3C6A1]" : "border-strokeGrey"
+              }`}
               iconRight={
                 <img
                   src={showPassword ? eyeopen : eyeclosed}
@@ -125,7 +129,7 @@ const LoginPage = () => {
             <ProceedButton
               type="submit"
               loading={loading}
-              variant={email || password ? "yellow" : "gray"}
+              variant={email || password ? "gradient" : "gray"}
             />
             {isForgotPassword ? (
               <em

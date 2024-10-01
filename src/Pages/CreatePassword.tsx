@@ -83,7 +83,9 @@ const LoginPage = () => {
             required={true}
             errorMessage=""
             style={`mb-4 ${
-              newPassword || confirmPassword ? "border-[#D3C6A1]" : ""
+              newPassword || confirmPassword
+                ? "border-[#D3C6A1]"
+                : "border-strokeGrey"
             }`}
             iconRight={
               <img
@@ -103,7 +105,9 @@ const LoginPage = () => {
             required={true}
             errorMessage=""
             style={`${
-              newPassword || confirmPassword ? "border-[#D3C6A1]" : ""
+              newPassword || confirmPassword
+                ? "border-[#D3C6A1]"
+                : "border-strokeGrey"
             }`}
             iconRight={
               <img
@@ -117,7 +121,7 @@ const LoginPage = () => {
             <ProceedButton
               type="submit"
               loading={loading}
-              variant={newPassword || confirmPassword ? "yellow" : "gray"}
+              variant={newPassword || confirmPassword ? "gradient" : "gray"}
             />
           </div>
         </form>
