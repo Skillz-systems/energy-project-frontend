@@ -3,8 +3,25 @@ import role from "../../assets/table/role.svg";
 import clock from "../../assets/table/clock.svg";
 import { GoDotFill } from "react-icons/go";
 import { generateUserEntries } from "../TableComponent/sampleData";
+import { useEffect, useState } from "react";
 
 const Users = () => {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [tableData, setTableData] = useState<any>(null);
+
+  // Simulate data fetch delay
+  const fetchData = async () => {
+    setLoading(true);
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    setTableData(generateUserEntries(50));
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const filterList = [
     {
       name: "All Roles",
@@ -79,7 +96,7 @@ const Users = () => {
       valueIsAComponent: true,
       customValue: () => {
         return (
-          <span className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer">
+          <span className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold">
             View
           </span>
         );
@@ -93,7 +110,8 @@ const Users = () => {
         tableTitle="USERS"
         filterList={filterList}
         columnList={columnList}
-        tableData={generateUserEntries(50)}
+        loading={loading}
+        tableData={tableData}
       />
     </div>
   );

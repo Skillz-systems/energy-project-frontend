@@ -16,7 +16,6 @@ export const SideMenu = (props: SideMenuType) => {
   const { navigationList, parentClass } = props;
   useDefaultNavigation(navigationList);
 
-  const mobileLength = 100 / navigationList.length;
   return (
     <div
       className={`${parentClass} flex flex-wrap flex-row w-full h-max sm:max-w-[216px] items-center justify-between bg-white p-2 sm:p-4 gap-2 border border-strokeGreyThree rounded-[20px] sm:flex-col`}
@@ -25,7 +24,7 @@ export const SideMenu = (props: SideMenuType) => {
         <Link
           to={item.link}
           key={index}
-          className={`flex group items-center justify-center sm:justify-between w-[${mobileLength}%] sm:w-full h-[24px] px-3 py-1.5 sm:pl-2 sm:pr-1 sm:py-1 gap-2 sm:gap-0 rounded-full cursor-pointer transition-all
+          className={`flex group items-center justify-center sm:justify-between w-max sm:w-full h-[24px] px-3 py-1.5 sm:pl-2 sm:pr-1 sm:py-1 gap-2 sm:gap-0 rounded-full cursor-pointer transition-all
             ${
               location.pathname === item.link
                 ? "bg-primaryGradient"

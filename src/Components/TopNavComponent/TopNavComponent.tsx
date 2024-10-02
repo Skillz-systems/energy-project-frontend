@@ -59,7 +59,7 @@ const TopNavComponent = () => {
       }
     },
     customButton: (
-      <div className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom">
+      <div className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom transition-all hover:bg-[#E2E4EB]">
         <img src={edit} alt="Edit" className="w-[16px] cursor-pointer" />
       </div>
     ),
@@ -88,7 +88,7 @@ const TopNavComponent = () => {
             <span className="hidden sm:flex items-center justify-center bg-[#F6F8FA] h-[32px] px-2 py-1 text-xs text-textDarkGrey border-[0.6px] border-strokeGreyThree rounded-full">
               {currentDate}
             </span>
-            <div className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom">
+            <div className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom transition-all hover:bg-[#E2E4EB]">
               <img
                 src={notification}
                 alt="Notification"
@@ -119,7 +119,7 @@ const TopNavComponent = () => {
           </div>
         ) : (
           <div
-            className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom"
+            className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom transition-all hover:bg-[#E2E4EB]"
             onClick={() => setSearchInput(true)}
           >
             <img
@@ -131,7 +131,7 @@ const TopNavComponent = () => {
         )}
         {showSearchInput ? (
           <div
-            className="flex items-center justify-center w-[40px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom"
+            className="flex items-center justify-center w-[40px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom  transition-all hover:bg-[#E2E4EB]"
             onClick={() => setSearchInput(false)}
           >
             <img

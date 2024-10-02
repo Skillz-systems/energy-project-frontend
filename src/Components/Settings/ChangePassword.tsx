@@ -82,7 +82,7 @@ const ChangePassword = () => {
 
   return (
     <form
-      className="relative flex flex-col justify-end bg-white p-4 w-full max-w-[700px] min-h-[414px] border-[0.6px] border-strokeGreyThree rounded-[20px]"
+      className="relative flex flex-col justify-end bg-white p-4 w-full lg:max-w-[700px] min-h-[414px] border-[0.6px] border-strokeGreyThree rounded-[20px]"
       onSubmit={handleSubmit}
     >
       <img

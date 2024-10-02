@@ -28,6 +28,7 @@ export default {
         successTwo: "#E3FAD6",
         disabled: "#E2E4EB",
         blackBrown: "#1E0604",
+        gold: "#F8CB48",
       },
       backgroundImage: {
         primaryGradient: "linear-gradient(to right, #982214, #F8CB48)",

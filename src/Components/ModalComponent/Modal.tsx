@@ -59,9 +59,9 @@ export const Modal = ({
 
   // Modal size mapping
   const sizeClasses = {
-    small: "w-[25vw]",
-    medium: "w-[50vw]",
-    large: "w-[75vw]",
+    small: "w-[90vw] sm:w-[50vw] md:w-[40vw] lg:w-[30vw] xl:w-[25vw]",
+    medium: "w-[95vw] sm:w-[70vw] md:w-[60vw] lg:w-[50vw] xl:w-[40vw]",
+    large: "w-[100vw] sm:w-[90vw] md:w-[75vw] lg:w-[65vw] xl:w-[50vw]",
   };
 
   // Conditional layout styles

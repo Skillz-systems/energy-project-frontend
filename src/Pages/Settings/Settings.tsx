@@ -7,7 +7,7 @@ import { TitlePill } from "../../Components/TitlePillComponent/TitlePill";
 import settings from "../../assets/settings/settings.svg";
 import ActionButton from "../../Components/ActionButtonComponent/ActionButton";
 import circleAction from "../../assets/settings/addCircle.svg";
-import threedots from "../../assets/settings/3dots.svg";
+import edit from "../../assets/edit.svg";
 import { DropDown } from "../../Components/DropDownComponent/DropDown";
 import HeaderBadge from "../../Components/HeaderBadgeComponent/HeaderBadge";
 import settingsbadge from "../../assets/settings/settingsbadge.png";
@@ -66,12 +66,9 @@ const Settings = () => {
       console.log("INDEX:", index);
     },
     customButton: (
-      <img
-        src={threedots}
-        alt="Edit Modal"
-        width="32px"
-        className="cursor-pointer"
-      />
+      <div className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom transition-all hover:bg-[#E2E4EB]">
+        <img src={edit} alt="Edit" className="w-[16px] cursor-pointer" />
+      </div>
     ),
   };
 
@@ -133,9 +130,9 @@ const Settings = () => {
               </div>
             </section>
           ) : null}
-          <div className="flex flex-col w-full px-2 py-8 gap-4 md:flex-row md:p-8 ">
+          <div className="flex flex-col w-full px-2 py-8 gap-4 lg:flex-row md:p-8">
             <SideMenu navigationList={navigationList} />
-            <section className="relative items-start justify-center flex min-h-[415px] w-full">
+            <section className="relative items-start justify-center flex min-h-[415px] w-full overflow-hidden">
               <Suspense
                 fallback={
                   <LoadingSpinner parentClass="absolute top-[50%] w-full" />
@@ -180,7 +177,7 @@ const Settings = () => {
               New User
             </h2>
           </div>
-          <div className="flex flex-col items-center justify-center w-full gap-4 py-8">
+          <div className="flex flex-col items-center justify-center w-full px-4 gap-4 py-8">
             <Input
               type="text"
               name="firstname"
