@@ -20,6 +20,7 @@ export type DropDownType = {
 export const DropDown = (props: DropDownType) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [showIcon, setShowIcon] = useState<boolean>(false);
 
   const {
     name,
@@ -44,6 +45,7 @@ export const DropDown = (props: DropDownType) => {
   const handleOptionClick = (index: number) => {
     setLinkIndex(index);
     if (onClickLink) onClickLink(index);
+    setIsOpen(false);
   };
 
   // Handler for date selection
@@ -82,7 +84,13 @@ export const DropDown = (props: DropDownType) => {
           />
         </button>
       )}
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
+      <Modal
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+          setShowIcon(false);
+        }}
+      >
         {isDate ? (
           <div className="absolute top-[35px] right-0 z-50">
             <DatePicker
@@ -100,14 +108,18 @@ export const DropDown = (props: DropDownType) => {
               <li
                 key={index}
                 className={`flex items-center justify-between h-[24px] px-2 py-2.5 text-xs rounded-full cursor-pointer 
-                ${linkIndex === index
+                ${
+                  linkIndex === index && showIcon
                     ? "bg-paleLightBlue text-textBlack"
                     : "hover:bg-gray-100 text-textDarkGrey"
-                  }`}
-                onClick={() => handleOptionClick(index)}
+                }`}
+                onClick={() => {
+                  setShowIcon(true);
+                  handleOptionClick(index);
+                }}
               >
                 {item}
-                {linkIndex === index ? (
+                {linkIndex === index && showIcon ? (
                   <svg
                     width="16"
                     height="16"

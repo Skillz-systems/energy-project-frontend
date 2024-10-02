@@ -109,21 +109,21 @@ const Settings = () => {
 
   return (
     <>
-      <main className="flex flex-col items-center w-full overflow-hidden">
-        <div className="w-full max-w-[1440px]">
+      <main className="relative flex flex-col items-center w-full pt-[67px] overflow-hidden">
+        <div className="flex flex-col items-center justify-center w-full max-w-[1440px]">
           <TopNavComponent />
           <HeaderBadge pageName="Settings" image={settingsbadge} />
           {userlocation.pathname === "/settings/users" ? (
-            <section className="flex items-center justify-between w-full bg-paleGrayGradient px-4 md:px-8 py-4 gap-2 h-[64px]">
+            <section className="flex flex-col-reverse sm:flex-row items-center justify-between w-full bg-paleGrayGradient px-2 md:px-8 py-4 gap-2 min-h-[64px]">
               <TitlePill
-                parentClass="w-full max-w-[150px] sm:max-w-[172px]"
+                parentClass="w-full max-w-none sm:max-w-[172px]"
                 icon={settings}
                 iconBgColor="bg-[#FDEEC2]"
                 topText="All"
                 bottomText="USERS"
                 value="120"
               />
-              <div className="flex items-center gap-2">
+              <div className="flex w-full items-center justify-between gap-2 sm:w-max sm:justify-start">
                 <ActionButton
                   label="New User"
                   icon={<img src={circleAction} />}
@@ -133,13 +133,8 @@ const Settings = () => {
               </div>
             </section>
           ) : null}
-          <div className="flex flex-col w-full px-4 py-8 gap-4 md:flex-row md:p-8">
-            <aside className="w-max h-max">
-              <SideMenu
-                navigationList={navigationList}
-                parentClass="sticky top-0"
-              />
-            </aside>
+          <div className="flex flex-col w-full px-2 py-8 gap-4 md:flex-row md:p-8 ">
+            <SideMenu navigationList={navigationList} />
             <section className="relative items-start justify-center flex min-h-[415px] w-full">
               <Suspense
                 fallback={

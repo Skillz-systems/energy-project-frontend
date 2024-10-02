@@ -16,15 +16,16 @@ export const SideMenu = (props: SideMenuType) => {
   const { navigationList, parentClass } = props;
   useDefaultNavigation(navigationList);
 
+  const mobileLength = 100 / navigationList.length;
   return (
     <div
-      className={`${parentClass} flex flex-col items-center justify-center bg-white p-4 gap-4 w-[216px] border border-strokeGreyThree rounded-[20px]`}
+      className={`${parentClass} flex flex-wrap flex-row w-full h-max sm:max-w-[216px] items-center justify-between bg-white p-2 sm:p-4 gap-2 border border-strokeGreyThree rounded-[20px] sm:flex-col`}
     >
       {navigationList.map((item, index) => (
         <Link
           to={item.link}
           key={index}
-          className={`flex group items-center justify-between w-full h-[24px] pl-2 pr-1 py-1 rounded-full cursor-pointer transition-all
+          className={`flex group items-center justify-center sm:justify-between w-[${mobileLength}%] sm:w-full h-[24px] px-3 py-1.5 sm:pl-2 sm:pr-1 sm:py-1 gap-2 sm:gap-0 rounded-full cursor-pointer transition-all
             ${
               location.pathname === item.link
                 ? "bg-primaryGradient"

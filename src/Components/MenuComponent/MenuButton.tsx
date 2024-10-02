@@ -15,7 +15,7 @@ export const MenuButton = (props: MenuButtonType) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
-    <div className="">
+    <div>
       <div
         className={`${buttonStyle}
         flex items-center justify-center w-8 h-8 p-1 rounded-full 
@@ -33,7 +33,7 @@ export const MenuButton = (props: MenuButtonType) => {
         />
       </div>
       {dialog && (
-        <div className="absolute overflow-visible top-[70px] left-[90px] z-50 flex flex-col w-full bg-white p-4 gap-[10px] max-w-[200px] rounded-[20px] shadow-menuCustom">
+        <div className="absolute overflow-visible top-[60px] md:top-[70px] md:left-[90px] z-50 flex flex-col w-full bg-white p-4 gap-[10px] max-w-[200px] rounded-[20px] shadow-menuCustom">
           {sections.map((section, index) => (
             <div key={index} className="bg-white">
               <div
