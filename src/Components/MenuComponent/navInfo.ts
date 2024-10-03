@@ -17,7 +17,7 @@ export const navData = [
   {
     title: "Home",
     icon: HomeIcon,
-    link: "/dashboard",
+    link: "/home",
   },
   {
     title: "Dashboard",

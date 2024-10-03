@@ -18,7 +18,7 @@ export const SideMenu = (props: SideMenuType) => {
 
   return (
     <div
-      className={`${parentClass} flex flex-wrap flex-row w-full h-max sm:max-w-[216px] items-center justify-between bg-white p-2 sm:p-4 gap-2 border border-strokeGreyThree rounded-[20px] sm:flex-col`}
+      className={`${parentClass} flex flex-wrap flex-row w-full h-max sm:max-w-[208px] items-center justify-between bg-white p-2 sm:p-4 gap-2 border border-strokeGreyThree rounded-[20px] sm:flex-col`}
     >
       {navigationList.map((item, index) => (
         <Link

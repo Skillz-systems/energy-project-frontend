@@ -2,25 +2,39 @@ import { Table } from "../TableComponent/Table";
 import role from "../../assets/table/role.svg";
 import clock from "../../assets/table/clock.svg";
 import { GoDotFill } from "react-icons/go";
-import { generateUserEntries } from "../TableComponent/sampleData";
-import { useEffect, useState } from "react";
+import { useGetRequest } from "../../utils/useApiCall";
+import { observer } from "mobx-react-lite";
+import rootStore from "../../stores/rootStore";
 
-const Users = () => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [tableData, setTableData] = useState<any>(null);
+interface UserEntries {
+  no: number;
+  name: string;
+  email: string;
+  location: string | null;
+  role: string;
+  status: string;
+}
 
-  // Simulate data fetch delay
-  const fetchData = async () => {
-    setLoading(true);
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setTableData(generateUserEntries(50));
-    setLoading(false);
-  };
+// Helper function to map the API data to the desired format
+const generateUserEntries = (data: any): UserEntries[] => {
+  const entries: UserEntries[] = data?.users.map((user: any, index: number) => {
+    return {
+      no: index + 1,
+      name: `${user?.firstname} ${user?.lastname}`,
+      email: user?.email,
+      location: user?.location || "N/A",
+      role: user?.role?.role.toUpperCase(),
+      status: user?.status.toUpperCase(),
+    };
+  });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  return entries;
+};
+
+const Users = observer(() => {
+  const { settingsStore } = rootStore;
+  const { data, isLoading } = useGetRequest("/v1/users");
+  settingsStore.updateUserCount(data?.total || settingsStore.noOfUsers);
 
   const filterList = [
     {
@@ -110,11 +124,11 @@ const Users = () => {
         tableTitle="USERS"
         filterList={filterList}
         columnList={columnList}
-        loading={loading}
-        tableData={tableData}
+        loading={isLoading}
+        tableData={generateUserEntries(data)}
       />
     </div>
   );
-};
+});
 
 export default Users;

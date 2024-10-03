@@ -4,6 +4,7 @@ import {
   Settings,
   PageNotFound,
   CreatePassword,
+  Dashboard,
 } from "./Pages/Index";
 import "./index.css";
 import { ErrorProvider } from "./Context/ErrorContext";
@@ -18,6 +19,17 @@ function App() {
       <ErrorProvider>
         <Routes>
           {/* Wrap Routes that require protection */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <ErrorBoundary>
+                  <Dashboard />
+                </ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/settings/*"
             element={
@@ -49,10 +61,18 @@ function App() {
               </ErrorBoundary>
             }
           />
+          <Route
+            path={"/reset-password/:id/:token/"}
+            element={
+              <ErrorBoundary>
+                <CreatePassword />
+              </ErrorBoundary>
+            }
+          />
 
           <Route path="*" element={<PageNotFound />} />
         </Routes>
-        <ToastContainer />
+        <ToastContainer autoClose={1000} />
       </ErrorProvider>
     </>
   );

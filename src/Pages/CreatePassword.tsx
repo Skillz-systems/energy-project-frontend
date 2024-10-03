@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import loginbg from "../assets/loginbg.png";
 import logo from "../assets/logo.svg";
 import eyeclosed from "../assets/eyeclosed.svg";
@@ -13,7 +13,7 @@ const LoginPage = () => {
   // const { data, error, isLoading } = useGetRequest(
   //   userId ? `/v1/auth/get-user/${userId}` : null
   // );
-
+  const location = useLocation();
   const navigate = useNavigate();
   const { apiCall } = useApiCall();
   const [newPassword, setNewPassword] = useState<string>("");
@@ -21,25 +21,32 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
 
+  const isResetPasswordRoute = location.pathname.startsWith("/reset-password");
+
   const handleCreatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       const response = await apiCall({
-        endpoint: "/v1/auth/reset-password",
+        endpoint: isResetPasswordRoute
+          ? "/v1/auth/reset-password"
+          : `/v1/auth/create-user-password/${userId}/${remember_token}`,
         method: "post",
         data: {
-          resetToken: remember_token,
-          newPassword,
-          confirmPassword,
+          userid: isResetPasswordRoute ? userId : undefined,
+          resetToken: isResetPasswordRoute ? remember_token : undefined,
+          newPassword: newPassword,
+          confirmNewPassword: confirmPassword,
         },
         headers: {},
-        successMessage: "Password Succesfully created!",
+        successMessage: isResetPasswordRoute
+          ? "Password successfully updated!"
+          : "Password succesfully created!",
       });
       navigate("/login");
-      console.log("Create password response:", response);
+      console.log("Response:", response);
     } catch (error) {
-      console.error("Create password failed:", error);
+      console.error("Error:", error);
     }
     setLoading(false);
   };
@@ -66,7 +73,9 @@ const LoginPage = () => {
             Hello, Jane Doe
           </h1>
           <em className="text-xs text-textDarkGrey text-center max-w-[220px]">
-            Since this is your first time here, create your password below.
+            {isResetPasswordRoute
+              ? "Hopefully you don't forgot this password."
+              : "Since this is your first time here, create your password below."}
           </em>
         </div>
         <form
@@ -101,7 +110,7 @@ const LoginPage = () => {
             label="CONFIRM PASSWORD"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Confirm Password"
+            placeholder="Confirm New Password"
             required={true}
             errorMessage=""
             style={`${

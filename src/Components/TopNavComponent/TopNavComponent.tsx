@@ -10,8 +10,10 @@ import edit from "../../assets/edit.svg";
 import close from "../../assets/close.svg";
 import { DropDown } from "../DropDownComponent/DropDown";
 import Cookies from "js-cookie";
+import useTokens from "../../hooks/useTokens";
 
 const TopNavComponent = () => {
+  const { role } = useTokens();
   const navigate = useNavigate();
   const currentDate = useFormattedCurrentDate();
   const [showSearchInput, setSearchInput] = useState<boolean>(false);
@@ -80,7 +82,7 @@ const TopNavComponent = () => {
           onClick={() => navigate("/dashboard")}
         />
         <MenuButton />
-        <UserProfile />
+        <UserProfile role={role.role} />
       </div>
       <div className="flex items-center w-max max-w-[350px] gap-1 sm:gap-4">
         {showSearchInput ? null : (

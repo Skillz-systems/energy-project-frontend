@@ -1,31 +1,34 @@
 import { Routes, Route, useLocation } from "react-router-dom";
-import { SideMenu } from "../../Components/SideMenuComponent/SideMenu";
-import Profile from "../../Components/Settings/Profile";
-import LoadingSpinner from "../../Components/Loaders/LoadingSpinner";
+import { SideMenu } from "../Components/SideMenuComponent/SideMenu";
+import Profile from "../Components/Settings/Profile";
+import LoadingSpinner from "../Components/Loaders/LoadingSpinner";
 import { Suspense, lazy, useState } from "react";
-import { TitlePill } from "../../Components/TitlePillComponent/TitlePill";
-import settings from "../../assets/settings/settings.svg";
-import ActionButton from "../../Components/ActionButtonComponent/ActionButton";
-import circleAction from "../../assets/settings/addCircle.svg";
-import edit from "../../assets/edit.svg";
-import { DropDown } from "../../Components/DropDownComponent/DropDown";
-import HeaderBadge from "../../Components/HeaderBadgeComponent/HeaderBadge";
-import settingsbadge from "../../assets/settings/settingsbadge.png";
-import TopNavComponent from "../../Components/TopNavComponent/TopNavComponent";
-import { Modal } from "../../Components/ModalComponent/Modal";
-import { Input } from "../../Components/InputComponent/Input";
-import ProceedButton from "../../Components/ProceedButtonComponent/ProceedButtonComponent";
-import { useApiCall } from "../../utils/useApiCall";
+import { TitlePill } from "../Components/TitlePillComponent/TitlePill";
+import settings from "../assets/settings/settings.svg";
+import ActionButton from "../Components/ActionButtonComponent/ActionButton";
+import circleAction from "../assets/settings/addCircle.svg";
+import edit from "../assets/edit.svg";
+import { DropDown } from "../Components/DropDownComponent/DropDown";
+import HeaderBadge from "../Components/HeaderBadgeComponent/HeaderBadge";
+import settingsbadge from "../assets/settings/settingsbadge.png";
+import TopNavComponent from "../Components/TopNavComponent/TopNavComponent";
+import { Modal } from "../Components/ModalComponent/Modal";
+import { Input } from "../Components/InputComponent/Input";
+import ProceedButton from "../Components/ProceedButtonComponent/ProceedButtonComponent";
+import { useApiCall } from "../utils/useApiCall";
+import { observer } from "mobx-react-lite";
+import rootStore from "../stores/rootStore";
 
 const RoleAndPermissions = lazy(
-  () => import("../../Components/Settings/RoleAndPermissions")
+  () => import("../Components/Settings/RoleAndPermissions")
 );
 const ChangePassword = lazy(
-  () => import("../../Components/Settings/ChangePassword")
+  () => import("../Components/Settings/ChangePassword")
 );
-const Users = lazy(() => import("../../Components/Settings/Users"));
+const Users = lazy(() => import("../Components/Settings/Users"));
 
-const Settings = () => {
+const Settings = observer(() => {
+  const { settingsStore } = rootStore;
   const { apiCall } = useApiCall();
   const [formData, setFormData] = useState({
     email: "",
@@ -56,7 +59,7 @@ const Settings = () => {
     {
       title: "Users",
       link: "/settings/users",
-      count: "42",
+      count: settingsStore.noOfUsers,
     },
   ];
 
@@ -83,9 +86,10 @@ const Settings = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+    if (!formData) return;
     try {
       const response = await apiCall({
-        endpoint: "/v1/auth/create-user",
+        endpoint: "/v1/auth/add-user",
         method: "post",
         data: formData,
         successMessage: "User created successfully!",
@@ -106,7 +110,7 @@ const Settings = () => {
 
   return (
     <>
-      <main className="relative flex flex-col items-center w-full pt-[67px] overflow-hidden">
+      <main className="relative flex flex-col items-center w-full pt-[67px] min-h-screen overflow-y-auto">
         <div className="flex flex-col items-center justify-center w-full max-w-[1440px]">
           <TopNavComponent />
           <HeaderBadge pageName="Settings" image={settingsbadge} />
@@ -260,6 +264,6 @@ const Settings = () => {
       </Modal>
     </>
   );
-};
+});
 
 export default Settings;
