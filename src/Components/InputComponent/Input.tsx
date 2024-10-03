@@ -237,18 +237,13 @@ export const SelectInput = ({
 }: SelectInputType) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleSelectChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    setIsOpen(false);
-    onChange(event);
-  };
-
   return (
     <div
       className={`relative flex items-center 
         ${style} 
         ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"} 
         w-full max-w-[400px] h-[48px] px-[1.1em] py-[1.25em] 
-        rounded-3xl text-sm text-textGrey border-[0.6px]
+        rounded-3xl text-sm text-textGrey border-[0.6px] gap-2
         transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
         cursor-pointer ${value ? "border-strokeCream" : "border-strokeGrey"}`}
       onClick={() => setIsOpen(!isOpen)}
@@ -263,17 +258,20 @@ export const SelectInput = ({
         </span>
       )}
       {required && (
-        <span className="mb-1.5 text-lg text-red-600">
+        <span className="mb-2 text-lg text-red-600">
           <CgAsterisk />
         </span>
       )}
       <select
         name={name}
         value={value}
-        onChange={handleSelectChange}
+        onChange={(e) => {
+          onChange(e);
+          setIsOpen(false);
+        }}
         disabled={disabled}
         required={required}
-        className="w-full bg-transparent outline-none appearance-none"
+        className="w-full bg-transparent text-textBlack font-semibold outline-none appearance-none"
       >
         {placeholder && <option value="">{placeholder}</option>}
         {options.map((option) => (

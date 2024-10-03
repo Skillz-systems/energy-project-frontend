@@ -13,7 +13,7 @@ import HeaderBadge from "../Components/HeaderBadgeComponent/HeaderBadge";
 import settingsbadge from "../assets/settings/settingsbadge.png";
 import TopNavComponent from "../Components/TopNavComponent/TopNavComponent";
 import { Modal } from "../Components/ModalComponent/Modal";
-import { Input } from "../Components/InputComponent/Input";
+import { Input, SelectInput } from "../Components/InputComponent/Input";
 import ProceedButton from "../Components/ProceedButtonComponent/ProceedButtonComponent";
 import { useApiCall } from "../utils/useApiCall";
 import { observer } from "mobx-react-lite";
@@ -75,7 +75,9 @@ const Settings = observer(() => {
     ),
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -108,6 +110,15 @@ const Settings = observer(() => {
   const isFormFilled =
     email || password || firstname || lastname || phone || role || location;
 
+  const rolesList = [
+    { label: "Super Admin", value: "superAdmin" },
+    { label: "Admin", value: "admin" },
+    { label: "Accounts", value: "accounts" },
+    { label: "Sales", value: "sales" },
+    { label: "Support", value: "support" },
+    { label: "Inventory", value: "inventory" },
+  ];
+
   return (
     <>
       <main className="relative flex flex-col items-center w-full pt-[67px] min-h-screen overflow-y-auto">
@@ -122,7 +133,7 @@ const Settings = observer(() => {
                 iconBgColor="bg-[#FDEEC2]"
                 topText="All"
                 bottomText="USERS"
-                value="120"
+                value={settingsStore.noOfUsers}
               />
               <div className="flex w-full items-center justify-between gap-2 sm:w-max sm:justify-start">
                 <ActionButton
@@ -230,14 +241,15 @@ const Settings = observer(() => {
                 isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
               }`}
             />
-            <Input
-              type="text"
+
+            <SelectInput
+              label="Role"
               name="role"
-              label="ROLE"
+              options={rolesList}
               value={role}
               onChange={handleInputChange}
-              placeholder="Role"
               required={true}
+              placeholder="Select a role"
               style={`${
                 isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
               }`}

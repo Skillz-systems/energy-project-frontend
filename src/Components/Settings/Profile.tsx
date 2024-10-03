@@ -3,11 +3,35 @@ import lightCheckeredBg from "../../assets/lightCheckeredBg.png";
 import role from "../../assets/table/role.svg";
 import addButton from "../../assets/settings/addbutton.svg";
 import editButton from "../../assets/settings/editbutton.svg";
-import sampleButton from "../../assets/settings/samplebutton.svg";
 import { MdCancel } from "react-icons/md";
+import { Input } from "../InputComponent/Input";
+import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 
 const Profile = () => {
   const [displayInput, setDisplayInput] = useState<boolean>(false);
+  const [formData, setFormData] = useState({
+    firstname: "",
+    lastname: "",
+    username: "",
+    email: "",
+    phone: "",
+    location: "",
+  });
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const { firstname, lastname, email, phone, location } = formData;
+
+  const isFormFilled = firstname || lastname || email || phone || location;
 
   const DetailComponent = ({
     label,
@@ -147,9 +171,11 @@ const Profile = () => {
           valueClass="flex items-center justify-center bg-paleLightBlue text-textBlack font-semibold p-2 h-[24px] rounded-full"
         />
         <div className="flex items-center justify-center w-full pt-10 pb-5">
-          <button type="submit" className="cursor-pointer">
-            <img src={sampleButton} alt="Submit" width="54px" />
-          </button>
+          <ProceedButton
+            type="submit"
+            loading={loading}
+            variant={isFormFilled ? "gradient" : "gray"}
+          />
         </div>
       </div>
     </form>

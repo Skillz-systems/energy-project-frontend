@@ -3,12 +3,16 @@ import lightCheckeredBg from "../../assets/lightCheckeredBg.png";
 import addCircleGold from "../../assets/settings/addCircleGold.svg";
 import { GoDotFill } from "react-icons/go";
 import { Modal } from "../ModalComponent/Modal";
-import { SelectInput, ToggleInput } from "../InputComponent/Input";
+import { Input, ToggleInput } from "../InputComponent/Input";
 import oblongedit from "../../assets/settings/oblongedit.svg";
 import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
 import role from "../../assets/table/role.svg";
 import roletwo from "../../assets/table/roletwo.svg";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
+import { useApiCall, useGetRequest } from "../../utils/useApiCall";
+import LoadingSpinner from "../Loaders/LoadingSpinner";
+import axios from "axios";
+import useTokens from "../../hooks/useTokens";
 
 const columnList = ["TITLE", "ASSIGNED USERS", "PERMISSIONS", "ACTIONS"];
 const columnWidth = ["w-[15%]", "w-[22.5%]", "w-[50%]", "w-[12.5%]"];
@@ -16,79 +20,115 @@ const columnWidth = ["w-[15%]", "w-[22.5%]", "w-[50%]", "w-[12.5%]"];
 const usersColumnList = ["USER", "DATE ASSIGNED", "ACTIONS"];
 const userColumnWidth = ["w-[55%]", "w-[30%]", "w-[15%]"];
 
-const rolesList = [
-  { label: "Super Admin", value: "superAdmin" },
-  { label: "Admin", value: "admin" },
-  { label: "Accounts", value: "accounts" },
-  { label: "Sales", value: "sales" },
-  { label: "Support", value: "support" },
-  { label: "Inventory", value: "inventory" },
-];
-
-const permissionsStateInitial = {
-  sales: false,
-  agents: false,
-  customers: false,
-  inventory: false,
-  accounts: false,
-  admin: false,
-  products: false,
-  contracts: false,
-  support: false,
-  communication: false,
-};
-
 const RoleAndPermissions = () => {
-  type Permission = keyof typeof permissionsState;
+  const { token } = useTokens();
+  const { apiCall } = useApiCall();
+
+  const {
+    data: allRoles,
+    isLoading: allRolesLoading,
+    error: allRolesError,
+  } = useGetRequest("/v1/roles");
+
+  const {
+    data: allPermissions,
+    isLoading: allPermissionsLoading,
+    error: allPermissionsError,
+  } = useGetRequest("/v1/permissions");
+
+  const getSingleRoleData = async (id: string) => {
+    let data;
+
+    try {
+      const response = await axios.get(
+        `https://energy-project-backend.onrender.com/api/v1/roles/more_details/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      data = response;
+    } catch (error) {
+      console.log(error);
+    }
+
+    return {
+      data,
+    };
+  };
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [modalInfo, setModalInfo] = useState<string | any>(null);
   const [selectedRole, setSelectedRole] = useState<string>("");
-  const [permissionsState, setPermissionsState] = useState(
-    permissionsStateInitial
-  );
+  const [permissionIds, setPermissionIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [activeNav, setActiveNav] = useState<number>(0);
+  const [singleRoleData, setSingleRoleData] = useState<any>(null);
 
-  // Handle permission toggle change
-  const handlePermissionChange = (permission: Permission, checked: boolean) => {
-    setPermissionsState((prevState) => ({
-      ...prevState,
-      [permission]: checked,
-    }));
-    console.log("Permission changed:", permission, "to", checked);
+  const handlePermissionChange = (checked: boolean, id: string) => {
+    if (checked) {
+      // Add the id to the array if checked
+      setPermissionIds((prev) => [...prev, id]);
+    } else {
+      // Remove the id from the array if unchecked
+      setPermissionIds((prev) =>
+        prev.filter((permissionId) => permissionId !== id)
+      );
+    }
   };
 
-  // Handle role change
-  const handleRoleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedRole(event.target.value);
-  };
+  const PermissionComponent = ({ permission }: { permission: any }) => {
+    // Check if the permission ID is in the array
+    const isChecked = permissionIds.includes(permission.id);
 
-  // Handle form submission
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    setLoading(true);
-
-    // Log the role and permissions state
-    console.log("Selected Role:", selectedRole);
-    console.log("Permissions:", permissionsState);
-    setLoading(false);
-  };
-
-  const PermissionComponent = ({ permission }: { permission: string }) => {
     return (
       <div className="flex items-center justify-between w-full">
         <p className="flex items-center justify-center bg-[#F6F8FA] p-2 h-6 text-xs rounded-full capitalize">
-          {permission}
+          {permission.subject}
         </p>
         <ToggleInput
-          defaultChecked={permissionsState[permission as Permission]}
+          defaultChecked={isChecked}
           onChange={(checked: boolean) =>
-            handlePermissionChange(permission as Permission, checked)
+            handlePermissionChange(checked, permission.id)
           }
         />
       </div>
     );
+  };
+
+  const handleRoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedRole(event.target.value);
+  };
+
+  // Handle form submission
+  const handleSubmitRoleCreation = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setLoading(true);
+
+    if (!selectedRole) return;
+
+    try {
+      const response = await apiCall({
+        endpoint: "/v1/roles",
+        method: "post",
+        data: {
+          role: selectedRole,
+          active: true,
+          permissionIds,
+        },
+        successMessage: "Role created successfully!",
+      });
+
+      console.log("Role creation response:", response);
+    } catch (error) {
+      console.error("Role creation failed:", error);
+    } finally {
+      setLoading(false);
+      setIsOpen(false);
+      setSelectedRole("");
+      setPermissionIds([]);
+    }
   };
 
   const DetailComponent = ({
@@ -141,7 +181,11 @@ const RoleAndPermissions = () => {
 
   const isFormFilled = selectedRole;
 
-  return (
+  if (allRolesError) return <div>Failed to fetch allRole.</div>;
+
+  console.log(singleRoleData);
+
+  return !allRolesLoading ? (
     <>
       <div className="relative flex flex-col justify-end bg-white p-2 sm:p-4 w-full lg:max-w-[700px] min-h-[414px] border-[0.6px] border-strokeGreyThree rounded-[20px] overflow-x-auto max-w-full">
         <img
@@ -177,31 +221,31 @@ const RoleAndPermissions = () => {
             ))}
           </div>
           <div className="flex flex-col">
-            {rolesData.map((item, index) => (
+            {allRoles.map((role) => (
               <div
-                key={index}
+                key={role.id}
                 className="flex items-center justify-between w-full border-t-[0.2px] border-t-strokeGreyThree"
               >
                 <p
-                  className={`py-2 text-xs text-textBlack font-semibold ${columnWidth[0]}`}
+                  className={`py-2 text-xs text-textBlack font-semibold capitalize ${columnWidth[0]}`}
                 >
-                  {item.title}
+                  {role.role}
                 </p>
                 <p
                   className={`py-2 text-xs text-textDarkGrey ${columnWidth[1]}`}
                 >
-                  {item.assignedUsers}
+                  {4}
                 </p>
                 <div
                   className={`flex items-center flex-wrap gap-2.5 py-2 ${columnWidth[2]}`}
                 >
-                  {item.permissions.map((permission, index) => (
+                  {role.permissions.map((permission) => (
                     <span
-                      key={index}
-                      className="flex items-center justify-center gap-1 bg-[#F6F8FA] px-2 py-1 text-xs text-textDarkGrey border-[0.4px] border-strokeGreyThree rounded-full"
+                      key={permission.id}
+                      className="flex items-center justify-center gap-1 bg-[#F6F8FA] px-2 py-1 text-xs uppercase text-textDarkGrey border-[0.4px] border-strokeGreyThree rounded-full"
                     >
                       <GoDotFill color="#9BA4BA" />
-                      {permission.toLocaleUpperCase()}
+                      {permission.subject}
                     </span>
                   ))}
                 </div>
@@ -210,7 +254,9 @@ const RoleAndPermissions = () => {
                 >
                   <span
                     className="flex items-center justify-center px-2 pt-[1px] text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-[32px] shadow-innerCustom cursor-pointer hover:bg-gold"
-                    onClick={() => {
+                    onClick={async () => {
+                      const { data } = await getSingleRoleData(role.id);
+                      setSingleRoleData(data);
                       setModalInfo("view-permissions");
                       setIsOpen(true);
                     }}
@@ -225,7 +271,10 @@ const RoleAndPermissions = () => {
       </div>
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} layout="right">
         {modalInfo === "edit-permissions" ? (
-          <form className="flex flex-col bg-white" onSubmit={handleSubmit}>
+          <form
+            className="flex flex-col bg-white"
+            onSubmit={handleSubmitRoleCreation}
+          >
             <div
               className={`flex items-center justify-center px-4 min-h-[64px] bg-paleGrayGradientLeft border-b-[0.6px] border-strokeGreyThree ${
                 isFormFilled
@@ -241,15 +290,17 @@ const RoleAndPermissions = () => {
               </h2>
             </div>
             <div className="flex flex-col items-center justify-center gap-6 p-10">
-              <SelectInput
-                label="Role Name"
+              <Input
+                type="text"
                 name="role"
-                options={rolesList}
+                label="ROLE NAME"
                 value={selectedRole}
                 onChange={handleRoleChange}
+                placeholder="Role Name"
                 required={true}
-                placeholder="Select a role"
-                style="max-w-none border-strokeGreyTwo"
+                style={`${
+                  isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                }`}
               />
               <div className="relative flex flex-col w-full gap-0.5 p-5 border-[0.6px] border-strokeGreyTwo rounded-[20px]">
                 <span
@@ -257,12 +308,18 @@ const RoleAndPermissions = () => {
                 >
                   PERMISSIONS
                 </span>
-                {Object.keys(permissionsState).map((permission) => (
-                  <PermissionComponent
-                    key={permission}
-                    permission={permission}
-                  />
-                ))}
+                {allPermissionsLoading ? (
+                  <LoadingSpinner parentClass="flex items-center justify-center w-full h-full" />
+                ) : allPermissionsError ? (
+                  <p className="text-textDarkGrey">{allPermissionsError}</p>
+                ) : (
+                  allPermissions?.map((permission) => (
+                    <PermissionComponent
+                      key={permission.id}
+                      permission={permission}
+                    />
+                  ))
+                )}
               </div>
               <div className="flex items-center justify-center w-full pt-10 pb-5">
                 <ProceedButton
@@ -421,62 +478,9 @@ const RoleAndPermissions = () => {
         )}
       </Modal>
     </>
+  ) : (
+    <LoadingSpinner parentClass="absolute top-[50%] w-full" />
   );
 };
 
 export default RoleAndPermissions;
-
-const rolesData = [
-  {
-    title: "Super Admin",
-    assignedUsers: 2,
-    permissions: [
-      "sales",
-      "agents",
-      "customers",
-      "inventory",
-      "accounts",
-      "admin",
-      "products",
-      "contracts",
-      "support",
-      "communication",
-    ],
-  },
-  {
-    title: "Admin",
-    assignedUsers: 4,
-    permissions: [
-      "sales",
-      "agents",
-      "customers",
-      "inventory",
-      "accounts",
-      "admin",
-      "products",
-      "contracts",
-      "support",
-      "communication",
-    ],
-  },
-  {
-    title: "Accounts",
-    assignedUsers: 3,
-    permissions: ["sales", "agents", "customers", "inventory", "accounts"],
-  },
-  {
-    title: "Sales",
-    assignedUsers: 42,
-    permissions: ["sales", "customers", "inventory", "products", "contracts"],
-  },
-  {
-    title: "Support",
-    assignedUsers: 19,
-    permissions: ["sales", "agents", "customers", "support", "communication"],
-  },
-  {
-    title: "Inventory",
-    assignedUsers: 27,
-    permissions: ["inventory", "products"],
-  },
-];
