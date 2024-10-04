@@ -1,16 +1,18 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import { Settings } from "./Pages/Index";
+import { LoginForm, Settings } from "./Pages/Index";
 import Icon from "./Components/IconComponent";
 import { FaUser } from "react-icons/fa";
+
 
 import "./index.css";
 
 function App() {
   return (
     <Routes>
-      <Route path="/settings/*" element={<Settings />} />
 
+      <Route path="/settings/*" element={<Settings />} />
+      <Route path="/loginForm" element={<LoginForm />} />
       <Route
         path="/"
         element={

@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify'; 
+import 'react-toastify/dist/ReactToastify.css';
+import { useApiCall } from '../../utils/useApiCall';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -7,9 +10,12 @@ const LoginForm = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
 
+  const { apiCall } = useApiCall(); 
+
   const isEmailValid = email.includes('@');
   const isPasswordValid = password.length > 6;
 
+  
   const handleSubmit = async (e: React.MouseEvent<HTMLImageElement>) => {
     e.preventDefault();
     if (!isEmailValid || !isPasswordValid || isSubmitting) return;
@@ -18,23 +24,20 @@ const LoginForm = () => {
     setErrorMessage('');
 
     try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+      const response = await apiCall({
+        endpoint: '/api/v1/auth/login',
+        method: 'post',
+        data: { email, password }, 
+        successMessage: 'Login successful!',
       });
 
-      const data = await response.json();
+     
+      console.log('Login successful:', response);
+      toast.success('Login successful!'); 
 
-      if (response.ok) {
-        console.log('Login successful');
-      } else {
-        setErrorMessage(data.message || 'Login failed');
-      }
     } catch (error) {
-      setErrorMessage('Network error. Please try again.');
+      setErrorMessage('Login failed. Please try again.');
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -45,19 +48,21 @@ const LoginForm = () => {
       className="min-h-screen flex items-center justify-center bg-cover bg-center px-4 sm:px-6 lg:px-8"
       style={{ backgroundImage: "url('/Images/image.png')" }}
     >
-      <form
-        className="p-8 w-full max-w-md flex flex-col items-center"
-      >
+      <form className="p-8 w-full max-w-md flex flex-col items-center">
         <div className="text-center mb-6">
           <img
-            src="./Images/logo.png"
-            className="h-[120px] w-[120px] mx-auto mb-6"
+            src="./Images/logo2.png"
+            className="logo-image h-[120px] w-[120px] mx-auto mb-6"
           />
         </div>
 
         <div className="text-center mt-8">
-          <h2 className="text-[32px] font-medium text-red-950 w-[230px] h-[32px] font-['lora']  leading-8">Welcome Back</h2>
-          <p className="text-[12px] text-gray-600 font-['Red_Hat_Display'] w-[219px] h-[20px] italic font-normal">Sign In to Access your Workplace</p>
+          <h2 className="text-[32px] font-medium text-red-950 w-[230px] h-[32px] font-['lora'] leading-8">
+            Welcome Back
+          </h2>
+          <p className="text-[12px] text-gray-600 font-['Red_Hat_Display'] w-[219px] h-[20px] italic font-normal">
+            Sign In to Access your Workplace
+          </p>
         </div>
 
         <div className="w-full flex flex-col items-center mt-16">
@@ -103,10 +108,10 @@ const LoginForm = () => {
           )}
 
           <img
-            src="./Images/Arrow button.png" 
+            src="./Images/Arrow button.png"
             className={`cursor-pointer ${(!isEmailValid || !isPasswordValid || isSubmitting) ? 'opacity-50' : ''}`}
-            onClick={handleSubmit} 
-            style={{ width: '64px', height: '64px' }} 
+            onClick={handleSubmit}
+            style={{ width: '64px', height: '64px' }}
           />
 
           <div className="mt-8 w-[400px] text-center">
