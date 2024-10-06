@@ -3,6 +3,7 @@ import axios, { AxiosRequestConfig, AxiosError } from "axios";
 import useSWR from "swr";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Cookies from "js-cookie";
 
 // Create an axios instance
 const baseURL = import.meta.env.VITE_API_URL;
@@ -110,13 +111,15 @@ const handleApiError = (error: AxiosError | Error) => {
           break;
         case 401:
           toast.error("Unauthorized: Please log in again.");
-          // window.location.href = "/login";
+          Cookies.remove("userData");
+          window.location.href = "/login";
           break;
         case 403:
           toast.error(
             "Forbidden: You don't have permission to perform this action."
           );
-          // window.location.href = "/login";
+          Cookies.remove("userData");
+          window.location.href = "/login";
           break;
         case 404:
           toast.error("Not Found: The requested resource does not exist.");
@@ -128,7 +131,7 @@ const handleApiError = (error: AxiosError | Error) => {
           toast.error("Server Error: Please try again later.");
           break;
         default:
-          toast.error(`Error: ${error.response.statusText}`);
+          toast.error(`Error: ${error.response.data.message}`);
       }
     } else if (error.request) {
       toast.error("Network Error: Please check your connection.");

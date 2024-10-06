@@ -10,9 +10,9 @@ import { useApiCall, useGetRequest } from "../utils/useApiCall";
 
 const LoginPage = () => {
   const { id: userId, token: remember_token } = useParams();
-  // const { data, error, isLoading } = useGetRequest(
-  //   userId ? `/v1/auth/get-user/${userId}` : null
-  // );
+  const { data, error, isLoading } = useGetRequest(
+    userId ? `/v1/users/single/${userId}` : null
+  );
   const location = useLocation();
   const navigate = useNavigate();
   const { apiCall } = useApiCall();
@@ -26,18 +26,26 @@ const LoginPage = () => {
   const handleCreatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    const resetPayload = {
+      userid: userId,
+      resetToken: remember_token,
+      newPassword,
+      confirmNewPassword: confirmPassword,
+    };
+
+    const createPayload = {
+      password: newPassword,
+      confirmPassword,
+    };
+
     try {
       const response = await apiCall({
         endpoint: isResetPasswordRoute
           ? "/v1/auth/reset-password"
           : `/v1/auth/create-user-password/${userId}/${remember_token}`,
         method: "post",
-        data: {
-          userid: isResetPasswordRoute ? userId : undefined,
-          resetToken: isResetPasswordRoute ? remember_token : undefined,
-          newPassword: newPassword,
-          confirmNewPassword: confirmPassword,
-        },
+        data: isResetPasswordRoute ? resetPayload : createPayload,
         headers: {},
         successMessage: isResetPasswordRoute
           ? "Password successfully updated!"
@@ -51,11 +59,13 @@ const LoginPage = () => {
     setLoading(false);
   };
 
-  // useEffect(() => {
-  //   if (userId || remember_token) {
-  //     console.log("User ID or token changed");
-  //   }
-  // }, [userId, remember_token]);
+  useEffect(() => {
+    if (userId || remember_token) {
+      console.log("User ID or token changed");
+    }
+  }, [userId, remember_token]);
+
+  if (error) return <div>Oops Something went wrong</div>;
 
   return (
     <main className="relative flex flex-col items-center justify-center gap-[60px] px-4 py-16 min-h-screen">
@@ -70,7 +80,9 @@ const LoginPage = () => {
       <section className="flex w-full flex-col items-center justify-center gap-2 z-10 max-w-[500px]">
         <div className="flex flex-col items-center justify-center">
           <h1 className="text-[32px] text-primary font-medium font-secondary">
-            Hello, Jane Doe
+            {isLoading
+              ? "Welcome"
+              : `Hello, ${data?.firstname} ${data?.lastname}`}
           </h1>
           <em className="text-xs text-textDarkGrey text-center max-w-[220px]">
             {isResetPasswordRoute

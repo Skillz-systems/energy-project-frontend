@@ -15,7 +15,7 @@ import TopNavComponent from "../Components/TopNavComponent/TopNavComponent";
 import { Modal } from "../Components/ModalComponent/Modal";
 import { Input, SelectInput } from "../Components/InputComponent/Input";
 import ProceedButton from "../Components/ProceedButtonComponent/ProceedButtonComponent";
-import { useApiCall } from "../utils/useApiCall";
+import { useApiCall, useGetRequest } from "../utils/useApiCall";
 import { observer } from "mobx-react-lite";
 import rootStore from "../stores/rootStore";
 
@@ -66,7 +66,16 @@ const Settings = observer(() => {
   const dropDownList = {
     items: ["Add new user", "Export List"],
     onClickLink: (index: number) => {
-      console.log("INDEX:", index);
+      switch (index) {
+        case 0:
+          setIsOpen(true);
+          break;
+        case 1:
+          console.log(index);
+          break;
+        default:
+          break;
+      }
     },
     customButton: (
       <div className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom transition-all hover:bg-[#E2E4EB]">
@@ -96,12 +105,21 @@ const Settings = observer(() => {
         data: formData,
         successMessage: "User created successfully!",
       });
-
       console.log("User creation response:", response);
     } catch (error) {
       console.error("User creation failed:", error);
     }
     setLoading(false);
+    setIsOpen(false);
+    setFormData({
+      email: "",
+      password: "",
+      firstname: "",
+      lastname: "",
+      phone: "",
+      role: "",
+      location: "",
+    });
   };
 
   const { email, password, firstname, lastname, phone, role, location } =
@@ -110,14 +128,18 @@ const Settings = observer(() => {
   const isFormFilled =
     email || password || firstname || lastname || phone || role || location;
 
-  const rolesList = [
-    { label: "Super Admin", value: "superAdmin" },
-    { label: "Admin", value: "admin" },
-    { label: "Accounts", value: "accounts" },
-    { label: "Sales", value: "sales" },
-    { label: "Support", value: "support" },
-    { label: "Inventory", value: "inventory" },
-  ];
+  const {
+    data: allRoles,
+    isLoading: allRolesLoading,
+    error: allRolesError,
+  } = useGetRequest("/v1/roles");
+
+  const rolesList = allRoles?.map((item) => ({
+    label: item.role,
+    value: item.id,
+  }));
+
+  if (allRolesError) return <div>Oops! Something wrong</div>;
 
   return (
     <>
@@ -158,7 +180,13 @@ const Settings = observer(() => {
                   <Route path="profile" element={<Profile />} />
                   <Route
                     path="role-permissions"
-                    element={<RoleAndPermissions />}
+                    element={
+                      <RoleAndPermissions
+                        allRoles={allRoles}
+                        allRolesLoading={allRolesLoading}
+                        allRolesError={allRolesError}
+                      />
+                    }
                   />
                   <Route path="change-password" element={<ChangePassword />} />
                   <Route path="users" element={<Users />} />
@@ -192,81 +220,85 @@ const Settings = observer(() => {
               New User
             </h2>
           </div>
-          <div className="flex flex-col items-center justify-center w-full px-4 gap-4 py-8">
-            <Input
-              type="text"
-              name="firstname"
-              label="FIRST NAME"
-              value={firstname}
-              onChange={handleInputChange}
-              placeholder="First Name"
-              required={true}
-              style={`${
-                isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-              }`}
-            />
-            <Input
-              type="text"
-              name="lastname"
-              label="LAST NAME"
-              value={lastname}
-              onChange={handleInputChange}
-              placeholder="Last Name"
-              required={true}
-              style={`${
-                isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-              }`}
-            />
-            <Input
-              type="email"
-              name="email"
-              label="EMAIL"
-              value={email}
-              onChange={handleInputChange}
-              placeholder="Email"
-              required={true}
-              style={`${
-                isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-              }`}
-            />
-            <Input
-              type="text"
-              name="phone"
-              label="PHONE NUMBER"
-              value={phone}
-              onChange={handleInputChange}
-              placeholder="Phone Number"
-              required={true}
-              style={`${
-                isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-              }`}
-            />
+          {allRolesLoading ? (
+            <LoadingSpinner parentClass="absolute top-[50%] w-full" />
+          ) : (
+            <div className="flex flex-col items-center justify-center w-full px-4 gap-4 py-8">
+              <Input
+                type="text"
+                name="firstname"
+                label="FIRST NAME"
+                value={firstname}
+                onChange={handleInputChange}
+                placeholder="First Name"
+                required={true}
+                style={`${
+                  isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                }`}
+              />
+              <Input
+                type="text"
+                name="lastname"
+                label="LAST NAME"
+                value={lastname}
+                onChange={handleInputChange}
+                placeholder="Last Name"
+                required={true}
+                style={`${
+                  isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                }`}
+              />
+              <Input
+                type="email"
+                name="email"
+                label="EMAIL"
+                value={email}
+                onChange={handleInputChange}
+                placeholder="Email"
+                required={true}
+                style={`${
+                  isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                }`}
+              />
+              <Input
+                type="text"
+                name="phone"
+                label="PHONE NUMBER"
+                value={phone}
+                onChange={handleInputChange}
+                placeholder="Phone Number"
+                required={true}
+                style={`${
+                  isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                }`}
+              />
 
-            <SelectInput
-              label="Role"
-              name="role"
-              options={rolesList}
-              value={role}
-              onChange={handleInputChange}
-              required={true}
-              placeholder="Select a role"
-              style={`${
-                isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-              }`}
-            />
-            <Input
-              type="text"
-              name="location"
-              label="LOCATION"
-              value={location}
-              onChange={handleInputChange}
-              placeholder="Location"
-              required={true}
-              style={`${
-                isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-              }`}
-            />
-          </div>
+              <SelectInput
+                label="Role"
+                name="role"
+                options={rolesList}
+                value={role}
+                onChange={handleInputChange}
+                required={true}
+                placeholder="Select a role"
+                style={`${
+                  isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                }`}
+              />
+              <Input
+                type="text"
+                name="location"
+                label="LOCATION"
+                value={location}
+                onChange={handleInputChange}
+                placeholder="Location"
+                required={true}
+                style={`${
+                  isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                }`}
+              />
+            </div>
+          )}
           <ProceedButton
             type="submit"
             loading={loading}
