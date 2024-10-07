@@ -5,7 +5,6 @@ import { Modal } from "../ModalComponent/Modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-
 export type DropDownType = {
   name?: string;
   items?: string[];
@@ -15,11 +14,14 @@ export type DropDownType = {
   isSearch?: boolean;
   isDate?: boolean;
   onDateClick?: (date: string) => void;
+  customButton?: React.ReactNode;
+  defaultStyle?: boolean;
 };
 
 export const DropDown = (props: DropDownType) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [showIcon, setShowIcon] = useState<boolean>(false);
 
   const {
     name,
@@ -29,6 +31,8 @@ export const DropDown = (props: DropDownType) => {
     dropDownContainerStyle,
     isDate,
     onDateClick,
+    customButton,
+    defaultStyle,
   } = props;
   const [linkIndex, setLinkIndex] = useState<number>(0);
 
@@ -43,6 +47,7 @@ export const DropDown = (props: DropDownType) => {
   const handleOptionClick = (index: number) => {
     setLinkIndex(index);
     if (onClickLink) onClickLink(index);
+    setIsOpen(false);
   };
 
   // Handler for date selection
@@ -56,26 +61,38 @@ export const DropDown = (props: DropDownType) => {
 
   return (
     <div className="relative flex w-max">
-      <button
-        className="flex items-center justify-between w-max gap-2 pl-2 pr-1 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full"
-        onClick={handleClick}
+      {customButton ? (
+        <div onClick={handleClick} className="w-max">
+          {customButton}
+        </div>
+      ) : (
+        <button
+          className="flex items-center justify-between w-max gap-2 pl-2 pr-1 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full"
+          onClick={handleClick}
+        >
+          <span className="text-xs font-medium text-textGrey">
+            {isDate && selectedDate
+              ? selectedDate.toLocaleDateString("default", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
+              : name}
+          </span>
+          <img
+            src={isDate ? dateIcon : drop}
+            alt="DropdownIcon"
+            className={`w-4 h-4 ${buttonImgStyle || ""}`}
+          />
+        </button>
+      )}
+      <Modal
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+          setShowIcon(false);
+        }}
       >
-        <span className="text-xs font-medium text-textGrey">
-          {isDate && selectedDate
-            ? selectedDate.toLocaleDateString("default", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })
-            : name}
-        </span>
-        <img
-          src={isDate ? dateIcon : drop}
-          alt="DropdownIcon"
-          className={`w-4 h-4 ${buttonImgStyle || ""}`}
-        />
-      </button>
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
         {isDate ? (
           <div className="absolute top-[35px] right-0 z-50">
             <DatePicker
@@ -93,14 +110,18 @@ export const DropDown = (props: DropDownType) => {
               <li
                 key={index}
                 className={`flex items-center justify-between h-[24px] px-2 py-2.5 text-xs rounded-full cursor-pointer 
-                ${linkIndex === index
+                ${
+                  linkIndex === index && showIcon && !defaultStyle
                     ? "bg-paleLightBlue text-textBlack"
                     : "hover:bg-gray-100 text-textDarkGrey"
-                  }`}
-                onClick={() => handleOptionClick(index)}
+                }`}
+                onClick={() => {
+                  setShowIcon(true);
+                  handleOptionClick(index);
+                }}
               >
                 {item}
-                {linkIndex === index ? (
+                {linkIndex === index && showIcon && !defaultStyle ? (
                   <svg
                     width="16"
                     height="16"

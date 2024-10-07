@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { DropDown } from "../DropDownComponent/DropDown";
 import { copyToClipboard } from "../../utils/helpers";
 import { PiCopySimple } from "react-icons/pi";
@@ -23,14 +23,15 @@ export type TableType = {
     title: string;
     key: string;
     valueIsAComponent?: boolean;
-    customValue?: (value?: string | number) => JSX.Element;
+    customValue?: (value?: string | number, rowData?: any) => JSX.Element;
     width?: string;
     rightIcon?: React.ReactNode;
   }[];
   tableClassname?: string;
   tableData: Record<string, any>[];
   tableType?: "default" | "card";
-  cardComponent: (data: any[]) => React.ReactNode;
+  cardComponent?: (data: any[]) => React.ReactNode;
+  loading: boolean;
 };
 
 export const Table = (props: TableType) => {
@@ -42,6 +43,7 @@ export const Table = (props: TableType) => {
     tableData,
     tableType = "default",
     cardComponent,
+    loading,
   } = props;
   const [hoveredCell, setHoveredCell] = useState<{
     rowIndex: number;
@@ -52,24 +54,11 @@ export const Table = (props: TableType) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
 
-  const [loading, setLoading] = useState<boolean>(true);
-
-  // Simulate data fetch delay
-  useEffect(() => {
-    setLoading(true);
-    const fetchData = async () => {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setLoading(false);
-    };
-    fetchData();
-  }, [currentPage]);
-
-  const totalEntries = tableData.length;
+  const totalEntries = tableData?.length;
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * entriesPerPage;
     const endIndex = startIndex + entriesPerPage;
-    return tableData.slice(startIndex, endIndex);
+    return tableData?.slice(startIndex, endIndex);
   }, [currentPage, entriesPerPage, tableData]);
 
   const SkeletonLoader = () => {
@@ -180,7 +169,7 @@ export const Table = (props: TableType) => {
                             onMouseLeave={() => setHoveredCell(null)}
                           >
                             {column.valueIsAComponent && column.customValue ? (
-                              column.customValue(cellValue)
+                              column.customValue(cellValue, row)
                             ) : (
                               <div className="flex items-center justify-between">
                                 <span>{cellValue || "-"}</span>
@@ -206,7 +195,7 @@ export const Table = (props: TableType) => {
                 </tbody>
               </table>
             ) : (
-              cardComponent(paginatedData)
+              cardComponent && cardComponent(paginatedData)
             )}
             <Pagination
               totalEntries={totalEntries}

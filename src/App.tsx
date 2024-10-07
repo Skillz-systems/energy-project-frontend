@@ -1,30 +1,46 @@
-import React from "react";
-import { Route, Routes } from "react-router-dom";
-import { Settings } from "./Pages/Index";
-import Icon from "./Components/IconComponent";
-import { FaUser } from "react-icons/fa";
-
+import { Navigate, Route, Routes } from "react-router-dom";
+import {
+  LoginPage,
+  Settings,
+  PageNotFound,
+  CreatePassword,
+  Dashboard,
+} from "./Pages/Index";
 import "./index.css";
+import { ErrorProvider } from "./Context/ErrorContext";
+import { ProtectedRouteWrapper } from "./Context/ProtectedRoute";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/settings/*" element={<Settings />} />
+    <>
+      <ErrorProvider>
+          <Routes>
+            {/* Protected Routes */}
+            <Route element={<ProtectedRouteWrapper />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/settings/*" element={<Settings />} />
+            </Route>
 
-      <Route
-        path="/"
-        element={
-          <Icon
-            icon={FaUser}
-            title="User Icon"
-            className="custom-icon-wrapper bg-red-300 w-fit"
-            iconClassName="custom-icon text-2xl text-[blue]"
-            titleClassName="custom-title"
-            onClick={() => console.log("Icon clicked")}
-          />
-        }
-      />
-    </Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/create-password/:id/:token"
+              element={<CreatePassword />}
+            />
+            <Route
+              path="/reset-password/:id/:token"
+              element={<CreatePassword />}
+            />
+
+            {/* Fallback Route */}
+            <Route path="*" element={<PageNotFound />} />
+          </Routes>
+        <ToastContainer autoClose={1000} />
+      </ErrorProvider>
+    </>
   );
 }
 

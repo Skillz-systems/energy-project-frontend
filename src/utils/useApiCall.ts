@@ -1,37 +1,20 @@
 import useTokens from "../hooks/useTokens";
-import axios, { AxiosRequestConfig, AxiosError, AxiosResponse } from "axios";
+import axios, { AxiosRequestConfig, AxiosError } from "axios";
 import useSWR from "swr";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Cookies from "js-cookie";
 
 // Create an axios instance
-const baseURL = process.env.VITE_API_URL
+const baseURL = import.meta.env.VITE_API_URL;
 const apiClient = axios.create({
   baseURL: baseURL as string,
 });
 
-// SWR fetcher function with axios
-const fetcher = async (
-  url: string,
-  token: string
-): Promise<AxiosResponse<any>> => {
-  try {
-    const response = await apiClient.get(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error: any) {
-    handleApiError(error);
-    throw error;
-  }
-};
-
 // API call for POST, PUT, DELETE, PATCH requests
 interface ApiCallOptions {
   endpoint: string;
-  method: "post" | "put" | "delete" | "patch";
+  method: "post" | "put" | "delete" | "patch" | "get";
   params?: any;
   data?: any;
   headers?: any;
@@ -41,15 +24,16 @@ interface ApiCallOptions {
 export const useApiCall = () => {
   const { token } = useTokens();
 
-  const apiCall = async <T>({
+  const apiCall = async ({
     endpoint,
     method,
     params = {},
     data = {},
     headers = {},
     successMessage = "Successful",
-  }: ApiCallOptions): Promise<T> => {
-    const baseURL = `${process.env.VITE_API_URL}/api`;
+  }: ApiCallOptions): Promise<any> => {
+    const url = import.meta.env.VITE_API_URL;
+    const baseURL = `${url}/api`;
 
     const requestConfig: AxiosRequestConfig = {
       baseURL,
@@ -68,7 +52,7 @@ export const useApiCall = () => {
       if (response.status >= 200 && response.status < 300) {
         toast.success(successMessage);
       }
-      return response.data;
+      return response;
     } catch (error: any) {
       handleApiError(error);
       throw error;
@@ -83,8 +67,24 @@ export const useApiCall = () => {
 // SWR hook for GET requests with revalidation
 export const useGetRequest = (endpoint: string, revalidate = true) => {
   const { token } = useTokens();
-  const { data, error, mutate } = useSWR(
-    [`${apiClient.defaults.baseURL}/api${endpoint}`, token],
+
+  // SWR fetcher function with axios
+  const fetcher = async (url: string): Promise<any> => {
+    try {
+      const response = await apiClient.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error: any) {
+      handleApiError(error);
+      throw error;
+    }
+  };
+
+  const { data, error, isLoading, mutate } = useSWR(
+    `${apiClient.defaults.baseURL}/api${endpoint}`,
     fetcher,
     {
       revalidateOnFocus: revalidate, // Revalidate on window focus
@@ -95,7 +95,7 @@ export const useGetRequest = (endpoint: string, revalidate = true) => {
   return {
     data,
     error,
-    isLoading: !error && !data,
+    isLoading,
     mutate,
   };
 };
@@ -111,11 +111,15 @@ const handleApiError = (error: AxiosError | Error) => {
           break;
         case 401:
           toast.error("Unauthorized: Please log in again.");
+          Cookies.remove("userData");
+          window.location.href = "/login";
           break;
         case 403:
           toast.error(
             "Forbidden: You don't have permission to perform this action."
           );
+          Cookies.remove("userData");
+          window.location.href = "/login";
           break;
         case 404:
           toast.error("Not Found: The requested resource does not exist.");
@@ -127,7 +131,7 @@ const handleApiError = (error: AxiosError | Error) => {
           toast.error("Server Error: Please try again later.");
           break;
         default:
-          toast.error(`Error: ${error.response.statusText}`);
+          toast.error(`Error: ${error.response.data.message}`);
       }
     } else if (error.request) {
       toast.error("Network Error: Please check your connection.");
