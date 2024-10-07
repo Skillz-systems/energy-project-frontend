@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import loginbg from "../assets/loginbg.png";
 import logo from "../assets/logo.svg";
