@@ -2,14 +2,14 @@ import { useState } from "react";
 import lightCheckeredBg from "../../assets/lightCheckeredBg.png";
 import role from "../../assets/table/role.svg";
 import addButton from "../../assets/settings/addbutton.svg";
-import editButton from "../../assets/settings/editbutton.svg";
+import editInput from "../../assets/settings/editInput.svg";
 import { MdCancel } from "react-icons/md";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { useApiCall } from "../../utils/useApiCall";
 import useTokens from "../../hooks/useTokens";
 import Cookies from "js-cookie";
 
-const Profile = () => {
+const Profile = ({ rolesList }) => {
   const userData = useTokens();
   const { apiCall } = useApiCall();
   const [displayInput, setDisplayInput] = useState<boolean>(false);
@@ -20,6 +20,7 @@ const Profile = () => {
     phone: userData.phone || "",
     location: userData.location || "",
   });
+  const [designation, setDesignation] = useState<string>(userData.role.id);
   const [loading, setLoading] = useState<boolean>(false);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -32,7 +33,9 @@ const Profile = () => {
     location: "Location",
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
@@ -47,6 +50,30 @@ const Profile = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+    if (designation !== userData.role.role) {
+      try {
+        await apiCall({
+          endpoint: `/v1/roles/${userData.id}/assign`,
+          method: "post",
+          data: {
+            roleId: designation,
+          },
+          successMessage: "User role assigned successfully!",
+        });
+        // Update the cookies with the new user data
+        const updatedUserData = {
+          ...userData,
+          role: {
+            id: designation,
+            role: rolesList.find((r) => r.value === designation)?.label,
+          },
+        };
+        Cookies.set("userData", JSON.stringify(updatedUserData));
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
     if (!formData) return;
     try {
       await apiCall({
@@ -96,7 +123,8 @@ const Profile = () => {
     }
   };
 
-  const isFormFilled = unsavedChanges;
+  const designationChanged = designation !== userData.role.role;
+  const isFormFilled = unsavedChanges || designationChanged;
 
   const DetailComponent = ({
     label,
@@ -135,25 +163,26 @@ const Profile = () => {
       />
       <div className="z-10 flex justify-end">
         {!displayInput ? (
-          <img
-            src={editButton}
-            alt="Edit Button"
-            className="w-[24px] h-[24px] hover:cursor-pointer hover:opacity-80"
-            onClick={() => setDisplayInput(true)}
-          />
+          <div className="flex items-center justify-center w-[24px] h-[24px] bg-white border border-strokeGreyTwo rounded-full cursor-pointer hover:bg-slate-100">
+            <img
+              src={editInput}
+              alt="Edit Button"
+              width="15px"
+              onClick={() => setDisplayInput(true)}
+            />
+          </div>
         ) : (
-          <button
-            type="button"
+          <div
             onClick={handleCancelClick}
-            className="flex items-center justify-center w-[24px] h-[24px] bg-white border border-errorTwo rounded-full hover:opacity-80"
+            className="flex items-center justify-center w-[24px] h-[24px] bg-white border border-errorTwo rounded-full cursor-pointer hover:opacity-80"
           >
             <MdCancel className="text-errorTwo" />
-          </button>
+          </div>
         )}
       </div>
       <div className="z-10 flex flex-col gap-4 mt-[60px] md:mt-[80px]">
         {errorMessage && (
-          <div className="z-10 text-errorTwo text-sm mb-4">{errorMessage}</div>
+          <p className="text-errorTwo text-xs font-medium">{errorMessage}</p>
         )}
         <DetailComponent
           label="User ID"
@@ -200,13 +229,38 @@ const Profile = () => {
             </div>
           ))}
         </div>
-        <DetailComponent
-          label="Designation"
-          value={userData.role.role}
-          parentClass="z-10 p-2.5 h-[44px] border-[0.6px] border-strokeGreyThree"
-          valueClass="flex items-center justify-center bg-paleLightBlue text-textBlack font-semibold p-2 h-[24px] rounded-full capitalize"
-        />
-        <div className="flex items-center justify-center w-full pt-10 pb-5">
+
+        <div className="flex items-center justify-between bg-white w-full text-textDarkGrey text-xs rounded-full z-10 p-2.5 h-[44px] border-[0.6px] border-strokeGreyThree">
+          <span className="flex items-center justify-center bg-[#F6F8FA] text-textBlack text-xs p-2 h-[24px] rounded-full">
+            Designation
+          </span>
+          {!displayInput ? (
+            <span className="flex items-center justify-center bg-paleLightBlue text-textBlack font-semibold p-2 h-[24px] rounded-full capitalize text-xs">
+              {userData.role.role}
+            </span>
+          ) : (
+            <select
+              name="role"
+              value={designation}
+              onChange={(e) => {
+                setDesignation(e.target.value);
+              }}
+              required={false}
+              className="px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
+            >
+              {rolesList.map((option) => (
+                <option
+                  key={option.value}
+                  value={option.value}
+                  className="capitalize"
+                >
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+        <div className="flex items-center justify-center w-full pt-5 pb-5">
           <ProceedButton
             type="submit"
             loading={loading}

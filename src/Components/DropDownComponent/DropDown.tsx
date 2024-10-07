@@ -15,6 +15,7 @@ export type DropDownType = {
   isDate?: boolean;
   onDateClick?: (date: string) => void;
   customButton?: React.ReactNode;
+  defaultStyle?: boolean;
 };
 
 export const DropDown = (props: DropDownType) => {
@@ -31,6 +32,7 @@ export const DropDown = (props: DropDownType) => {
     isDate,
     onDateClick,
     customButton,
+    defaultStyle,
   } = props;
   const [linkIndex, setLinkIndex] = useState<number>(0);
 
@@ -109,7 +111,7 @@ export const DropDown = (props: DropDownType) => {
                 key={index}
                 className={`flex items-center justify-between h-[24px] px-2 py-2.5 text-xs rounded-full cursor-pointer 
                 ${
-                  linkIndex === index && showIcon
+                  linkIndex === index && showIcon && !defaultStyle
                     ? "bg-paleLightBlue text-textBlack"
                     : "hover:bg-gray-100 text-textDarkGrey"
                 }`}
@@ -119,7 +121,7 @@ export const DropDown = (props: DropDownType) => {
                 }}
               >
                 {item}
-                {linkIndex === index && showIcon ? (
+                {linkIndex === index && showIcon && !defaultStyle ? (
                   <svg
                     width="16"
                     height="16"

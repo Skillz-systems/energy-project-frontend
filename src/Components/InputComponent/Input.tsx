@@ -271,11 +271,15 @@ export const SelectInput = ({
         }}
         disabled={disabled}
         required={required}
-        className="w-full bg-transparent text-textBlack font-semibold outline-none appearance-none capitalize"
+        className="w-full bg-transparent text-textBlack font-semibold outline-none appearance-none"
       >
         {placeholder && <option value="">{placeholder}</option>}
         {options.map((option) => (
-          <option key={option.value} value={option.value} className="capitalize">
+          <option
+            key={option.value}
+            value={option.value}
+            className="capitalize"
+          >
             {option.label}
           </option>
         ))}

@@ -132,6 +132,7 @@ const Settings = observer(() => {
     data: allRoles,
     isLoading: allRolesLoading,
     error: allRolesError,
+    mutate: allRolesRefresh,
   } = useGetRequest("/v1/roles");
 
   const rolesList = allRoles?.map((item) => ({
@@ -176,8 +177,11 @@ const Settings = observer(() => {
                 }
               >
                 <Routes>
-                  <Route index element={<Profile />} />
-                  <Route path="profile" element={<Profile />} />
+                  <Route index element={<Profile rolesList={rolesList} />} />
+                  <Route
+                    path="profile"
+                    element={<Profile rolesList={rolesList} />}
+                  />
                   <Route
                     path="role-permissions"
                     element={
@@ -185,11 +189,16 @@ const Settings = observer(() => {
                         allRoles={allRoles}
                         allRolesLoading={allRolesLoading}
                         allRolesError={allRolesError}
+                        allRolesRefresh={allRolesRefresh}
+                        rolesList={rolesList}
                       />
                     }
                   />
                   <Route path="change-password" element={<ChangePassword />} />
-                  <Route path="users" element={<Users />} />
+                  <Route
+                    path="users"
+                    element={<Users rolesList={rolesList} />}
+                  />
                 </Routes>
               </Suspense>
             </section>

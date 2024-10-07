@@ -158,7 +158,7 @@ const ChangePassword = () => {
             />
           }
         />
-        <div className="flex items-center justify-center w-full pt-10 pb-5">
+        <div className="flex items-center justify-center w-full pt-5 pb-5">
           <ProceedButton
             type="submit"
             loading={loading}

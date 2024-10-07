@@ -23,7 +23,7 @@ export type TableType = {
     title: string;
     key: string;
     valueIsAComponent?: boolean;
-    customValue?: (value?: string | number) => JSX.Element;
+    customValue?: (value?: string | number, rowData?: any) => JSX.Element;
     width?: string;
     rightIcon?: React.ReactNode;
   }[];
@@ -169,7 +169,7 @@ export const Table = (props: TableType) => {
                             onMouseLeave={() => setHoveredCell(null)}
                           >
                             {column.valueIsAComponent && column.customValue ? (
-                              column.customValue(cellValue)
+                              column.customValue(cellValue, row)
                             ) : (
                               <div className="flex items-center justify-between">
                                 <span>{cellValue || "-"}</span>

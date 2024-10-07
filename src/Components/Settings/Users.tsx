@@ -5,8 +5,11 @@ import { GoDotFill } from "react-icons/go";
 import { useGetRequest } from "../../utils/useApiCall";
 import { observer } from "mobx-react-lite";
 import rootStore from "../../stores/rootStore";
+import UserModal from "./UserModal";
+import { useEffect, useState } from "react";
 
 interface UserEntries {
+  id: string;
   no: number;
   name: string;
   email: string;
@@ -19,6 +22,7 @@ interface UserEntries {
 const generateUserEntries = (data: any): UserEntries[] => {
   const entries: UserEntries[] = data?.users.map((user: any, index: number) => {
     return {
+      id: user?.id,
       no: index + 1,
       name: `${user?.firstname} ${user?.lastname}`,
       email: user?.email,
@@ -31,10 +35,17 @@ const generateUserEntries = (data: any): UserEntries[] => {
   return entries;
 };
 
-const Users = observer(() => {
+const Users = observer(({ rolesList }: { rolesList: any }) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [userID, setUserID] = useState<string>("");
   const { settingsStore } = rootStore;
-  const { data, isLoading } = useGetRequest("/v1/users");
-  settingsStore.updateUserCount(data?.total || settingsStore.noOfUsers);
+  const { data, isLoading, mutate: refreshTable } = useGetRequest("/v1/users");
+
+  useEffect(() => {
+    if (data?.total) {
+      settingsStore.updateUserCount(data.total);
+    }
+  }, [data?.total, settingsStore]);
 
   const filterList = [
     {
@@ -108,9 +119,15 @@ const Users = observer(() => {
       title: "ACTIONS",
       key: "actions",
       valueIsAComponent: true,
-      customValue: () => {
+      customValue: (value, rowData) => {
         return (
-          <span className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold">
+          <span
+            className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold"
+            onClick={() => {
+              setUserID(rowData.id);
+              setIsOpen(true);
+            }}
+          >
             View
           </span>
         );
@@ -119,15 +136,24 @@ const Users = observer(() => {
   ];
 
   return (
-    <div className="w-full">
-      <Table
-        tableTitle="USERS"
-        filterList={filterList}
-        columnList={columnList}
-        loading={isLoading}
-        tableData={generateUserEntries(data)}
+    <>
+      <div className="w-full">
+        <Table
+          tableTitle="USERS"
+          filterList={filterList}
+          columnList={columnList}
+          loading={isLoading}
+          tableData={generateUserEntries(data)}
+        />
+      </div>
+      <UserModal
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        userID={userID}
+        refreshTable={refreshTable}
+        rolesList={rolesList}
       />
-    </div>
+    </>
   );
 });
 
