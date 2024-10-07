@@ -1,4 +1,5 @@
 import { createContext, useState, ReactNode } from "react";
+import ErrorBoundary from "./ErrorBoundary";
 
 interface ErrorContextType {
   hasError: boolean;
@@ -14,7 +15,7 @@ export const ErrorProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <ErrorContext.Provider value={{ hasError, setHasError }}>
-      {children}
+      <ErrorBoundary>{children}</ErrorBoundary>
     </ErrorContext.Provider>
   );
 };

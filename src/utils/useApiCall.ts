@@ -14,7 +14,7 @@ const apiClient = axios.create({
 // API call for POST, PUT, DELETE, PATCH requests
 interface ApiCallOptions {
   endpoint: string;
-  method: "post" | "put" | "delete" | "patch";
+  method: "post" | "put" | "delete" | "patch" | "get";
   params?: any;
   data?: any;
   headers?: any;

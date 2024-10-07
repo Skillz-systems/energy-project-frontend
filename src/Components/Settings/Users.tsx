@@ -2,11 +2,12 @@ import { Table } from "../TableComponent/Table";
 import role from "../../assets/table/role.svg";
 import clock from "../../assets/table/clock.svg";
 import { GoDotFill } from "react-icons/go";
-import { useGetRequest } from "../../utils/useApiCall";
+import { useApiCall, useGetRequest } from "../../utils/useApiCall";
 import { observer } from "mobx-react-lite";
 import rootStore from "../../stores/rootStore";
 import UserModal from "./UserModal";
 import { useEffect, useState } from "react";
+import { capitalizeFirstLetter } from "../../utils/helpers";
 
 interface UserEntries {
   id: string;
@@ -36,8 +37,11 @@ const generateUserEntries = (data: any): UserEntries[] => {
 };
 
 const Users = observer(({ rolesList }: { rolesList: any }) => {
+  const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [userID, setUserID] = useState<string>("");
+  const [queryValue, setQueryValue] = useState<string>("");
+  const [queryData, setQueryData] = useState<any>(null);
   const { settingsStore } = rootStore;
   const { data, isLoading, mutate: refreshTable } = useGetRequest("/v1/users");
 
@@ -52,21 +56,47 @@ const Users = observer(({ rolesList }: { rolesList: any }) => {
       name: "All Roles",
       items: [
         "All Roles",
-        "Super Admin",
-        "Admin",
-        "Support",
-        "Inventory",
-        "Account",
-        "Sales",
+        ...(rolesList
+          ? rolesList.map((role) => capitalizeFirstLetter(role.label))
+          : []),
       ],
-      onClickLink: (index: number) => {
-        console.log("INDEX:", index);
+      onClickLink: async (index: number) => {
+        // Get the selected role id by using index-1 (since "All Roles" is at index 0)
+        const selectedRole = rolesList[index - 1];
+        const roleId = selectedRole.value;
+        setQueryValue(roleId);
+
+        // If "All Roles" is selected (index 0), reset or handle accordingly
+        try {
+          const response = await apiCall({
+            endpoint: index === 0 ? "/v1/users" : `/v1/users?roleId=${roleId}`,
+            method: "get",
+            successMessage:
+              index === 0
+                ? "Fetched all users successfully!"
+                : `Users with the role ${selectedRole.label} fetched successfully!`,
+          });
+          setQueryData(response.data);
+        } catch (error) {
+          console.error(error);
+        }
+        return;
       },
     },
     {
       name: "Search",
-      onSearch: (query: string) => {
-        console.log("Query:", query);
+      onSearch: async (query: string) => {
+        setQueryValue(query);
+        try {
+          const response = await apiCall({
+            endpoint: `/v1/users?search=${encodeURIComponent(query)}`,
+            method: "get",
+            successMessage: "Query successfull!",
+          });
+          setQueryData(response.data);
+        } catch (error) {
+          console.error(error);
+        }
       },
       isSearch: true,
     },
@@ -135,6 +165,12 @@ const Users = observer(({ rolesList }: { rolesList: any }) => {
     },
   ];
 
+  const getTableData = () => {
+    if (queryValue && queryData) {
+      return generateUserEntries(queryData);
+    } else return generateUserEntries(data);
+  };
+
   return (
     <>
       <div className="w-full">
@@ -143,7 +179,7 @@ const Users = observer(({ rolesList }: { rolesList: any }) => {
           filterList={filterList}
           columnList={columnList}
           loading={isLoading}
-          tableData={generateUserEntries(data)}
+          tableData={getTableData()}
         />
       </div>
       <UserModal
@@ -158,3 +194,5 @@ const Users = observer(({ rolesList }: { rolesList: any }) => {
 });
 
 export default Users;
+
+// Ability to do nested query searches. Add later
