@@ -54,7 +54,7 @@ const RoleAndPermissions = ({
       );
       data = response;
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setSingleLoading(false);
     }
@@ -118,7 +118,7 @@ const RoleAndPermissions = ({
     if (!selectedRole) return;
 
     try {
-      const response = await apiCall({
+      await apiCall({
         endpoint: "/v1/roles",
         method: "post",
         data: {
@@ -128,8 +128,6 @@ const RoleAndPermissions = ({
         },
         successMessage: "Role created successfully!",
       });
-
-      console.log("Role creation response:", response);
     } catch (error) {
       console.error("Role creation failed:", error);
     } finally {
@@ -286,7 +284,7 @@ const RoleAndPermissions = ({
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} layout="right">
         {modalInfo === "edit-permissions" ? (
           <form
-            className="flex flex-col bg-white"
+            className="flex flex-col bg-white pb-8"
             onSubmit={handleSubmitRoleCreation}
           >
             <div
@@ -335,13 +333,15 @@ const RoleAndPermissions = ({
                   ))
                 )}
               </div>
-              <div className="flex items-center justify-center w-full pt-10 pb-5">
-                <ProceedButton
-                  type="submit"
-                  loading={loading}
-                  variant={isFormFilled ? "gradient" : "gray"}
-                />
-              </div>
+              {isFormFilled ? (
+                <div className="flex items-center justify-center w-full pt-6 pb-5">
+                  <ProceedButton
+                    type="submit"
+                    loading={loading}
+                    variant={isFormFilled ? "gradient" : "gray"}
+                  />
+                </div>
+              ) : null}
             </div>
           </form>
         ) : (

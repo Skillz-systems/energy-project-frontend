@@ -40,7 +40,7 @@ const LoginPage = () => {
     };
 
     try {
-      const response = await apiCall({
+      await apiCall({
         endpoint: isResetPasswordRoute
           ? "/v1/auth/reset-password"
           : `/v1/auth/create-user-password/${userId}/${remember_token}`,
@@ -52,7 +52,6 @@ const LoginPage = () => {
           : "Password succesfully created!",
       });
       navigate("/login");
-      console.log("Response:", response);
     } catch (error) {
       console.error("Error:", error);
     }

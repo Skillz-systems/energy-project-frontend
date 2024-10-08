@@ -9,7 +9,7 @@ import { useApiCall } from "../../utils/useApiCall";
 import useTokens from "../../hooks/useTokens";
 import Cookies from "js-cookie";
 
-const Profile = ({ rolesList }) => {
+const Profile = () => {
   const userData = useTokens();
   const { apiCall } = useApiCall();
   const [displayInput, setDisplayInput] = useState<boolean>(false);
@@ -20,10 +20,8 @@ const Profile = ({ rolesList }) => {
     phone: userData.phone || "",
     location: userData.location || "",
   });
-  const [designation, setDesignation] = useState<string>(userData.role.id);
   const [loading, setLoading] = useState<boolean>(false);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const fieldLabels: { [key: string]: string } = {
     firstname: "First Name",
@@ -38,43 +36,22 @@ const Profile = ({ rolesList }) => {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Check for unsaved changes by comparing the form data with the initial userData
-    if (userData[name] !== value) {
-      setUnsavedChanges(true);
-    } else {
-      setUnsavedChanges(false);
-    }
+    setUnsavedChanges(true);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    if (designation !== userData.role.role) {
-      try {
-        await apiCall({
-          endpoint: `/v1/roles/${userData.id}/assign`,
-          method: "post",
-          data: {
-            roleId: designation,
-          },
-          successMessage: "User role assigned successfully!",
-        });
-        // Update the cookies with the new user data
-        const updatedUserData = {
-          ...userData,
-          role: {
-            id: designation,
-            role: rolesList.find((r) => r.value === designation)?.label,
-          },
-        };
-        Cookies.set("userData", JSON.stringify(updatedUserData));
-      } catch (error) {
-        console.error(error);
-      }
-    }
 
     if (!formData) return;
+
+    // Remove all spaces from the relevant fields
+    formData.firstname = formData.firstname?.replace(/\s+/g, "") || "";
+    formData.lastname = formData.lastname?.replace(/\s+/g, "") || "";
+    formData.email = formData.email?.replace(/\s+/g, "") || "";
+    formData.phone = formData.phone?.replace(/\s+/g, "") || "";
+    formData.location = formData.location?.replace(/\s+/g, "") || "";
+
     try {
       await apiCall({
         endpoint: "/v1/users",
@@ -95,7 +72,6 @@ const Profile = ({ rolesList }) => {
 
       Cookies.set("userData", JSON.stringify(updatedUserData));
       setUnsavedChanges(false);
-      setErrorMessage("");
     } catch (error) {
       console.error("User update failed:", error);
     } finally {
@@ -105,26 +81,19 @@ const Profile = ({ rolesList }) => {
   };
 
   const handleCancelClick = () => {
-    if (unsavedChanges) {
-      setErrorMessage(
-        "You have unsaved changes. Please submit your changes before exiting edit mode."
-      );
-    } else {
-      setDisplayInput(false);
-      setErrorMessage("");
+    setDisplayInput(false);
+    setUnsavedChanges(false);
 
-      setFormData({
-        firstname: userData.firstname || "",
-        lastname: userData.lastname || "",
-        email: userData.email || "",
-        phone: userData.phone || "",
-        location: userData.location || "",
-      });
-    }
+    setFormData({
+      firstname: userData.firstname || "",
+      lastname: userData.lastname || "",
+      email: userData.email || "",
+      phone: userData.phone || "",
+      location: userData.location || "",
+    });
   };
 
-  const designationChanged = designation !== userData.role.role;
-  const isFormFilled = unsavedChanges || designationChanged;
+  const isFormFilled = unsavedChanges;
 
   const DetailComponent = ({
     label,
@@ -181,9 +150,6 @@ const Profile = ({ rolesList }) => {
         )}
       </div>
       <div className="z-10 flex flex-col gap-4 mt-[60px] md:mt-[80px]">
-        {errorMessage && (
-          <p className="text-errorTwo text-xs font-medium">{errorMessage}</p>
-        )}
         <DetailComponent
           label="User ID"
           value={userData.id}
@@ -229,44 +195,21 @@ const Profile = ({ rolesList }) => {
             </div>
           ))}
         </div>
-
-        <div className="flex items-center justify-between bg-white w-full text-textDarkGrey text-xs rounded-full z-10 p-2.5 h-[44px] border-[0.6px] border-strokeGreyThree">
-          <span className="flex items-center justify-center bg-[#F6F8FA] text-textBlack text-xs p-2 h-[24px] rounded-full">
-            Designation
-          </span>
-          {!displayInput ? (
-            <span className="flex items-center justify-center bg-paleLightBlue text-textBlack font-semibold p-2 h-[24px] rounded-full capitalize text-xs">
-              {userData.role.role}
-            </span>
-          ) : (
-            <select
-              name="role"
-              value={designation}
-              onChange={(e) => {
-                setDesignation(e.target.value);
-              }}
-              required={false}
-              className="px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
-            >
-              {rolesList.map((option) => (
-                <option
-                  key={option.value}
-                  value={option.value}
-                  className="capitalize"
-                >
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-        <div className="flex items-center justify-center w-full pt-5 pb-5">
-          <ProceedButton
-            type="submit"
-            loading={loading}
-            variant={isFormFilled ? "gradient" : "gray"}
-          />
-        </div>
+        <DetailComponent
+          label="Designation"
+          value={userData.role.role}
+          parentClass="z-10 p-2.5 h-[44px] border-[0.6px] border-strokeGreyThree"
+          valueClass="flex items-center justify-center bg-paleLightBlue text-textBlack font-semibold p-2 h-[24px] rounded-full capitalize"
+        />
+        {displayInput ? (
+          <div className="flex items-center justify-center w-full pt-5 pb-5">
+            <ProceedButton
+              type="submit"
+              loading={loading}
+              variant={isFormFilled ? "gradient" : "gray"}
+            />
+          </div>
+        ) : null}
       </div>
     </form>
   );

@@ -7,7 +7,6 @@ const useTokens = () => {
   try {
     const parsedData = userData ? JSON.parse(userData) : null;
     // Safely access token and other properties
-    // console.log("userData:", parsedData);
     return {
       token: parsedData?.token,
       createdAt: parsedData?.createdAt,
