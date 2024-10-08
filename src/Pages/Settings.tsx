@@ -99,13 +99,13 @@ const Settings = observer(() => {
     isLoading: allRolesLoading,
     error: allRolesError,
     mutate: allRolesRefresh,
-  } = useGetRequest("/v1/roles");
+  } = useGetRequest("/v1/roles", true, 60000);
 
   const {
     data: userData,
     isLoading: userLoading,
     mutate: allUsersRefresh,
-  } = useGetRequest("/v1/users");
+  } = useGetRequest("/v1/users", true, 60000);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

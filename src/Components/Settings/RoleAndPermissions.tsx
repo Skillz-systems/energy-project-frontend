@@ -54,7 +54,7 @@ const RoleAndPermissions = ({
       );
       data = response;
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setSingleLoading(false);
     }
@@ -118,7 +118,7 @@ const RoleAndPermissions = ({
     if (!selectedRole) return;
 
     try {
-      const response = await apiCall({
+      await apiCall({
         endpoint: "/v1/roles",
         method: "post",
         data: {
@@ -128,8 +128,6 @@ const RoleAndPermissions = ({
         },
         successMessage: "Role created successfully!",
       });
-
-      console.log("Role creation response:", response);
     } catch (error) {
       console.error("Role creation failed:", error);
     } finally {

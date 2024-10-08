@@ -55,6 +55,7 @@ const Users = observer(
     const [userID, setUserID] = useState<string>("");
     const [queryValue, setQueryValue] = useState<string>("");
     const [queryData, setQueryData] = useState<any>(null);
+    const [queryLoading, setQueryLoading] = useState<boolean>(false);
 
     useEffect(() => {
       if (data?.total) {
@@ -75,6 +76,7 @@ const Users = observer(
           // Get the selected role id by using index-1 (since "All Roles" is at index 0)
           const selectedRole = rolesList[index - 1];
           const roleId = selectedRole.value;
+          setQueryLoading(true);
           setQueryValue(roleId);
 
           // If "All Roles" is selected (index 0), reset or handle accordingly
@@ -92,6 +94,8 @@ const Users = observer(
             setQueryData(response.data);
           } catch (error) {
             console.error(error);
+          } finally {
+            setQueryLoading(false);
           }
           return;
         },
@@ -99,6 +103,7 @@ const Users = observer(
       {
         name: "Search",
         onSearch: async (query: string) => {
+          setQueryLoading(true);
           setQueryValue(query);
           try {
             const response = await apiCall({
@@ -110,6 +115,8 @@ const Users = observer(
             setQueryData(response.data);
           } catch (error) {
             console.error(error);
+          } finally {
+            setQueryLoading(false);
           }
         },
         isSearch: true,
@@ -192,7 +199,7 @@ const Users = observer(
             tableTitle="USERS"
             filterList={filterList}
             columnList={columnList}
-            loading={isLoading}
+            loading={queryLoading || isLoading}
             tableData={getTableData()}
             refreshTable={async () => {
               await refreshTable();

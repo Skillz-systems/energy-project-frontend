@@ -69,7 +69,11 @@ export const useApiCall = () => {
 };
 
 // SWR hook for GET requests with revalidation
-export const useGetRequest = (endpoint: string, revalidate = true) => {
+export const useGetRequest = (
+  endpoint: string,
+  revalidate = true,
+  refreshInterval?: number
+) => {
   const { token } = useTokens();
 
   // SWR fetcher function with axios
@@ -93,6 +97,7 @@ export const useGetRequest = (endpoint: string, revalidate = true) => {
     {
       revalidateOnFocus: revalidate, // Revalidate on window focus
       revalidateOnReconnect: revalidate, // Revalidate on reconnect
+      refreshInterval: refreshInterval, // Set refresh interval
     }
   );
 

@@ -39,7 +39,6 @@ const LoginPage = () => {
         token: response.headers.access_token,
         ...response.data,
       };
-      console.log(userData);
       Cookies.set("userData", JSON.stringify(userData), {
         expires: 7,
       }); // Token expires in 7 days
@@ -55,7 +54,7 @@ const LoginPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await apiCall({
+      await apiCall({
         endpoint: "/v1/auth/forgot-password",
         method: "post",
         data: {
@@ -65,7 +64,6 @@ const LoginPage = () => {
         successMessage: "Password reset email sent!",
       });
 
-      console.log("Forgot password response:", response);
     } catch (error) {
       console.error("Forgot password failed:", error);
     }
