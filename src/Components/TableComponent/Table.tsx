@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { DropDown } from "../DropDownComponent/DropDown";
 import { copyToClipboard } from "../../utils/helpers";
 import { PiCopySimple } from "react-icons/pi";
@@ -32,6 +32,7 @@ export type TableType = {
   tableType?: "default" | "card";
   cardComponent?: (data: any[]) => React.ReactNode;
   loading: boolean;
+  refreshTable?: () => Promise<any>;
 };
 
 export const Table = (props: TableType) => {
@@ -44,6 +45,7 @@ export const Table = (props: TableType) => {
     tableType = "default",
     cardComponent,
     loading,
+    refreshTable,
   } = props;
   const [hoveredCell, setHoveredCell] = useState<{
     rowIndex: number;
@@ -53,6 +55,7 @@ export const Table = (props: TableType) => {
   // Pagination state
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const totalEntries = tableData?.length;
   const paginatedData = useMemo(() => {
@@ -60,6 +63,8 @@ export const Table = (props: TableType) => {
     const endIndex = startIndex + entriesPerPage;
     return tableData?.slice(startIndex, endIndex);
   }, [currentPage, entriesPerPage, tableData]);
+
+  useEffect(() => {}, [tableData]);
 
   const SkeletonLoader = () => {
     return (
@@ -103,20 +108,37 @@ export const Table = (props: TableType) => {
       {loading ? (
         <SkeletonLoader />
       ) : paginatedData.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-[95vh]">
+        <div className="flex flex-col items-center justify-center pt-10">
           <img src={wrong} alt="No data available" className="w-[100px]" />
           <p className="text-textBlack font-medium">No data available</p>
+          <button
+            className="bg-[#F6F8FA] px-4 py-1 text-textDarkGrey font-medium border border-strokeGreyTwo mt-4 rounded-full hover:text-textBlack transition-all"
+            onClick={async () => {
+              setRefreshing(true);
+              await refreshTable();
+              setRefreshing(false);
+            }}
+          >
+            {refreshing ? "Refreshing..." : "Refresh Table"}
+          </button>
         </div>
       ) : (
         <div className="flex flex-col gap-2 min-w-[975px]">
           <header className="flex items-center justify-between gap-2 p-[8px_8px_8px_16px] bg-paleGrayGradient border-[0.6px] border-strokeGreyThree rounded-full">
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-2">
               <h2 className="text-sm font-bold text-textDarkGrey">
                 {tableTitle}
               </h2>
-              <span className="text-sm font-base text-textLightGrey">
-                [Filter Table Title]
-              </span>
+              <button
+                className="bg-white text-xs px-2 py-1 text-textDarkGrey font-medium border border-strokeGreyTwo rounded-full hover:text-textBlack hover:border-textBlack transition-all"
+                onClick={async () => {
+                  setRefreshing(true);
+                  await refreshTable();
+                  setRefreshing(false);
+                }}
+              >
+                {refreshing ? "Refreshing..." : "Refresh Table"}
+              </button>
             </div>
             <div className="flex items-center justify-end gap-2">
               {filterList.map((filter, index) =>

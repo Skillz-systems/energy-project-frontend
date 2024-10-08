@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import loginbg from "../assets/loginbg.png";
 import logo from "../assets/logo.svg";
@@ -18,6 +18,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +46,7 @@ const LoginPage = () => {
       navigate("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);
+      setErrorMessage(error.response.data.message);
     }
     setLoading(false);
   };
@@ -106,7 +108,10 @@ const LoginPage = () => {
               name="email"
               label="EMAIL"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setErrorMessage("");
+              }}
               placeholder="Email"
               required={true}
               errorMessage=""
@@ -120,7 +125,10 @@ const LoginPage = () => {
                 name="password"
                 label="PASSWORD"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setErrorMessage("");
+                }}
                 placeholder="Password"
                 required={true}
                 errorMessage=""
@@ -135,6 +143,9 @@ const LoginPage = () => {
                   />
                 }
               />
+            ) : null}
+            {errorMessage ? (
+              <p className="text-md font-medium mt-2">{errorMessage}</p>
             ) : null}
             <div className="flex flex-col items-center justify-center gap-8 pt-8">
               <ProceedButton

@@ -286,7 +286,7 @@ const RoleAndPermissions = ({
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} layout="right">
         {modalInfo === "edit-permissions" ? (
           <form
-            className="flex flex-col bg-white"
+            className="flex flex-col bg-white pb-8"
             onSubmit={handleSubmitRoleCreation}
           >
             <div
@@ -335,13 +335,15 @@ const RoleAndPermissions = ({
                   ))
                 )}
               </div>
-              <div className="flex items-center justify-center w-full pt-10 pb-5">
-                <ProceedButton
-                  type="submit"
-                  loading={loading}
-                  variant={isFormFilled ? "gradient" : "gray"}
-                />
-              </div>
+              {isFormFilled ? (
+                <div className="flex items-center justify-center w-full pt-6 pb-5">
+                  <ProceedButton
+                    type="submit"
+                    loading={loading}
+                    variant={isFormFilled ? "gradient" : "gray"}
+                  />
+                </div>
+              ) : null}
             </div>
           </form>
         ) : (

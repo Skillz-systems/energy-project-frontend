@@ -94,18 +94,32 @@ const Settings = observer(() => {
     }));
   };
 
+  const {
+    data: allRoles,
+    isLoading: allRolesLoading,
+    error: allRolesError,
+    mutate: allRolesRefresh,
+  } = useGetRequest("/v1/roles");
+
+  const {
+    data: userData,
+    isLoading: userLoading,
+    mutate: allUsersRefresh,
+  } = useGetRequest("/v1/users");
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     if (!formData) return;
     try {
-      const response = await apiCall({
+      await apiCall({
         endpoint: "/v1/auth/add-user",
         method: "post",
         data: formData,
         successMessage: "User created successfully!",
       });
-      console.log("User creation response:", response);
+      setLoading(false);
+      await allUsersRefresh();
     } catch (error) {
       console.error("User creation failed:", error);
     }
@@ -128,13 +142,6 @@ const Settings = observer(() => {
   const isFormFilled =
     email || password || firstname || lastname || phone || role || location;
 
-  const {
-    data: allRoles,
-    isLoading: allRolesLoading,
-    error: allRolesError,
-    mutate: allRolesRefresh,
-  } = useGetRequest("/v1/roles");
-
   const rolesList = allRoles?.map((item) => ({
     label: item.role,
     value: item.id,
@@ -156,7 +163,7 @@ const Settings = observer(() => {
                 iconBgColor="bg-[#FDEEC2]"
                 topText="All"
                 bottomText="USERS"
-                value={settingsStore.noOfUsers}
+                value={settingsStore.noOfUsers || null}
               />
               <div className="flex w-full items-center justify-between gap-2 sm:w-max sm:justify-start">
                 <ActionButton
@@ -177,11 +184,8 @@ const Settings = observer(() => {
                 }
               >
                 <Routes>
-                  <Route index element={<Profile rolesList={rolesList} />} />
-                  <Route
-                    path="profile"
-                    element={<Profile rolesList={rolesList} />}
-                  />
+                  <Route index element={<Profile />} />
+                  <Route path="profile" element={<Profile />} />
                   <Route
                     path="role-permissions"
                     element={
@@ -197,7 +201,14 @@ const Settings = observer(() => {
                   <Route path="change-password" element={<ChangePassword />} />
                   <Route
                     path="users"
-                    element={<Users rolesList={rolesList} />}
+                    element={
+                      <Users
+                        rolesList={rolesList}
+                        data={userData}
+                        isLoading={userLoading}
+                        refreshTable={allUsersRefresh}
+                      />
+                    }
                   />
                 </Routes>
               </Suspense>

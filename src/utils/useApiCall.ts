@@ -4,6 +4,7 @@ import useSWR from "swr";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Cookies from "js-cookie";
+import { Location, useLocation } from "react-router-dom";
 
 // Create an axios instance
 const baseURL = import.meta.env.VITE_API_URL;
@@ -19,10 +20,12 @@ interface ApiCallOptions {
   data?: any;
   headers?: any;
   successMessage?: string;
+  showToast?: boolean;
 }
 
 export const useApiCall = () => {
   const { token } = useTokens();
+  const location = useLocation();
 
   const apiCall = async ({
     endpoint,
@@ -31,6 +34,7 @@ export const useApiCall = () => {
     data = {},
     headers = {},
     successMessage = "Successful",
+    showToast = true,
   }: ApiCallOptions): Promise<any> => {
     const url = import.meta.env.VITE_API_URL;
     const baseURL = `${url}/api`;
@@ -49,12 +53,12 @@ export const useApiCall = () => {
 
     try {
       const response = await apiClient(requestConfig);
-      if (response.status >= 200 && response.status < 300) {
+      if (response.status >= 200 && response.status < 300 && showToast) {
         toast.success(successMessage);
       }
       return response;
     } catch (error: any) {
-      handleApiError(error);
+      handleApiError(error, location);
       throw error;
     }
   };
@@ -101,7 +105,10 @@ export const useGetRequest = (endpoint: string, revalidate = true) => {
 };
 
 // Error handler to process different error cases
-const handleApiError = (error: AxiosError | Error) => {
+const handleApiError = (
+  error: AxiosError | Error,
+  location?: Location<any>
+) => {
   if (axios.isAxiosError(error)) {
     if (error.response) {
       const status = error.response.status;
@@ -110,9 +117,13 @@ const handleApiError = (error: AxiosError | Error) => {
           toast.error("Bad Request: Please check your input and try again.");
           break;
         case 401:
-          toast.error("Unauthorized: Please log in again.");
-          Cookies.remove("userData");
-          window.location.href = "/login";
+          if (location.pathname === "/login") {
+            return;
+          } else {
+            toast.error("Unauthorized: Please log in again.");
+            Cookies.remove("userData");
+            window.location.href = "/login";
+          }
           break;
         case 403:
           toast.error(
