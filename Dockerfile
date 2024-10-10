@@ -14,7 +14,7 @@ COPY package*.json ./
 RUN chown -R app:app /app
 
 # Install dependencies as root (needed to avoid permission issues during installation)
-USER node
+USER root
 
 # Install dependencies
 RUN npm install
