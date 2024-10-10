@@ -14,6 +14,6 @@ export const formatNumberWithSuffix = (input: number | string) => {
   } else if (num >= 100_000) {
     return (num / 1_000).toFixed(0) + "k+";
   } else {
-    return num.toLocaleString();
+    return num?.toLocaleString();
   }
 };

@@ -9,6 +9,8 @@ export type ModalType = {
   size?: "small" | "medium" | "large";
   layout?: "right" | "default";
   bodyStyle?: string;
+  leftHeaderComponents?: React.ReactNode;
+  rightHeaderComponents?: React.ReactNode;
 };
 
 export const Modal = ({
@@ -18,6 +20,8 @@ export const Modal = ({
   size = "medium",
   layout = "default",
   bodyStyle,
+  leftHeaderComponents,
+  rightHeaderComponents,
 }: ModalType) => {
   const [isClosing, setIsClosing] = useState<boolean>(false);
 
@@ -59,15 +63,15 @@ export const Modal = ({
 
   // Modal size mapping
   const sizeClasses = {
-    small: "w-[25vw]",
-    medium: "w-[50vw]",
-    large: "w-[75vw]",
+    small: "w-[90vw] sm:w-[50vw] md:w-[40vw] lg:w-[30vw] xl:w-[25vw]",
+    medium: "w-[95vw] sm:w-[70vw] md:w-[60vw] lg:w-[50vw] xl:w-[40vw]",
+    large: "w-[100vw] sm:w-[90vw] md:w-[75vw] lg:w-[65vw] xl:w-[50vw]",
   };
 
   // Conditional layout styles
   const layoutClasses = clsx(
     layout === "right" &&
-      "h-[97vh] mr-1.5 bg-white shadow-lg transition-transform transform rounded-md",
+      "h-[100vh] mt-2 mr-1.5 bg-white shadow-lg transition-transform transform rounded-md",
     sizeClasses[size],
     {
       "animate-slide-out-right": isClosing,
@@ -86,22 +90,34 @@ export const Modal = ({
   return (
     <div className={wrapperClasses}>
       <div
-        className="fixed inset-0 z-40 transition-opacity bg-black opacity-50"
+        className={`fixed inset-0 ${
+          layout === "default" ? "z-40" : ""
+        } transition-opacity bg-black opacity-50`}
         onClick={handleClose}
         aria-hidden="true"
       ></div>
 
       {layout === "right" ? (
         <div className={layoutClasses} role="dialog" aria-modal="true">
-          <header className="flex items-center justify-end p-2 h-[40px] border-b-[0.6px] border-b-strokeGreyThree">
-            <button
-              onClick={handleClose}
-              className="flex items-center justify-center w-[24px] h-[24px] bg-white border border-strokeGreyTwo rounded-full top-4 right-4"
-              aria-label="Close modal"
-              title="Close modal"
-            >
-              <MdCancel className="text-error" />
-            </button>
+          <header
+            className={`flex items-center p-2 h-[40px] border-b-[0.6px] border-b-strokeGreyThree ${
+              leftHeaderComponents ? "justify-between" : "justify-end"
+            }`}
+          >
+            <div className="flex items-center gap-1">
+              {leftHeaderComponents}
+            </div>
+            <div className="flex items-center gap-1">
+              {rightHeaderComponents}
+              <button
+                onClick={handleClose}
+                className="flex items-center justify-center w-[24px] h-[24px] bg-white border border-strokeGreyTwo rounded-full top-4 right-4 hover:bg-slate-100"
+                aria-label="Close modal"
+                title="Close modal"
+              >
+                <MdCancel className="text-error" />
+              </button>
+            </div>
           </header>
 
           <section className={`${bodyStyle} h-full overflow-auto`}>
@@ -109,7 +125,7 @@ export const Modal = ({
           </section>
         </div>
       ) : (
-        <section className={`${bodyStyle}h-full overflow-auto`}>
+        <section className={`${bodyStyle} h-full overflow-auto`}>
           {children}
         </section>
       )}
