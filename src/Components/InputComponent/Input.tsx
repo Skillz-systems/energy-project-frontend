@@ -1,7 +1,6 @@
 import { ChangeEvent, MouseEvent, ReactNode } from "react";
 import { CgAsterisk, CgChevronDown } from "react-icons/cg";
 import { useState } from "react";
-import React from "react";
 
 type AllowedInputTypes =
   | "text"
@@ -30,9 +29,9 @@ export type InputType = {
   required: boolean;
   checked?: boolean;
   readOnly?: boolean;
-  icon?: ReactNode;
-  iconStyle?: string;
-  iconPosition?: "left" | "right";
+  iconLeft?: ReactNode;
+  iconRight?: ReactNode;
+  // iconCTA?
   style?: string;
   errorMessage?: string;
 };
@@ -49,9 +48,8 @@ export const Input = ({
   required = false,
   checked,
   readOnly = false,
-  icon,
-  iconStyle,
-  iconPosition = "left",
+  iconLeft,
+  iconRight,
   style,
   errorMessage,
 }: InputType) => {
@@ -73,10 +71,10 @@ export const Input = ({
         <div
           className={`relative autofill-parent
           ${type === "hidden" ? "hidden" : "flex"} 
-        ${style} ${iconPosition === "left" ? "flex-row" : "flex-row-reverse"} 
+        ${style} 
         ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
         items-center w-full max-w-[400px] h-[48px] px-[1.1em] py-[1.25em] 
-        gap-2 rounded-3xl border-[0.6px] border-strokeGrey
+        gap-2 rounded-3xl border-[0.6px]
         transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent `}
         >
           {value && (
@@ -88,7 +86,7 @@ export const Input = ({
               {label.toUpperCase()}
             </span>
           )}
-          {icon && <span className={`${iconStyle}`}>{icon}</span>}
+          {iconLeft && iconLeft}
           {required && (
             <span className="mb-2 text-lg text-red-600">
               <CgAsterisk />
@@ -109,6 +107,7 @@ export const Input = ({
             min={0}
             className="w-full text-sm font-semibold text-textBlack placeholder:text-textGrey placeholder:font-normal placeholder:italic"
           />
+          {iconRight && iconRight}
         </div>
         {errorMessage && (
           <p className="mt-1 px-[1.1em] text-sm text-errorTwo font-medium">
@@ -208,6 +207,7 @@ export type SelectOption = {
 };
 
 export type SelectInputType = {
+  label: string;
   name: string;
   options: SelectOption[];
   value: string;
@@ -219,9 +219,11 @@ export type SelectInputType = {
   icon?: ReactNode;
   iconStyle?: string;
   iconPosition?: "left" | "right";
+  // selectmultipl
 };
 
 export const SelectInput = ({
+  label,
   name,
   options,
   value,
@@ -235,33 +237,49 @@ export const SelectInput = ({
 }: SelectInputType) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleSelectChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    setIsOpen(false);
-    onChange(event);
-  };
-
   return (
     <div
       className={`relative flex items-center 
         ${style} 
         ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"} 
         w-full max-w-[400px] h-[48px] px-[1.1em] py-[1.25em] 
-        rounded-3xl text-sm text-textGrey border-[0.6px] border-strokeGrey 
+        rounded-3xl text-sm text-textGrey border-[0.6px] gap-2
         transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
-        cursor-pointer`}
+        cursor-pointer ${value ? "border-strokeCream" : "border-strokeGrey"}`}
       onClick={() => setIsOpen(!isOpen)}
     >
+      {value && (
+        <span
+          className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] 
+            transition-opacity duration-500 ease-in-out
+            ${value ? "opacity-100" : "opacity-0"}`}
+        >
+          {label.toUpperCase()}
+        </span>
+      )}
+      {required && (
+        <span className="mb-2 text-lg text-red-600">
+          <CgAsterisk />
+        </span>
+      )}
       <select
         name={name}
         value={value}
-        onChange={handleSelectChange}
+        onChange={(e) => {
+          onChange(e);
+          setIsOpen(false);
+        }}
         disabled={disabled}
         required={required}
-        className="w-full bg-transparent outline-none appearance-none"
+        className="w-full bg-transparent text-textBlack font-semibold outline-none appearance-none"
       >
         {placeholder && <option value="">{placeholder}</option>}
         {options.map((option) => (
-          <option key={option.value} value={option.value}>
+          <option
+            key={option.value}
+            value={option.value}
+            className="capitalize"
+          >
             {option.label}
           </option>
         ))}
@@ -375,8 +393,11 @@ export const ToggleInput = ({
 
   const handleToggle = () => {
     if (!disabled) {
-      setIsChecked((prev) => !prev);
-      onChange(!isChecked);
+      setIsChecked((prev) => {
+        const newChecked = !prev;
+        onChange(newChecked);
+        return newChecked;
+      });
     }
   };
 
@@ -388,13 +409,15 @@ export const ToggleInput = ({
       onClick={handleToggle}
     >
       <div
-        className={`absolute inset-y-1 inset-x-1 rounded-full transition-colors duration-300 ${
-          isChecked ? "bg-blue-500" : "bg-gray-300"
+        className={`absolute inset-y-1 inset-x-1 rounded-full transition-colors duration-300 border-[0.4px] ${
+          isChecked
+            ? "bg-[#FFF3D5] border-[#A58730]"
+            : "bg-[#F6F8FA] border-[#CCD0DC]"
         }`}
       ></div>
       <div
-        className={`absolute top-2.5 left-2.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${
-          isChecked ? "transform translate-x-6" : ""
+        className={`absolute top-2.5 left-2.5 w-5 h-5 rounded-full shadow-md transition-transform duration-300 ${
+          isChecked ? "transform translate-x-6 bg-[#A58730]" : "bg-[#CCD0DC]"
         }`}
       ></div>
     </div>

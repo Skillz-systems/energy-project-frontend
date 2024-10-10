@@ -1,12 +1,9 @@
-// Import local stores
+import { SettingsStore } from "./SettingsStore";
 
 function createRootStore() {
   const rootStore = {
-    // settingsStore: new SettingsStore(this),
+    settingsStore: SettingsStore,
   };
-
-  // Pass rootStore to each individual store
-  //   rootStore.settingsStore = new SettingsStore(rootStore);
 
   return rootStore;
 }

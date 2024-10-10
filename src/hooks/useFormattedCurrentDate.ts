@@ -32,3 +32,7 @@ export const useFormattedCurrentDate = () => {
 
   return formattedDate;
 };
+
+export const useFormattedDate =()=> {
+
+}

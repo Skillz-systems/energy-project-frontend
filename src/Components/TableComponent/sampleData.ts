@@ -79,3 +79,48 @@ export const generateAgentEntries = (count: number): EntryTwo[] => {
 
   return entries;
 };
+
+type EntryThree = {
+  no: number;
+  name: string;
+  email: string;
+  location: string;
+  role: string;
+  status: string;
+};
+
+// Generate 'n' random entries
+export const generateUserEntries = (count: number): EntryThree[] => {
+  const names = ["Naomi Gambo", "John Doe", "Mary Jane", "David Smith"];
+  const emails = [
+    "naomigambo@gmail.com",
+    "johndoe@gmail.com",
+    "maryjane@gmail.com",
+    "davidsmith@gmail.com",
+  ];
+  const locations = ["Asaba", "Lagos", "Abuja", "Makurdi"];
+  const roles = [
+    "Super Admin",
+    "Admin",
+    "Support",
+    "Inventory",
+    "Account",
+    "Sales",
+  ];
+  const statuses = ["ACTIVE", "INACTIVE"];
+
+  const entries: EntryThree[] = [];
+
+  for (let i = 1; i <= count; i++) {
+    entries.push({
+      no: i,
+      name: getRandomItem(names),
+      email: getRandomItem(emails),
+      location: getRandomItem(locations),
+      role: getRandomItem(roles),
+      status: getRandomItem(statuses),
+    });
+  }
+
+  return entries;
+};

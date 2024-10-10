@@ -11,7 +11,6 @@ import customer from "../../assets/table/customer.svg";
 import call from "../../assets/table/call.svg";
 import message from "../../assets/table/message.svg";
 import setting from "../../assets/table/setting.svg";
-import React from 'react';
 
 export default {
   title: "Components/Table",
