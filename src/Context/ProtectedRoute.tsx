@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Navigate, useLocation, Outlet } from "react-router-dom";
 import useTokens from "../hooks/useTokens";
 import { toast } from "react-toastify";
@@ -8,31 +8,29 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const [redirect, setRedirect] = useState<boolean>(false);
-
   const { token } = useTokens();
   const location = useLocation();
 
   useEffect(() => {
     if (!token) {
-      setRedirect(true);
       toast.warning(`You are not Logged In!`);
     }
   }, [token]);
 
-  if (redirect) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
+  const isLoginPage = location.pathname === "/login";
 
   if (!token) {
-    return <div></div>;
-  } else {
-    return <>{children}</>;
+    // If the user is not logged in and is not on the login page, redirect to login
+    if (!isLoginPage) {
+      return <Navigate to="/login" state={{ from: location }} replace />;
+    }
+    // If the user is on the login page and not logged in, just render children
+    return null;
   }
+
+  // If the user is logged in, render the children
+  return <>{children}</>;
 };
-
-export default ProtectedRoute;
-
 
 export const ProtectedRouteWrapper = () => {
   return (
@@ -41,3 +39,5 @@ export const ProtectedRouteWrapper = () => {
     </ProtectedRoute>
   );
 };
+
+export default ProtectedRoute;

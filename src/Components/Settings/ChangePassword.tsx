@@ -6,7 +6,6 @@ import eyeopen from "../../assets/eyeopen.svg";
 import { Input } from "../InputComponent/Input";
 import { useApiCall } from "../../utils/useApiCall";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
-import useTokens from "../../hooks/useTokens";
 
 const changePasswordSchema = z
   .object({
@@ -33,7 +32,6 @@ const changePasswordSchema = z
   });
 
 const ChangePassword = () => {
-  const { token, id } = useTokens();
   const { apiCall } = useApiCall();
   const [formData, setFormData] = useState({
     oldPassword: "",
@@ -42,11 +40,26 @@ const ChangePassword = () => {
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [showPassword, setShowPassword] = useState(false);
+  const [passwordVisibility, setPasswordVisibility] = useState({
+    oldPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (errors[name]) {
+      setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
+    }
+  };
+
+  const togglePasswordVisibility = (field: string) => {
+    setPasswordVisibility((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,19 +67,32 @@ const ChangePassword = () => {
     setErrors({});
 
     setLoading(true);
+    // Remove all spaces from password fields
+    if (formData) {
+      formData.oldPassword = formData.oldPassword.replace(/\s+/g, "");
+      formData.newPassword = formData.newPassword.replace(/\s+/g, "");
+      formData.confirmPassword = formData.confirmPassword.replace(/\s+/g, "");
+    }
+
     try {
       // Validate form data using Zod schema
       changePasswordSchema.parse(formData);
 
       // Use apiCall to handle the password change
       await apiCall({
-        endpoint: `/v1/auth/create-user-password/${id}/${token}`,
+        endpoint: `/v1/auth/change-password`,
         method: "post",
         data: {
+          oldPassword: formData.oldPassword,
           password: formData.newPassword,
           confirmPassword: formData.confirmPassword,
         },
         successMessage: "Password changed successfully!",
+      });
+      setFormData({
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -77,8 +103,9 @@ const ChangePassword = () => {
         });
         setErrors(validationErrors);
       }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const isFormFilled =
@@ -99,7 +126,7 @@ const ChangePassword = () => {
           Click any field below to make changes
         </p>
         <Input
-          type={showPassword ? "text" : "password"}
+          type={passwordVisibility.oldPassword ? "text" : "password"}
           name="oldPassword"
           label="Old Password"
           value={formData.oldPassword}
@@ -112,14 +139,14 @@ const ChangePassword = () => {
           errorMessage={errors.oldPassword || ""}
           iconRight={
             <img
-              src={showPassword ? eyeopen : eyeclosed}
+              src={passwordVisibility.oldPassword ? eyeopen : eyeclosed}
               className="w-[16px] cursor-pointer"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => togglePasswordVisibility("oldPassword")}
             />
           }
         />
         <Input
-          type={showPassword ? "text" : "password"}
+          type={passwordVisibility.newPassword ? "text" : "password"}
           name="newPassword"
           label="New Password"
           value={formData.newPassword}
@@ -132,14 +159,14 @@ const ChangePassword = () => {
           errorMessage={errors.newPassword || ""}
           iconRight={
             <img
-              src={showPassword ? eyeopen : eyeclosed}
+              src={passwordVisibility.newPassword ? eyeopen : eyeclosed}
               className="w-[16px] cursor-pointer"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => togglePasswordVisibility("newPassword")}
             />
           }
         />
         <Input
-          type={showPassword ? "text" : "password"}
+          type={passwordVisibility.confirmPassword ? "text" : "password"}
           name="confirmPassword"
           label="Confirm New Password"
           value={formData.confirmPassword}
@@ -152,9 +179,9 @@ const ChangePassword = () => {
           errorMessage={errors.confirmPassword || ""}
           iconRight={
             <img
-              src={showPassword ? eyeopen : eyeclosed}
+              src={passwordVisibility.confirmPassword ? eyeopen : eyeclosed}
               className="w-[16px] cursor-pointer"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => togglePasswordVisibility("confirmPassword")}
             />
           }
         />
