@@ -56,7 +56,13 @@ const Users = observer(
     const [queryValue, setQueryValue] = useState<string>("");
     const [queryData, setQueryData] = useState<any>(null);
     const [queryLoading, setQueryLoading] = useState<boolean>(false);
+    const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
 
+    const buildQueryString = () => {
+      const endpoint = `/v1/users?search=${encodeURIComponent(query)}`;
+      return endpoint;
+    };
+    
     useEffect(() => {
       if (data?.total) {
         settingsStore.updateUserCount(data.total);
@@ -73,22 +79,21 @@ const Users = observer(
             : []),
         ],
         onClickLink: async (index: number) => {
-          // Get the selected role id by using index-1 (since "All Roles" is at index 0)
-          const selectedRole = rolesList[index - 1];
-          const roleId = selectedRole.value;
+          setIsSearchQuery(false);
+          let roleId = "";
+          if (index !== 0) {
+            const selectedRole = rolesList[index - 1];
+            roleId = selectedRole?.value;
+            setQueryValue(roleId);
+          } else {
+            setQueryValue("");
+          }
           setQueryLoading(true);
-          setQueryValue(roleId);
-
-          // If "All Roles" is selected (index 0), reset or handle accordingly
           try {
             const response = await apiCall({
               endpoint:
                 index === 0 ? "/v1/users" : `/v1/users?roleId=${roleId}`,
               method: "get",
-              successMessage:
-                index === 0
-                  ? "Fetched all users successfully!"
-                  : `Users with the role ${selectedRole.label} fetched successfully!`,
               showToast: false,
             });
             setQueryData(response.data);
@@ -103,6 +108,8 @@ const Users = observer(
       {
         name: "Search",
         onSearch: async (query: string) => {
+          setIsSearchQuery(true);
+          if (queryData) setQueryData(null);
           setQueryLoading(true);
           setQueryValue(query);
           try {
@@ -205,6 +212,7 @@ const Users = observer(
               await refreshTable();
               setQueryData(null);
             }}
+            queryValue={isSearchQuery ? queryValue : ""}
           />
         </div>
         <UserModal

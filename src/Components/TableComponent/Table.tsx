@@ -33,6 +33,7 @@ export type TableType = {
   cardComponent?: (data: any[]) => React.ReactNode;
   loading: boolean;
   refreshTable?: () => Promise<any>;
+  queryValue: string;
 };
 
 export const Table = (props: TableType) => {
@@ -46,6 +47,7 @@ export const Table = (props: TableType) => {
     cardComponent,
     loading,
     refreshTable,
+    queryValue,
   } = props;
   const [hoveredCell, setHoveredCell] = useState<{
     rowIndex: number;
@@ -161,6 +163,8 @@ export const Table = (props: TableType) => {
                         key={index}
                         name={filter.name}
                         onSearch={filter.onSearch}
+                        queryValue={queryValue}
+                        refreshTable={refreshTable}
                       />
                     ) : (
                       <DropDown key={index} {...filter} />
