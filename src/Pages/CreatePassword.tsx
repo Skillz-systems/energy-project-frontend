@@ -6,13 +6,36 @@ import eyeclosed from "../assets/eyeclosed.svg";
 import eyeopen from "../assets/eyeopen.svg";
 import { Input } from "../Components/InputComponent/Input";
 import ProceedButton from "../Components/ProceedButtonComponent/ProceedButtonComponent";
-import { useApiCall, useGetRequest } from "../utils/useApiCall";
+import { useApiCall } from "../utils/useApiCall";
 
 const LoginPage = () => {
   const { id: userId, token: remember_token } = useParams();
-  const { data, error, isLoading } = useGetRequest(
-    userId ? `/v1/users/single/${userId}` : null
-  );
+  const [userLoading, setUserLoading] = useState<boolean>(false);
+  const [userInfo, setUserInfo] = useState(null);
+  const [userInfoError, setUserInfoError] = useState(null);
+
+  const getUserInfo = async () => {
+    setUserLoading(true);
+    try {
+      const response = await apiCall({
+        endpoint: `/v1/auth/verify-reset-token/${userId}/${remember_token}`,
+        method: "post",
+        headers: {},
+      });
+      console.log(response);
+      setUserInfo(response.data);
+    } catch (error) {
+      console.error(error);
+      setUserInfoError(error);
+    } finally {
+      setUserLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getUserInfo();
+  });
+
   const location = useLocation();
   const navigate = useNavigate();
   const { apiCall } = useApiCall();
@@ -40,7 +63,7 @@ const LoginPage = () => {
     };
 
     try {
-      const response = await apiCall({
+      await apiCall({
         endpoint: isResetPasswordRoute
           ? "/v1/auth/reset-password"
           : `/v1/auth/create-user-password/${userId}/${remember_token}`,
@@ -52,7 +75,6 @@ const LoginPage = () => {
           : "Password succesfully created!",
       });
       navigate("/login");
-      console.log("Response:", response);
     } catch (error) {
       console.error("Error:", error);
     }
@@ -65,7 +87,7 @@ const LoginPage = () => {
     }
   }, [userId, remember_token]);
 
-  if (error) return <div>Oops Something went wrong</div>;
+  if (userInfoError) return <div>Oops Something went wrong</div>;
 
   return (
     <main className="relative flex flex-col items-center justify-center gap-[60px] px-4 py-16 min-h-screen">
@@ -80,9 +102,9 @@ const LoginPage = () => {
       <section className="flex w-full flex-col items-center justify-center gap-2 z-10 max-w-[500px]">
         <div className="flex flex-col items-center justify-center">
           <h1 className="text-[32px] text-primary font-medium font-secondary">
-            {isLoading
+            {userLoading
               ? "Welcome"
-              : `Hello, ${data?.firstname} ${data?.lastname}`}
+              : `Hello, ${userInfo?.firstname} ${userInfo?.lastname}`}
           </h1>
           <em className="text-xs text-textDarkGrey text-center max-w-[220px]">
             {isResetPasswordRoute

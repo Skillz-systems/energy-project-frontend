@@ -2,7 +2,6 @@ import LoadingSpinner from "../Loaders/LoadingSpinner";
 import { Modal } from "../ModalComponent/Modal";
 import { useApiCall, useGetRequest } from "../../utils/useApiCall";
 import roletwo from "../../assets/table/roletwo.svg";
-import edit from "../../assets/edit.svg";
 import call from "../../assets/settings/call.svg";
 import message from "../../assets/settings/message.svg";
 import user from "../../assets/settings/user.svg";
@@ -16,7 +15,8 @@ import { DropDown } from "../DropDownComponent/DropDown";
 const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }) => {
   const { apiCall } = useApiCall();
   const { data, isLoading, error, mutate } = useGetRequest(
-    `/v1/users/single/${userID}`
+    `/v1/users/single/${userID}`,
+    false
   );
   const [activeNav, setActiveNav] = useState<number>(0);
   const [formData, setFormData] = useState({
@@ -26,7 +26,7 @@ const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }) => {
     phone: data?.phone || "",
     location: data?.location || "",
   });
-  const [designation, setDesignation] = useState<string>(data?.role?.id);
+  const [designation, setDesignation] = useState<string>("");
   const [displayInput, setDisplayInput] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
@@ -67,7 +67,17 @@ const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }) => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    if (designation !== data?.role?.role) {
+
+    // Remove all spaces from each field in formData
+    if (formData) {
+      Object.keys(formData).forEach((key) => {
+        if (typeof formData[key] === "string") {
+          formData[key] = formData[key].replace(/\s+/g, "");
+        }
+      });
+    }
+
+    if (designation) {
       try {
         await apiCall({
           endpoint: `/v1/roles/${data?.id}/assign`,
@@ -75,7 +85,7 @@ const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }) => {
           data: {
             roleId: designation,
           },
-          successMessage: "User role assigned successfully!",
+          successMessage: "",
         });
       } catch (error) {
         console.error(error);
@@ -118,6 +128,7 @@ const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }) => {
         phone: data?.phone || "",
         location: data?.location || "",
       });
+      setDesignation(data?.role?.id || "");
     }
   };
 
@@ -147,6 +158,8 @@ const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }) => {
           method: "delete",
           successMessage: "User deleted successfully!",
         });
+        setIsOpen(false);
+        refreshTable();
       } catch (error) {
         console.error("User deletion failed:", error);
       }
@@ -173,7 +186,7 @@ const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }) => {
       }
     },
     defaultStyle: true,
-    customButton: <Icon icon={edit} />,
+    showCustomButton: true,
   };
 
   return (
@@ -191,7 +204,9 @@ const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }) => {
             </p>
             <p
               className={`flex items-center justify-center gap-1 bg-[#F6F8FA] w-max px-2 py-1 text-xs ${
-                data?.status === "active" ? "text-success" : "text-errorTwo"
+                data?.status.toLowerCase() === "active"
+                  ? "text-success"
+                  : "text-errorTwo"
               } border-[0.4px] border-strokeGreyTwo rounded-full uppercase`}
             >
               <GoDotFill />
@@ -304,7 +319,7 @@ const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }) => {
                     ) : (
                       <select
                         name="role"
-                        value={designation}
+                        value={designation || data.role.id}
                         onChange={(e) => {
                           setDesignation(e.target.value);
                         }}
@@ -369,7 +384,13 @@ const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }) => {
                       <p className="bg-[#EFF2FF] px-2 py-1 text-xs text-[#3951B6] rounded-full">
                         Status
                       </p>
-                      <p className="flex items-center justify-center gap-1 bg-[#F6F8FA] w-max px-2 py-1 text-xs text-success border-[0.4px] border-strokeGreyTwo rounded-full uppercase">
+                      <p
+                        className={`flex items-center justify-center gap-1 bg-[#F6F8FA] w-max px-2 py-1 text-xs border-[0.4px] border-strokeGreyTwo rounded-full uppercase ${
+                          data?.status?.toLowerCase() === "active"
+                            ? "text-success"
+                            : "text-errorTwo"
+                        }`}
+                      >
                         <GoDotFill />
                         {data.status}
                       </p>

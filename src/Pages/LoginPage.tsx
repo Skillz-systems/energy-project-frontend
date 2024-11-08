@@ -18,6 +18,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,13 +39,13 @@ const LoginPage = () => {
         token: response.headers.access_token,
         ...response.data,
       };
-      console.log(userData);
       Cookies.set("userData", JSON.stringify(userData), {
         expires: 7,
       }); // Token expires in 7 days
       navigate("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);
+      setErrorMessage(error?.response?.data?.message);
     }
     setLoading(false);
   };
@@ -53,7 +54,7 @@ const LoginPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await apiCall({
+      await apiCall({
         endpoint: "/v1/auth/forgot-password",
         method: "post",
         data: {
@@ -63,7 +64,6 @@ const LoginPage = () => {
         successMessage: "Password reset email sent!",
       });
 
-      console.log("Forgot password response:", response);
     } catch (error) {
       console.error("Forgot password failed:", error);
     }
@@ -106,7 +106,10 @@ const LoginPage = () => {
               name="email"
               label="EMAIL"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setErrorMessage("");
+              }}
               placeholder="Email"
               required={true}
               errorMessage=""
@@ -120,7 +123,10 @@ const LoginPage = () => {
                 name="password"
                 label="PASSWORD"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setErrorMessage("");
+                }}
                 placeholder="Password"
                 required={true}
                 errorMessage=""
@@ -135,6 +141,9 @@ const LoginPage = () => {
                   />
                 }
               />
+            ) : null}
+            {errorMessage ? (
+              <p className="text-md font-medium mt-2">{errorMessage}</p>
             ) : null}
             <div className="flex flex-col items-center justify-center gap-8 pt-8">
               <ProceedButton

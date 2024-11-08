@@ -4,7 +4,6 @@ import addCircleGold from "../../assets/settings/addCircleGold.svg";
 import { GoDotFill } from "react-icons/go";
 import { Modal } from "../ModalComponent/Modal";
 import { Input, ToggleInput } from "../InputComponent/Input";
-import edit from "../../assets/edit.svg";
 import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
 import role from "../../assets/table/role.svg";
 import roletwo from "../../assets/table/roletwo.svg";
@@ -14,7 +13,7 @@ import LoadingSpinner from "../Loaders/LoadingSpinner";
 import axios from "axios";
 import useTokens from "../../hooks/useTokens";
 import { formatDateTime } from "../../utils/helpers";
-import UserModal, { Icon } from "./UserModal";
+import UserModal from "./UserModal";
 import { DropDown } from "../DropDownComponent/DropDown";
 
 const columnList = ["TITLE", "ASSIGNED USERS", "PERMISSIONS", "ACTIONS"];
@@ -54,7 +53,7 @@ const RoleAndPermissions = ({
       );
       data = response;
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setSingleLoading(false);
     }
@@ -118,7 +117,7 @@ const RoleAndPermissions = ({
     if (!selectedRole) return;
 
     try {
-      const response = await apiCall({
+      await apiCall({
         endpoint: "/v1/roles",
         method: "post",
         data: {
@@ -128,8 +127,6 @@ const RoleAndPermissions = ({
         },
         successMessage: "Role created successfully!",
       });
-
-      console.log("Role creation response:", response);
     } catch (error) {
       console.error("Role creation failed:", error);
     } finally {
@@ -191,7 +188,7 @@ const RoleAndPermissions = ({
       }
     },
     defaultStyle: true,
-    customButton: <Icon icon={edit} />,
+    showCustomButton: true,
   };
 
   const userCount = singleRoleData?.users?.length;
@@ -286,7 +283,7 @@ const RoleAndPermissions = ({
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} layout="right">
         {modalInfo === "edit-permissions" ? (
           <form
-            className="flex flex-col bg-white"
+            className="flex flex-col bg-white pb-8"
             onSubmit={handleSubmitRoleCreation}
           >
             <div
@@ -335,13 +332,15 @@ const RoleAndPermissions = ({
                   ))
                 )}
               </div>
-              <div className="flex items-center justify-center w-full pt-10 pb-5">
-                <ProceedButton
-                  type="submit"
-                  loading={loading}
-                  variant={isFormFilled ? "gradient" : "gray"}
-                />
-              </div>
+              {isFormFilled ? (
+                <div className="flex items-center justify-center w-full pt-6 pb-5">
+                  <ProceedButton
+                    type="submit"
+                    loading={loading}
+                    variant={isFormFilled ? "gradient" : "gray"}
+                  />
+                </div>
+              ) : null}
             </div>
           </form>
         ) : (

@@ -7,7 +7,6 @@ import { TitlePill } from "../Components/TitlePillComponent/TitlePill";
 import settings from "../assets/settings/settings.svg";
 import ActionButton from "../Components/ActionButtonComponent/ActionButton";
 import circleAction from "../assets/settings/addCircle.svg";
-import edit from "../assets/edit.svg";
 import { DropDown } from "../Components/DropDownComponent/DropDown";
 import HeaderBadge from "../Components/HeaderBadgeComponent/HeaderBadge";
 import settingsbadge from "../assets/settings/settingsbadge.png";
@@ -77,11 +76,7 @@ const Settings = observer(() => {
           break;
       }
     },
-    customButton: (
-      <div className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom transition-all hover:bg-[#E2E4EB]">
-        <img src={edit} alt="Edit" className="w-[16px] cursor-pointer" />
-      </div>
-    ),
+    showCustomButton: true,
   };
 
   const handleInputChange = (
@@ -94,18 +89,32 @@ const Settings = observer(() => {
     }));
   };
 
+  const {
+    data: allRoles,
+    isLoading: allRolesLoading,
+    error: allRolesError,
+    mutate: allRolesRefresh,
+  } = useGetRequest("/v1/roles", true, 60000);
+
+  const {
+    data: userData,
+    isLoading: userLoading,
+    mutate: allUsersRefresh,
+  } = useGetRequest("/v1/users", true, 60000);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     if (!formData) return;
     try {
-      const response = await apiCall({
+      await apiCall({
         endpoint: "/v1/auth/add-user",
         method: "post",
         data: formData,
         successMessage: "User created successfully!",
       });
-      console.log("User creation response:", response);
+      setLoading(false);
+      await allUsersRefresh();
     } catch (error) {
       console.error("User creation failed:", error);
     }
@@ -128,13 +137,6 @@ const Settings = observer(() => {
   const isFormFilled =
     email || password || firstname || lastname || phone || role || location;
 
-  const {
-    data: allRoles,
-    isLoading: allRolesLoading,
-    error: allRolesError,
-    mutate: allRolesRefresh,
-  } = useGetRequest("/v1/roles");
-
   const rolesList = allRoles?.map((item) => ({
     label: item.role,
     value: item.id,
@@ -156,7 +158,7 @@ const Settings = observer(() => {
                 iconBgColor="bg-[#FDEEC2]"
                 topText="All"
                 bottomText="USERS"
-                value={settingsStore.noOfUsers}
+                value={settingsStore.noOfUsers || null}
               />
               <div className="flex w-full items-center justify-between gap-2 sm:w-max sm:justify-start">
                 <ActionButton
@@ -177,11 +179,8 @@ const Settings = observer(() => {
                 }
               >
                 <Routes>
-                  <Route index element={<Profile rolesList={rolesList} />} />
-                  <Route
-                    path="profile"
-                    element={<Profile rolesList={rolesList} />}
-                  />
+                  <Route index element={<Profile />} />
+                  <Route path="profile" element={<Profile />} />
                   <Route
                     path="role-permissions"
                     element={
@@ -197,7 +196,14 @@ const Settings = observer(() => {
                   <Route path="change-password" element={<ChangePassword />} />
                   <Route
                     path="users"
-                    element={<Users rolesList={rolesList} />}
+                    element={
+                      <Users
+                        rolesList={rolesList}
+                        data={userData}
+                        isLoading={userLoading}
+                        refreshTable={allUsersRefresh}
+                      />
+                    }
                   />
                 </Routes>
               </Suspense>
