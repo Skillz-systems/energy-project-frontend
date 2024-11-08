@@ -7,7 +7,6 @@ import { TitlePill } from "../Components/TitlePillComponent/TitlePill";
 import settings from "../assets/settings/settings.svg";
 import ActionButton from "../Components/ActionButtonComponent/ActionButton";
 import circleAction from "../assets/settings/addCircle.svg";
-import edit from "../assets/edit.svg";
 import { DropDown } from "../Components/DropDownComponent/DropDown";
 import HeaderBadge from "../Components/HeaderBadgeComponent/HeaderBadge";
 import settingsbadge from "../assets/settings/settingsbadge.png";
@@ -77,11 +76,7 @@ const Settings = observer(() => {
           break;
       }
     },
-    customButton: (
-      <div className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom transition-all hover:bg-[#E2E4EB]">
-        <img src={edit} alt="Edit" className="w-[16px] cursor-pointer" />
-      </div>
-    ),
+    showCustomButton: true,
   };
 
   const handleInputChange = (

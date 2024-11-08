@@ -49,3 +49,7 @@ export function capitalizeFirstLetter(str) {
   if (!str) return str; // Return the original string if it's empty or undefined
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
+
+export function formatNumberWithCommas(number: number) {
+  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}

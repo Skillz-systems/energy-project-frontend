@@ -2,7 +2,6 @@ import LoadingSpinner from "../Loaders/LoadingSpinner";
 import { Modal } from "../ModalComponent/Modal";
 import { useApiCall, useGetRequest } from "../../utils/useApiCall";
 import roletwo from "../../assets/table/roletwo.svg";
-import edit from "../../assets/edit.svg";
 import call from "../../assets/settings/call.svg";
 import message from "../../assets/settings/message.svg";
 import user from "../../assets/settings/user.svg";
@@ -187,7 +186,7 @@ const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }) => {
       }
     },
     defaultStyle: true,
-    customButton: <Icon icon={edit} />,
+    showCustomButton: true,
   };
 
   return (

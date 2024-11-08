@@ -4,7 +4,6 @@ import addCircleGold from "../../assets/settings/addCircleGold.svg";
 import { GoDotFill } from "react-icons/go";
 import { Modal } from "../ModalComponent/Modal";
 import { Input, ToggleInput } from "../InputComponent/Input";
-import edit from "../../assets/edit.svg";
 import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
 import role from "../../assets/table/role.svg";
 import roletwo from "../../assets/table/roletwo.svg";
@@ -14,7 +13,7 @@ import LoadingSpinner from "../Loaders/LoadingSpinner";
 import axios from "axios";
 import useTokens from "../../hooks/useTokens";
 import { formatDateTime } from "../../utils/helpers";
-import UserModal, { Icon } from "./UserModal";
+import UserModal from "./UserModal";
 import { DropDown } from "../DropDownComponent/DropDown";
 
 const columnList = ["TITLE", "ASSIGNED USERS", "PERMISSIONS", "ACTIONS"];
@@ -189,7 +188,7 @@ const RoleAndPermissions = ({
       }
     },
     defaultStyle: true,
-    customButton: <Icon icon={edit} />,
+    showCustomButton: true,
   };
 
   const userCount = singleRoleData?.users?.length;
