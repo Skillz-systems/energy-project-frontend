@@ -38,7 +38,7 @@ function App() {
             {/* Fallback Route */}
             <Route path="*" element={<PageNotFound />} />
           </Routes>
-        <ToastContainer autoClose={1000} />
+        <ToastContainer autoClose={2000} />
       </ErrorProvider>
     </>
   );

@@ -4,6 +4,8 @@ import dateIcon from "../../assets/table/date.svg";
 import { Modal } from "../ModalComponent/Modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { Icon } from "../Settings/UserModal";
+import edit from "../../assets/edit.svg";
 
 export type DropDownType = {
   name?: string;
@@ -14,7 +16,7 @@ export type DropDownType = {
   isSearch?: boolean;
   isDate?: boolean;
   onDateClick?: (date: string) => void;
-  customButton?: React.ReactNode;
+  showCustomButton?: boolean;
   defaultStyle?: boolean;
 };
 
@@ -31,7 +33,7 @@ export const DropDown = (props: DropDownType) => {
     dropDownContainerStyle,
     isDate,
     onDateClick,
-    customButton,
+    showCustomButton = false,
     defaultStyle,
   } = props;
   const [linkIndex, setLinkIndex] = useState<number>(0);
@@ -61,9 +63,9 @@ export const DropDown = (props: DropDownType) => {
 
   return (
     <div className="relative flex w-max">
-      {customButton ? (
+      {showCustomButton ? (
         <div onClick={handleClick} className="w-max">
-          {customButton}
+          <Icon icon={edit} />
         </div>
       ) : (
         <button
@@ -109,11 +111,11 @@ export const DropDown = (props: DropDownType) => {
             {items?.map((item, index) => (
               <li
                 key={index}
-                className={`flex items-center justify-between h-[24px] px-2 py-2.5 text-xs rounded-full cursor-pointer 
+                className={`flex items-center justify-between h-[24px] px-2 py-2.5 text-xs rounded-full cursor-pointer border-[0.4px] border-transparent
                 ${
                   linkIndex === index && showIcon && !defaultStyle
                     ? "bg-paleLightBlue text-textBlack"
-                    : "hover:bg-gray-100 text-textDarkGrey"
+                    : "hover:bg-gray-100 text-textDarkGrey hover:border-strokeGreyTwo"
                 }`}
                 onClick={() => {
                   setShowIcon(true);

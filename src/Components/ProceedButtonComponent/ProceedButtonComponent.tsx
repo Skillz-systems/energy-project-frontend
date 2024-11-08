@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 interface ButtonProps {
   type?: "reset" | "submit" | "button";
@@ -15,24 +15,31 @@ const ProceedButton: React.FC<ButtonProps> = ({
   variant = "yellow",
   loading,
 }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
   // Define different styles for each variant
   const variantClasses = {
     yellow:
-      "bg-[#FEF5DA] border border-[#A58730]/20 shadow-[2px_6px_8px_0px_rgba(0,0,0,0.15)]",
+      "bg-[#FEF5DA] border border-[#A58730]/20 shadow-[2px_6px_8px_0px_rgba(0,0,0,0.15)] hover:bg-[#941C12] hover:border-[#63130C]/20",
     gray: "bg-[#E2E4EB] border border-[#9BA4BA]/20",
-    gradient:
-      "bg-[#FEF5DA] border border-[#A58730]/20 shadow-innerCustom",
+    gradient: "bg-[#FEF5DA] border border-[#A58730]/20 shadow-innerCustom",
     red: "bg-[#941C12] border border-[#63130C]/20",
   };
 
-  return (
+  return loading ? (
+    <div className="flex items-center justify-center w-16 h-16">
+      <div className="loaderTwo"></div>
+    </div>
+  ) : (
     <button
       onClick={onClick}
       type={type}
-      className={`flex items-center justify-center w-16 h-16 rounded-full ${
-        variantClasses[variant]
+      className={`flex items-center justify-center w-16 h-16 rounded-full transition-all ${
+        isHovered ? variantClasses.red : variantClasses[variant]
       } ${className} ${loading ? "cursor-not-allowed opacity-50" : ""}`}
       disabled={loading}
+      onMouseOver={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {variant !== "gradient" ? (
         <svg
@@ -45,7 +52,9 @@ const ProceedButton: React.FC<ButtonProps> = ({
           <g clipPath="url(#clip0_48_2923)">
             <path
               d="M16 19C16 18.258 16.733 17.15 17.475 16.22C18.429 15.02 19.569 13.973 20.876 13.174C21.856 12.575 23.044 12 24 12M24 12C23.044 12 21.855 11.425 20.876 10.826C19.569 10.026 18.429 8.979 17.475 7.781C16.733 6.85 16 5.74 16 5M24 12H0"
-              stroke={variant === "red" ? "white" : "#828DA9"}
+              stroke={
+                isHovered ? "white" : variant === "red" ? "white" : "#828DA9"
+              }
               strokeWidth="1.33333"
             />
           </g>
@@ -71,7 +80,7 @@ const ProceedButton: React.FC<ButtonProps> = ({
           <g clipPath="url(#clip0_51_2955)">
             <path
               d="M16 19C16 18.258 16.733 17.15 17.475 16.22C18.429 15.02 19.569 13.973 20.876 13.174C21.856 12.575 23.044 12 24 12M24 12C23.044 12 21.855 11.425 20.876 10.826C19.569 10.026 18.429 8.979 17.475 7.781C16.733 6.85 16 5.74 16 5M24 12H0"
-              stroke="url(#paint0_linear_51_2955)"
+              stroke={isHovered ? "white" : "url(#paint0_linear_51_2955)"}
               strokeWidth="1.33333"
             />
           </g>
