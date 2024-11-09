@@ -58,10 +58,10 @@ const Users = observer(
     const [queryLoading, setQueryLoading] = useState<boolean>(false);
     const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
 
-    const buildQueryString = () => {
-      const endpoint = `/v1/users?search=${encodeURIComponent(query)}`;
-      return endpoint;
-    };
+    // const buildQueryString = () => {
+    //   const endpoint = `/v1/users?search=${encodeURIComponent(query)}`;
+    //   return endpoint;
+    // };
     
     useEffect(() => {
       if (data?.total) {
