@@ -1,38 +1,29 @@
 import React from 'react';
 
-interface ProgressBarProps {
-  percentage: number; // Progress percentage (0-100)
-  height?: string; // Optional height for the bar
-  width?: string; // Optional width for the bar
-}
-
-const ProgressBar: React.FC<ProgressBarProps> = ({ percentage, height = '20px', width = '100%' }) => {
-  
-  // Function to get color based on the percentage
-  const getColor = (percentage: number) => {
-    if (percentage >= 80) return 'green';  // A
-    if (percentage >= 60) return 'blue';   // B
-    if (percentage >= 50) return 'purple'; // C
-    if (percentage >= 40) return 'yellow'; // D
-    if (percentage >= 30) return 'amber';  // E
-    return 'red';  // F
-  };
-
-  // Apply color based on percentage
-  const progressBarColor = getColor(percentage);
+const ProgressBar = ({ percentage }) => {
+  const progressBarColor = getProgressBarColor(percentage);
 
   return (
-    <div style={{ width: width, height: height, backgroundColor: '#e0e0e0', borderRadius: '10px', overflow: 'hidden' }}>
+    <div className="w-full bg-gray-100 rounded-full h-[20px] overflow-hidden relative">
       <div
-        style={{
-          width: `${percentage}%`,
-          height: '100%',
-          backgroundColor: progressBarColor,
-          transition: 'width 0.3s ease-in-out',
-        }}
-      />
+        className={`h-full ${progressBarColor} rounded-full flex items-center justify-end transition-all duration-300 pr-2`}
+        style={{ width: `${percentage}%` }}
+      >
+        <span className="text-black text-[12px] font-bold">
+          {`${percentage}%`}
+        </span>
+      </div>
     </div>
   );
 };
+
+function getProgressBarColor(percentage) {
+  if (percentage >= 90 && percentage <= 100) return 'bg-green-300';
+  if (percentage >= 60 && percentage < 80) return 'bg-blue-500';
+  if (percentage >= 50 && percentage < 60) return 'bg-purple-500';
+  if (percentage >= 40 && percentage < 50) return 'bg-yellow-500';
+  if (percentage >= 30 && percentage < 40) return 'bg-amber-500';
+  return 'bg-red-500'; 
+}
 
 export default ProgressBar;
