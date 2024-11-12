@@ -1,7 +1,6 @@
-import { useState } from "react";
 import { Meta, StoryFn } from "@storybook/react";
 import TabComponent from "./TabComponent";
-import { TabComponentProps, Tab } from "./TabComponent";
+import { TabComponentProps } from "./TabComponent";
 import { MemoryRouter } from "react-router-dom";
 
 const tabNames = [
@@ -60,30 +59,15 @@ export default {
 } as Meta;
 
 const Template: StoryFn<TabComponentProps> = (args) => {
-  const [data, setData] = useState<any>(args.tabs[0]?.data);
-
-  const handleTabSelect = (tab: Tab) => {
-    setData(tab.data);
-    if (args.onTabSelect) args.onTabSelect(tab);
-  };
-
-  return (
-    <div className="flex flex-col gap-2">
-      <TabComponent {...args} onTabSelect={handleTabSelect} />
-      <div className="mt-4">
-        <h4>Selected Tab Data:</h4>
-        <pre>{JSON.stringify(data, null, 2)}</pre>
-      </div>
-    </div>
-  );
+  return <TabComponent {...args} />;
 };
 
 export const Default = Template.bind({});
 Default.args = {
   tabs: tabNames.map(({ name, key }) => ({
     name,
-    data: fetchedData[key],
+    key,
     count: fetchedData[key].length,
   })),
-  onTabSelect: (tab: Tab) => console.log("Selected tab:", tab),
+  onTabSelect: (key: string) => console.log("Selected tab:", key),
 };

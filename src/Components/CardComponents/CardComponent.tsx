@@ -11,6 +11,7 @@ import { GoDotFill } from "react-icons/go";
 import { Icon } from "../Settings/UserModal";
 import { DropDown } from "../DropDownComponent/DropDown";
 import { formatDateTime, formatNumberWithCommas } from "../../utils/helpers";
+import useBreakpoint from "../../hooks/useBreakpoint";
 
 export type CardComponentProps = {
   variant:
@@ -54,7 +55,7 @@ export type CardComponentProps = {
   onSelectProduct?: (productId: string | number, productUnits: number) => void;
 };
 
-const ProductTag = ({ productTag }: { productTag: string }) => {
+export const ProductTag = ({ productTag }: { productTag: string }) => {
   return (
     <p
       className={`flex items-center justify-center ${
@@ -147,7 +148,7 @@ const DateTimeTag = ({ datetime }: { datetime: string }) => {
   );
 };
 
-const NameTag = ({ name }: { name: string }) => {
+export const NameTag = ({ name }: { name: string }) => {
   return (
     <span className="flex items-center gap-0.5">
       <img src={smile} alt="Smile Icon" />
@@ -158,7 +159,7 @@ const NameTag = ({ name }: { name: string }) => {
   );
 };
 
-const NairaSymbol = ({ color }: { color?: string }) => {
+export const NairaSymbol = ({ color }: { color?: string }) => {
   return (
     <svg
       width="12"
@@ -302,6 +303,7 @@ export const CardComponent = ({
   productUnits,
   onSelectProduct,
 }: CardComponentProps) => {
+  const inventoryMobile = useBreakpoint("max", 350);
   const [_productUnits, setProductUnits] = useState<number>(0);
   const [_productId, setProductId] = useState<string>(productId);
   const [selected, setSelected] = useState<boolean>(false);
@@ -328,7 +330,7 @@ export const CardComponent = ({
     <div
       className={`flex flex-col ${
         variant === "inventoryOne" || variant === "inventoryTwo"
-          ? "w-[24%] min-w-[150px]"
+          ? `${inventoryMobile ? "w-full" : "w-[47%]"} md:w-[31%]`
           : "w-[32%] min-w-[204px]"
       } bg-white border-[0.6px] rounded-[20px] ${
         selected ? " border-success" : "border-strokeGreyThree"

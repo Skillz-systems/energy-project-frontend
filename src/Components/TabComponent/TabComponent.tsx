@@ -3,13 +3,13 @@ import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
 
 export interface Tab {
   name: string;
-  data: any[];
+  key: string;
   count?: number;
 }
 
 export interface TabComponentProps {
   tabs: Tab[];
-  onTabSelect: (tab: Tab) => void;
+  onTabSelect: (key: string) => void;
   tabsContainerClass?: string;
 }
 
@@ -22,7 +22,7 @@ const TabComponent: React.FC<TabComponentProps> = ({
 
   const handleTabClick = (tab: Tab) => {
     setActiveTab(tab);
-    onTabSelect(tab);
+    onTabSelect(tab.key);
   };
 
   return (
@@ -40,7 +40,7 @@ const TabComponent: React.FC<TabComponentProps> = ({
           onClick={() => handleTabClick(tab)}
         >
           {tab.name}
-          {tab.count !== undefined && (
+          {tab.count !== null && (
             <span
               className={`flex items-center justify-center max-w-max px-1 border-[0.2px] text-xs rounded-full transition-all
             ${
