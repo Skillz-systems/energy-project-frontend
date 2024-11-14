@@ -19,7 +19,7 @@ export type TableType = {
     isDate?: boolean;
     onDateClick?: (date: string) => void;
   }[];
-  columnList: {
+  columnList?: {
     title: string;
     key: string;
     valueIsAComponent?: boolean;

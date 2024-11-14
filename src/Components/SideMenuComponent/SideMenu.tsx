@@ -7,6 +7,7 @@ export type SideMenuType = {
     title: string;
     link: string;
     count?: number | string;
+    onClick?: () => void;
   }[];
   parentClass?: string;
 };
@@ -30,6 +31,7 @@ export const SideMenu = (props: SideMenuType) => {
                 ? "bg-primaryGradient"
                 : "bg-white hover:bg-[#F6F8FA]"
             }`}
+          // onClick={item.onClick && item.onClick}
         >
           <p
             className={`text-xs font-medium transition-all ${

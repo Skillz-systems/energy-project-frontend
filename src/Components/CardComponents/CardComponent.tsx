@@ -46,7 +46,7 @@ export type CardComponentProps = {
   transactionAmount?: number;
   saleId?: string | number;
   productStatus?: string;
-  productId?: string;
+  productId?: string | number;
   installment?: number;
   productPrice?: number;
   productImage?: string;
@@ -78,7 +78,7 @@ const ProductTypeWithTag = ({
   daysDue,
 }: {
   productTag?: string;
-  productType?: string;
+  productType?: string | number;
   paymentStatus?: "Completed" | "Successful" | "Defaulted" | any;
   daysDue?: number;
 }) => {
@@ -152,9 +152,9 @@ export const NameTag = ({ name }: { name: string }) => {
   return (
     <span className="flex items-center gap-0.5">
       <img src={smile} alt="Smile Icon" />
-      <p className="flex items-center justify-center bg-paleLightBlue text-xs px-2 text-textBlack font-semibold rounded-full h-[24px]">
+      <span className="flex items-center justify-center bg-paleLightBlue text-xs px-2 text-textBlack font-semibold rounded-full h-[24px]">
         {name}
-      </p>
+      </span>
     </span>
   );
 };
@@ -305,7 +305,7 @@ export const CardComponent = ({
 }: CardComponentProps) => {
   const inventoryMobile = useBreakpoint("max", 350);
   const [_productUnits, setProductUnits] = useState<number>(0);
-  const [_productId, setProductId] = useState<string>(productId);
+  const [_productId, setProductId] = useState<string | number>(productId);
   const [selected, setSelected] = useState<boolean>(false);
 
   const handleSelectProduct = () => {
@@ -526,7 +526,7 @@ export const CardComponent = ({
           />
         ) : variant === "product-no-image" ? (
           <SimpleTag
-            text={productPrice}
+            text={formatNumberWithCommas(productPrice)}
             dotColour="#49526A"
             customIcon={<NairaSymbol color="#828DA9" />}
             containerClass="bg-successTwo font-bold px-2 py-1 border border-successThree rounded-full"

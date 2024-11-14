@@ -1,3 +1,5 @@
+import solarpanel from "../../assets/table/solar-panel.png";
+
 type Entry = {
   no: number;
   name: string;
@@ -123,4 +125,72 @@ export const generateUserEntries = (count: number): EntryThree[] => {
   }
 
   return entries;
+};
+
+interface ProductEntries {
+  productId: number;
+  productTag: string;
+  productImage: string;
+  productPrice: number;
+  paymentModes: string[];
+  datetime: string;
+  name: string;
+}
+
+const names = [
+  "Naomi Gambo",
+  "John Doe",
+  "Mary Jane",
+  "David Smith",
+  "Ahire Tersoo",
+];
+const productTags = ["EAAS", "SHS", "Rooftop"];
+const productPrices = [1200000, 850000, 950000, 620000, 420000];
+const paymentOptions = [
+  ["One-Time", "Instalmental"],
+  ["One-Time"],
+  ["Instalmental"],
+];
+const images = [solarpanel];
+
+// Helper function to generate a list of random product entries
+export const generateRandomProductEntries = (
+  count: number,
+  filterTags?: string[]
+): ProductEntries[] => {
+  const entries: ProductEntries[] = [];
+
+  for (let i = 1; i <= count; i++) {
+    const entry = {
+      productId: 100000 + i,
+      productTag: getRandomItem(productTags),
+      productImage: getRandomItem(images),
+      productPrice: getRandomItem(productPrices),
+      paymentModes: getRandomItem(paymentOptions),
+      datetime: new Date().toISOString(),
+      name: getRandomItem(names),
+    };
+
+    // Only add entry if it matches a tag in filterTags, or if no filter is applied
+    if (!filterTags || filterTags.includes(entry.productTag)) {
+      entries.push(entry);
+    }
+  }
+
+  return entries;
+};
+
+export const generateRandomProductEntry = (): ProductEntries => {
+  // Generate a single random product entry
+  const productEntry: ProductEntries = {
+    productId: 100000 + Math.floor(Math.random() * 1000),
+    productTag: getRandomItem(productTags),
+    productImage: getRandomItem(images),
+    productPrice: getRandomItem(productPrices),
+    paymentModes: getRandomItem(paymentOptions),
+    datetime: new Date().toISOString(),
+    name: getRandomItem(names),
+  };
+
+  return productEntry;
 };

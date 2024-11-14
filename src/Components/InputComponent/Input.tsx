@@ -1,4 +1,4 @@
-import { ChangeEvent, MouseEvent, ReactNode } from "react";
+import { ChangeEvent, MouseEvent, ReactNode, useEffect, useRef } from "react";
 import { CgAsterisk, CgChevronDown } from "react-icons/cg";
 import { useState } from "react";
 
@@ -63,6 +63,7 @@ export const Input = ({
     "tel",
     "url",
     "date",
+    "file",
   ];
 
   if (similarTypes.includes(type)) {
@@ -210,7 +211,7 @@ export type SelectInputType = {
   label: string;
   name: string;
   options: SelectOption[];
-  value: string;
+  value: string | string[];
   onChange: (event: ChangeEvent<HTMLSelectElement>) => void;
   placeholder?: string;
   disabled?: boolean;
@@ -285,98 +286,133 @@ export const SelectInput = ({
         ))}
       </select>
 
-      <span
-        className={`${iconStyle} absolute right-3 p-[0.3em] `}
-        // rounded-full transition-all hover:bg-slate-200
-      >
-        {icon}
-      </span>
+      <span className={`${iconStyle} absolute right-3 p-[0.3em] `}>{icon}</span>
     </div>
   );
 };
 
-// ALTERNATE SELECT COMPONENT START
-// export const SelectInput = ({
-//   name,
-//   options,
-//   value,
-//   onChange,
-//   placeholder = "Select an option",
-//   disabled = false,
-//   required = false,
-//   style,
-//   icon = <CgChevronDown />, // Default icon
-//   iconStyle = "text-lg", // Icon style
-//   iconPosition = "right", // Icon position
-// }: SelectInputType) => {
-//   const [isOpen, setIsOpen] = useState(false);
+export type MultipleSelectInputType = {
+  label: string;
+  options: SelectOption[];
+  value: string[];
+  onChange: (values: string[]) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  required?: boolean;
+  style?: string;
+  icon?: ReactNode;
+  iconStyle?: string;
+};
 
-//   const handleToggleDropdown = () => {
-//     if (!disabled) {
-//       setIsOpen((prev) => !prev);
-//     }
-//   };
+export const SelectMultipleInput = ({
+  label,
+  options,
+  value,
+  onChange,
+  placeholder = "Select options",
+  disabled = false,
+  required = false,
+  style,
+  icon = <CgChevronDown />,
+  iconStyle = "text-lg",
+}: MultipleSelectInputType) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-//   const handleSelectOption = (selectedValue: string) => {
-//     onChange(selectedValue); // Notify the parent component
-//     setIsOpen(false); // Close the dropdown after selection
-//   };
+  const handleCheckboxChange = (optionValue: string) => {
+    const updatedValue = value.includes(optionValue)
+      ? value.filter((val) => val !== optionValue)
+      : [...value, optionValue];
+    onChange(updatedValue);
+  };
 
-//   return (
-//     <div
-//       className={`relative flex items-center
-//         ${style}
-//         ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
-//         w-full max-w-[400px] h-[48px] px-[1.1em] py-[1.25em]
-//         rounded-3xl text-sm text-textGrey border-[0.6px] border-strokeGrey
-//         transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
-//         cursor-pointer`}
-//       onClick={handleToggleDropdown} // Clicking the container toggles dropdown
-//     >
-//       {/* Display selected option or placeholder */}
-//       <div className="flex-grow">
-//         {value ? (
-//           options.find((option) => option.value === value)?.label
-//         ) : (
-//           <span className="text-gray-400">{placeholder}</span>
-//         )}
-//       </div>
+  useEffect(() => {
+    const handleClickOutside = (event: Event) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
 
-//       {/* Render the icon */}
-//       <span
-//         className={`${iconStyle} ${
-//           iconPosition === "right" ? "absolute right-3" : "mr-3"
-//         } p-[0.3em] rounded-full transition-all hover:bg-slate-200`}
-//       >
-//         {icon}
-//       </span>
+    if (isOpen) {
+      document.addEventListener(
+        "mousedown",
+        handleClickOutside as EventListener
+      );
+    } else {
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside as EventListener
+      );
+    }
 
-//       {/* Dropdown list */}
-//       {isOpen && (
-//         <ul className="absolute left-0 z-10 w-full mt-1 overflow-auto bg-white border border-gray-300 rounded-md shadow-lg top-full max-h-48">
-//           {placeholder && (
-//             <li
-//               className="px-4 py-2 cursor-pointer hover:bg-gray-100"
-//               onClick={() => handleSelectOption("")}
-//             >
-//               {placeholder}
-//             </li>
-//           )}
-//           {options.map((option) => (
-//             <li
-//               key={option.value}
-//               className="px-4 py-2 cursor-pointer hover:bg-gray-100"
-//               onClick={() => handleSelectOption(option.value)}
-//             >
-//               {option.label}
-//             </li>
-//           ))}
-//         </ul>
-//       )}
-//     </div>
-//   );
-// };
-// ALTERNATE SELECT COMPONENT END
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside as EventListener
+      );
+    };
+  }, [isOpen]);
+
+  return (
+    <div ref={dropdownRef} className={`relative w-full max-w-[400px] `}>
+      <div
+        className={`relative flex items-center justify-between 
+          ${style}
+          ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"} 
+          w-full h-[48px] px-[1.1em] py-[1.25em] 
+          rounded-3xl text-sm text-textGrey border-[0.6px] gap-2
+          transition-all focus:outline-none focus:ring-2 focus:ring-primary`}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+      >
+        {value && (
+          <span
+            className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] 
+            transition-opacity duration-500 ease-in-out
+            ${value ? "opacity-100" : "opacity-0"}`}
+          >
+            {label.toUpperCase()}
+          </span>
+        )}
+
+        {required && (
+          <span className="mb-2 text-lg text-red-600">
+            <CgAsterisk />
+          </span>
+        )}
+
+        <span className="w-full text-textBlack font-semibold">
+          {value.length > 0 ? `${value.length} selected` : placeholder}
+        </span>
+        <span className={`${iconStyle}`}>{icon}</span>
+      </div>
+
+      {isOpen && (
+        <div className="pl-10">
+          <div className="absolute mt-2 bg-white border border-gray-300 rounded-md w-full max-w-[340px] max-h-60 overflow-y-auto shadow-lg z-10">
+            {options.map((option) => (
+              <label
+                key={option.value}
+                className="flex items-center px-2 py-1 cursor-pointer text-sm"
+              >
+                <input
+                  type="checkbox"
+                  value={option.value}
+                  checked={value.includes(option.value)}
+                  onChange={() => handleCheckboxChange(option.value)}
+                  className="mr-2"
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export type ToggleInputType = {
   onChange: (checked: boolean) => void;
