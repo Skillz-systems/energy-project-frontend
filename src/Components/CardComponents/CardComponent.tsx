@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import smile from "../../assets/table/smile.svg";
 import ongoing from "../../assets/table/ongoing.svg";
 import inventory from "../../assets/table/inventory.svg";
@@ -10,9 +11,17 @@ import { GoDotFill } from "react-icons/go";
 import { Icon } from "../Settings/UserModal";
 import { DropDown } from "../DropDownComponent/DropDown";
 import { formatDateTime, formatNumberWithCommas } from "../../utils/helpers";
+import useBreakpoint from "../../hooks/useBreakpoint";
 
 export type CardComponentProps = {
-  variant: "agent" | "customer" | "transactions" | "sales" | "product-no-image";
+  variant:
+    | "agent"
+    | "customer"
+    | "transactions"
+    | "sales"
+    | "product-no-image"
+    | "inventoryOne"
+    | "inventoryTwo";
   handleCallClick?: () => void;
   handleWhatsAppClick?: () => void;
   dropDownList: {
@@ -40,9 +49,13 @@ export type CardComponentProps = {
   productId?: string;
   installment?: number;
   productPrice?: number;
+  productImage?: string;
+  productName?: string;
+  productUnits?: number;
+  onSelectProduct?: (productId: string | number, productUnits: number) => void;
 };
 
-const ProductTag = ({ productTag }: { productTag: string }) => {
+export const ProductTag = ({ productTag }: { productTag: string }) => {
   return (
     <p
       className={`flex items-center justify-center ${
@@ -135,7 +148,7 @@ const DateTimeTag = ({ datetime }: { datetime: string }) => {
   );
 };
 
-const NameTag = ({ name }: { name: string }) => {
+export const NameTag = ({ name }: { name: string }) => {
   return (
     <span className="flex items-center gap-0.5">
       <img src={smile} alt="Smile Icon" />
@@ -145,6 +158,121 @@ const NameTag = ({ name }: { name: string }) => {
     </span>
   );
 };
+
+export const NairaSymbol = ({ color }: { color?: string }) => {
+  return (
+    <svg
+      width="12"
+      height="10"
+      viewBox="0 0 12 10"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M2.66659 9V1.70133C2.66654 1.54622 2.71802 1.39548 2.81293 1.27279C2.90785 1.1501 3.04083 1.06242 3.19098 1.0235C3.34114 0.984592 3.49997 0.996657 3.64253 1.0578C3.78508 1.11895 3.90329 1.22572 3.97859 1.36133L8.02125 8.63867C8.09655 8.77428 8.21476 8.88105 8.35731 8.9422C8.49987 9.00334 8.6587 9.01541 8.80885 8.9765C8.95901 8.93758 9.09199 8.8499 9.18691 8.72721C9.28182 8.60452 9.3333 8.45378 9.33325 8.29867V1M1.33325 3.66667H10.6666M1.33325 6.33333H10.6666"
+        stroke={color || "#00AF50"}
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+interface QuantitySelectorProps {
+  productUnits: number;
+  defaultValue?: number;
+  onValueChange: (value: number) => void;
+  isSelected: boolean;
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
+}
+
+export default function QuantitySelector({
+  productUnits,
+  defaultValue = 0,
+  onValueChange,
+  isSelected,
+  onClick,
+}: QuantitySelectorProps) {
+  const [quantity, setQuantity] = useState(defaultValue);
+
+  const updateQuantity = (adjustment: number) => {
+    const newValue = quantity + adjustment;
+    if (newValue >= 0 && newValue <= productUnits) {
+      setQuantity(newValue);
+      onValueChange(newValue);
+    }
+  };
+
+  return (
+    <div
+      className="inline-flex items-center w-max gap-2 bg-white p-1 rounded-[32px] border-[0.2px] border-strokeGreyTwo h-[20px]"
+      onClick={onClick}
+    >
+      {isSelected && (
+        <button
+          onClick={() => updateQuantity(-1)}
+          disabled={quantity === 0}
+          className="group rounded-full disabled:opacity-50 transition-colors"
+          aria-label="Decrease quantity"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            xmlns="http://www.w3.org/2000/svg"
+            className="group-hover:stroke-gray-400 group-hover:fill-gray-400"
+            stroke="#CCD0DC"
+            strokeWidth="1"
+          >
+            <path
+              d="M9.99992 8.4987C10.2761 8.4987 10.4999 8.27484 10.4999 7.9987C10.4999 7.72256 10.2761 7.4987 9.99992 7.4987H5.99992C5.72378 7.4987 5.49992 7.72256 5.49992 7.9987C5.49992 8.27484 5.72378 8.4987 5.99992 8.4987H9.99992Z"
+              className="transition-colors duration-200 group-hover:fill-gray-400"
+            />
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M7.99992 0.832031C4.04188 0.832031 0.833252 4.04066 0.833252 7.9987C0.833252 11.9567 4.04188 15.1654 7.99992 15.1654C11.958 15.1654 15.1666 11.9567 15.1666 7.9987C15.1666 4.04066 11.958 0.832031 7.99992 0.832031ZM1.83325 7.9987C1.83325 4.59294 4.59416 1.83203 7.99992 1.83203C11.4057 1.83203 14.1666 4.59294 14.1666 7.9987C14.1666 11.4045 11.4057 14.1654 7.99992 14.1654C4.59416 14.1654 1.83325 11.4045 1.83325 7.9987Z"
+              className="transition-colors duration-200 group-hover:fill-gray-400"
+            />
+          </svg>
+        </button>
+      )}
+      <span className="text-center text-[#49526A] font-semibold" key={quantity}>
+        {quantity}
+      </span>
+      {isSelected && (
+        <button
+          onClick={() => updateQuantity(1)}
+          disabled={quantity === productUnits}
+          className="group rounded-full disabled:opacity-50 transition-colors"
+          aria-label="Increase quantity"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            xmlns="http://www.w3.org/2000/svg"
+            className="group-hover:stroke-gray-400 group-hover:fill-gray-400"
+            stroke="#CCD0DC"
+            strokeWidth="1"
+          >
+            <path
+              d="M8.49992 5.9987C8.49992 5.72256 8.27606 5.4987 7.99992 5.4987C7.72378 5.4987 7.49992 5.72256 7.49992 5.9987L7.49992 7.49871H5.99992C5.72378 7.49871 5.49992 7.72257 5.49992 7.99871C5.49992 8.27486 5.72378 8.49871 5.99992 8.49871H7.49992V9.9987C7.49992 10.2748 7.72378 10.4987 7.99992 10.4987C8.27606 10.4987 8.49992 10.2748 8.49992 9.9987L8.49992 8.49871H9.99992C10.2761 8.49871 10.4999 8.27486 10.4999 7.99871C10.4999 7.72257 10.2761 7.49871 9.99992 7.49871H8.49992V5.9987Z"
+              className="transition-colors duration-200 group-hover:fill-gray-400"
+            />
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M7.99992 0.832031C4.04188 0.832031 0.833252 4.04066 0.833252 7.9987C0.833252 11.9567 4.04188 15.1654 7.99992 15.1654C11.958 15.1654 15.1666 11.9567 15.1666 7.9987C15.1666 4.04066 11.958 0.832031 7.99992 0.832031ZM1.83325 7.9987C1.83325 4.59294 4.59416 1.83203 7.99992 1.83203C11.4057 1.83203 14.1666 4.59294 14.1666 7.9987C14.1666 11.4045 11.4057 14.1654 7.99992 14.1654C4.59416 14.1654 1.83325 11.4045 1.83325 7.9987Z"
+              className="transition-colors duration-200 group-hover:fill-gray-400"
+            />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+}
 
 export const CardComponent = ({
   variant = "agent",
@@ -170,13 +298,49 @@ export const CardComponent = ({
   productId,
   installment,
   productPrice,
+  productImage,
+  productName,
+  productUnits,
+  onSelectProduct,
 }: CardComponentProps) => {
+  const inventoryMobile = useBreakpoint("max", 350);
+  const [_productUnits, setProductUnits] = useState<number>(0);
+  const [_productId, setProductId] = useState<string>(productId);
+  const [selected, setSelected] = useState<boolean>(false);
+
+  const handleSelectProduct = () => {
+    if (!selected) {
+      onSelectProduct(_productId, _productUnits);
+      setSelected(true);
+    } else {
+      setSelected(false);
+    }
+  };
+
+  const handleCardClick = () => {
+    setProductId(productId);
+    if (variant === "inventoryTwo") {
+      if (productId === _productId) {
+        handleSelectProduct();
+      }
+    }
+  };
+
   return (
-    <div className="flex flex-col w-[32%] min-w-[204px] bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
+    <div
+      className={`flex flex-col ${
+        variant === "inventoryOne" || variant === "inventoryTwo"
+          ? `${inventoryMobile ? "w-full" : "w-[47%]"} md:w-[31%]`
+          : "w-[32%] min-w-[204px]"
+      } bg-white border-[0.6px] rounded-[20px] ${
+        selected ? " border-success" : "border-strokeGreyThree"
+      }`}
+      onClick={handleCardClick}
+    >
       {/* HEADER */}
       <div
-        className={`flex items-center justify-between p-2 ${
-          variant === "sales" ? "bg-paleLightBlue rounded-t-[20px]" : "bg-white"
+        className={`flex items-center justify-between p-2 rounded-t-[20px] ${
+          variant === "sales" ? "bg-paleLightBlue" : "bg-white"
         }`}
       >
         {variant === "transactions" ? (
@@ -189,9 +353,19 @@ export const CardComponent = ({
           </p>
         ) : variant === "product-no-image" ? (
           <img src={checkers} width="100%" />
+        ) : variant === "inventoryOne" || variant === "inventoryTwo" ? (
+          <div className="flex items-center justify-center w-full h-full">
+            <img
+              src={productImage}
+              alt="Product"
+              width="100%"
+              className="max-w-[134px]"
+            />
+          </div>
         ) : (
           <NameTag name={name} />
         )}
+
         {variant === "agent" ? (
           <span
             className={`flex items-center text-xs justify-center gap-0.5 bg-[#F6F8FA] px-2 py-1 border-[0.4px] border-strokeGreyTwo h-[24px] rounded-full ${
@@ -284,22 +458,7 @@ export const CardComponent = ({
             <div className="flex items-center justify-between gap-1">
               <SimpleTag text="AMOUNT" containerClass="font-light " />
               <div className="flex items-center gap-[1px]">
-                <svg
-                  width="12"
-                  height="10"
-                  viewBox="0 0 12 10"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M2.66634 9V1.70133C2.66629 1.54622 2.71777 1.39548 2.81269 1.27279C2.9076 1.1501 3.04058 1.06242 3.19074 1.0235C3.3409 0.984592 3.49973 0.996657 3.64228 1.0578C3.78484 1.11895 3.90305 1.22572 3.97834 1.36133L8.02101 8.63867C8.0963 8.77428 8.21451 8.88105 8.35707 8.9422C8.49962 9.00334 8.65845 9.01541 8.80861 8.9765C8.95877 8.93758 9.09175 8.8499 9.18666 8.72721C9.28158 8.60452 9.33306 8.45378 9.33301 8.29867V1M1.33301 3.66667H10.6663M1.33301 6.33333H10.6663"
-                    stroke="#00AF50"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-
+                <NairaSymbol />
                 <p className="text-textBlack text-xs">
                   {formatNumberWithCommas(transactionAmount)}
                 </p>
@@ -333,6 +492,15 @@ export const CardComponent = ({
             </p>
             <ProductTag productTag={productTag} />
           </div>
+        ) : variant === "inventoryOne" || variant === "inventoryTwo" ? (
+          <div className="flex flex-col gap-2">
+            {variant === "inventoryTwo" && (
+              <p className="flex items-center justify-center bg-paleLightBlue text-inkBlueTwo w-max p-1 h-[14px] text-[8px] font-medium rounded-full uppercase">
+                {productTag}
+              </p>
+            )}
+            <p className="text-textDarkGrey text-xs">{productName}</p>
+          </div>
         ) : null}
       </div>
       {/* BOTTOM */}
@@ -340,8 +508,15 @@ export const CardComponent = ({
         className={`flex items-center ${
           variant === "transactions" ? "justify-end" : "justify-between"
         } ${
-          variant === "sales" ? "bg-white" : "bg-[#F6F8FA]"
-        } p-2 h-[40px] border-t-[0.6px] border-t-strokeGreyThree rounded-b-[20px]`}
+          variant === "sales"
+            ? "bg-white"
+            : selected
+            ? "bg-successTwo"
+            : "bg-[#F6F8FA]"
+        } p-2 h-[40px] border-t-[0.6px]
+        ${
+          selected ? "border-t-success" : "border-t-strokeGreyThree"
+        }  rounded-b-[20px]`}
       >
         {variant === "transactions" ? null : variant === "sales" ? (
           <SimpleTag
@@ -351,26 +526,24 @@ export const CardComponent = ({
           />
         ) : variant === "product-no-image" ? (
           <SimpleTag
-            text={productPrice}
+            text={formatNumberWithCommas(productPrice)}
             dotColour="#49526A"
-            customIcon={
-              <svg
-                width="12"
-                height="10"
-                viewBox="0 0 12 10"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M2.66683 9V1.70133C2.66678 1.54622 2.71826 1.39548 2.81318 1.27279C2.90809 1.1501 3.04107 1.06242 3.19123 1.0235C3.34138 0.984592 3.50021 0.996657 3.64277 1.0578C3.78533 1.11895 3.90353 1.22572 3.97883 1.36133L8.0215 8.63867C8.09679 8.77428 8.215 8.88105 8.35756 8.9422C8.50011 9.00334 8.65894 9.01541 8.8091 8.9765C8.95926 8.93758 9.09223 8.8499 9.18715 8.72721C9.28207 8.60452 9.33354 8.45378 9.3335 8.29867V1M1.3335 3.66667H10.6668M1.3335 6.33333H10.6668"
-                  stroke="#828DA9"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            }
+            customIcon={<NairaSymbol color="#828DA9" />}
             containerClass="bg-successTwo font-bold px-2 py-1 border border-successThree rounded-full"
+          />
+        ) : variant === "inventoryOne" ? (
+          <SimpleTag
+            text={formatNumberWithCommas(productPrice)}
+            customIcon={<NairaSymbol color="#828DA9" />}
+            containerClass="text-textBlack font-medium px-1 py-0.5 bg-[#eceef1] border-[0.4px] border-strokeGreyTwo rounded-full"
+          />
+        ) : variant === "inventoryTwo" ? (
+          <SimpleTag
+            text={formatNumberWithCommas(productPrice)}
+            customIcon={
+              <NairaSymbol color={selected ? undefined : "#828DA9"} />
+            }
+            containerClass="text-textBlack font-medium"
           />
         ) : (
           <div className="flex items-center gap-2">
@@ -382,7 +555,17 @@ export const CardComponent = ({
             />
           </div>
         )}
-        <DropDown {...dropDownList} />
+
+        {variant === "inventoryTwo" ? (
+          <QuantitySelector
+            productUnits={productUnits}
+            onValueChange={(value) => setProductUnits(value)}
+            isSelected={!selected}
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : (
+          <DropDown {...dropDownList} />
+        )}
       </div>
     </div>
   );
