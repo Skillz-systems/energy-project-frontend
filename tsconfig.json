@@ -6,7 +6,12 @@
     // { "path": "./tsconfig.app.json" },
     // { "path": "./tsconfig.node.json" }
   ],
+  "include": ["src", "./jest.setup.ts"],
   "compilerOptions": {
+     "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*"]
+    },
     "noEmit": true,
     "allowImportingTsExtensions": true, 
     "target": "esnext",              // Target modern JavaScript
