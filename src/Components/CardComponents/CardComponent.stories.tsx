@@ -1,5 +1,6 @@
 import { Meta, StoryFn } from "@storybook/react";
 import { CardComponent, CardComponentProps } from "./CardComponent";
+import solarpanel from "../../assets/table/solar-panel.png";
 
 export default {
   title: "Components/Cards",
@@ -103,4 +104,43 @@ productNoImageCard.args = {
   productTag: "EAAS",
   productId: "124242",
   productPrice: 4000,
+};
+
+export const inventoryOneCard = CardTemplate.bind({});
+inventoryOneCard.args = {
+  variant: "inventoryOne",
+  dropDownList: {
+    items: [],
+    onClickLink: (index: number) => {
+      console.log(index);
+    },
+    defaultStyle: true,
+    showCustomButton: true,
+  },
+  productImage: solarpanel,
+  productName: "Monochromatic Solar Panels",
+  productPrice: 250000,
+};
+
+export const inventoryTwoCard = CardTemplate.bind({});
+inventoryTwoCard.args = {
+  variant: "inventoryTwo",
+  dropDownList: {
+    items: [],
+    onClickLink: (index: number) => {
+      console.log(index);
+    },
+    defaultStyle: true,
+    showCustomButton: true,
+  },
+  productId: "12323sdb23y723d",
+  productImage: solarpanel,
+  productTag: "Lima Panels",
+  productName: "Monochromatic Solar Panels",
+  productPrice: 250000,
+  productUnits: 10,
+  onSelectProduct: (productId: string | number, productUnits: number) => {
+    console.log("Product Id:", productId);
+    console.log("Product Units:", productUnits);
+  },
 };

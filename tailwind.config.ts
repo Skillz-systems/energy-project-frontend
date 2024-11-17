@@ -33,6 +33,7 @@ export default {
         purpleBlue: "#DADFF8",
         pink: "#F7D3E1",
         inkBlue: "#8396E7",
+        inkBlueTwo: "#3951B6",
         paleYellow: "#FFF3D5",
       },
       backgroundImage: {

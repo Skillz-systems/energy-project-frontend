@@ -12,6 +12,7 @@ import { ProtectedRouteWrapper } from "./Context/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProgressBar from "./Components/ProgressBar/ProgressBar";
+import CustomerPage from "./Pages/CustomerPage";
 
 function App() {
   return (
@@ -36,15 +37,11 @@ function App() {
             element={<CreatePassword />}
           />
           <Route
-            path="/test-progress-bar"
+            path="/CustomerPage"
             element={
               <div className="p-8">
-                <ProgressBar
-                  percentage={85}
-                  parentClassname="custom-parent-class"
-                  percentageClassname="custom-percentage-class" />
-                <ProgressBar percentage={60} />
-                <ProgressBar percentage={90} />
+                
+                <CustomerPage />
               </div>
             }
           />
