@@ -10,7 +10,7 @@ import edit from "../../assets/edit.svg";
 export type DropDownType = {
   name?: string;
   items?: string[];
-  onClickLink?: (index: number) => void;
+  onClickLink?: (index?: number) => void;
   buttonImgStyle?: string;
   dropDownContainerStyle?: string;
   isSearch?: boolean;
@@ -106,7 +106,7 @@ export const DropDown = (props: DropDownType) => {
           </div>
         ) : (
           <ul
-            className={`${dropDownContainerStyle} absolute top-[35px] right-0 z-50 flex flex-col gap-1 p-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] shadow-lg w-[168px]`}
+            className={`${dropDownContainerStyle} absolute top-[35px] right-0 z-[100] flex flex-col gap-1 p-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] shadow-lg w-[168px]`}
           >
             {items?.map((item, index) => (
               <li

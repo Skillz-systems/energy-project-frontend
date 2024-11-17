@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "jest",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "coverage": "npm test --coverage --watchAll --collectCoverageFrom='src/components/**/*.{ts,tsx}'"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
