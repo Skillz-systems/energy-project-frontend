@@ -11,7 +11,8 @@ import { ErrorProvider } from "./Context/ErrorContext";
 import { ProtectedRouteWrapper } from "./Context/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ProgressBar from "./Components/ProgressBar/ProgressBar";
+import ProgressBar from "./Components/Progressbar/ProgressBar";
+
 
 function App() {
   return (
