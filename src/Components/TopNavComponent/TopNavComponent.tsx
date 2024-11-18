@@ -69,9 +69,8 @@ const TopNavComponent = () => {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 z-20 bg-white w-full flex items-start sm:items-center justify-between gap-1 px-2 md:px-8 py-4 h-max transition-shadow ${
-          isScrolled ? "border-b border-b-strokeGreyThree shadow-md" : ""
-        }`}
+        className={`fixed top-0 left-0 z-20 bg-white w-full flex items-start sm:items-center justify-between gap-1 px-2 md:px-8 py-4 h-max transition-shadow ${isScrolled ? "border-b border-b-strokeGreyThree shadow-md" : ""
+          }`}
       >
         <div className="flex flex-wrap sm:flex-nowrap items-center w-max gap-1 sm:gap-2">
           <img
@@ -82,7 +81,12 @@ const TopNavComponent = () => {
             onClick={() => navigate("/dashboard")}
           />
           <MenuButton />
-          <UserProfile role={role.role} />
+          <UserProfile
+            role="Admin"
+            bg="#FEF5DA"
+            borderColor="#A58730"
+            textColor="white"
+          />
         </div>
         <div className="flex items-center w-max max-w-[350px] gap-1 sm:gap-4">
           {showSearchInput ? null : (
