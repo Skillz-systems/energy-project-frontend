@@ -21,17 +21,16 @@ export type InputType = {
   type: AllowedInputTypes;
   name: string;
   label: string;
-  value?: string | number;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  value?: string | number | any[];
+  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
-  onClick?: (event: MouseEvent<HTMLInputElement>) => void;
+  onClick?: (event?: MouseEvent<HTMLInputElement>) => void;
   disabled?: boolean;
   required: boolean;
   checked?: boolean;
   readOnly?: boolean;
   iconLeft?: ReactNode;
   iconRight?: ReactNode;
-  // iconCTA?
   style?: string;
   errorMessage?: string;
 };
@@ -70,29 +69,29 @@ export const Input = ({
     return (
       <>
         <div
-          className={`relative autofill-parent
-          ${type === "hidden" ? "hidden" : "flex"} 
-        ${style} 
-        ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
-        items-center w-full max-w-[400px] h-[48px] px-[1.1em] py-[1.25em] 
-        gap-2 rounded-3xl border-[0.6px]
-        transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+          className={`relative autofill-parent ${
+            type === "hidden" ? "hidden" : "flex"
+          } ${style} ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
+          items-center w-full max-w-[400px] px-[1.1em] py-[1.25em] gap-2 rounded-3xl h-[48px] border-[0.6px]
+          transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+          onClick={onClick}
         >
           {value && (
             <span
-              className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] 
-            transition-opacity duration-500 ease-in-out
+              className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out
             ${value ? "opacity-100" : "opacity-0"}`}
             >
               {label.toUpperCase()}
             </span>
           )}
           {iconLeft && iconLeft}
+
           {required && (
             <span className="mb-2 text-lg text-red-600">
               <CgAsterisk />
             </span>
           )}
+
           <input
             type={type}
             id={name}
@@ -108,6 +107,7 @@ export const Input = ({
             min={0}
             className="w-full text-sm font-semibold text-textBlack placeholder:text-textGrey placeholder:font-normal placeholder:italic"
           />
+
           {iconRight && iconRight}
         </div>
         {errorMessage && (
@@ -120,6 +120,253 @@ export const Input = ({
   } else {
     return "Input Type Not Allowed";
   }
+};
+
+type ModalInputType = {
+  type: string;
+  name: string;
+  label: string;
+  value?: any[];
+  placeholder: string;
+  onClick: () => void;
+  disabled?: boolean;
+  required?: boolean;
+  style?: string;
+  errorMessage?: string;
+  isItemsSelected?: boolean;
+  itemsSelected: ReactNode;
+};
+
+export const ModalInput = ({
+  type = "text",
+  name,
+  label,
+  placeholder = "Enter your firstname",
+  onClick,
+  disabled = false,
+  required = false,
+  style,
+  errorMessage,
+  isItemsSelected,
+  itemsSelected,
+}: ModalInputType) => {
+  return (
+    <div className="flex items-center justify-center gap-2 w-full">
+      <div
+        className={`flex relative ${
+          isItemsSelected ? "flex-col" : "flex-row"
+        } items-center gap-1.5 ${style} ${
+          disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"
+        }  w-full max-w-[400px] py-[1.25em] ${
+          isItemsSelected ? "rounded-[20px]" : "rounded-3xl h-[48px]"
+        } border-[0.6px] 
+          transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent `}
+      >
+        <span className="absolute flex left-[1.6em] -top-2 z-50 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out opacity-100">
+          {label.toUpperCase()}
+        </span>
+
+        <div
+          className={`flex items-center pl-[1.1em] ${
+            isItemsSelected ? "w-full" : "w-max"
+          }`}
+        >
+          {isItemsSelected ? (
+            <span
+              className="w-full text-sm font-semibold text-textDarkGrey cursor-pointer"
+              onClick={onClick}
+            >
+              Change {name} selected
+            </span>
+          ) : (
+            required && (
+              <span className="mb-2 text-lg text-red-600">
+                <CgAsterisk />
+              </span>
+            )
+          )}
+        </div>
+
+        {isItemsSelected ? (
+          <div className="flex flex-col items-center justify-start w-full px-[1.1em] max-h-[550px] overflow-y-auto">
+            {itemsSelected}
+          </div>
+        ) : type === "button" ? (
+          <span
+            className="w-full text-sm font-semibold text-textBlack cursor-pointer"
+            onClick={onClick}
+          >
+            {placeholder}
+          </span>
+        ) : null}
+      </div>
+      {errorMessage && (
+        <p className="-mt-3 px-[1.1em] pb-2 text-sm text-errorTwo font-medium">
+          {errorMessage}
+        </p>
+      )}
+    </div>
+  );
+};
+
+export type FileInputType = {
+  name: string;
+  label: string;
+  value?: string | number;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  required: boolean;
+  iconRight?: ReactNode;
+  style?: string;
+  errorMessage?: string;
+};
+
+export const FileInput = ({
+  name,
+  label,
+  onChange,
+  placeholder,
+  disabled = false,
+  required = false,
+  iconRight,
+  style,
+  errorMessage,
+}: FileInputType) => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+      onChange(e);
+    }
+  };
+  const openFile = () => {
+    return (document.getElementById(name) as HTMLInputElement).click();
+  };
+
+  return (
+    <>
+      <div
+        className={`relative autofill-parent flex
+          ${style} 
+          ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
+          items-center w-full max-w-[400px] h-[48px] px-[1.1em] py-[1.25em] 
+          gap-2 rounded-3xl border-[0.6px]
+          transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+      >
+        {label && (
+          <span
+            className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] 
+              transition-opacity duration-500 ease-in-out`}
+          >
+            {label.toUpperCase()}
+          </span>
+        )}
+        {required && (
+          <span className="mb-2 text-lg text-red-600">
+            <CgAsterisk />
+          </span>
+        )}
+
+        {/* Hidden file input */}
+        <input
+          type="file"
+          id={name}
+          name={name}
+          onChange={handleFileChange}
+          disabled={disabled}
+          style={{ display: "none" }}
+        />
+        {/* Custom button to trigger file input */}
+        <div className="flex items-center justify-between w-full">
+          <>
+            <button
+              type="button"
+              onClick={openFile}
+              disabled={disabled}
+              className="text-sm font-semibold text-textBlack"
+            >
+              {selectedFile ? (
+                <span className="text-sm font-semibold text-textBlack">
+                  {selectedFile.name}
+                </span>
+              ) : (
+                placeholder
+              )}
+            </button>
+          </>
+
+          <span onClick={openFile} className="cursor-pointer">
+            {iconRight && iconRight}
+          </span>
+        </div>
+      </div>
+      {errorMessage && (
+        <p className="-mt-3 px-[1.1em] pb-2 text-sm text-errorTwo font-medium">
+          {errorMessage}
+        </p>
+      )}
+    </>
+  );
+};
+
+export const SmallFileInput = ({
+  name,
+  onChange,
+  placeholder,
+  iconRight,
+}: {
+  name: string;
+  onChange: (e: any) => void;
+  placeholder: string;
+  iconRight?: ReactNode;
+}) => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+      onChange(e);
+    }
+  };
+
+  const openFile = () => {
+    return (document.getElementById(name) as HTMLInputElement).click();
+  };
+
+  return (
+    <div className="px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full">
+      {/* Hidden file input */}
+      <input
+        type="file"
+        id={name}
+        name={name}
+        onChange={handleFileChange}
+        style={{ display: "none" }}
+      />
+      {/* Custom button to trigger file input */}
+      <div className="flex items-center justify-between w-full">
+        <>
+          <button type="button" onClick={openFile}>
+            {selectedFile ? (
+              <span className="text-xs text-textDarkGrey">
+                {selectedFile.name}
+              </span>
+            ) : (
+              <span className="text-xs text-textBlack text-ellipsis">
+                {placeholder}
+              </span>
+            )}
+          </button>
+        </>
+
+        <span onClick={openFile} className="cursor-pointer">
+          {iconRight && iconRight}
+        </span>
+      </div>
+    </div>
+  );
 };
 
 export type RadioOption = {
@@ -246,7 +493,7 @@ export const SelectInput = ({
         w-full max-w-[400px] h-[48px] px-[1.1em] py-[1.25em] 
         rounded-3xl text-sm text-textGrey border-[0.6px] gap-2
         transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
-        cursor-pointer ${value ? "border-strokeCream" : "border-strokeGrey"}`}
+        ${value ? "border-strokeCream" : "border-strokeGrey"}`}
       onClick={() => setIsOpen(!isOpen)}
     >
       {value && (
@@ -272,7 +519,7 @@ export const SelectInput = ({
         }}
         disabled={disabled}
         required={required}
-        className="w-full bg-transparent text-textBlack font-semibold outline-none appearance-none"
+        className="w-full bg-transparent text-textBlack font-semibold outline-none appearance-none cursor-pointer"
       >
         {placeholder && <option value="">{placeholder}</option>}
         {options.map((option) => (

@@ -9,7 +9,7 @@ import {
 } from "./Pages/Index";
 import "./index.css";
 import { ErrorProvider } from "./Context/ErrorContext";
-import { ProtectedRouteWrapper } from "./Context/ProtectedRoute";
+import ProtectedRouteWrapper from "./Context/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -40,7 +40,7 @@ function App() {
           {/* Fallback Route */}
           <Route path="*" element={<PageNotFound />} />
         </Routes>
-        <ToastContainer autoClose={2000} />
+        <ToastContainer autoClose={3000} />
       </ErrorProvider>
     </>
   );

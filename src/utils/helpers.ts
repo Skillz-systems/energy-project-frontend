@@ -1,3 +1,8 @@
+import { useNavigate } from "react-router-dom";
+import useTokens from "../hooks/useTokens";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
+
 export function copyToClipboard(value: any) {
   if (!navigator.clipboard) {
     console.error("Clipboard API not supported");
@@ -52,4 +57,17 @@ export function capitalizeFirstLetter(str) {
 
 export function formatNumberWithCommas(number: number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+export function useIsLoggedIn(route?: string) {
+  const { token } = useTokens();
+  const navigate = useNavigate();
+  const sessionRedirect = sessionStorage.getItem("redirect");
+
+  useEffect(() => {
+    if (token) {
+      toast.info("You are already logged in!");
+      navigate(route || sessionRedirect);
+    }
+  }, [token, navigate, route, sessionRedirect]);
 }

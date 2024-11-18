@@ -9,6 +9,8 @@ import {
 } from "../CardComponents/CardComponent";
 import { formatDateTime, formatNumberWithCommas } from "../../utils/helpers";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
+import { SmallFileInput } from "../InputComponent/Input";
+import { LuImagePlus } from "react-icons/lu";
 
 interface ProductDetailsProps {
   productId: string;
@@ -21,7 +23,7 @@ interface ProductDetailsProps {
   displayInput?: boolean;
 }
 
-const Tag = ({ name, variant }: { name: string; variant?: string }) => {
+export const Tag = ({ name, variant }: { name: string; variant?: string }) => {
   return (
     <p
       className={`flex items-center justify-center h-[24px] text-xs p-2 rounded-full ${
@@ -106,13 +108,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       <div className="flex items-center justify-between p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
         <Tag name="Product Picture" variant="ink" />
         {displayInput ? (
-          <input
-            type="file"
+          <SmallFileInput
             name="productImage"
-            value={formData.productImage}
             onChange={handleChange}
-            className="px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
-            placeholder="Upload Product Image"
+            placeholder="Upload Image"
+            iconRight={<LuImagePlus />}
           />
         ) : (
           <div className="flex items-center justify-center w-full p-2 max-w-[100px] h-[100px] gap-2 border-[0.6px] border-[#D3C6A1] rounded-full">

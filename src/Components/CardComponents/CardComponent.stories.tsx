@@ -139,8 +139,7 @@ inventoryTwoCard.args = {
   productName: "Monochromatic Solar Panels",
   productPrice: 250000,
   productUnits: 10,
-  onSelectProduct: (productId: string | number, productUnits: number) => {
-    console.log("Product Id:", productId);
-    console.log("Product Units:", productUnits);
+  onSelectProduct: (productInfo: any) => {
+    console.log("Product Info:", productInfo);
   },
 };

@@ -121,7 +121,7 @@ export const Table = (props: TableType) => {
     <div className="flex flex-col w-full gap-2">
       {loading ? (
         <SkeletonLoader />
-      ) : paginatedData.length === 0 ? (
+      ) : paginatedData?.length === 0 ? (
         <div className="flex flex-col items-center justify-center pt-10">
           <img src={wrong} alt="No data available" className="w-[100px]" />
           <p className="text-textBlack font-medium">No data available</p>
@@ -194,7 +194,7 @@ export const Table = (props: TableType) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {paginatedData.map((row, rowIndex) => (
+                      {paginatedData?.map((row, rowIndex) => (
                         <tr
                           key={rowIndex}
                           className="h-[40px] hover:opacity-80"

@@ -57,6 +57,7 @@ const TopNavComponent = () => {
           break;
         case 1:
           Cookies.remove("userData");
+          sessionStorage.clear();
           navigate("/login");
           break;
         default:

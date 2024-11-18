@@ -1,4 +1,8 @@
 import solarpanel from "../../assets/table/solar-panel.png";
+import inverters from "../../assets/table/inverter.jpg";
+import batteries from "../../assets/table/battery.avif";
+import controllers from "../../assets/table/controllers.avif";
+import accessories from "../../assets/table/accessory.avif";
 
 type Entry = {
   no: number;
@@ -151,7 +155,7 @@ const paymentOptions = [
   ["One-Time"],
   ["Instalmental"],
 ];
-const images = [solarpanel];
+const images = [solarpanel, inverters, batteries, controllers, accessories];
 
 // Helper function to generate a list of random product entries
 export const generateRandomProductEntries = (
@@ -193,4 +197,124 @@ export const generateRandomProductEntry = (): ProductEntries => {
   };
 
   return productEntry;
+};
+
+const productCategory = [
+  "solarPanels",
+  "inverters",
+  "batteries",
+  "chargeControllers",
+  "accessories",
+];
+
+const solarPanels = [
+  "SolarMax 2000",
+  "EcoLite Panel",
+  "SunPower Ultra",
+  "Photon Pro",
+  "EnergyStar Panel",
+];
+
+const inverter = [
+  "VoltSwitch Pro",
+  "PowerSync 500",
+  "InverMax Prime",
+  "WattWave Lite",
+  "GridFlex Ultra",
+];
+
+const battery = [
+  "LithiumCore X",
+  "EnergyVault 3000",
+  "PowerSafe Elite",
+  "ChargeHub Max",
+  "BatteryBank Pro",
+];
+
+const controller = [
+  "SolarBrain X",
+  "ChargeControl Max",
+  "SunTrack Elite",
+  "PowerFlow 400",
+  "GridManager Pro",
+];
+
+const accessory = [
+  "CableMaster Pro",
+  "SolarMount Kit",
+  "ConnectorFlex",
+  "PanelClamp Set",
+  "VoltageReg Ultra",
+];
+
+const productUnits = [10, 6, 12, 15, 18, 20];
+
+type ProductInventoryType = {
+  name: string;
+  data: {
+    productId: string | number;
+    productImage: string;
+    productTag: string;
+    productName: string;
+    productPrice: number;
+    productUnits: number;
+  }[];
+};
+
+const getRandomProductName = (name: string) => {
+  switch (name) {
+    case "solarPanels":
+      return getRandomItem(solarPanels);
+    case "inverters":
+      return getRandomItem(inverter);
+    case "batteries":
+      return getRandomItem(battery);
+    case "chargeControllers":
+      return getRandomItem(controller);
+    case "accessories":
+      return getRandomItem(accessory);
+    default:
+      return "Undefined Product Name";
+  }
+};
+
+const getRandomProductImage = (name: string) => {
+  switch (name) {
+    case "solarPanels":
+      return solarpanel;
+    case "inverters":
+      return inverters;
+    case "batteries":
+      return batteries;
+    case "chargeControllers":
+      return controllers;
+    case "accessories":
+      return accessories;
+    default:
+      break;
+  }
+};
+
+export const generateRandomProductInventoryEntries = (...counts: number[]) => {
+  if (counts.length !== productCategory.length) {
+    throw new Error(
+      `Counts array length (${counts.length}) must match productCategory length (${productCategory.length})`
+    );
+  }
+
+  const entries: ProductInventoryType[] = productCategory.map(
+    (item, index) => ({
+      name: item,
+      data: Array.from({ length: counts[index] }, (_, i) => ({
+        productId: 100000 + index * 1000 + i, // Generate unique IDs
+        productImage: getRandomProductImage(item),
+        productTag: getRandomItem(["Lima", "Sigma"]),
+        productName: getRandomProductName(item),
+        productPrice: getRandomItem(productPrices),
+        productUnits: getRandomItem(productUnits),
+      })),
+    })
+  );
+
+  return entries;
 };

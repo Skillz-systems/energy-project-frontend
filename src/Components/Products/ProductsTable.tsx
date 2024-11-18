@@ -99,7 +99,7 @@ const ProductsTable = ({ productData }) => {
         loading={false}
         filterList={filterList}
         cardComponent={(data) => {
-          return data.map((item: ProductEntries, index) => (
+          return data?.map((item: ProductEntries, index) => (
             <CardComponent
               key={index}
               variant="product-no-image"

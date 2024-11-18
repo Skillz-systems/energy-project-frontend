@@ -9,7 +9,10 @@ export type ModalType = {
   size?: "small" | "medium" | "large";
   layout?: "right" | "default";
   bodyStyle?: string;
+  headerClass?: string;
+  leftHeaderContainerClass?: string;
   leftHeaderComponents?: React.ReactNode;
+  rightHeaderContainerClass?: string;
   rightHeaderComponents?: React.ReactNode;
 };
 
@@ -20,7 +23,10 @@ export const Modal = ({
   size = "medium",
   layout = "default",
   bodyStyle,
+  headerClass,
+  leftHeaderContainerClass,
   leftHeaderComponents,
+  rightHeaderContainerClass,
   rightHeaderComponents,
 }: ModalType) => {
   const [isClosing, setIsClosing] = useState<boolean>(false);
@@ -102,12 +108,24 @@ export const Modal = ({
           <header
             className={`flex items-center p-2 h-[40px] border-b-[0.6px] border-b-strokeGreyThree ${
               leftHeaderComponents ? "justify-between" : "justify-end"
-            }`}
+            } ${headerClass}`}
           >
-            <div className="flex items-center gap-1">
+            <div
+              className={`flex ${
+                leftHeaderContainerClass
+                  ? leftHeaderContainerClass
+                  : "items-center gap-1"
+              }`}
+            >
               {leftHeaderComponents}
             </div>
-            <div className="flex items-center gap-1">
+            <div
+              className={`flex ${
+                rightHeaderContainerClass
+                  ? rightHeaderContainerClass
+                  : "items-center gap-1 "
+              }`}
+            >
               {rightHeaderComponents}
               <button
                 onClick={handleClose}
