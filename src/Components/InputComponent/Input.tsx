@@ -1,6 +1,25 @@
 import { ChangeEvent, MouseEvent, ReactNode, useEffect, useRef } from "react";
-import { CgAsterisk, CgChevronDown } from "react-icons/cg";
+import { CgChevronDown } from "react-icons/cg";
 import { useState } from "react";
+
+const Asterik = () => {
+  return (
+    <span className="mb-1.5">
+      <svg
+        width="8"
+        height="8"
+        viewBox="0 0 8 8"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M2.51025 6.444L2.54225 4.588L0.86225 5.628L0.09425 4.428L1.90225 3.372L0.09425 2.3L0.87825 1.116L2.54225 2.172L2.51025 0.299999H3.93425L3.90225 2.156L5.56625 1.116L6.35025 2.3L4.54225 3.372L6.35025 4.428L5.55025 5.628L3.90225 4.604L3.93425 6.444H2.51025Z"
+          fill="#FF0707"
+        />
+      </svg>
+    </span>
+  );
+};
 
 type AllowedInputTypes =
   | "text"
@@ -21,7 +40,7 @@ export type InputType = {
   type: AllowedInputTypes;
   name: string;
   label: string;
-  value?: string | number | any[];
+  value: string | number;
   onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   onClick?: (event?: MouseEvent<HTMLInputElement>) => void;
@@ -72,25 +91,21 @@ export const Input = ({
           className={`relative autofill-parent ${
             type === "hidden" ? "hidden" : "flex"
           } ${style} ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
-          items-center w-full max-w-[400px] px-[1.1em] py-[1.25em] gap-2 rounded-3xl h-[48px] border-[0.6px]
+          items-center w-full max-w-full px-[1.1em] py-[1.25em] gap-1 rounded-3xl h-[48px] border-[0.6px]
           transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
           onClick={onClick}
         >
-          {value && (
-            <span
-              className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out
-            ${value ? "opacity-100" : "opacity-0"}`}
-            >
-              {label.toUpperCase()}
-            </span>
-          )}
+          <span
+            className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out
+            ${value ? "opacity-100" : "opacity-0"}
+            `}
+          >
+            {label.toUpperCase()}
+          </span>
+
           {iconLeft && iconLeft}
 
-          {required && (
-            <span className="mb-2 text-lg text-red-600">
-              <CgAsterisk />
-            </span>
-          )}
+          {required && <Asterik />}
 
           <input
             type={type}
@@ -155,16 +170,18 @@ export const ModalInput = ({
       <div
         className={`flex relative ${
           isItemsSelected ? "flex-col" : "flex-row"
-        } items-center gap-1.5 ${style} ${
+        } items-center gap-[4px] ${style} ${
           disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"
-        }  w-full max-w-[400px] py-[1.25em] ${
+        }  w-full max-w-full py-[1.25em] ${
           isItemsSelected ? "rounded-[20px]" : "rounded-3xl h-[48px]"
         } border-[0.6px] 
           transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent `}
       >
-        <span className="absolute flex left-[1.6em] -top-2 z-50 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out opacity-100">
-          {label.toUpperCase()}
-        </span>
+        {isItemsSelected && (
+          <span className="absolute flex left-[1.6em] -top-2 z-50 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out opacity-100">
+            {label.toUpperCase()}
+          </span>
+        )}
 
         <div
           className={`flex items-center pl-[1.1em] ${
@@ -173,27 +190,28 @@ export const ModalInput = ({
         >
           {isItemsSelected ? (
             <span
-              className="w-full text-sm font-semibold text-textDarkGrey cursor-pointer"
+              className="w-full text-sm font-semibold text-textBlack cursor-pointer"
               onClick={onClick}
             >
               Change {name} selected
             </span>
           ) : (
-            required && (
-              <span className="mb-2 text-lg text-red-600">
-                <CgAsterisk />
-              </span>
-            )
+            required && <Asterik />
           )}
         </div>
 
         {isItemsSelected ? (
-          <div className="flex flex-col items-center justify-start w-full px-[1.1em] max-h-[550px] overflow-y-auto">
+          <div
+            className={`flex flex-col items-center justify-start not-italic text-textBlack w-full px-[1.1em] max-h-[550px] overflow-y-auto
+            ${isItemsSelected ? "opacity-100" : "opacity-0"}
+          
+          `}
+          >
             {itemsSelected}
           </div>
         ) : type === "button" ? (
           <span
-            className="w-full text-sm font-semibold text-textBlack cursor-pointer"
+            className="w-full text-sm text-textGrey italic cursor-pointer"
             onClick={onClick}
           >
             {placeholder}
@@ -251,23 +269,18 @@ export const FileInput = ({
         className={`relative autofill-parent flex
           ${style} 
           ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
-          items-center w-full max-w-[400px] h-[48px] px-[1.1em] py-[1.25em] 
-          gap-2 rounded-3xl border-[0.6px]
+          items-center w-full max-w-full h-[48px] px-[1.1em] py-[1.25em] 
+          gap-1 rounded-3xl border-[0.6px]
           transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
       >
-        {label && (
-          <span
-            className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] 
-              transition-opacity duration-500 ease-in-out`}
-          >
-            {label.toUpperCase()}
-          </span>
-        )}
-        {required && (
-          <span className="mb-2 text-lg text-red-600">
-            <CgAsterisk />
-          </span>
-        )}
+        <span
+          className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out
+            ${selectedFile ? "opacity-100" : "opacity-0"}
+          `}
+        >
+          {label.toUpperCase()}
+        </span>
+        {required && <Asterik />}
 
         {/* Hidden file input */}
         <input
@@ -285,10 +298,10 @@ export const FileInput = ({
               type="button"
               onClick={openFile}
               disabled={disabled}
-              className="text-sm font-semibold text-textBlack"
+              className="text-sm text-textGrey italic"
             >
               {selectedFile ? (
-                <span className="text-sm font-semibold text-textBlack">
+                <span className="text-sm not-italic font-semibold text-textBlack">
                   {selectedFile.name}
                 </span>
               ) : (
@@ -487,46 +500,47 @@ export const SelectInput = ({
 
   return (
     <div
-      className={`relative flex items-center 
-        ${style} 
-        ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"} 
-        w-full max-w-[400px] h-[48px] px-[1.1em] py-[1.25em] 
-        rounded-3xl text-sm text-textGrey border-[0.6px] gap-2
-        transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
-        ${value ? "border-strokeCream" : "border-strokeGrey"}`}
+      className={`relative flex items-center
+      w-full max-w-full h-[48px] px-[1.25em] py-[1.25em] 
+      rounded-3xl text-sm text-textGrey border-[0.6px] gap-1
+      transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
+      ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
+      ${style}`}
       onClick={() => setIsOpen(!isOpen)}
     >
-      {value && (
-        <span
-          className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] 
-            transition-opacity duration-500 ease-in-out
-            ${value ? "opacity-100" : "opacity-0"}`}
-        >
-          {label.toUpperCase()}
-        </span>
-      )}
-      {required && (
-        <span className="mb-2 text-lg text-red-600">
-          <CgAsterisk />
-        </span>
-      )}
+      <span
+        className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out ${
+          value ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        {label.toUpperCase()}
+      </span>
+      {required && <Asterik />}
+
       <select
         name={name}
         value={value}
         onChange={(e) => {
           onChange(e);
-          setIsOpen(false);
         }}
         disabled={disabled}
         required={required}
-        className="w-full bg-transparent text-textBlack font-semibold outline-none appearance-none cursor-pointer"
+        className={`w-full bg-transparent outline-none appearance-none cursor-pointer ${
+          value && value !== ""
+            ? "text-textBlack font-semibold"
+            : "text-textGrey italic"
+        }`}
       >
-        {placeholder && <option value="">{placeholder}</option>}
+        {placeholder && (
+          <option value="" className="not-italic">
+            {placeholder}
+          </option>
+        )}
         {options.map((option) => (
           <option
             key={option.value}
             value={option.value}
-            className="capitalize"
+            className="capitalize text-textBlack not-italic"
           >
             {option.label}
           </option>
@@ -604,35 +618,35 @@ export const SelectMultipleInput = ({
   }, [isOpen]);
 
   return (
-    <div ref={dropdownRef} className={`relative w-full max-w-[400px] `}>
+    <div ref={dropdownRef} className={`relative w-full max-w-full `}>
       <div
         className={`relative flex items-center justify-between 
           ${style}
           ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"} 
-          w-full h-[48px] px-[1.1em] py-[1.25em] 
-          rounded-3xl text-sm text-textGrey border-[0.6px] gap-2
+          w-full h-[48px] px-[1.3em] py-[1em] 
+          rounded-3xl text-sm text-textGrey border-[0.6px] gap-[4.23px]
           transition-all focus:outline-none focus:ring-2 focus:ring-primary`}
         onClick={() => !disabled && setIsOpen(!isOpen)}
       >
-        {value && (
-          <span
-            className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] 
+        <span
+          className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] 
             transition-opacity duration-500 ease-in-out
-            ${value ? "opacity-100" : "opacity-0"}`}
-          >
-            {label.toUpperCase()}
-          </span>
-        )}
-
-        {required && (
-          <span className="mb-2 text-lg text-red-600">
-            <CgAsterisk />
-          </span>
-        )}
-
-        <span className="w-full text-textBlack font-semibold">
-          {value.length > 0 ? `${value.length} selected` : placeholder}
+            ${value.length > 0 ? "opacity-100" : "opacity-0"}`}
+        >
+          {label.toUpperCase()}
         </span>
+
+        {required && <Asterik />}
+
+        <div className="w-full">
+          {value.length > 0 ? (
+            <span className="font-semibold text-textBlack">
+              {value.length} selected
+            </span>
+          ) : (
+            <span className="text-textGrey italic">{placeholder}</span>
+          )}
+        </div>
         <span className={`${iconStyle}`}>{icon}</span>
       </div>
 

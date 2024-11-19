@@ -106,24 +106,18 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
       }
     };
 
-    const {
-      category,
-      productName,
-      inventory,
-      paymentModes,
-      sellingPrice,
-      productImage,
-    } = formData;
+    const selectedProducts = rootStore.productStore.products;
+
+    const { category, productName, paymentModes, sellingPrice, productImage } =
+      formData;
 
     const isFormFilled =
       category ||
       productName ||
-      inventory.length >= 1 ||
+      selectedProducts.length > 0 ||
       paymentModes.length >= 1 ||
       sellingPrice ||
       productImage;
-
-    const selectedProducts = rootStore.productStore.products;
 
     return (
       <>
@@ -152,7 +146,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
               </h2>
             </div>
             <>
-              <div className="flex flex-col items-center justify-center w-full px-4 gap-4 py-8">
+              <div className="flex flex-col items-center justify-center w-full px-[2.5em] gap-4 py-8">
                 <SelectInput
                   label="Product Category"
                   name="category"
@@ -165,35 +159,35 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                   onChange={handleInputChange}
                   required={true}
                   placeholder="Select Product Category"
-                  style={`${
-                    isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                  }`}
+                  style={
+                    isFormFilled ? "border-strokeCream" : "border-strokeGrey"
+                  }
                 />
                 <Input
                   type="text"
                   name="productName"
                   label="PRODUCT NAME"
+                  value={productName}
                   onChange={handleInputChange}
                   placeholder="Product Name"
                   required={true}
-                  style={`${
-                    isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                  }`}
+                  style={
+                    isFormFilled ? "border-strokeCream" : "border-strokeGrey"
+                  }
                 />
 
                 <ModalInput
                   type="button"
                   name="inventory"
                   label="INVENTORY"
-                  value={inventory}
                   onClick={() => setIsInventoryOpen(true)}
                   placeholder="Select Inventory"
                   required={true}
-                  style={`${
+                  style={
                     isFormFilled || selectedProducts.length > 0
-                      ? "border-[#D3C6A1]"
+                      ? "border-strokeCream"
                       : "border-strokeGrey"
-                  }`}
+                  }
                   isItemsSelected={selectedProducts.length > 0}
                   itemsSelected={
                     <div className="flex flex-wrap items-center w-full gap-4">
@@ -229,11 +223,11 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                   onChange={(values) =>
                     handleMultiSelectChange("paymentModes", values)
                   }
-                  placeholder="Select skills"
+                  placeholder="Select Payment Modes"
                   required={true}
-                  style={`${
-                    isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                  }`}
+                  style={
+                    isFormFilled ? "border-strokeCream" : "border-strokeGrey"
+                  }
                 />
 
                 <Input
@@ -244,9 +238,9 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                   onChange={handleInputChange}
                   placeholder="Selling Price"
                   required={true}
-                  style={`${
-                    isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                  }`}
+                  style={
+                    isFormFilled ? "border-strokeCream" : "border-strokeGrey"
+                  }
                 />
                 <FileInput
                   name="productImage"
@@ -254,10 +248,10 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                   onChange={handleInputChange}
                   required={true}
                   placeholder="Upload Product Image"
-                  style={`${
-                    isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                  }`}
-                  iconRight={<LuImagePlus />}
+                  style={
+                    isFormFilled ? "border-strokeCream" : "border-strokeGrey"
+                  }
+                  iconRight={<LuImagePlus color="#828da9" />}
                 />
               </div>
               <ProceedButton

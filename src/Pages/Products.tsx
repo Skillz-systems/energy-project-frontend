@@ -100,7 +100,6 @@ const Products = () => {
         <section className="flex flex-col-reverse sm:flex-row items-center justify-between w-full bg-paleGrayGradient px-2 md:px-8 py-4 gap-2 min-h-[64px]">
           <div className="flex flex-wrap w-full items-center gap-2 gap-y-3">
             <TitlePill
-              parentClass="w-full gap-4 max-w-none sm:max-w-max"
               icon={productgradient}
               iconBgColor="bg-[#FDEEC2]"
               topText="All"
@@ -108,7 +107,6 @@ const Products = () => {
               value={40}
             />
             <TitlePill
-              parentClass="w-full gap-4 max-w-none sm:max-w-max"
               icon={productgreen}
               iconBgColor="bg-[#E3FAD6]"
               topText="Instalmental"
@@ -116,7 +114,6 @@ const Products = () => {
               value={22}
             />
             <TitlePill
-              parentClass="w-full max-w-none sm:max-w-[172px]"
               icon={productgreen}
               iconBgColor="bg-[#E3FAD6]"
               topText="Single Deposit"
@@ -124,7 +121,6 @@ const Products = () => {
               value={7}
             />
             <TitlePill
-              parentClass="w-full max-w-none sm:max-w-[172px]"
               icon={productgreen}
               iconBgColor="bg-[#E3FAD6]"
               topText="Recharge"
@@ -132,7 +128,6 @@ const Products = () => {
               value={7}
             />
             <TitlePill
-              parentClass="w-full max-w-none sm:max-w-[172px]"
               icon={cancelled}
               iconBgColor="bg-[#FFDBDE]"
               topText="Cancelled"

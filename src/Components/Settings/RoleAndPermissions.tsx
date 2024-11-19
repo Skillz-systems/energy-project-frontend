@@ -310,7 +310,7 @@ const RoleAndPermissions = ({
                 placeholder="Role Name"
                 required={true}
                 style={`${
-                  isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
                 }`}
               />
               <div className="relative flex flex-col w-full gap-0.5 p-5 border-[0.6px] border-strokeGreyTwo rounded-[20px]">

@@ -115,7 +115,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
             iconRight={<LuImagePlus />}
           />
         ) : (
-          <div className="flex items-center justify-center w-full p-2 max-w-[100px] h-[100px] gap-2 border-[0.6px] border-[#D3C6A1] rounded-full">
+          <div className="flex items-center justify-center w-full p-2 max-w-[100px] h-[100px] gap-2 border-[0.6px] border-strokeCream rounded-full">
             <img
               src={productImage}
               alt="Product Image"

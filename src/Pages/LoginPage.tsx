@@ -24,7 +24,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
-  useIsLoggedIn();
+  useIsLoggedIn("/dashboard");
   if (token) return null;
 
   const redirectPath = searchParams.get("redirect");
@@ -122,7 +122,7 @@ const LoginPage = () => {
               required={true}
               errorMessage=""
               style={`mb-4 ${
-                email || password ? "border-[#D3C6A1]" : "border-strokeGrey"
+                email || password ? "border-strokeCream" : "border-strokeGrey"
               }`}
             />
             {!isForgotPassword ? (
@@ -139,7 +139,7 @@ const LoginPage = () => {
                 required={true}
                 errorMessage=""
                 style={`${
-                  email || password ? "border-[#D3C6A1]" : "border-strokeGrey"
+                  email || password ? "border-strokeCream" : "border-strokeGrey"
                 }`}
                 iconRight={
                   <img

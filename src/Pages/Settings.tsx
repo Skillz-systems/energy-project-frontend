@@ -149,12 +149,11 @@ const Settings = observer(() => {
         {userlocation.pathname === "/settings/users" ? (
           <section className="flex flex-col-reverse sm:flex-row items-center justify-between w-full bg-paleGrayGradient px-2 md:px-8 py-4 gap-2 min-h-[64px]">
             <TitlePill
-              parentClass="w-full max-w-none sm:max-w-[172px]"
               icon={settings}
               iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="USERS"
-              value={settingsStore.noOfUsers || null}
+              value={settingsStore.noOfUsers || 0}
             />
             <div className="flex w-full items-center justify-between gap-2 sm:w-max sm:justify-start">
               <ActionButton
@@ -244,7 +243,7 @@ const Settings = observer(() => {
                   placeholder="First Name"
                   required={true}
                   style={`${
-                    isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                    isFormFilled ? "border-strokeCream" : "border-strokeGrey"
                   }`}
                 />
                 <Input
@@ -256,7 +255,7 @@ const Settings = observer(() => {
                   placeholder="Last Name"
                   required={true}
                   style={`${
-                    isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                    isFormFilled ? "border-strokeCream" : "border-strokeGrey"
                   }`}
                 />
                 <Input
@@ -268,7 +267,7 @@ const Settings = observer(() => {
                   placeholder="Email"
                   required={true}
                   style={`${
-                    isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                    isFormFilled ? "border-strokeCream" : "border-strokeGrey"
                   }`}
                 />
                 <Input
@@ -280,7 +279,7 @@ const Settings = observer(() => {
                   placeholder="Phone Number"
                   required={true}
                   style={`${
-                    isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                    isFormFilled ? "border-strokeCream" : "border-strokeGrey"
                   }`}
                 />
 
@@ -293,7 +292,7 @@ const Settings = observer(() => {
                   required={true}
                   placeholder="Select a role"
                   style={`${
-                    isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                    isFormFilled ? "border-strokeCream" : "border-strokeGrey"
                   }`}
                 />
                 <Input
@@ -305,7 +304,7 @@ const Settings = observer(() => {
                   placeholder="Location"
                   required={true}
                   style={`${
-                    isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                    isFormFilled ? "border-strokeCream" : "border-strokeGrey"
                   }`}
                 />
               </div>
