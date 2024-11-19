@@ -12,6 +12,8 @@ import { ErrorProvider } from "./Context/ErrorContext";
 import ProtectedRouteWrapper from "./Context/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ProgressBar from "./Components/Progressbar/ProgressBar";
+
 
 function App() {
   return (
@@ -36,11 +38,35 @@ function App() {
             path="/reset-password/:id/:token"
             element={<CreatePassword />}
           />
+          <Route
+            path="/test-progress-bar"
+            element={
+              <div className="p-8">
+                <ProgressBar
+                  percentage={85}
+                  parentClassname="custom-parent-class"
+                  percentageClassname="custom-percentage-class" />
+                <ProgressBar percentage={60} />
+                <ProgressBar percentage={90} />
+              </div>
+            }
+          />
+          {/* Public Routes */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/create-password/:id/:token"
+            element={<CreatePassword />}
+          />
+          <Route
+            path="/reset-password/:id/:token"
+            element={<CreatePassword />}
+          />
 
-          {/* Fallback Route */}
-          <Route path="*" element={<PageNotFound />} />
-        </Routes>
-        <ToastContainer autoClose={3000} />
+            {/* Fallback Route */}
+            <Route path="*" element={<PageNotFound />} />
+          </Routes>
+        <ToastContainer autoClose={2000} />
       </ErrorProvider>
     </>
   );
