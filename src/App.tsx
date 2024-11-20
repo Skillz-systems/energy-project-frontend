@@ -11,7 +11,7 @@ import { ErrorProvider } from "./Context/ErrorContext";
 import { ProtectedRouteWrapper } from "./Context/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ProgressBar from "./Components/ProgressBar/ProgressBar";
+
 import CustomerPage from "./Pages/CustomerPage";
 
 function App() {
@@ -23,32 +23,23 @@ function App() {
           <Route element={<ProtectedRouteWrapper />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/settings/*" element={<Settings />} />
+            <Route path="/customers" element={<CustomerPage />} />
+            {/* Other protected routes */}
           </Route>
 
           {/* Public Routes */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/create-password/:id/:token"
-            element={<CreatePassword />}
-          />
-          <Route
-            path="/reset-password/:id/:token"
-            element={<CreatePassword />}
-          />
-          <Route
-            path="/CustomerPage"
-            element={
-              <div className="p-8">
-                
-                <CustomerPage />
-              </div>
-            }
-          />
+          <Route path="/create-password/:id/:token" element={<CreatePassword />} />
+          <Route path="/reset-password/:id/:token" element={<CreatePassword />} />
+
+          {/* Customer Page Route */}
+          
 
           {/* Fallback Route */}
           <Route path="*" element={<PageNotFound />} />
         </Routes>
+
         <ToastContainer autoClose={2000} />
       </ErrorProvider>
     </>
