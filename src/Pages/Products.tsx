@@ -161,7 +161,12 @@ const Products = () => {
                   <Route
                     key={path}
                     path={path}
-                    element={<ProductsTable productData={productData} />}
+                    element={
+                      <ProductsTable
+                        productData={productData}
+                        isLoading={!productData?.length}
+                      />
+                    }
                   />
                 ))}
               </Routes>

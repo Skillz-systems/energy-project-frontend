@@ -47,13 +47,6 @@ export default {
         menuCustom: "8px 12px 40px rgba(0, 0, 0, 0.15)",
         titlePillCustom: "1px 2px 10px rgba(0, 0, 0, 0.05)",
       },
-      utilities: {
-        ".flex-center": {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        },
-      },
     },
   },
   plugins: [],

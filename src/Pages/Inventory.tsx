@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import PageLayout from "./PageLayout";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
@@ -10,13 +10,20 @@ import circleAction from "../assets/settings/addCircle.svg";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
-import InventoryTable from "@/Components/Inventory/InventoryTable";
-import CreateNewInventory from "@/Components/Inventory/CreateNewInventory";
+import CreateNewInventory, {
+  InventoryFormType,
+} from "@/Components/Inventory/CreateNewInventory";
+import { generateRandomInventoryEntries } from "@/Components/TableComponent/sampleData";
+
+const InventoryTable = lazy(
+  () => import("@/Components/Inventory/InventoryTable")
+);
 
 const Inventory = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [inventoryData, setInventoryData] = useState<any>(null); // Temporary
+  const [formType, setFormType] = useState<InventoryFormType>("newInventory");
   //   const {
   //     data: productData,
   //     isLoading: productLoading,
@@ -31,21 +38,21 @@ const Inventory = () => {
       onclick: () => {},
     },
     {
-      title: "Deleted Inventory",
-      link: "/inventory/deleted",
-      count: 50,
-      onclick: () => {},
-    },
-    {
-      title: "Categories",
-      link: "/inventory/category",
-      count: 25,
+      title: "Regular",
+      link: "/inventory/regular",
+      count: 70,
       onclick: () => {},
     },
     {
       title: "Out of stock",
       link: "/inventory/out-of-stock",
-      count: 25,
+      count: 20,
+      onclick: () => {},
+    },
+    {
+      title: "Deleted Inventory",
+      link: "/inventory/deleted",
+      count: 10,
       onclick: () => {},
     },
   ];
@@ -53,19 +60,31 @@ const Inventory = () => {
   useEffect(() => {
     switch (location.pathname) {
       case "/inventory/all":
-        // setInventoryData(generateRandomProductEntries(100));
+        setInventoryData(generateRandomInventoryEntries(100));
         break;
-      case "/inventory/deleted":
-        // setInventoryData(generateRandomInventoryEntries(50, ["deleted"]));
-        break;
-      case "/inventory/category":
-        // setInventoryData(generateRandomInventoryEntries(25, ["category"]));
+      case "/inventory/regular":
+        setInventoryData(
+          generateRandomInventoryEntries(70, {
+            classTags: ["regular"],
+          })
+        );
         break;
       case "/inventory/out-of-stock":
-        // setInventoryData(generateRandomInventoryEntries(25, ["out-of-stock"]));
+        setInventoryData(
+          generateRandomInventoryEntries(20, {
+            outOfStock: true,
+          })
+        );
+        break;
+      case "/inventory/deleted":
+        setInventoryData(
+          generateRandomInventoryEntries(10, {
+            includeDeleted: true,
+          })
+        );
         break;
       default:
-      // setInventoryData(generateRandomInventoryEntries(100));
+        setInventoryData(generateRandomInventoryEntries(100));
     }
   }, [location.pathname]);
 
@@ -73,22 +92,27 @@ const Inventory = () => {
     items: [
       "Add New Inventory",
       "Create New Category",
+      "Create New Sub-Category",
       "Create New Location",
       "Export List",
     ],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
+          setFormType("newInventory");
           setIsOpen(true);
           break;
         case 1:
-          console.log("Exporting list...");
+          setFormType("newCategory");
+          setIsOpen(true);
           break;
         case 2:
-          console.log("Exporting list...");
+          setFormType("newSubCategory");
+          setIsOpen(true);
           break;
         case 3:
-          console.log("Exporting list...");
+          setFormType("newLocation");
+          setIsOpen(true);
           break;
         case 4:
           console.log("Exporting list...");
@@ -100,7 +124,7 @@ const Inventory = () => {
     showCustomButton: true,
   };
 
-  const inventoryPaths = ["all", "deleted", "category", "out-of-stock"];
+  const inventoryPaths = ["all", "regular", "out-of-stock", "deleted"];
 
   return (
     <>
@@ -162,7 +186,13 @@ const Inventory = () => {
                   <Route
                     key={path}
                     path={path}
-                    element={<InventoryTable inventoryData={inventoryData} />}
+                    element={
+                      <InventoryTable
+                        inventoryData={inventoryData}
+                        isLoading={!inventoryData?.length}
+                        // refreshTable={() => {}}
+                      />
+                    }
                   />
                 ))}
               </Routes>
@@ -170,7 +200,13 @@ const Inventory = () => {
           </section>
         </div>
       </PageLayout>
-      <CreateNewInventory isOpen={isOpen} setIsOpen={setIsOpen} />
+      {isOpen ? (
+        <CreateNewInventory
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          formType={formType}
+        />
+      ) : null}
     </>
   );
 };

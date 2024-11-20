@@ -23,7 +23,7 @@ export type TableType = {
     title: string;
     key: string;
     valueIsAComponent?: boolean;
-    customValue?: (value?: string | number, rowData?: any) => JSX.Element;
+    customValue?: (value?: any, rowData?: any) => JSX.Element;
     width?: string;
     rightIcon?: React.ReactNode;
   }[];
@@ -184,9 +184,11 @@ export const Table = (props: TableType) => {
                             key={index}
                             className={`${column.width} p-2 text-xs font-light text-left text-textDarkGrey border-b-[0.2px] border-[#E0E0E0]`}
                           >
-                            <div className="flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 bg-strokeGreyTwo rounded-full"></span>
-                              <span>{column.title}</span>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 bg-strokeGreyTwo rounded-full"></span>
+                                <span>{column.title}</span>
+                              </div>
                               {column.rightIcon}
                             </div>
                           </th>

@@ -23,7 +23,7 @@ export type DropDownType = {
 export const DropDown = (props: DropDownType) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [showIcon, setShowIcon] = useState<boolean>(false);
+  const [showIcon, setShowIcon] = useState<number>();
 
   const {
     name,
@@ -36,7 +36,6 @@ export const DropDown = (props: DropDownType) => {
     showCustomButton = false,
     defaultStyle,
   } = props;
-  const [linkIndex, setLinkIndex] = useState<number>(0);
 
   const handleClick = () => {
     if (isDate) {
@@ -47,7 +46,6 @@ export const DropDown = (props: DropDownType) => {
   };
 
   const handleOptionClick = (index: number) => {
-    setLinkIndex(index);
     if (onClickLink) onClickLink(index);
     setIsOpen(false);
   };
@@ -92,7 +90,7 @@ export const DropDown = (props: DropDownType) => {
         isOpen={isOpen}
         onClose={() => {
           setIsOpen(false);
-          setShowIcon(false);
+          setShowIcon(null);
         }}
       >
         {isDate ? (
@@ -106,24 +104,23 @@ export const DropDown = (props: DropDownType) => {
           </div>
         ) : (
           <ul
-            className={`${dropDownContainerStyle} absolute top-[35px] right-0 z-[100] flex flex-col gap-1 p-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] shadow-lg w-[168px]`}
+            className={`${dropDownContainerStyle} absolute top-[35px] right-0 z-[100] flex flex-col gap-0.5 p-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] shadow-lg w-[185px]`}
           >
             {items?.map((item, index) => (
               <li
                 key={index}
-                className={`flex items-center justify-between h-[24px] px-2 py-2.5 text-xs rounded-full cursor-pointer border-[0.4px] border-transparent
+                className={`flex items-center justify-between h-max px-2 py-1 text-xs rounded-full cursor-pointer border-[0.4px] border-transparent
                 ${
-                  linkIndex === index && showIcon && !defaultStyle
+                  index === showIcon && !defaultStyle
                     ? "bg-paleLightBlue text-textBlack"
                     : "hover:bg-gray-100 text-textDarkGrey hover:border-strokeGreyTwo"
                 }`}
-                onClick={() => {
-                  setShowIcon(true);
-                  handleOptionClick(index);
-                }}
+                onClick={() => handleOptionClick(index)}
+                onMouseEnter={() => setShowIcon(index)}
+                onMouseLeave={() => setShowIcon(null)}
               >
                 {item}
-                {linkIndex === index && showIcon && !defaultStyle ? (
+                {index === showIcon && !defaultStyle ? (
                   <svg
                     width="16"
                     height="16"
