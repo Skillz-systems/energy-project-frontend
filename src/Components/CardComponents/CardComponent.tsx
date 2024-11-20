@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import smile from "../../assets/table/smile.svg";
 import ongoing from "../../assets/table/ongoing.svg";
 import inventory from "../../assets/table/inventory.svg";
@@ -24,7 +24,7 @@ export type CardComponentProps = {
     | "inventoryTwo";
   handleCallClick?: () => void;
   handleWhatsAppClick?: () => void;
-  dropDownList: {
+  dropDownList?: {
     items: string[];
     onClickLink: (index: number) => void;
     defaultStyle: boolean;
@@ -46,13 +46,23 @@ export type CardComponentProps = {
   transactionAmount?: number;
   saleId?: string | number;
   productStatus?: string;
-  productId?: string;
+  productId?: string | number;
   installment?: number;
   productPrice?: number;
   productImage?: string;
   productName?: string;
   productUnits?: number;
-  onSelectProduct?: (productId: string | number, productUnits: number) => void;
+  onSelectProduct?: (productInfo: {
+    productId: string | number;
+    productImage: string;
+    productTag: string;
+    productName: string;
+    productPrice: number;
+    productUnits: number;
+  }) => void;
+  onRemoveProduct?: (productId: string | number) => void;
+  isProductSelected?: boolean;
+  readOnly?: boolean;
 };
 
 export const ProductTag = ({ productTag }: { productTag: string }) => {
@@ -78,7 +88,7 @@ const ProductTypeWithTag = ({
   daysDue,
 }: {
   productTag?: string;
-  productType?: string;
+  productType?: string | number;
   paymentStatus?: "Completed" | "Successful" | "Defaulted" | any;
   daysDue?: number;
 }) => {
@@ -113,22 +123,30 @@ const ProductTypeWithTag = ({
   );
 };
 
-const SimpleTag = ({
+export const SimpleTag = ({
   text,
   dotColour,
+  showIcon = true,
   customIcon,
   containerClass,
 }: {
   text: string | number;
+  showIcon?: boolean;
   dotColour?: string;
   customIcon?: React.ReactNode;
   containerClass?: string;
 }) => {
   return (
     <p
-      className={`flex items-center w-max gap-0.5 text-textDarkGrey text-xs uppercase ${containerClass}`}
+      className={`flex items-center w-max gap-0.5 text-xs uppercase ${containerClass}`}
     >
-      {customIcon ? customIcon : <GoDotFill color={dotColour || "#E0E0E0"} />}
+      {showIcon ? (
+        customIcon ? (
+          customIcon
+        ) : (
+          <GoDotFill color={dotColour || "#E0E0E0"} />
+        )
+      ) : null}
       {text}
     </p>
   );
@@ -152,9 +170,9 @@ export const NameTag = ({ name }: { name: string }) => {
   return (
     <span className="flex items-center gap-0.5">
       <img src={smile} alt="Smile Icon" />
-      <p className="flex items-center justify-center bg-paleLightBlue text-xs px-2 text-textBlack font-semibold rounded-full h-[24px]">
+      <span className="flex items-center justify-center bg-paleLightBlue text-xs px-2 text-textBlack font-semibold rounded-full h-[24px]">
         {name}
-      </p>
+      </span>
     </span>
   );
 };
@@ -189,12 +207,22 @@ interface QuantitySelectorProps {
 
 export default function QuantitySelector({
   productUnits,
-  defaultValue = 0,
+  defaultValue,
   onValueChange,
   isSelected,
   onClick,
 }: QuantitySelectorProps) {
-  const [quantity, setQuantity] = useState(defaultValue);
+  const [quantity, setQuantity] = useState<number>(defaultValue);
+
+  useEffect(() => {
+    if (!isSelected) {
+      setQuantity(0);
+      onValueChange(0);
+    } else if (isSelected && quantity === 0) {
+      setQuantity(1);
+      onValueChange(1);
+    }
+  }, [isSelected, quantity, onValueChange]);
 
   const updateQuantity = (adjustment: number) => {
     const newValue = quantity + adjustment;
@@ -238,7 +266,7 @@ export default function QuantitySelector({
           </svg>
         </button>
       )}
-      <span className="text-center text-[#49526A] font-semibold" key={quantity}>
+      <span className="text-center text-[#49526A] font-semibold transition-all">
         {quantity}
       </span>
       {isSelected && (
@@ -302,41 +330,98 @@ export const CardComponent = ({
   productName,
   productUnits,
   onSelectProduct,
+  onRemoveProduct,
+  isProductSelected,
+  readOnly = false,
 }: CardComponentProps) => {
   const inventoryMobile = useBreakpoint("max", 350);
   const [_productUnits, setProductUnits] = useState<number>(0);
-  const [_productId, setProductId] = useState<string>(productId);
-  const [selected, setSelected] = useState<boolean>(false);
+  const [_selected, setSelected] = useState<boolean>(
+    isProductSelected || false
+  );
+  const [isHovered, setIsHovered] = useState(false);
+
+  const productInfo = {
+    productId,
+    productImage,
+    productTag,
+    productName,
+    productPrice,
+    productUnits: _productUnits,
+  };
 
   const handleSelectProduct = () => {
-    if (!selected) {
-      onSelectProduct(_productId, _productUnits);
+    if (!_selected) {
+      const updatedUnits = _productUnits === 0 ? 1 : _productUnits;
+      const updatedProductInfo = {
+        ...productInfo,
+        productUnits: updatedUnits,
+      };
+      onSelectProduct?.(updatedProductInfo);
       setSelected(true);
     } else {
       setSelected(false);
+      setProductUnits(0);
+      onRemoveProduct?.(productId);
     }
   };
 
   const handleCardClick = () => {
-    setProductId(productId);
-    if (variant === "inventoryTwo") {
-      if (productId === _productId) {
-        handleSelectProduct();
-      }
+    if (!readOnly) {
+      if (variant === "inventoryTwo") handleSelectProduct();
     }
   };
 
   return (
     <div
-      className={`flex flex-col ${
+      className={`relative flex flex-col ${
         variant === "inventoryOne" || variant === "inventoryTwo"
-          ? `${inventoryMobile ? "w-full" : "w-[47%]"} md:w-[31%]`
+          ? `${inventoryMobile ? "w-full" : "w-[49%] "} ${
+              readOnly ? "md:w-[47%]" : "md:w-[31%]"
+            }`
           : "w-[32%] min-w-[204px]"
       } bg-white border-[0.6px] rounded-[20px] ${
-        selected ? " border-success" : "border-strokeGreyThree"
+        _selected || readOnly ? "border-success" : "border-strokeGreyThree"
       }`}
       onClick={handleCardClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
+      {readOnly && isHovered && (
+        <div className="absolute z-50 inset-0 bg-black bg-opacity-40 rounded-[20px] flex items-start justify-end p-2">
+          <div
+            className="flex items-center justify-center mr-1 mt-1 text-red-700 bg-gray-100 w-6 h-6 rounded-full cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemoveProduct?.(productId);
+            }}
+            title="Remove Product"
+          >
+            <svg
+              fill="#b91c1c"
+              height="16px"
+              width="16px"
+              version="1.1"
+              id="Capa_1"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 330 330"
+            >
+              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+              <g
+                id="SVGRepo_tracerCarrier"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></g>
+              <g id="SVGRepo_iconCarrier">
+                <g>
+                  <path d="M165,0C74.019,0,0,74.019,0,165s74.019,165,165,165c90.982,0,165-74.019,165-165S255.982,0,165,0z M165,300 c-74.439,0-135-60.561-135-135S90.561,30,165,30c74.439,0,135,60.561,135,135S239.439,300,165,300z"></path>
+                  <path d="M239.247,90.754c-5.857-5.858-15.355-5.858-21.213,0l-53.033,53.033l-53.033-53.033c-5.857-5.858-15.355-5.858-21.213,0 c-5.858,5.858-5.858,15.355,0,21.213L143.788,165l-53.033,53.033c-5.858,5.858-5.858,15.355,0,21.213 c2.929,2.929,6.768,4.394,10.606,4.394c3.839,0,7.678-1.464,10.606-4.394l53.033-53.033l53.033,53.033 c2.929,2.929,6.768,4.394,10.606,4.394c3.839,0,7.678-1.464,10.607-4.394c5.858-5.858,5.858-15.355,0-21.213L186.214,165 l53.033-53.033C245.105,106.109,245.105,96.612,239.247,90.754z"></path>
+                </g>
+              </g>
+            </svg>
+          </div>
+        </div>
+      )}
       {/* HEADER */}
       <div
         className={`flex items-center justify-between p-2 rounded-t-[20px] ${
@@ -354,13 +439,14 @@ export const CardComponent = ({
         ) : variant === "product-no-image" ? (
           <img src={checkers} width="100%" />
         ) : variant === "inventoryOne" || variant === "inventoryTwo" ? (
-          <div className="flex items-center justify-center w-full h-full">
-            <img
-              src={productImage}
-              alt="Product"
-              width="100%"
-              className="max-w-[134px]"
-            />
+          <div className="flex items-center justify-center w-full h-[120px]">
+            <div className="relative w-full max-w-[134px] h-full">
+              <img
+                src={productImage}
+                alt="Product"
+                className="w-full h-full object-contain"
+              />
+            </div>
           </div>
         ) : (
           <NameTag name={name} />
@@ -386,7 +472,7 @@ export const CardComponent = ({
           <SimpleTag
             text={productStatus}
             dotColour="#9BA4BA"
-            containerClass="bg-[#F6F8FA] font-light  px-2 py-1 border-[0.4px] border-strokeGreyThree rounded-full"
+            containerClass="bg-[#F6F8FA] font-light text-textDarkGrey px-2 py-1 border-[0.4px] border-strokeGreyThree rounded-full"
           />
         ) : null}
       </div>
@@ -445,18 +531,27 @@ export const CardComponent = ({
         ) : variant === "transactions" ? (
           <>
             <div className="flex items-center justify-between gap-1">
-              <SimpleTag text="DATE & TIME" containerClass="font-light" />
+              <SimpleTag
+                text="DATE & TIME"
+                containerClass="font-light text-textDarkGrey"
+              />
               <DateTimeTag datetime={datetime} />
             </div>
             <div className="flex items-center justify-between gap-1">
-              <SimpleTag text="Product Type" containerClass="font-light" />
+              <SimpleTag
+                text="Product Type"
+                containerClass="font-light text-textDarkGrey"
+              />
               <ProductTypeWithTag
                 productTag={productTag}
                 productType={productType}
               />
             </div>
             <div className="flex items-center justify-between gap-1">
-              <SimpleTag text="AMOUNT" containerClass="font-light " />
+              <SimpleTag
+                text="AMOUNT"
+                containerClass="font-light text-textDarkGrey"
+              />
               <div className="flex items-center gap-[1px]">
                 <NairaSymbol />
                 <p className="text-textBlack text-xs">
@@ -510,26 +605,28 @@ export const CardComponent = ({
         } ${
           variant === "sales"
             ? "bg-white"
-            : selected
+            : _selected || readOnly
             ? "bg-successTwo"
             : "bg-[#F6F8FA]"
         } p-2 h-[40px] border-t-[0.6px]
         ${
-          selected ? "border-t-success" : "border-t-strokeGreyThree"
+          _selected || readOnly
+            ? "border-t-success"
+            : "border-t-strokeGreyThree"
         }  rounded-b-[20px]`}
       >
         {variant === "transactions" ? null : variant === "sales" ? (
           <SimpleTag
             text={`${installment} DAYS`}
             dotColour="#49526A"
-            containerClass="bg-[#F6F8FA] font-light px-2 py-1 border-[0.4px] border-strokeGreyTwo rounded-full"
+            containerClass="bg-[#F6F8FA] text-textDarkGrey font-light px-2 py-1 border-[0.4px] border-strokeGreyTwo rounded-full"
           />
         ) : variant === "product-no-image" ? (
           <SimpleTag
             text={formatNumberWithCommas(productPrice)}
             dotColour="#49526A"
             customIcon={<NairaSymbol color="#828DA9" />}
-            containerClass="bg-successTwo font-bold px-2 py-1 border border-successThree rounded-full"
+            containerClass="bg-successTwo text-textDarkGrey font-bold px-2 py-1 border border-successThree rounded-full"
           />
         ) : variant === "inventoryOne" ? (
           <SimpleTag
@@ -541,7 +638,9 @@ export const CardComponent = ({
           <SimpleTag
             text={formatNumberWithCommas(productPrice)}
             customIcon={
-              <NairaSymbol color={selected ? undefined : "#828DA9"} />
+              <NairaSymbol
+                color={_selected || readOnly ? undefined : "#828DA9"}
+              />
             }
             containerClass="text-textBlack font-medium"
           />
@@ -558,9 +657,10 @@ export const CardComponent = ({
 
         {variant === "inventoryTwo" ? (
           <QuantitySelector
-            productUnits={productUnits}
+            productUnits={productUnits || 0}
+            defaultValue={productUnits}
             onValueChange={(value) => setProductUnits(value)}
-            isSelected={!selected}
+            isSelected={_selected}
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
