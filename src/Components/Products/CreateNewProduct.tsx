@@ -10,7 +10,6 @@ import {
   SelectMultipleInput,
 } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
-import { LuImagePlus } from "react-icons/lu";
 import SelectInventoryModal from "./SelectInventoryModal";
 import { generateRandomProductInventoryEntries } from "../TableComponent/sampleData";
 import { observer } from "mobx-react-lite";
@@ -23,6 +22,15 @@ interface CreatNewProductProps {
   allProductsRefresh?: KeyedMutator<any>;
 }
 
+const defaultFormData = {
+  category: "",
+  productName: "",
+  inventory: [],
+  paymentModes: [],
+  sellingPrice: "",
+  productImage: "",
+};
+
 const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
   ({
     isOpen,
@@ -30,14 +38,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
     // allProductsRefresh,
   }) => {
     // const { apiCall } = useApiCall();
-    const [formData, setFormData] = useState({
-      category: "",
-      productName: "",
-      inventory: [],
-      paymentModes: [],
-      sellingPrice: undefined,
-      productImage: "",
-    });
+    const [formData, setFormData] = useState(defaultFormData);
     const [loading, setLoading] = useState(false);
     const [isInventoryOpen, setIsInventoryOpen] = useState<boolean>(false);
 
@@ -57,7 +58,10 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
       }));
     };
 
-    const handleMultiSelectChange = (name: string, values: string[]) => {
+    const handleSelectChange = (
+      name: string,
+      values: string | string[]
+    ) => {
       setFormData((prev) => ({
         ...prev,
         [name]: values,
@@ -94,30 +98,17 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
       } finally {
         setLoading(false);
         setIsOpen(false);
-        setFormData({
-          category: "",
-          productName: "",
-          inventory: [],
-          paymentModes: [],
-          sellingPrice: undefined,
-          productImage: "",
-        });
+        setFormData(defaultFormData);
         rootStore.productStore.emptyProducts();
       }
     };
 
     const selectedProducts = rootStore.productStore.products;
-
-    const { category, productName, paymentModes, sellingPrice, productImage } =
-      formData;
-
+    const { category, productName, paymentModes, sellingPrice } = formData;
     const isFormFilled =
-      category ||
-      productName ||
-      selectedProducts.length > 0 ||
-      paymentModes.length >= 1 ||
-      sellingPrice ||
-      productImage;
+      Object.values(formData).some((value) =>
+        Array.isArray(value) ? value.length > 0 : Boolean(value)
+      ) || selectedProducts.length > 0;
 
     return (
       <>
@@ -149,20 +140,22 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
               <div className="flex flex-col items-center justify-center w-full px-[2.5em] gap-4 py-8">
                 <SelectInput
                   label="Product Category"
-                  name="category"
                   options={[
                     { label: "SHS", value: "shs" },
                     { label: "EAAS", value: "eaas" },
                     { label: "Rooftop", value: "rooftop" },
                   ]}
                   value={category}
-                  onChange={handleInputChange}
+                  onChange={(selectedValue) =>
+                    handleSelectChange("category", selectedValue)
+                  }
                   required={true}
                   placeholder="Select Product Category"
                   style={
                     isFormFilled ? "border-strokeCream" : "border-strokeGrey"
                   }
                 />
+
                 <Input
                   type="text"
                   name="productName"
@@ -221,7 +214,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                   ]}
                   value={paymentModes}
                   onChange={(values) =>
-                    handleMultiSelectChange("paymentModes", values)
+                    handleSelectChange("paymentModes", values)
                   }
                   placeholder="Select Payment Modes"
                   required={true}
@@ -242,16 +235,16 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                     isFormFilled ? "border-strokeCream" : "border-strokeGrey"
                   }
                 />
+
                 <FileInput
                   name="productImage"
                   label="PRODUCT IMAGE"
                   onChange={handleInputChange}
-                  required={true}
+                  required={false}
                   placeholder="Upload Product Image"
                   style={
                     isFormFilled ? "border-strokeCream" : "border-strokeGrey"
                   }
-                  iconRight={<LuImagePlus color="#828da9" />}
                 />
               </div>
               <ProceedButton

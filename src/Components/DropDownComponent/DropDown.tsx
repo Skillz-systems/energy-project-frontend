@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import drop from "../../assets/table/dropdown.svg";
 import dateIcon from "../../assets/table/date.svg";
 import { Modal } from "../ModalComponent/Modal";

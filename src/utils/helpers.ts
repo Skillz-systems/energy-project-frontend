@@ -66,8 +66,8 @@ export function useIsLoggedIn(route?: string) {
 
   useEffect(() => {
     if (token) {
+      navigate(sessionRedirect || route);
       toast.info("You are already logged in!");
-      navigate(route || sessionRedirect);
     }
   }, [token, navigate, route, sessionRedirect]);
 }

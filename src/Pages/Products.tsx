@@ -76,7 +76,7 @@ const Products = () => {
   }, [location.pathname]);
 
   const dropDownList = {
-    items: ["Add Existing Product", "Export List"],
+    items: ["Add New Product", "Export List"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
@@ -135,7 +135,7 @@ const Products = () => {
               value={4}
             />
           </div>
-          <div className="flex w-full items-center justify-between gap-2 min-w-[140px] sm:w-max sm:justify-end">
+          <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
             <ActionButton
               label="New Product"
               icon={<img src={circleAction} />}
