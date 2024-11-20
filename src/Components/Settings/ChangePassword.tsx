@@ -134,7 +134,7 @@ const ChangePassword = () => {
           required={true}
           placeholder="OLD PASSWORD"
           style={`${
-            isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+            isFormFilled ? "border-strokeCream" : "border-strokeGrey"
           } max-w-none`}
           errorMessage={errors.oldPassword || ""}
           iconRight={
@@ -154,7 +154,7 @@ const ChangePassword = () => {
           required={true}
           placeholder="ENTER NEW PASSWORD"
           style={`${
-            isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+            isFormFilled ? "border-strokeCream" : "border-strokeGrey"
           } max-w-none`}
           errorMessage={errors.newPassword || ""}
           iconRight={
@@ -174,7 +174,7 @@ const ChangePassword = () => {
           required={true}
           placeholder="CONFIRM NEW PASSWORD"
           style={`${
-            isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+            isFormFilled ? "border-strokeCream" : "border-strokeGrey"
           } max-w-none`}
           errorMessage={errors.confirmPassword || ""}
           iconRight={

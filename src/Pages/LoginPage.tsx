@@ -1,5 +1,6 @@
 import { Suspense, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import useTokens from "../hooks/useTokens";
 import loginbg from "../assets/loginbg.png";
 import logo from "../assets/logo.svg";
 import eyeclosed from "../assets/eyeclosed.svg";
@@ -9,9 +10,12 @@ import ProceedButton from "../Components/ProceedButtonComponent/ProceedButtonCom
 import { useApiCall } from "../utils/useApiCall";
 import Cookies from "js-cookie";
 import LoadingSpinner from "../Components/Loaders/LoadingSpinner";
+import { useIsLoggedIn } from "../utils/helpers";
 
 const LoginPage = () => {
+  const { token } = useTokens();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { apiCall } = useApiCall();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,6 +23,11 @@ const LoginPage = () => {
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
+
+  useIsLoggedIn("/dashboard");
+  if (token) return null;
+
+  const redirectPath = searchParams.get("redirect");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +51,7 @@ const LoginPage = () => {
       Cookies.set("userData", JSON.stringify(userData), {
         expires: 7,
       }); // Token expires in 7 days
-      navigate("/dashboard");
+      navigate(redirectPath || "/dashboard");
     } catch (error) {
       console.error("Login failed:", error);
       setErrorMessage(error?.response?.data?.message);
@@ -63,7 +72,6 @@ const LoginPage = () => {
         headers: {},
         successMessage: "Password reset email sent!",
       });
-
     } catch (error) {
       console.error("Forgot password failed:", error);
     }
@@ -114,7 +122,7 @@ const LoginPage = () => {
               required={true}
               errorMessage=""
               style={`mb-4 ${
-                email || password ? "border-[#D3C6A1]" : "border-strokeGrey"
+                email || password ? "border-strokeCream" : "border-strokeGrey"
               }`}
             />
             {!isForgotPassword ? (
@@ -131,7 +139,7 @@ const LoginPage = () => {
                 required={true}
                 errorMessage=""
                 style={`${
-                  email || password ? "border-[#D3C6A1]" : "border-strokeGrey"
+                  email || password ? "border-strokeCream" : "border-strokeGrey"
                 }`}
                 iconRight={
                   <img

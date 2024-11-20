@@ -3,41 +3,35 @@ import { Navigate, useLocation, Outlet } from "react-router-dom";
 import useTokens from "../hooks/useTokens";
 import { toast } from "react-toastify";
 
-interface ProtectedRouteProps {
-  children: JSX.Element;
-}
-
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+const ProtectedRouteWrapper: React.FC = () => {
   const { token } = useTokens();
   const location = useLocation();
+  const unprotectedRoutes = [
+    "/login",
+    "/create-password/:id/:token",
+    "/reset-password/:id/:token",
+  ];
 
   useEffect(() => {
-    if (!token) {
-      toast.warning(`You are not Logged In!`);
-    }
+    if (!token) toast.warning("You are not logged in!");
   }, [token]);
 
-  const isLoginPage = location.pathname === "/login";
-
-  if (!token) {
-    // If the user is not logged in and is not on the login page, redirect to login
-    if (!isLoginPage) {
-      return <Navigate to="/login" state={{ from: location }} replace />;
-    }
-    // If the user is on the login page and not logged in, just render children
-    return null;
+  if (token && !unprotectedRoutes.includes(location.pathname)) {
+    /* 
+      If the user is logged in and tries to access "/login" route, 
+      save the current route to session to be redirected back to in the login page.
+    */
+    sessionStorage.setItem("redirect", location.pathname);
   }
 
-  // If the user is logged in, render the children
-  return <>{children}</>;
+  if (!token) {
+    // If the user is not authenticated, redirect to login with the current path as a redirect query param
+    const loginRoute = `/login?redirect=${encodeURIComponent(location.pathname)}`;
+    return <Navigate to={loginRoute} replace />;
+  } else {
+    // If authenticated and not on an unprotected route, render the nested routes
+    return <Outlet />;
+  }
 };
 
-export const ProtectedRouteWrapper = () => {
-  return (
-    <ProtectedRoute>
-      <Outlet />
-    </ProtectedRoute>
-  );
-};
-
-export default ProtectedRoute;
+export default ProtectedRouteWrapper;

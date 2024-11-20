@@ -127,7 +127,7 @@ const LoginPage = () => {
             errorMessage=""
             style={`mb-4 ${
               newPassword || confirmPassword
-                ? "border-[#D3C6A1]"
+                ? "border-strokeCream"
                 : "border-strokeGrey"
             }`}
             iconRight={
@@ -149,7 +149,7 @@ const LoginPage = () => {
             errorMessage=""
             style={`${
               newPassword || confirmPassword
-                ? "border-[#D3C6A1]"
+                ? "border-strokeCream"
                 : "border-strokeGrey"
             }`}
             iconRight={

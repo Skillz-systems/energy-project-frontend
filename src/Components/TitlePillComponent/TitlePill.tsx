@@ -1,5 +1,5 @@
 export type TitlePillType = {
-  parentClass: string;
+  parentClass?: string;
   icon: string;
   iconBgColor: string;
   topText: string;
@@ -12,7 +12,7 @@ export const TitlePill = (props: TitlePillType) => {
 
   return (
     <div
-      className={`${parentClass} flex items-center justify-between gap-1 bg-white max-w-[189px] h-[40px] pl-1 pr-[20px] py-1 border-[0.6px] border-[#A5873033] rounded-full shadow-titlePillCustom`}
+      className={`${parentClass} flex items-center justify-between gap-6 bg-white max-w-none sm:max-w-max h-[40px] pl-1 pr-[20px] py-1 border-[0.6px] border-[#A5873033] rounded-full shadow-titlePillCustom`}
     >
       <div className="flex items-center gap-2">
         <div

@@ -18,8 +18,8 @@ export default {
 } as Meta;
 
 const CardTemplate: StoryFn<any> = (args) => {
-  const [productId, setProductId] = useState<string>("");
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
   return (
     <>
       <CardComponent
@@ -33,7 +33,6 @@ const CardTemplate: StoryFn<any> = (args) => {
           onClickLink: (index: number) => {
             switch (index) {
               case 0:
-                setProductId("124242");
                 setIsOpen(true);
                 break;
               case 1:
@@ -50,7 +49,7 @@ const CardTemplate: StoryFn<any> = (args) => {
       <ProductModal
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        productID={productId}
+        // productID={productId}
         // refreshTable={() => {}}
         productData={args.productData}
         inventoryData={args.inventoryData}
