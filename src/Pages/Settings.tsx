@@ -9,13 +9,13 @@ import ActionButton from "../Components/ActionButtonComponent/ActionButton";
 import circleAction from "../assets/settings/addCircle.svg";
 import { DropDown } from "../Components/DropDownComponent/DropDown";
 import settingsbadge from "../assets/settings/settingsbadge.png";
-import { Modal } from "../Components/ModalComponent/Modal";
 import { Input, SelectInput } from "../Components/InputComponent/Input";
 import ProceedButton from "../Components/ProceedButtonComponent/ProceedButtonComponent";
 import { useApiCall, useGetRequest } from "../utils/useApiCall";
 import { observer } from "mobx-react-lite";
 import rootStore from "../stores/rootStore";
 import PageLayout from "./PageLayout";
+import { Modal } from "@/Components/ModalComponent/ModalComponent/Modal";
 
 const RoleAndPermissions = lazy(
   () => import("../Components/Settings/RoleAndPermissions")

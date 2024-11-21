@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Modal } from "../ModalComponent/Modal";
+
 import TabComponent from "../TabComponent/TabComponent";
 import ListPagination from "../PaginationComponent/ListPagination";
 import { CardComponent } from "../CardComponents/CardComponent";
@@ -9,6 +9,7 @@ import rootStore from "../../stores/rootStore";
 import { observer } from "mobx-react-lite";
 import { TableSearch } from "../TableSearchComponent/TableSearch";
 import searchIcon from "../../assets/search.svg";
+import { Modal } from "../ModalComponent/ModalComponent/Modal";
 
 type ListDataType = {
   productId: string | number;

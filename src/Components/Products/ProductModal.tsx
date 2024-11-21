@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Modal } from "../ModalComponent/Modal";
 import editInput from "../../assets/settings/editInput.svg";
 // import LoadingSpinner from "../Loaders/LoadingSpinner";
 import { DropDown } from "../DropDownComponent/DropDown";
@@ -8,6 +7,7 @@ import ProductDetails from "./ProductDetails";
 import InventoryDetails from "./InventoryDetails";
 import StatsDetails from "./StatsDetails";
 import CustomerDetails from "./CustomerDetails";
+import { Modal } from "../ModalComponent/ModalComponent/Modal";
 // import { useApiCall, useGetRequest } from "../../utils/useApiCall";
 
 const ProductModal = ({

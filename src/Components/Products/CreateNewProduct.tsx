@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal } from "../ModalComponent/Modal";
+
 // import { useApiCall, useGetRequest } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
 import {
@@ -16,6 +16,7 @@ import { generateRandomProductInventoryEntries } from "../TableComponent/sampleD
 import { observer } from "mobx-react-lite";
 import rootStore from "../../stores/rootStore";
 import { CardComponent } from "../CardComponents/CardComponent";
+import { Modal } from "../LogoComponent/ModalComponent/Modal";
 
 interface CreatNewProductProps {
   isOpen: boolean;

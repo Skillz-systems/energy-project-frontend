@@ -13,6 +13,7 @@ import ProtectedRouteWrapper from "./Context/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProgressBar from "./Components/Progressbar/ProgressBar";
+import CustomerPage from "./Pages/CustomerPage";
 
 
 function App() {

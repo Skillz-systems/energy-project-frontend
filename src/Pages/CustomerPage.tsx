@@ -9,6 +9,7 @@ import settings from "../assets/settings/settings.svg";
 import Inventory from "../assets/table/inventory.svg";
 import moneyBag from "../assets/table/moneybag.svg";
 import statusIcon from "../assets/table/status.svg";
+import productsbadge from "../assets/products/productsbadge.png";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 import circleAction from "../assets/settings/addCircle.svg";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";
@@ -16,6 +17,9 @@ import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComp
 import { Modal } from "@/Components/LogoComponent/ModalComponent/Modal";
 import { Input, SelectInput } from "@/Components/InputComponent/Input";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
+import PageLayout from "./PageLayout";
+import cancelled from "../assets/cancelled.svg";
+import productgreen from "../assets/products/productgreen.svg";
 
 const CustomerPage = () => {
   const [tableData, setTableData] = useState([]);
@@ -224,179 +228,183 @@ const CustomerPage = () => {
 
 
   return (
-    <div className="flex w-full flex-col px-2 md:px-8 py-4 gap-2">
-      <div className="flex justify-between items-center mb-4 bg-paleGrayGradient min-h-[64px] w-full px-2">
-        <div className="flex gap-4 items-center">
-          <TitlePill
-            icon={sale}
-            iconBgColor="bg-[#FDEEC2]"
-            topText="All"
-            bottomText="CUSTOMERS"
-            value="2240"
-            parentClass="w-full max-w-none sm:max-w-[250px]"
-          />
-          <TitlePill
-            parentClass="w-full max-w-none sm:max-w-[250px]"
-            icon={settings}
-            iconBgColor="bg-[#FDEEC2]"
-            topText="New"
-            bottomText="CUSTOMERS"
-            value="2240"
-          />
-          <TitlePill
-            icon={Inventory}
-            iconBgColor="bg-[#FDEEC2]"
-            topText="Defaulting"
-            bottomText="CUSTOMERS"
-            value="2240"
-            parentClass="w-full max-w-none sm:max-w-[250px]"
-          />
-          <TitlePill
-            icon={moneyBag}
-            iconBgColor="bg-[#FDEEC2]"
-            topText="BARRED"
-            bottomText="CUSTOMERS"
-            value="2240"
-            parentClass="w-full max-w-none sm:max-w-[250px]"
-          />
-        </div>
-        <div className="flex w-full items-center justify-between gap-2 sm:w-max sm:justify-start">
-          <ActionButton
-            label="New Customer"
-            icon={<img src={circleAction} />}
-            onClick={() => setIsOpen(true)}
-          />
-          <DropDown {...dropDownList} />
-        </div>
-      </div>
-      <Modal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        layout="right"
-        bodyStyle="pb-[100px]"
-      >
-        <form
-          className="flex flex-col items-center bg-white"
-          onSubmit={handleSubmit}
-        >
-          <div
-            className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${isFormFilled
-              ? "bg-paleCreamGradientLeft"
-              : "bg-paleGrayGradientLeft"
-              }`}
-          >
-            <h2
-              style={{ textShadow: "1px 1px grey" }}
-              className="text-xl text-textBlack font-semibold font-secondary"
-            >
-              New Customer
-            </h2>
+    <PageLayout pageName="Customers" badge={productsbadge}>
+      <div className="flex w-full flex-col px-2 md:px-8 py-4 gap-2">
+        <div className="flex justify-between items-center mb-4 bg-paleGrayGradient min-h-[64px] w-full px-2">
+          <div className="flex gap-4 items-center">
+            <TitlePill
+              icon={productgreen}
+              iconBgColor="bg-[#E3FAD6]"
+              topText="All"
+              bottomText="CUSTOMERS"
+              value="2240"
+              parentClass="w-full max-w-none sm:max-w-[250px]"
+            />
+            <TitlePill
+              parentClass="w-full max-w-none sm:max-w-[250px]"
+              icon={settings}
+              iconBgColor="bg-[#FDEEC2]"
+              topText="New"
+              bottomText="CUSTOMERS"
+              value="2240"
+            />
+            <TitlePill
+              icon={cancelled}
+              iconBgColor="bg-[#FFDBDE]"
+              topText="Defaulting"
+              bottomText="CUSTOMERS"
+              value="2240"
+              parentClass="w-full max-w-none sm:max-w-[250px]"
+            />
+            <TitlePill
+              icon={cancelled}
+              iconBgColor="bg-[#FDEEC2]"
+              topText="BARRED"
+              bottomText="CUSTOMERS"
+              value="2240"
+              parentClass="w-full max-w-none sm:max-w-[250px]"
+            />
           </div>
-          {allRolesLoading ? (
-            <LoadingSpinner parentClass="absolute top-[50%] w-full" />
-          ) : (
-            <div className="flex flex-col items-center justify-center w-full px-4 gap-4 py-8">
-              <Input
-                type="text"
-                name="firstname"
-                label="FIRST NAME"
-                value={formState.firstname} 
-                onChange={handleInputChange}
-                placeholder="First Name"
-                required={true}
-                style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                  }`}
-              />
-              <Input
-                type="text"
-                name="lastname"
-                label="LAST NAME"
-                value={formState.lastname} 
-                onChange={handleInputChange}
-                placeholder="Last Name"
-                required={true}
-                style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                  }`}
-              />
-              <Input
-                type="email"
-                name="email"
-                label="EMAIL"
-                value={formState.email} 
-                onChange={handleInputChange}
-                placeholder="Email"
-                required={true}
-                style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                  }`}
-              />
-              <Input
-                type="text"
-                name="phone"
-                label="PHONE NUMBER"
-                value={formState.phonenumber} 
-                onChange={handleInputChange}
-                placeholder="Phone Number"
-                required={true}
-                style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                  }`}
-              />
-
-              <Input
-                type="text"
-                name="Address"
-                label="Address"
-                value={formState.address} 
-                onChange={handleInputChange}
-                placeholder="Address"
-                required={true}
-                style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                  }`}
-              />
-              <Input
-                type="text"
-                name="Address Type"
-                label="Address Type"
-                value={formState.addresstype} 
-                onChange={handleInputChange}
-                placeholder="Address Type"
-                required={true}
-                style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                  }`}
-              />
-            </div>
-          )}
-          <ProceedButton
-            type="submit"
-            loading={loading}
-            variant={isFormFilled ? "gradient" : "gray"}
-          />
-        </form>
-      </Modal>
-
-      <div className="flex flex-row w-full gap-4">
-       
-        <div className="flex-shrink-0">
-          <SideMenu navigationList={navigationList} />
+          <div className="flex w-full items-center justify-between gap-2 sm:w-max sm:justify-start">
+            <ActionButton
+              label="New Customer"
+              icon={<img src={circleAction} />}
+              onClick={() => setIsOpen(true)}
+            />
+            <DropDown {...dropDownList} />
+          </div>
         </div>
+        <Modal
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          layout="right"
+          bodyStyle="pb-[100px]"
+        >
+          <form
+            className="flex flex-col items-center bg-white"
+            onSubmit={handleSubmit}
+          >
+            <div
+              className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${isFormFilled
+                ? "bg-paleCreamGradientLeft"
+                : "bg-paleGrayGradientLeft"
+                }`}
+            >
+              <h2
+                style={{ textShadow: "1px 1px grey" }}
+                className="text-xl text-textBlack font-semibold font-secondary"
+              >
+                New Customer
+              </h2>
+            </div>
+            {allRolesLoading ? (
+              <LoadingSpinner parentClass="absolute top-[50%] w-full" />
+            ) : (
+              <div className="flex flex-col items-center justify-center w-full px-4 gap-4 py-8">
+                <Input
+                  type="text"
+                  name="firstname"
+                  label="FIRST NAME"
+                  value={formState.firstname}
+                  onChange={handleInputChange}
+                  placeholder="First Name"
+                  required={true}
+                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                    }`}
+                />
+                <Input
+                  type="text"
+                  name="lastname"
+                  label="LAST NAME"
+                  value={formState.lastname}
+                  onChange={handleInputChange}
+                  placeholder="Last Name"
+                  required={true}
+                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                    }`}
+                />
+                <Input
+                  type="email"
+                  name="email"
+                  label="EMAIL"
+                  value={formState.email}
+                  onChange={handleInputChange}
+                  placeholder="Email"
+                  required={true}
+                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                    }`}
+                />
+                <Input
+                  type="text"
+                  name="phone"
+                  label="PHONE NUMBER"
+                  value={formState.phonenumber}
+                  onChange={handleInputChange}
+                  placeholder="Phone Number"
+                  required={true}
+                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                    }`}
+                />
 
-       
-        <div className="flex-grow">
-          <Table
-            tableTitle="ALL CUSTOMERS"
-            filterList={filterList}
-            columnList={columnList}
-            loading={queryLoading || isLoading}
-            tableData={getTableData()}
-            refreshTable={async () => {
-              await refreshTable();
-              setQueryValue("");
-              setIsSearchQuery(false);
-            }}
-            queryValue={isSearchQuery ? queryValue : ""}
-          />
+                <Input
+                  type="text"
+                  name="Address"
+                  label="Address"
+                  value={formState.address}
+                  onChange={handleInputChange}
+                  placeholder="Address"
+                  required={true}
+                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                    }`}
+                />
+                <Input
+                  type="text"
+                  name="Address Type"
+                  label="Address Type"
+                  value={formState.addresstype}
+                  onChange={handleInputChange}
+                  placeholder="Address Type"
+                  required={true}
+                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                    }`}
+                />
+              </div>
+            )}
+            <ProceedButton
+              type="submit"
+              loading={loading}
+              variant={isFormFilled ? "gradient" : "gray"}
+            />
+          </form>
+        </Modal>
+
+        <div className="flex flex-row w-full gap-4">
+
+          <div className="flex-shrink-0">
+            <SideMenu navigationList={navigationList} />
+          </div>
+
+
+          <div className="flex-grow">
+            <Table
+              tableTitle="ALL CUSTOMERS"
+              filterList={filterList}
+              columnList={columnList}
+              loading={queryLoading || isLoading}
+              tableData={getTableData()}
+              refreshTable={async () => {
+                await refreshTable();
+                setQueryValue("");
+                setIsSearchQuery(false);
+              }}
+              queryValue={isSearchQuery ? queryValue : ""}
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </PageLayout>
+
+
   );
 };
 
