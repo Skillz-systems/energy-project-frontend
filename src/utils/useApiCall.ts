@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Cookies from "js-cookie";
 import { Location, useLocation } from "react-router-dom";
+import { useState } from "react";
 
 // Create an axios instance
 const baseURL = import.meta.env.VITE_API_URL;
@@ -26,6 +27,7 @@ interface ApiCallOptions {
 export const useApiCall = () => {
   const { token } = useTokens();
   const location = useLocation();
+  const [isNetworkError, setIsNetworkError] = useState(false);
 
   const apiCall = async ({
     endpoint,
@@ -58,13 +60,14 @@ export const useApiCall = () => {
       }
       return response;
     } catch (error: any) {
-      handleApiError(error, location);
+      handleApiError(error, location, setIsNetworkError);
       throw error;
     }
   };
 
   return {
     apiCall,
+    isNetworkError,
   };
 };
 
@@ -75,6 +78,8 @@ export const useGetRequest = (
   refreshInterval?: number
 ) => {
   const { token } = useTokens();
+  const location = useLocation();
+  const [isNetworkError, setIsNetworkError] = useState<boolean>(false);
 
   // SWR fetcher function with axios
   const fetcher = async (url: string): Promise<any> => {
@@ -84,9 +89,10 @@ export const useGetRequest = (
           Authorization: `Bearer ${token}`,
         },
       });
+      setIsNetworkError(false);
       return response.data;
     } catch (error: any) {
-      handleApiError(error);
+      handleApiError(error, location, setIsNetworkError);
       throw error;
     }
   };
@@ -96,7 +102,6 @@ export const useGetRequest = (
     fetcher,
     {
       revalidateOnFocus: revalidate, // Revalidate on window focus
-      revalidateOnReconnect: revalidate, // Revalidate on reconnect
       refreshInterval: refreshInterval, // Set refresh interval
     }
   );
@@ -106,20 +111,24 @@ export const useGetRequest = (
     error,
     isLoading,
     mutate,
+    isNetworkError,
   };
 };
 
 // Error handler to process different error cases
 const handleApiError = (
   error: AxiosError | Error,
-  location?: Location<any>
+  location?: Location<any>,
+  setIsNetworkError?: (value: boolean) => void
 ) => {
   if (axios.isAxiosError(error)) {
     if (error.response) {
       const status = error.response.status;
       switch (status) {
         case 400:
-          toast.error("Bad Request: Please check your input and try again.");
+          // toast.error(
+          //   "Bad Request: Please check your submission and try again."
+          // );
           break;
         case 401:
           if (location.pathname === "/login") {
@@ -137,24 +146,13 @@ const handleApiError = (
           Cookies.remove("userData");
           window.location.href = "/login";
           break;
-        case 404:
-          toast.error("Not Found: The requested resource does not exist.");
-          break;
-        case 405:
-          toast.error("Method Not Allowed: Please check your request method.");
-          break;
-        case 500:
-          toast.error("Server Error: Please try again later.");
-          break;
         default:
-          toast.error(`Error: ${error.response.data.message}`);
+          break;
       }
     } else if (error.request) {
-      toast.error("Network Error: Please check your connection.");
+      setIsNetworkError(true);
     } else {
-      toast.error(`Unexpected Error: ${error.message}`);
+      console.error(`Unexpected Error: ${error.message}`);
     }
-  } else {
-    toast.error(`Error: ${error.message}`);
   }
 };

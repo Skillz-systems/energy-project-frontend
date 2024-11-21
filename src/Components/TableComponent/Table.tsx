@@ -44,7 +44,7 @@ export const Table = (props: TableType) => {
     filterList,
     columnList,
     tableClassname,
-    tableData,
+    tableData = [],
     tableType = "default",
     cardComponent,
     loading,

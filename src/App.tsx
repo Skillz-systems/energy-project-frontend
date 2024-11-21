@@ -7,21 +7,29 @@ import {
   Dashboard,
   Products,
   Inventory,
+  Home,
 } from "./Pages/Index";
 import "./index.css";
-import { ErrorProvider } from "./Context/ErrorContext";
 import ProtectedRouteWrapper from "./Context/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProgressBar from "./Components/Progressbar/ProgressBar";
+import { ErrorBoundary } from "react-error-boundary";
+import ErrorPage from "./Pages/ErrorPage";
 
 function App() {
   return (
     <>
-      <ErrorProvider>
+      <ToastContainer autoClose={2000} />
+      <ErrorBoundary
+        fallbackRender={({ error, resetErrorBoundary }) => (
+          <ErrorPage error={error} resetErrorBoundary={resetErrorBoundary} />
+        )}
+      >
         <Routes>
           {/* Protected Routes */}
           <Route element={<ProtectedRouteWrapper />}>
+            <Route path="/home" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/products/*" element={<Products />} />
             <Route path="/inventory/*" element={<Inventory />} />
@@ -68,8 +76,7 @@ function App() {
           {/* Fallback Route */}
           <Route path="*" element={<PageNotFound />} />
         </Routes>
-        <ToastContainer autoClose={2000} />
-      </ErrorProvider>
+      </ErrorBoundary>
     </>
   );
 }

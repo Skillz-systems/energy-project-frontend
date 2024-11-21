@@ -9,10 +9,17 @@ import ProceedButton from "../Components/ProceedButtonComponent/ProceedButtonCom
 import { useApiCall } from "../utils/useApiCall";
 
 const LoginPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { apiCall } = useApiCall();
   const { id: userId, token: remember_token } = useParams();
   const [userLoading, setUserLoading] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState(null);
   const [userInfoError, setUserInfoError] = useState(null);
+  const [newPassword, setNewPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const getUserInfo = async () => {
     setUserLoading(true);
@@ -34,15 +41,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     getUserInfo();
-  });
-
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { apiCall } = useApiCall();
-  const [newPassword, setNewPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState<boolean>(false);
+  }, []);
 
   const isResetPasswordRoute = location.pathname.startsWith("/reset-password");
 
@@ -102,7 +101,7 @@ const LoginPage = () => {
       <section className="flex w-full flex-col items-center justify-center gap-2 z-10 max-w-[500px]">
         <div className="flex flex-col items-center justify-center">
           <h1 className="text-[32px] text-primary font-medium font-secondary">
-            {userLoading
+            {userLoading || userInfoError
               ? "Welcome"
               : `Hello, ${userInfo?.firstname} ${userInfo?.lastname}`}
           </h1>

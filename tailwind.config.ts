@@ -38,6 +38,8 @@ export default {
       },
       backgroundImage: {
         primaryGradient: "linear-gradient(to right, #982214, #F8CB48)",
+        errorGradient: "linear-gradient(to right, #982214, #473b15)",
+        inversedErrorGradient: "linear-gradient(to left, #982214, #473b15)",
         paleGrayGradient: "linear-gradient(to right, #F6F8FA, #FFFFFF)",
         paleGrayGradientLeft: "linear-gradient(to left, #F6F8FA, #FFFFFF)",
         paleCreamGradientLeft: "linear-gradient(to left, #FEF5DA, #FFFFFF)",
