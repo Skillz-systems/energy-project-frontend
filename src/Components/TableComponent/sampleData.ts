@@ -332,9 +332,11 @@ interface InventoryEntries {
   deleted: boolean;
 }
 const InventoryClass = ["regular", "returned", "refurbished"];
+const InventoryManufacturer = ["Samsung", "LG", "Panasonic", "Korea-Tech"];
 const InventorySalePrice = [
   1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000,
 ];
+const InventoryCostPrice = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
 const InventoryTotalUnits = [500, 1000, 1500, 2000, 2500, 3000];
 export const generateRandomInventoryEntries = (
   count: number,
@@ -377,6 +379,64 @@ export const generateRandomInventoryEntries = (
     if (matchesClass && matchesDeleted && matchesOutOfStock) {
       entries.push(entry);
     }
+  }
+
+  return entries;
+};
+
+type InventoryModalEntries = {
+  inventoryId: string | number;
+  inventoryImage: string;
+  inventoryName: string;
+  inventoryClass: string;
+  inventoryCategory: string;
+  sku: string;
+  manufacturerName: string;
+  dateOfManufacture: string;
+  numberOfStock: number;
+  costPrice: number;
+  salePrice: number;
+};
+
+export const generateRandomInventoryEntry = (): InventoryModalEntries => {
+  const inventoryEntry: InventoryModalEntries = {
+    inventoryId: 100000 + Math.floor(Math.random() * 1000),
+    inventoryImage: getRandomItem(images),
+    inventoryName: getRandomItem(solarPanels),
+    inventoryClass: getRandomItem(InventoryClass),
+    inventoryCategory: getRandomItem(productCategory),
+    sku: `${100000 + Math.floor(Math.random() * 1000)}`,
+    manufacturerName: getRandomItem(InventoryManufacturer),
+    dateOfManufacture: new Date().toISOString(),
+    numberOfStock: getRandomItem(InventoryTotalUnits),
+    costPrice: getRandomItem(InventoryCostPrice),
+    salePrice: getRandomItem(InventorySalePrice),
+  };
+
+  return inventoryEntry;
+};
+
+interface InventoryHistoryEntries {
+  datetime: string;
+  stockNumber: number;
+  stockValue: number;
+  staffName: string;
+}
+
+export const generateRandomInventoryHistoryEntries = (
+  count: number
+): InventoryHistoryEntries[] => {
+  const totalUnits: number = getRandomItem(InventoryTotalUnits);
+  const salePrice: number = getRandomItem(InventorySalePrice);
+  const entries: InventoryHistoryEntries[] = [];
+
+  for (let i = 1; i <= count; i++) {
+    entries.push({
+      datetime: new Date().toISOString(),
+      stockNumber: totalUnits,
+      stockValue: totalUnits * salePrice,
+      staffName: getRandomItem(names),
+    });
   }
 
   return entries;

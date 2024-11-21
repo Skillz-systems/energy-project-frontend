@@ -7,8 +7,9 @@ import wrong from "../../assets/table/wrong.png";
 import { TableSearch } from "../TableSearchComponent/TableSearch";
 
 export type TableType = {
-  tableTitle: string;
-  filterList: {
+  showHeader?: boolean;
+  tableTitle?: string;
+  filterList?: {
     name?: string;
     items?: string[];
     onClickLink?: (index: number) => void;
@@ -24,7 +25,7 @@ export type TableType = {
     key: string;
     valueIsAComponent?: boolean;
     customValue?: (value?: any, rowData?: any) => JSX.Element;
-    width?: string;
+    styles?: string;
     rightIcon?: React.ReactNode;
   }[];
   tableClassname?: string;
@@ -33,11 +34,12 @@ export type TableType = {
   cardComponent?: (data: any[]) => React.ReactNode;
   loading: boolean;
   refreshTable?: () => Promise<any>;
-  queryValue: string;
+  queryValue?: string;
 };
 
 export const Table = (props: TableType) => {
   const {
+    showHeader = true,
     tableTitle,
     filterList,
     columnList,
@@ -47,7 +49,7 @@ export const Table = (props: TableType) => {
     cardComponent,
     loading,
     refreshTable,
-    queryValue,
+    queryValue = "",
   } = props;
   const [hoveredCell, setHoveredCell] = useState<{
     rowIndex: number;
@@ -71,17 +73,19 @@ export const Table = (props: TableType) => {
   const SkeletonLoader = () => {
     return (
       <>
-        <header className="flex items-center justify-between gap-2 px-4 py-2 border-[0.6px] border-strokeGreyThree rounded-full">
-          <div className="w-[230px] h-[24px] bg-gray-100 border-[0.6px] border-strokeGreyThree rounded-full"></div>
-          <div className="flex items-center justify-end gap-2">
-            {filterList.map((_filter, index) => (
-              <div
-                key={index}
-                className="w-[88px] h-[24px] bg-gray-100 border-[0.6px] border-strokeGreyThree rounded-full"
-              ></div>
-            ))}
-          </div>
-        </header>
+        {showHeader ? (
+          <header className="flex items-center justify-between gap-2 px-4 py-2 border-[0.6px] border-strokeGreyThree rounded-full">
+            <div className="w-[230px] h-[24px] bg-gray-100 border-[0.6px] border-strokeGreyThree rounded-full"></div>
+            <div className="flex items-center justify-end gap-2">
+              {filterList.map((_filter, index) => (
+                <div
+                  key={index}
+                  className="w-[88px] h-[24px] bg-gray-100 border-[0.6px] border-strokeGreyThree rounded-full"
+                ></div>
+              ))}
+            </div>
+          </header>
+        ) : null}
         {tableType === "default" ? (
           <div className="animate-pulse border-[0.6px] p-4 border-strokeGreyThree">
             {Array.from({ length: entriesPerPage }).map((_, index) => (
@@ -140,38 +144,40 @@ export const Table = (props: TableType) => {
         <>
           <div className="flex flex-col w-full gap-2 overflow-x-auto max-w-full">
             <div className="flex flex-col gap-2 min-w-[975px]">
-              <header className="flex items-center justify-between gap-2 p-[8px_8px_8px_16px] bg-paleGrayGradient border-[0.6px] border-strokeGreyThree rounded-full">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-sm font-bold text-textDarkGrey">
-                    {tableTitle}
-                  </h2>
-                  <button
-                    className="bg-white text-xs px-2 py-1 text-textDarkGrey font-medium border border-strokeGreyTwo rounded-full hover:text-textBlack hover:border-textBlack transition-all"
-                    onClick={async () => {
-                      setRefreshing(true);
-                      await refreshTable();
-                      setRefreshing(false);
-                    }}
-                  >
-                    {refreshing ? "Refreshing..." : "Refresh Table"}
-                  </button>
-                </div>
-                <div className="flex items-center justify-end gap-2">
-                  {filterList.map((filter, index) =>
-                    filter.isSearch ? (
-                      <TableSearch
-                        key={index}
-                        name={filter.name}
-                        onSearch={filter.onSearch}
-                        queryValue={queryValue}
-                        refreshTable={refreshTable}
-                      />
-                    ) : (
-                      <DropDown key={index} {...filter} />
-                    )
-                  )}
-                </div>
-              </header>
+              {showHeader ? (
+                <header className="flex items-center justify-between gap-2 p-[8px_8px_8px_16px] bg-paleGrayGradient border-[0.6px] border-strokeGreyThree rounded-full">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-bold text-textDarkGrey">
+                      {tableTitle}
+                    </h2>
+                    <button
+                      className="bg-white text-xs px-2 py-1 text-textDarkGrey font-medium border border-strokeGreyTwo rounded-full hover:text-textBlack hover:border-textBlack transition-all"
+                      onClick={async () => {
+                        setRefreshing(true);
+                        await refreshTable();
+                        setRefreshing(false);
+                      }}
+                    >
+                      {refreshing ? "Refreshing..." : "Refresh Table"}
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-end gap-2">
+                    {filterList.map((filter, index) =>
+                      filter.isSearch ? (
+                        <TableSearch
+                          key={index}
+                          name={filter.name}
+                          onSearch={filter.onSearch}
+                          queryValue={queryValue}
+                          refreshTable={refreshTable}
+                        />
+                      ) : (
+                        <DropDown key={index} {...filter} />
+                      )
+                    )}
+                  </div>
+                </header>
+              ) : null}
               <section
                 className={`${tableClassname} w-full p-[16px_16px_0px_16px] border-[0.6px] border-strokeGreyThree rounded-[20px]`}
               >
@@ -182,7 +188,7 @@ export const Table = (props: TableType) => {
                         {columnList.map((column, index) => (
                           <th
                             key={index}
-                            className={`${column.width} p-2 text-xs font-light text-left text-textDarkGrey border-b-[0.2px] border-[#E0E0E0]`}
+                            className={`${column.styles} p-2 text-xs font-light text-left text-textDarkGrey border-b-[0.2px] border-[#E0E0E0]`}
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-1">
