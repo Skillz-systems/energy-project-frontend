@@ -25,18 +25,20 @@ const ChangePassword = lazy(
 );
 const Users = lazy(() => import("../Components/Settings/Users"));
 
+const defaultFormData = {
+  email: "",
+  password: "",
+  firstname: "",
+  lastname: "",
+  phone: "",
+  role: "",
+  location: "",
+};
+
 const Settings = observer(() => {
   const { settingsStore } = rootStore;
   const { apiCall } = useApiCall();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    firstname: "",
-    lastname: "",
-    phone: "",
-    role: "",
-    location: "",
-  });
+  const [formData, setFormData] = useState(defaultFormData);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -88,6 +90,13 @@ const Settings = observer(() => {
     }));
   };
 
+  const handleSelectChange = (name: string, values: string | string[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: values,
+    }));
+  };
+
   const {
     data: allRoles,
     isLoading: allRolesLoading,
@@ -119,23 +128,10 @@ const Settings = observer(() => {
     }
     setLoading(false);
     setIsOpen(false);
-    setFormData({
-      email: "",
-      password: "",
-      firstname: "",
-      lastname: "",
-      phone: "",
-      role: "",
-      location: "",
-    });
+    setFormData(defaultFormData);
   };
 
-  const { email, password, firstname, lastname, phone, role, location } =
-    formData;
-
-  const isFormFilled =
-    email || password || firstname || lastname || phone || role || location;
-
+  const isFormFilled = Object.values(formData).some((value) => Boolean(value));
   const rolesList = allRoles?.map((item) => ({
     label: item.role,
     value: item.id,
@@ -155,7 +151,7 @@ const Settings = observer(() => {
               bottomText="USERS"
               value={settingsStore.noOfUsers || 0}
             />
-            <div className="flex w-full items-center justify-between gap-2 sm:w-max sm:justify-start">
+            <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-start">
               <ActionButton
                 label="New User"
                 icon={<img src={circleAction} />}
@@ -238,7 +234,7 @@ const Settings = observer(() => {
                   type="text"
                   name="firstname"
                   label="FIRST NAME"
-                  value={firstname}
+                  value={formData.firstname}
                   onChange={handleInputChange}
                   placeholder="First Name"
                   required={true}
@@ -250,7 +246,7 @@ const Settings = observer(() => {
                   type="text"
                   name="lastname"
                   label="LAST NAME"
-                  value={lastname}
+                  value={formData.lastname}
                   onChange={handleInputChange}
                   placeholder="Last Name"
                   required={true}
@@ -262,7 +258,7 @@ const Settings = observer(() => {
                   type="email"
                   name="email"
                   label="EMAIL"
-                  value={email}
+                  value={formData.email}
                   onChange={handleInputChange}
                   placeholder="Email"
                   required={true}
@@ -274,7 +270,7 @@ const Settings = observer(() => {
                   type="text"
                   name="phone"
                   label="PHONE NUMBER"
-                  value={phone}
+                  value={formData.phone}
                   onChange={handleInputChange}
                   placeholder="Phone Number"
                   required={true}
@@ -285,10 +281,11 @@ const Settings = observer(() => {
 
                 <SelectInput
                   label="Role"
-                  name="role"
                   options={rolesList}
-                  value={role}
-                  onChange={handleInputChange}
+                  value={formData.role}
+                  onChange={(selectedValue) =>
+                    handleSelectChange("role", selectedValue)
+                  }
                   required={true}
                   placeholder="Select a role"
                   style={`${
@@ -299,7 +296,7 @@ const Settings = observer(() => {
                   type="text"
                   name="location"
                   label="LOCATION"
-                  value={location}
+                  value={formData.location}
                   onChange={handleInputChange}
                   placeholder="Location"
                   required={true}

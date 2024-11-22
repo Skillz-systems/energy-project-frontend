@@ -1,18 +1,29 @@
+import { ReactNode } from "react";
+
 export type TitlePillType = {
   parentClass?: string;
   icon: string;
   iconBgColor: string;
   topText: string;
   bottomText: string;
+  leftIcon?: ReactNode;
   value: string | number;
 };
 
 export const TitlePill = (props: TitlePillType) => {
-  const { parentClass, icon, iconBgColor, topText, bottomText, value } = props;
+  const {
+    parentClass,
+    icon,
+    iconBgColor,
+    topText,
+    bottomText,
+    leftIcon,
+    value,
+  } = props;
 
   return (
     <div
-      className={`${parentClass} flex items-center justify-between gap-6 bg-white max-w-none sm:max-w-max h-[40px] pl-1 pr-[20px] py-1 border-[0.6px] border-[#A5873033] rounded-full shadow-titlePillCustom`}
+      className={`${parentClass} flex items-center justify-between gap-6 bg-white h-[40px] pl-1 pr-[20px] py-1 border-[0.6px] border-[#A5873033] rounded-full shadow-titlePillCustom`}
     >
       <div className="flex items-center gap-2">
         <div
@@ -27,7 +38,10 @@ export const TitlePill = (props: TitlePillType) => {
           <p className="text-sm leading-3 text-textGrey">{bottomText}</p>
         </div>
       </div>
-      <p className="text-xl font-medium text-textBlack">{value}</p>
+      <div className="flex items-center justify-end w-max gap-1">
+        {leftIcon && leftIcon}
+        <p className="text-xl font-medium text-textBlack">{value}</p>
+      </div>
     </div>
   );
 };

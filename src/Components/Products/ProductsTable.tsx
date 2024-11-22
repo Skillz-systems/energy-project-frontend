@@ -33,7 +33,13 @@ interface ProductEntries {
 //   return entries;
 // };
 
-const ProductsTable = ({ productData }) => {
+const ProductsTable = ({
+  productData,
+  isLoading,
+}: {
+  productData: any;
+  isLoading: boolean;
+}) => {
   // const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   // const [productId, setProductId] = useState<string>("");
@@ -96,7 +102,7 @@ const ProductsTable = ({ productData }) => {
         tableTitle="ALL PRODUCTS"
         tableClassname="flex flex-wrap items-center gap-4"
         tableData={productData}
-        loading={false}
+        loading={isLoading}
         filterList={filterList}
         cardComponent={(data) => {
           return data?.map((item: ProductEntries, index) => (
