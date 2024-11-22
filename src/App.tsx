@@ -14,6 +14,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProgressBar from "./Components/Progressbar/ProgressBar";
 import CustomerPage from "./Pages/CustomerPage";
+import AgentPage from "./Pages/AgentPage";
 
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
             <Route path="/products/*" element={<Products />} />
             <Route path="/settings/*" element={<Settings />} />
             <Route path="/customers" element={<CustomerPage />} />
+            <Route path="/agents" element={<AgentPage />} />
             {/* Other protected routes */}
           </Route>
 
