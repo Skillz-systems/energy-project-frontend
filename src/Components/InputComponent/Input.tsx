@@ -1,6 +1,7 @@
 import { ChangeEvent, MouseEvent, ReactNode, useEffect, useRef } from "react";
 import { CgChevronDown } from "react-icons/cg";
 import { useState } from "react";
+import { LuImagePlus } from "react-icons/lu";
 
 const Asterik = () => {
   return (
@@ -120,7 +121,9 @@ export const Input = ({
             checked={checked}
             readOnly={readOnly}
             min={0}
-            className="w-full text-sm font-semibold text-textBlack placeholder:text-textGrey placeholder:font-normal placeholder:italic"
+            className={`w-full text-sm font-semibold ${
+              value ? "text-textBlack" : "text-textGrey"
+            } placeholder:text-textGrey placeholder:font-normal placeholder:italic`}
           />
 
           {iconRight && iconRight}
@@ -238,6 +241,7 @@ export type FileInputType = {
   iconRight?: ReactNode;
   style?: string;
   errorMessage?: string;
+  validateImagesOnly?: boolean;
 };
 
 export const FileInput = ({
@@ -250,15 +254,27 @@ export const FileInput = ({
   iconRight,
   style,
   errorMessage,
+  validateImagesOnly = true,
 }: FileInputType) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
-      onChange(e);
+      const file = e.target.files[0];
+      if (validateImagesOnly) {
+        if (file && file.type.startsWith("image/")) {
+          setSelectedFile(file);
+          onChange(e);
+        } else {
+          alert("Please select an image file.");
+        }
+      } else {
+        setSelectedFile(file);
+        onChange(e);
+      }
     }
   };
+
   const openFile = () => {
     return (document.getElementById(name) as HTMLInputElement).click();
   };
@@ -270,8 +286,9 @@ export const FileInput = ({
           ${style} 
           ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
           items-center w-full max-w-full h-[48px] px-[1.1em] py-[1.25em] 
-          gap-1 rounded-3xl border-[0.6px]
+          gap-1 rounded-3xl border-[0.6px] cursor-pointer
           transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
+        onClick={openFile}
       >
         <span
           className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out
@@ -290,13 +307,13 @@ export const FileInput = ({
           onChange={handleFileChange}
           disabled={disabled}
           style={{ display: "none" }}
+          accept={validateImagesOnly ? "image/*" : "*/*"}
         />
         {/* Custom button to trigger file input */}
         <div className="flex items-center justify-between w-full">
           <>
             <button
               type="button"
-              onClick={openFile}
               disabled={disabled}
               className="text-sm text-textGrey italic"
             >
@@ -310,8 +327,12 @@ export const FileInput = ({
             </button>
           </>
 
-          <span onClick={openFile} className="cursor-pointer">
-            {iconRight && iconRight}
+          <span>
+            {iconRight ? (
+              iconRight
+            ) : (
+              <LuImagePlus color="black" title="Upload Image" />
+            )}
           </span>
         </div>
       </div>
@@ -469,10 +490,9 @@ export type SelectOption = {
 
 export type SelectInputType = {
   label: string;
-  name: string;
   options: SelectOption[];
   value: string | string[];
-  onChange: (event: ChangeEvent<HTMLSelectElement>) => void;
+  onChange: (values: string) => void;
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
@@ -480,12 +500,10 @@ export type SelectInputType = {
   icon?: ReactNode;
   iconStyle?: string;
   iconPosition?: "left" | "right";
-  // selectmultipl
 };
 
 export const SelectInput = ({
   label,
-  name,
   options,
   value,
   onChange,
@@ -493,61 +511,98 @@ export const SelectInput = ({
   disabled = false,
   required = false,
   style,
-  icon = <CgChevronDown />,
+  icon = <CgChevronDown color="black" title="Show options" />,
   iconStyle = "text-lg",
 }: SelectInputType) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [valueLabel, setValueLabel] = useState<string | number>("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const handleSelect = (selectedValue: string) => {
+    onChange(selectedValue);
+    setIsOpen(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: Event) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener(
+        "mousedown",
+        handleClickOutside as EventListener
+      );
+    } else {
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside as EventListener
+      );
+    }
+
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside as EventListener
+      );
+    };
+  }, [isOpen]);
 
   return (
-    <div
-      className={`relative flex items-center
-      w-full max-w-full h-[48px] px-[1.25em] py-[1.25em] 
-      rounded-3xl text-sm text-textGrey border-[0.6px] gap-1
-      transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
-      ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
-      ${style}`}
-      onClick={() => setIsOpen(!isOpen)}
-    >
-      <span
-        className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out ${
-          value ? "opacity-100" : "opacity-0"
-        }`}
+    <div ref={dropdownRef} className={`relative w-full max-w-full`}>
+      <div
+        className={`relative flex items-center
+        w-full max-w-full h-[48px] px-[1.25em] py-[1.25em] 
+        rounded-3xl text-sm text-textGrey border-[0.6px] gap-1 cursor-pointer
+        transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
+        ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
+        ${style}`}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
       >
-        {label.toUpperCase()}
-      </span>
-      {required && <Asterik />}
+        <span
+          className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out ${
+            value ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          {label.toUpperCase()}
+        </span>
+        {required && <Asterik />}
 
-      <select
-        name={name}
-        value={value}
-        onChange={(e) => {
-          onChange(e);
-        }}
-        disabled={disabled}
-        required={required}
-        className={`w-full bg-transparent outline-none appearance-none cursor-pointer ${
-          value && value !== ""
-            ? "text-textBlack font-semibold"
-            : "text-textGrey italic"
-        }`}
-      >
-        {placeholder && (
-          <option value="" className="not-italic">
-            {placeholder}
-          </option>
-        )}
-        {options.map((option) => (
-          <option
-            key={option.value}
-            value={option.value}
-            className="capitalize text-textBlack not-italic"
-          >
-            {option.label}
-          </option>
-        ))}
-      </select>
+        <div className="w-full">
+          {value ? (
+            <span className="font-semibold text-textBlack uppercase">
+              {valueLabel}
+            </span>
+          ) : (
+            <span className="text-textGrey italic">{placeholder}</span>
+          )}
+        </div>
 
-      <span className={`${iconStyle} absolute right-3 p-[0.3em] `}>{icon}</span>
+        <span className={`${iconStyle} absolute right-3 p-[0.3em]`}>
+          {icon}
+        </span>
+      </div>
+      {isOpen && (
+        <div className="absolute mt-1.5 flex flex-col gap-1 bg-white p-2 border border-strokeGreyTwo rounded-[20px] w-full max-h-60 overflow-y-auto shadow-lg z-10">
+          {options.map((option) => (
+            <div
+              key={option.value}
+              className="text-xs capitalize text-textDarkGrey cursor-pointer px-2 py-1 border border-transparent hover:bg-[#F6F8FA] hover:border hover:border-strokeGreyTwo hover:rounded-full"
+              onClick={() => {
+                handleSelect(option.value);
+                setValueLabel(option.label);
+              }}
+            >
+              {option.label}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -623,7 +678,7 @@ export const SelectMultipleInput = ({
         className={`relative flex items-center justify-between 
           ${style}
           ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"} 
-          w-full h-[48px] px-[1.3em] py-[1em] 
+          w-full h-[48px] px-[1.3em] py-[1em] cursor-pointer
           rounded-3xl text-sm text-textGrey border-[0.6px] gap-[4.23px]
           transition-all focus:outline-none focus:ring-2 focus:ring-primary`}
         onClick={() => !disabled && setIsOpen(!isOpen)}
@@ -651,24 +706,22 @@ export const SelectMultipleInput = ({
       </div>
 
       {isOpen && (
-        <div className="pl-10">
-          <div className="absolute mt-2 bg-white border border-gray-300 rounded-md w-full max-w-[340px] max-h-60 overflow-y-auto shadow-lg z-10">
-            {options.map((option) => (
-              <label
-                key={option.value}
-                className="flex items-center px-2 py-1 cursor-pointer text-sm"
-              >
-                <input
-                  type="checkbox"
-                  value={option.value}
-                  checked={value.includes(option.value)}
-                  onChange={() => handleCheckboxChange(option.value)}
-                  className="mr-2"
-                />
-                {option.label}
-              </label>
-            ))}
-          </div>
+        <div className="absolute mt-1.5 flex flex-col gap-0 bg-white p-2 border border-strokeGreyTwo rounded-[20px] w-full max-h-60 overflow-y-auto shadow-lg z-10">
+          {options.map((option) => (
+            <label
+              key={option.value}
+              className="flex items-center text-xs capitalize text-textDarkGrey cursor-pointer px-2 py-1 border border-transparent hover:bg-[#F6F8FA] hover:border hover:border-strokeGreyTwo hover:rounded-full"
+            >
+              <input
+                type="checkbox"
+                value={option.value}
+                checked={value.includes(option.value)}
+                onChange={() => handleCheckboxChange(option.value)}
+                className="mr-2 w-3 h-3"
+              />
+              {option.label}
+            </label>
+          ))}
         </div>
       )}
     </div>

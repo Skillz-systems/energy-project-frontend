@@ -135,7 +135,7 @@ table {
 .loaderTwo {
   width: 50px;
   aspect-ratio: 1;
-  border: 10px solid #FEF5DA;
+  border: 10px solid #fef5da;
   /* border: 10px solid #f8cc48f1; */
   border-radius: 50%;
   position: relative;

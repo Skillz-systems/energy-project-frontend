@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Table } from "../TableComponent/Table";
 import role from "../../assets/table/role.svg";
 import clock from "../../assets/table/clock.svg";
@@ -5,7 +6,6 @@ import { GoDotFill } from "react-icons/go";
 import { useApiCall } from "../../utils/useApiCall";
 import { observer } from "mobx-react-lite";
 import UserModal from "./UserModal";
-import { useEffect, useState } from "react";
 import { capitalizeFirstLetter } from "../../utils/helpers";
 import { KeyedMutator } from "swr";
 import rootStore from "../../stores/rootStore";

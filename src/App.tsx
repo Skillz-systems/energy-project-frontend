@@ -6,6 +6,7 @@ import {
   CreatePassword,
   Dashboard,
   Products,
+  Inventory,
 } from "./Pages/Index";
 import "./index.css";
 import { ErrorProvider } from "./Context/ErrorContext";
@@ -14,7 +15,6 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProgressBar from "./Components/Progressbar/ProgressBar";
 import CustomerPage from "./Pages/CustomerPage";
-
 
 function App() {
   return (
@@ -25,6 +25,7 @@ function App() {
           <Route element={<ProtectedRouteWrapper />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/products/*" element={<Products />} />
+            <Route path="/inventory/*" element={<Inventory />} />
             <Route path="/settings/*" element={<Settings />} />
             <Route path="/customers" element={<CustomerPage />} />
             {/* Other protected routes */}
@@ -48,7 +49,8 @@ function App() {
                 <ProgressBar
                   percentage={85}
                   parentClassname="custom-parent-class"
-                  percentageClassname="custom-percentage-class" />
+                  percentageClassname="custom-percentage-class"
+                />
                 <ProgressBar percentage={60} />
                 <ProgressBar percentage={90} />
               </div>
