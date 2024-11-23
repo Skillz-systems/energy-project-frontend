@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal } from "../ModalComponent/Modal";
 import editInput from "../../assets/settings/editInput.svg";
 import { DropDown } from "../DropDownComponent/DropDown";
@@ -78,14 +78,17 @@ const InventoryDetailModal = ({
     }
   };
 
+  useEffect(() => {
+    console.log("Current tab content:", tabContent);
+  }, [tabContent]);
   return (
     <Modal
       layout="right"
       bodyStyle="pb-44 overflow-auto"
       isOpen={isOpen}
       onClose={() => {
+        setTabContent("details");
         setIsOpen(false);
-        setTabContent("productDetails");
       }}
       leftHeaderContainerClass="pl-2"
       leftHeaderComponents={
@@ -150,11 +153,11 @@ const InventoryDetailModal = ({
             <InventoryStats
             // stats={statsData}
             />
-          ) : (
+          ) : tabContent === "history" ? (
             <InventoryHistory
               historyData={generateRandomInventoryHistoryEntries(50)}
             />
-          )}
+          ) : null}
         </div>
       </div>
       {/* )} */}

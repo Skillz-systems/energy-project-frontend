@@ -98,6 +98,7 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
             name="productImage"
             onChange={handleChange}
             placeholder="Upload Image"
+            required={false}
             iconRight={<LuImagePlus />}
           />
         ) : (
@@ -124,6 +125,7 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
               name="inventoryName"
               value={formData.inventoryName}
               onChange={handleChange}
+              required={true}
               placeholder="Enter Inventory Name"
               className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
             />
@@ -140,6 +142,7 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
               name="inventoryClass"
               value={formData.inventoryClass}
               onChange={handleChange}
+              required={true}
               className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-[10px]"
             >
               <option value="regular">Regular</option>
@@ -164,6 +167,7 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
               name="inventoryCategory"
               value={formData.inventoryCategory}
               onChange={handleChange}
+              required={true}
               className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-[10px]"
             >
               <option value="solarPanel">Solar Panel</option>
@@ -186,6 +190,7 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
               value={formData.sku}
               onChange={handleChange}
               placeholder="Enter SKU"
+              required={false}
               className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
             />
           ) : (
@@ -207,6 +212,7 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
               value={formData.manufacturerName}
               onChange={handleChange}
               placeholder="Enter Manufacturer Name"
+              required={true}
               className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
             />
           ) : (
@@ -224,6 +230,7 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
               value={formData.dateOfManufacture}
               onChange={handleChange}
               placeholder="Enter Date of Manufacture"
+              required={false}
               className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
             />
           ) : (
@@ -246,6 +253,7 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
               value={formData.numberOfStock}
               onChange={handleChange}
               placeholder="Enter Number of Stock"
+              required={true}
               className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
             />
           ) : (
@@ -263,6 +271,7 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
               value={formData.costPrice}
               onChange={handleChange}
               placeholder="Enter Cost Price"
+              required={true}
               className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
             />
           ) : (
@@ -281,6 +290,7 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
               value={formData.salePrice}
               onChange={handleChange}
               placeholder="Enter Selling Price"
+              required={true}
               className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
             />
           ) : (

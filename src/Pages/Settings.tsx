@@ -80,6 +80,26 @@ const Settings = observer(() => {
   if (fetchAllUsers.error)
     handleErrorBoundary(fetchAllUsers.error, fetchAllUsers.isNetworkError);
 
+  // const tersoo = true;
+  // let rolesList;
+  // let fetchAllRoles;
+  // let fetchAllUsers;
+
+  // if (tersoo) {
+  //   fetchAllRoles = useGetRequest("/v1/roles", true, 60000);
+  //   fetchAllUsers = useGetRequest("/v1/users", true, 60000);
+
+  //   rolesList = fetchAllRoles.data?.map((item) => ({
+  //     label: item.role,
+  //     value: item.id,
+  //   }));
+
+  //   if (fetchAllRoles.error)
+  //     handleErrorBoundary(fetchAllRoles.error, fetchAllUsers.isNetworkError);
+  //   if (fetchAllUsers.error)
+  //     handleErrorBoundary(fetchAllUsers.error, fetchAllUsers.isNetworkError);
+  // }
+
   return (
     <>
       <PageLayout pageName="Settings" badge={settingsbadge}>

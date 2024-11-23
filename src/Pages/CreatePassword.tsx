@@ -86,7 +86,7 @@ const LoginPage = () => {
     }
   }, [userId, remember_token]);
 
-  if (userInfoError) return <div>Oops Something went wrong</div>;
+  // if (userInfoError) return <div>Oops Something went wrong</div>;
 
   return (
     <main className="relative flex flex-col items-center justify-center gap-[60px] px-4 py-16 min-h-screen">

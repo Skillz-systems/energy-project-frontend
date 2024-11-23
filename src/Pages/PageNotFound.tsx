@@ -55,10 +55,10 @@ const PageNotFound = () => {
             </p>
             <div className="mt-6">
               <Link
-                to={"/dashboard"}
+                to={"/home"}
                 className="inline-flex items-center px-4 py-2 text-base font-medium rounded-md text-white bg-errorGradient hover:bg-inversedErrorGradient transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
               >
-                Go to Dashboard
+                Go back Home
               </Link>
             </div>
           </div>

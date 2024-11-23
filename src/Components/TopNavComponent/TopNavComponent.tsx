@@ -80,7 +80,7 @@ const TopNavComponent = () => {
             alt="Logo"
             width="51px"
             className="w-[25px] sm:w-[51px] cursor-pointer"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/home")}
           />
           <MenuButton />
           <UserProfile role={role.role} />
