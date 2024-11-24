@@ -20,6 +20,8 @@ import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import PageLayout from "./PageLayout";
 import cancelled from "../assets/cancelled.svg";
 import productgreen from "../assets/products/productgreen.svg";
+import UserModal from "@/Components/Settings/UserModal";
+import CustomerPagemodal from "./CustomerPagemodal";
 
 const CustomerPage = () => {
   const [tableData, setTableData] = useState([]);
@@ -28,6 +30,8 @@ const CustomerPage = () => {
   const [queryValue, setQueryValue] = useState("");
   const [isSearchQuery, setIsSearchQuery] = useState(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [formState, setFormState] = useState({
     firstname: "",
     lastname: "",
@@ -41,6 +45,18 @@ const CustomerPage = () => {
   const [isFormFilled, setIsFormFilled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [allRolesLoading, setAllRolesLoading] = useState(false);
+
+  const handleViewCustomer = async (id: number) => {
+    try {
+      const response = await fetch(`https://jsonplaceholder.typicode.com/users/${id}`);
+      const data = await response.json();
+      setSelectedCustomer(data); // Store customer details
+      setIsCustomerModalOpen(true); // Open the modal
+    } catch (error) {
+      console.error("Failed to fetch customer details:", error);
+    }
+  };
+
 
   const refreshTable = async () => {
     setIsLoading(true);
@@ -170,8 +186,10 @@ const CustomerPage = () => {
       title: "ACTIONS",
       key: "actions",
       valueIsAComponent: true,
-      customValue: () => (
-        <span className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer">
+      customValue: (value, rowData) => (
+        <span
+          onClick={() => handleViewCustomer(rowData.id)}
+          className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer">
           View
         </span>
       ),
@@ -398,6 +416,13 @@ const CustomerPage = () => {
                 setIsSearchQuery(false);
               }}
               queryValue={isSearchQuery ? queryValue : ""}
+
+            />
+            <CustomerPagemodal
+              isOpen={isCustomerModalOpen}
+              setIsOpen={() => setIsCustomerModalOpen(false)}
+              customerID={selectedCustomer}
+              refreshTable={()=>{}}
             />
           </div>
         </div>
