@@ -198,27 +198,20 @@ export const NairaSymbol = ({ color }: { color?: string }) => {
 };
 
 interface QuantitySelectorProps {
-  productUnits: number;
-  defaultValue?: number;
   onValueChange: (value: number) => void;
   isSelected: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
 
 export default function QuantitySelector({
-  productUnits,
-  defaultValue,
   onValueChange,
   isSelected,
   onClick,
 }: QuantitySelectorProps) {
-  const [quantity, setQuantity] = useState<number>(defaultValue);
+  const [quantity, setQuantity] = useState<number>(1);
 
   useEffect(() => {
     if (!isSelected) {
-      setQuantity(0);
-      onValueChange(0);
-    } else if (isSelected && quantity === 0) {
       setQuantity(1);
       onValueChange(1);
     }
@@ -226,7 +219,7 @@ export default function QuantitySelector({
 
   const updateQuantity = (adjustment: number) => {
     const newValue = quantity + adjustment;
-    if (newValue >= 0 && newValue <= productUnits) {
+    if (newValue >= 1) {
       setQuantity(newValue);
       onValueChange(newValue);
     }
@@ -272,7 +265,6 @@ export default function QuantitySelector({
       {isSelected && (
         <button
           onClick={() => updateQuantity(1)}
-          disabled={quantity === productUnits}
           className="group rounded-full disabled:opacity-50 transition-colors"
           aria-label="Increase quantity"
         >
@@ -335,7 +327,8 @@ export const CardComponent = ({
   readOnly = false,
 }: CardComponentProps) => {
   const inventoryMobile = useBreakpoint("max", 350);
-  const [_productUnits, setProductUnits] = useState<number>(0);
+  const [_productUnits, setProductUnits] = useState<number>(productUnits);
+  const [_productPrice, setProductPrice] = useState<number>(productPrice);
   const [_selected, setSelected] = useState<boolean>(
     isProductSelected || false
   );
@@ -347,17 +340,19 @@ export const CardComponent = ({
     productTag,
     productName,
     productPrice,
+  };
+
+  useEffect(() => {}, [_productPrice, _productUnits]);
+
+  const updatedProductInfo = {
+    ...productInfo,
+    productPrice: _productPrice,
     productUnits: _productUnits,
   };
 
   const handleSelectProduct = () => {
     if (!_selected) {
-      const updatedUnits = _productUnits === 0 ? 1 : _productUnits;
-      const updatedProductInfo = {
-        ...productInfo,
-        productUnits: updatedUnits,
-      };
-      onSelectProduct?.(updatedProductInfo);
+      onSelectProduct(updatedProductInfo);
       setSelected(true);
     } else {
       setSelected(false);
@@ -636,7 +631,7 @@ export const CardComponent = ({
           />
         ) : variant === "inventoryTwo" ? (
           <SimpleTag
-            text={formatNumberWithCommas(productPrice)}
+            text={formatNumberWithCommas(_productPrice || productPrice)}
             customIcon={
               <NairaSymbol
                 color={_selected || readOnly ? undefined : "#828DA9"}
@@ -657,9 +652,10 @@ export const CardComponent = ({
 
         {variant === "inventoryTwo" ? (
           <QuantitySelector
-            productUnits={productUnits || 0}
-            defaultValue={productUnits}
-            onValueChange={(value) => setProductUnits(value)}
+            onValueChange={(value) => {
+              setProductUnits(value);
+              setProductPrice(value * productPrice);
+            }}
             isSelected={_selected}
             onClick={(e) => e.stopPropagation()}
           />

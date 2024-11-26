@@ -16,7 +16,6 @@ type ListDataType = {
   productTag: string;
   productName: string;
   productPrice: number;
-  productUnits: number;
 };
 
 type ProductInventoryType = {
@@ -168,7 +167,6 @@ const SelectInventoryModal = observer(
                     productTag={data.productTag}
                     productName={data.productName}
                     productPrice={data.productPrice}
-                    productUnits={data.productUnits}
                     onSelectProduct={(productInfo) => {
                       rootStore.productStore.addProduct(productInfo);
                     }}

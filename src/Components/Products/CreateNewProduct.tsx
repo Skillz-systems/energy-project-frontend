@@ -58,10 +58,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
       }));
     };
 
-    const handleSelectChange = (
-      name: string,
-      values: string | string[]
-    ) => {
+    const handleSelectChange = (name: string, values: string | string[]) => {
       setFormData((prev) => ({
         ...prev,
         [name]: values,

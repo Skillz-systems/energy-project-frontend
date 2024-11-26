@@ -32,6 +32,12 @@ const productStore = types
         Object.assign(product, updatedFields);
       }
     },
+    getProductById(productId: string | number) {
+      const product = self.products.find(
+        (product) => product.productId === productId
+      );
+      return product;
+    },
     emptyProducts() {
       self.products.clear();
     },
