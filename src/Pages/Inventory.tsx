@@ -13,7 +13,7 @@ import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import CreateNewInventory, {
   InventoryFormType,
 } from "@/Components/Inventory/CreateNewInventory";
-import { generateRandomInventoryEntries } from "@/Components/TableComponent/sampleData";
+import { useGetRequest } from "@/utils/useApiCall";
 
 const InventoryTable = lazy(
   () => import("@/Components/Inventory/InventoryTable")
@@ -22,71 +22,60 @@ const InventoryTable = lazy(
 const Inventory = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [inventoryData, setInventoryData] = useState<any>(null); // Temporary
+  const [_inventoryData, setInventoryData] = useState<any>(null); // Temporary
   const [formType, setFormType] = useState<InventoryFormType>("newInventory");
-  //   const {
-  //     data: productData,
-  //     isLoading: productLoading,
-  //     mutate: allProductsRefresh,
-  //   } = useGetRequest("/v1/products", true, 60000);
+  const {
+    data: inventoryData,
+    isLoading: inventoryLoading,
+    mutate: allInventoryRefresh,
+  } = useGetRequest("/v1/inventory", true, 60000);
 
   const navigationList = [
     {
       title: "All Inventory",
       link: "/inventory/all",
-      count: 100,
-      onclick: () => {},
+      // count: inventoryData?.total,
+      count:
+        inventoryData?.inventories?.filter(
+          (item) => item.batches && item.batches.length > 0
+        )?.length ?? 0,
     },
-    {
-      title: "Regular",
-      link: "/inventory/regular",
-      count: 70,
-      onclick: () => {},
-    },
-    {
-      title: "Out of stock",
-      link: "/inventory/out-of-stock",
-      count: 20,
-      onclick: () => {},
-    },
-    {
-      title: "Deleted Inventory",
-      link: "/inventory/deleted",
-      count: 10,
-      onclick: () => {},
-    },
+    // {
+    //   title: "Regular",
+    //   link: "/inventory/regular",
+    //   count: 70,
+    // },
+    // {
+    //   title: "Out of stock",
+    //   link: "/inventory/out-of-stock",
+    //   count: 20,
+    // },
+    // {
+    //   title: "Deleted Inventory",
+    //   link: "/inventory/deleted",
+    //   count: 10,
+    // },
   ];
 
   useEffect(() => {
     switch (location.pathname) {
       case "/inventory/all":
-        setInventoryData(generateRandomInventoryEntries(100));
+        setInventoryData(inventoryData);
         break;
-      case "/inventory/regular":
-        setInventoryData(
-          generateRandomInventoryEntries(70, {
-            classTags: ["regular"],
-          })
-        );
-        break;
-      case "/inventory/out-of-stock":
-        setInventoryData(
-          generateRandomInventoryEntries(20, {
-            outOfStock: true,
-          })
-        );
-        break;
-      case "/inventory/deleted":
-        setInventoryData(
-          generateRandomInventoryEntries(10, {
-            includeDeleted: true,
-          })
-        );
-        break;
+      // case "/inventory/regular":
+      //   setInventoryData(inventoryData);
+      //   break;
+      // case "/inventory/out-of-stock":
+      //   setInventoryData(inventoryData);
+      //   break;
+      // case "/inventory/deleted":
+      //   setInventoryData(inventoryData);
+      //   break;
       default:
-        setInventoryData(generateRandomInventoryEntries(100));
+        setInventoryData(inventoryData);
     }
-  }, [location.pathname]);
+    setInventoryData(inventoryData);
+  }, [location.pathname, inventoryData]);
 
   const dropDownList = {
     items: [
@@ -136,28 +125,32 @@ const Inventory = () => {
               iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="INVENTORY"
-              value={5124}
+              value={
+                inventoryData?.inventories?.filter(
+                  (item) => item.batches && item.batches.length > 0
+                )?.length ?? 0
+              }
             />
             <TitlePill
               icon={inventorygradient}
               iconBgColor="bg-[#FDEEC2]"
               topText="Regular"
               bottomText="INVENTORY"
-              value={498}
+              value={1}
             />
             <TitlePill
               icon={inventorygradient}
               iconBgColor="bg-[#FDEEC2]"
               topText="Refurbished"
               bottomText="INVENTORY"
-              value={12}
+              value={0}
             />
             <TitlePill
               icon={cancelled}
               iconBgColor="bg-[#FFDBDE]"
               topText="Deleted"
               bottomText="INVENTORY"
-              value={4}
+              value={0}
             />
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
@@ -191,9 +184,9 @@ const Inventory = () => {
                     path={path}
                     element={
                       <InventoryTable
-                        inventoryData={inventoryData}
-                        isLoading={!inventoryData?.length}
-                        // refreshTable={() => {}}
+                        inventoryData={_inventoryData}
+                        isLoading={inventoryLoading}
+                        refreshTable={allInventoryRefresh}
                       />
                     }
                   />

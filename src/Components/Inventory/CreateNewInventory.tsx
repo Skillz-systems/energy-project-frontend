@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Modal } from "../ModalComponent/Modal";
-// import { useApiCall, useGetRequest } from "../../utils/useApiCall";
+import { useApiCall, useGetRequest } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
 import { FileInput, Input, SelectInput } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
+import { Category } from "../Products/CreateNewProduct";
 
 export type InventoryFormType =
   | "newInventory"
@@ -18,7 +19,20 @@ interface CreatNewInventoryProps {
   formType: InventoryFormType;
 }
 
-const defaultInventoryFormData = {
+interface InventoryFormData {
+  className: string;
+  category: string;
+  subCategory: string;
+  itemName: string;
+  manufacturerName: string;
+  dateOfManufacture: string;
+  sku: string;
+  numberOfStock: string;
+  costPrice: string;
+  salePrice: string;
+  itemPicture: File | null;
+}
+const defaultInventoryFormData: InventoryFormData = {
   className: "",
   category: "",
   subCategory: "",
@@ -29,16 +43,16 @@ const defaultInventoryFormData = {
   numberOfStock: "",
   costPrice: "",
   salePrice: "",
-  itemPicture: "",
+  itemPicture: null,
 };
 
 const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
   isOpen,
   setIsOpen,
-  // allInventoryRefresh,
+  allInventoryRefresh,
   formType,
 }) => {
-  // const { apiCall } = useApiCall();
+  const { apiCall } = useApiCall();
   const [formData, setFormData] = useState(defaultInventoryFormData);
   const [loading, setLoading] = useState(false);
   const [otherFormData, setOtherFormData] = useState({
@@ -47,20 +61,24 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
     newLocation: "",
   });
 
-  // const { data: inventoryData, isLoading: inventoryLoading } = useGetRequest(
-  //   "/v1/inventory",
-  //   true,
-  //   60000
-  // );
+  const fetchInventoryCategories = useGetRequest(
+    "/v1/inventory/categories",
+    false
+  );
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleInputChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === "itemPicture" && files && files.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        itemPicture: files[0],
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSelectChange = (name: string, values: string) => {
@@ -73,25 +91,58 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    if (formType === "newInventory") {
-      if (!formData) return;
-    } else {
-      if (!isOtherFormFilled) return;
-    }
     try {
       if (formType === "newInventory") {
-        console.log(formData);
+        if (!formData) return;
+
+        // Create FormData instance for multipart/form-data
+        const formSubmissionData = new FormData();
+
+        // Append fields to FormData
+        formSubmissionData.append("class", formData.className);
+        formSubmissionData.append("inventoryCategoryId", formData.category);
+        formSubmissionData.append(
+          "inventorySubCategoryId",
+          formData.subCategory
+        );
+        formSubmissionData.append("name", formData.itemName);
+        formSubmissionData.append(
+          "manufacturerName",
+          formData.manufacturerName
+        );
+        formSubmissionData.append(
+          "dateOfManufacture",
+          formData.dateOfManufacture
+        );
+        formSubmissionData.append("sku", formData.sku);
+        formSubmissionData.append("numberOfStock", formData.numberOfStock);
+        formSubmissionData.append("costOfItem", formData.costPrice);
+        formSubmissionData.append("price", formData.salePrice);
+
+        if (formData.itemPicture instanceof File) {
+          formSubmissionData.append("inventoryImage", formData.itemPicture);
+        } else {
+          alert("No Image Selected");
+          return;
+        }
+        // Log the FormData entries to debug
+        for (const pair of formSubmissionData.entries()) {
+          console.log(pair[0], pair[1]);
+        }
+
+        await apiCall({
+          endpoint: "/v1/inventory/create",
+          method: "post",
+          data: formSubmissionData,
+          headers: { "Content-Type": "multipart/form-data" },
+          successMessage: "Inventory created successfully!",
+        });
       } else {
+        if (!isOtherFormFilled) return;
         console.log(isOtherFormFilled());
       }
-      // await apiCall({
-      //   endpoint: "/v1/auth/add-inventory",
-      //   method: "post",
-      //   data: formData,
-      //   successMessage: "Product created successfully!",
-      // });
       setLoading(false);
-      // await allInventoryRefresh();
+      await allInventoryRefresh();
     } catch (error) {
       console.error("Product creation failed:", error);
       setLoading(false);
@@ -162,9 +213,9 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
               <SelectInput
                 label="Class"
                 options={[
-                  { label: "Regular", value: "regular" },
-                  { label: "Returned", value: "returned" },
-                  { label: "Refurbished", value: "refurbished" },
+                  { label: "Regular", value: "REGULAR" },
+                  { label: "Returned", value: "RETURNED" },
+                  { label: "Refurbished", value: "REFURBISHED" },
                 ]}
                 value={formData.className}
                 onChange={(selectedValue) =>
@@ -179,13 +230,12 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
 
               <SelectInput
                 label="Category"
-                options={[
-                  { label: "Solar Panels", value: "solarPanels" },
-                  { label: "Inverters", value: "inverters" },
-                  { label: "Batteries", value: "batteries" },
-                  { label: "Charge Controllers", value: "chargeControllers" },
-                  { label: "Accessories", value: "accessories" },
-                ]}
+                options={
+                  fetchInventoryCategories.data?.map((category: Category) => ({
+                    label: category.name,
+                    value: category.id,
+                  })) || [{ label: "", value: "" }]
+                }
                 value={formData.category}
                 onChange={(selectedValue) =>
                   handleSelectChange("category", selectedValue)
@@ -199,11 +249,17 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
 
               <SelectInput
                 label="Sub-Category"
-                options={[
-                  { label: "Dry Cell", value: "dry-cell" },
-                  { label: "Switch", value: "switch" },
-                  { label: "Socket", value: "socket" },
-                ]}
+                options={
+                  fetchInventoryCategories.data?.flatMap(
+                    (category: Category) =>
+                      category.children?.length
+                        ? category.children.map((child) => ({
+                            label: child.name, // Use the child name for the label
+                            value: child.id, // Use the child id for the value
+                          }))
+                        : [] // Exclude categories without children
+                  ) || [{ label: "", value: "" }]
+                }
                 value={formData.subCategory}
                 onChange={(selectedValue) =>
                   handleSelectChange("subCategory", selectedValue)
@@ -310,7 +366,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                 name="itemPicture"
                 label="Item Picture"
                 onChange={handleInputChange}
-                required={false}
+                required={true}
                 placeholder="Item Picture"
                 style={
                   isFormFilled ? "border-strokeCream" : "border-strokeGrey"

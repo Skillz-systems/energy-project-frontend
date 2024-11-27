@@ -14,8 +14,8 @@ import { generateRandomInventoryHistoryEntries } from "../TableComponent/sampleD
 const InventoryDetailModal = ({
   isOpen,
   setIsOpen,
-  // inventorytID,
-  // refreshTable,
+  inventorytID,
+  refreshTable,
   inventoryData,
 }) => {
   // const { apiCall } = useApiCall();

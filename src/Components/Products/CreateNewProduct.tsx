@@ -24,7 +24,7 @@ interface CreatNewProductProps {
   formType?: ProductFormType;
 }
 
-type Category = {
+export type Category = {
   id: string;
   name: string;
   parent: string | null;
