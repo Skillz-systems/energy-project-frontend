@@ -46,19 +46,25 @@ const CustomerPage = () => {
   const [isFormFilled, setIsFormFilled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [allRolesLoading, setAllRolesLoading] = useState(false);
-
-  const { apiCall } = useApiCall(); 
+  
+  const { apiCall } = useApiCall();
   const handleViewCustomer = async (id: number) => {
     try {
-      const response = await fetch(`https://jsonplaceholder.typicode.com/users/${id}`);
-      const data = await response.json();
-      setSelectedCustomer(data); // Store customer details
-      setIsCustomerModalOpen(true); // Open the modal
+      const response = await apiCall({
+        endpoint: `v1/customers/single`, 
+        method: "get",
+        showToast: false, 
+      });
+  
+      if (response?.data) {
+        setSelectedCustomer(response.data); 
+        setIsCustomerModalOpen(true); 
+      }
     } catch (error) {
       console.error("Failed to fetch customer details:", error);
+      
     }
   };
-
 
   const refreshTable = async () => {
     setIsLoading(true);

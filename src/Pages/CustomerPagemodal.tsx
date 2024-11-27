@@ -30,7 +30,7 @@ const CustomerModal = ({ isOpen, setIsOpen, customerId, refreshTable }) => {
     ];
 
     useEffect(() => {
-        // Fetch or reset data when modal opens
+        
     }, [customerId]);
 
     const handleDelete = async () => {
