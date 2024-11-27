@@ -17,7 +17,7 @@ export default {
   ],
 } as Meta;
 
-const CardTemplate: StoryFn<any> = (args) => {
+const CardTemplate: StoryFn<any> = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return (
@@ -49,10 +49,8 @@ const CardTemplate: StoryFn<any> = (args) => {
       <ProductModal
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        // productID={productId}
-        // refreshTable={() => {}}
-        productData={args.productData}
-        inventoryData={args.inventoryData}
+        productID={""}
+        refreshTable={() => {}}
       />
     </>
   );

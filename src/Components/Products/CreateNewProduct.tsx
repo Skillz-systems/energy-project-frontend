@@ -124,7 +124,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
           formSubmissionData.append("categoryId", formData.category);
           formSubmissionData.append(
             "inventoryBatchId",
-            ["67463564ccf37eb949a00b26"]
+            JSON.stringify(["67463564ccf37eb949a00b26"])
             // JSON.stringify(
             //   rootStore.productStore.products.map(
             //     (product) => product.productId
