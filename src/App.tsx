@@ -14,6 +14,7 @@ import ProtectedRouteWrapper from "./Context/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProgressBar from "./Components/Progressbar/ProgressBar";
+import CustomerPage from "./Pages/CustomerPage";
 
 function App() {
   return (
@@ -26,6 +27,8 @@ function App() {
             <Route path="/products/*" element={<Products />} />
             <Route path="/inventory/*" element={<Inventory />} />
             <Route path="/settings/*" element={<Settings />} />
+            <Route path="/customers" element={<CustomerPage />} />
+            {/* Other protected routes */}
           </Route>
 
           {/* Public Routes */}

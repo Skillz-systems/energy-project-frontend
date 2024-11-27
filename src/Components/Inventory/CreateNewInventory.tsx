@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Modal } from "../ModalComponent/Modal";
 // import { useApiCall, useGetRequest } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
 import { FileInput, Input, SelectInput } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
+import { Modal } from "../ModalComponent/ModalComponent/Modal";
 
 export type InventoryFormType =
   | "newInventory"

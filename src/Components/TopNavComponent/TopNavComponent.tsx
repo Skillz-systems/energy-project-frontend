@@ -11,8 +11,8 @@ import support from "../../assets/support.svg";
 import { DropDown } from "../DropDownComponent/DropDown";
 import Cookies from "js-cookie";
 import useTokens from "../../hooks/useTokens";
-import { Modal } from "../ModalComponent/Modal";
 import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
+import { Modal } from "../LogoComponent/ModalComponent/Modal";
 
 const TopNavComponent = () => {
   const { role } = useTokens();
