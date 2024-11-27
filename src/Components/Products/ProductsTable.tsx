@@ -2,49 +2,46 @@ import { useState } from "react";
 import { Table } from "../TableComponent/Table";
 import { CardComponent } from "../CardComponents/CardComponent";
 import ProductModal from "./ProductModal";
-import { generateRandomProductEntry } from "../TableComponent/sampleData";
-import solarpanel from "../../assets/table/solar-panel.png";
+import { KeyedMutator } from "swr";
 // import { useApiCall } from "../../utils/useApiCall";
 
-interface ProductEntries {
-  productId: number;
-  productTag: string;
+interface AllProductEntries {
+  productId: string;
   productImage: string;
+  productName: string;
+  productTag: string;
   productPrice: number;
-  paymentModes: string[];
-  datetime: string;
-  name: string;
 }
 
-// // Helper function to map the API data to the ProductEntries format
-// const generateProductEntries = (data: any): ProductEntries[] => {
-//   const entries: ProductEntries[] = data?.products.map((product: any) => {
-//     return {
-//       productId: product?.id,
-//       productTag: product?.tag,
-//       productImage: product?.imageUrl,
-//       productPrice: product?.price,
-//       paymentModes: product?.paymentModes || null,
-//       datetime: product?.datetime,
-//       name: product?.name,
-//     };
-//   });
+// Helper function to map the API data to the ProductEntries format
+const generateProductEntries = (data: any): AllProductEntries[] => {
+  const entries: AllProductEntries[] = data?.products.map((product: any) => {
+    return {
+      productId: product?.id,
+      productImage: product?.image,
+      productName: product.name,
+      productTag: product?.category?.name,
+      productPrice: product?.price,
+    };
+  });
 
-//   return entries;
-// };
+  return entries;
+};
 
 const ProductsTable = ({
   productData,
   isLoading,
+  refreshTable,
 }: {
   productData: any;
   isLoading: boolean;
+  refreshTable: KeyedMutator<any>;
 }) => {
   // const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  // const [productId, setProductId] = useState<string>("");
-  // const [queryValue, setQueryValue] = useState<string>("");
-  // const [queryData, setQueryData] = useState<any>(null);
+  const [productId, setProductId] = useState<string | number>("");
+  const [queryValue, setQueryValue] = useState<string>("");
+  const [queryData, setQueryData] = useState<any>(null);
   // const [queryLoading, setQueryLoading] = useState<boolean>(false);
   // const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
 
@@ -60,6 +57,7 @@ const ProductsTable = ({
       name: "Search",
       onSearch: (query: string) => {
         console.log("Query:", query);
+        setQueryValue(query);
       },
       isSearch: true,
     },
@@ -73,9 +71,10 @@ const ProductsTable = ({
 
   const dropDownList = {
     items: ["View Product", "Cancel Product"],
-    onClickLink: (index: number) => {
+    onClickLink: (index: number, cardData: any) => {
       switch (index) {
         case 0:
+          setProductId(cardData?.productId);
           setIsOpen(true);
           break;
         case 1:
@@ -89,11 +88,11 @@ const ProductsTable = ({
     showCustomButton: true,
   };
 
-  // const getTableData = () => {
-  //   if (queryValue && queryData) {
-  //     return generateProductEntries(queryData);
-  //   } else return generateProductEntries(data);
-  // };
+  const getTableData = () => {
+    if (queryValue && queryData) {
+      return generateProductEntries(queryData);
+    } else return generateProductEntries(productData);
+  };
 
   return (
     <>
@@ -101,38 +100,34 @@ const ProductsTable = ({
         tableType="card"
         tableTitle="ALL PRODUCTS"
         tableClassname="flex flex-wrap items-center gap-4"
-        tableData={productData}
+        tableData={getTableData()}
         loading={isLoading}
         filterList={filterList}
         cardComponent={(data) => {
-          return data?.map((item: ProductEntries, index) => (
+          return data?.map((item: AllProductEntries, index) => (
             <CardComponent
               key={index}
               variant="product-no-image"
-              productTag={item.productTag}
               productId={item.productId}
+              productImage={item.productImage}
+              productName={item.productName}
+              productTag={item.productTag}
               productPrice={item.productPrice}
               dropDownList={dropDownList}
             />
           ));
         }}
-        // refreshTable={async () => {
-        //   await refreshTable();
-        //   setQueryData(null);
-        // }}
-        queryValue={""}
+        refreshTable={async () => {
+          await refreshTable();
+          setQueryData(null);
+        }}
+        queryValue={queryValue}
       />
       <ProductModal
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        // productID={1232763}
-        // refreshTable={() => {}}
-        productData={generateRandomProductEntry()}
-        inventoryData={Array.from({ length: 10 }, () => ({
-          productImage: solarpanel,
-          productName: "Monochromatic Solar Panels",
-          productPrice: 250000,
-        }))}
+        productID={productId}
+        refreshTable={refreshTable}
       />
     </>
   );

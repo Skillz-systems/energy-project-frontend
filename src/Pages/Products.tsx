@@ -11,9 +11,10 @@ import cancelled from "../assets/cancelled.svg";
 import LoadingSpinner from "../Components/Loaders/LoadingSpinner";
 import { SideMenu } from "../Components/SideMenuComponent/SideMenu";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import CreateNewProduct from "../Components/Products/CreateNewProduct";
-import { generateRandomProductEntries } from "../Components/TableComponent/sampleData";
-// import { useGetRequest } from "../utils/useApiCall";
+import CreateNewProduct, {
+  ProductFormType,
+} from "../Components/Products/CreateNewProduct";
+import { useGetRequest } from "../utils/useApiCall";
 
 const ProductsTable = lazy(
   () => import("../Components/Products/ProductsTable")
@@ -22,67 +23,76 @@ const ProductsTable = lazy(
 const Products = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [productData, setProductData] = useState<any>(null); // Temporary
-  //   const {
-  //     data: productData,
-  //     isLoading: productLoading,
-  //     mutate: allProductsRefresh,
-  //   } = useGetRequest("/v1/products", true, 60000);
+  const [_productData, setProductData] = useState<any>(null); // Temporary
+  const [formType, setFormType] = useState<ProductFormType>("newProduct");
+
+  const {
+    data: productData,
+    isLoading: productLoading,
+    mutate: allProductsRefresh,
+  } = useGetRequest("/v1/products", true, 60000);
+
+  const fetchAllProductStats = useGetRequest(
+    "/v1/products/statistics/view",
+    true,
+    60000
+  );
 
   const navigationList = [
     {
       title: "All Product",
       link: "/products/all",
-      count: 100,
-      onclick: () => {},
+      count: fetchAllProductStats.data?.allProducts,
     },
-    {
-      title: "SHS",
-      link: "/products/shs",
-      count: 50,
-      onclick: () => {},
-    },
-    {
-      title: "EAAS",
-      link: "/products/eaas",
-      count: 25,
-      onclick: () => {},
-    },
-    {
-      title: "Rooftop",
-      link: "/products/rooftop",
-      count: 25,
-      onclick: () => {},
-    },
+    // {
+    //   title: "SHS",
+    //   link: "/products/shs",
+    //   count: 50,
+    // },
+    // {
+    //   title: "EAAS",
+    //   link: "/products/eaas",
+    //   count: 25,
+    // },
+    // {
+    //   title: "Rooftop",
+    //   link: "/products/rooftop",
+    //   count: 25,
+    // },
   ];
 
   useEffect(() => {
     switch (location.pathname) {
       case "/products/all":
-        setProductData(generateRandomProductEntries(100));
+        setProductData(productData);
         break;
-      case "/products/shs":
-        setProductData(generateRandomProductEntries(50, ["SHS"]));
-        break;
-      case "/products/eaas":
-        setProductData(generateRandomProductEntries(25, ["EAAS"]));
-        break;
-      case "/products/rooftop":
-        setProductData(generateRandomProductEntries(25, ["Rooftop"]));
-        break;
+      // case "/products/shs":
+      //   setProductData(productData);
+      //   break;
+      // case "/products/eaas":
+      //   setProductData(productData);
+      //   break;
+      // case "/products/rooftop":
+      //   setProductData(productData);
+      //   break;
       default:
-        setProductData(generateRandomProductEntries(100));
+        setProductData(productData);
     }
-  }, [location.pathname]);
+  }, [location.pathname, productData]);
 
   const dropDownList = {
-    items: ["Add New Product", "Export List"],
+    items: ["Add New Product", "Create New Category", "Export List"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
+          setFormType("newProduct");
           setIsOpen(true);
           break;
         case 1:
+          setFormType("newCategory");
+          setIsOpen(true);
+          break;
+        case 2:
           console.log("Exporting list...");
           break;
         default:
@@ -104,42 +114,45 @@ const Products = () => {
               iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="PRODUCTS"
-              value={40}
+              value={fetchAllProductStats.data?.allProducts}
             />
             <TitlePill
               icon={productgreen}
               iconBgColor="bg-[#E3FAD6]"
               topText="Instalmental"
               bottomText="PRODUCTS"
-              value={22}
+              value={0}
             />
             <TitlePill
               icon={productgreen}
               iconBgColor="bg-[#E3FAD6]"
               topText="Single Deposit"
               bottomText="PRODUCTS"
-              value={7}
+              value={0}
             />
             <TitlePill
               icon={productgreen}
               iconBgColor="bg-[#E3FAD6]"
               topText="Recharge"
               bottomText="PRODUCTS"
-              value={7}
+              value={0}
             />
             <TitlePill
               icon={cancelled}
               iconBgColor="bg-[#FFDBDE]"
               topText="Cancelled"
               bottomText="PRODUCTS"
-              value={4}
+              value={0}
             />
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
             <ActionButton
               label="New Product"
               icon={<img src={circleAction} />}
-              onClick={() => setIsOpen(true)}
+              onClick={() => {
+                setFormType("newProduct");
+                setIsOpen(true);
+              }}
             />
             <DropDown {...dropDownList} />
           </div>
@@ -163,8 +176,9 @@ const Products = () => {
                     path={path}
                     element={
                       <ProductsTable
-                        productData={productData}
-                        isLoading={!productData?.length}
+                        productData={_productData}
+                        isLoading={productLoading}
+                        refreshTable={allProductsRefresh}
                       />
                     }
                   />
@@ -174,7 +188,12 @@ const Products = () => {
           </section>
         </div>
       </PageLayout>
-      <CreateNewProduct isOpen={isOpen} setIsOpen={setIsOpen} />
+      <CreateNewProduct
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        refreshTable={allProductsRefresh}
+        formType={formType}
+      />
     </>
   );
 };

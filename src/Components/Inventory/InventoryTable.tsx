@@ -8,43 +8,91 @@ import InventoryDetailModal from "./InventoryDetailModal";
 import { generateRandomInventoryEntry } from "../TableComponent/sampleData";
 // import rootStore from "../../stores/rootStore";
 
-// interface InventoryEntries {
-//   id: string;
-//   no: number;
-//   name: { image: string; text: string };
-//   class: string;
-//   salePrice: number;
-//   inventoryValue: number;
-//   stockLevel: { totalUnits: number; currentUnits: number };
-//   deleted: boolean;
-// }
+interface InventoryEntries {
+  id: string;
+  no: number;
+  name: { image: string; text: string };
+  class: string;
+  salePrice: number;
+  inventoryValue: number;
+  stockLevel: { totalUnits: number; currentUnits: number };
+  deleted: boolean;
+}
+
+type InventoryType = {
+  id: string;
+  name: string;
+  manufacturerName: string;
+  inventoryCategoryId: string;
+  inventorySubCategoryId: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  batches: {
+    id: string;
+    name: string;
+    dateOfManufacture: string;
+    sku: string;
+    image: string;
+    batchNumber: number;
+    costOfItem: number;
+    price: number;
+    numberOfStock: number;
+    remainingQuantity: number;
+    status: string;
+    class: string;
+    createdAt: string;
+    updatedAt: string;
+    deletedAt: string | null;
+    inventoryId: string;
+  }[];
+  inventoryCategory: {
+    id: string;
+    name: string;
+    parentId: string | null;
+    type: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  inventorySubCategory: {
+    id: string;
+    name: string;
+    parentId: string;
+    type: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
 
 // Helper function to map the API data to the desired format
-// const generateInventoryEntries = (data: any): InventoryEntries[] => {
-//   const entries: InventoryEntries[] = data?.map((item: any, index: number) => {
-//     return {
-//       id: item?.id,
-//       no: index + 1,
-//       name: { image: item.image, text: item.text },
-//       class: item.class,
-//       salePrice: item.salePrice,
-//       inventoryValue: item.inventoryValue,
-//       stockLevel: {
-//         totalUnits: item.totalUnits,
-//         currentUnits: item.currentUnits,
-//       },
-//       deleted: item.deleted;
-//     };
-//   });
+const generateInventoryEntries = (data: any): InventoryEntries[] => {
+  const entries: InventoryEntries[] = data?.inventories
+    .filter((item: InventoryType) => item.batches && item.batches.length > 0) // Filter inventories with non-empty batches
+    .map((item: InventoryType, index: number) => {
+      return {
+        id: item?.id,
+        no: index + 1,
+        name: { image: item?.batches[0]?.image, text: item?.batches[0]?.name },
+        class: item?.batches[0]?.class,
+        salePrice: item?.batches[0]?.price,
+        inventoryValue:
+          item?.batches[0]?.price * item?.batches[0]?.numberOfStock,
+        stockLevel: {
+          totalUnits: item?.batches[0]?.numberOfStock,
+          currentUnits: item?.batches[0]?.remainingQuantity,
+        },
+        deleted: item?.batches[0]?.deletedAt ?? false,
+      };
+    });
 
-//   return entries;
-// };
+  return entries;
+};
 
 const InventoryTable = ({
   inventoryData,
   isLoading,
-}: // refreshTable,
-{
+  refreshTable,
+}: {
   inventoryData: any;
   isLoading: boolean;
   refreshTable?: KeyedMutator<any>;
@@ -52,11 +100,11 @@ const InventoryTable = ({
   // const { inventoryStore } = rootStore;
   // const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  // const [inventoryID, setInventoryID] = useState<string>("");
-  // const [queryValue, setQueryValue] = useState<string>("");
-  // const [queryData, setQueryData] = useState<any>(null);
-  // const [queryLoading, setQueryLoading] = useState<boolean>(false);
-  // const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
+  const [inventoryID, setInventoryID] = useState<string>("");
+  const [queryValue, setQueryValue] = useState<string>("");
+  const [queryData, setQueryData] = useState<any>(null);
+  const [queryLoading, setQueryLoading] = useState<boolean>(false);
+  const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
 
   // useEffect(() => {
   //   if (data?.total) {
@@ -76,6 +124,7 @@ const InventoryTable = ({
       name: "Search",
       onSearch: async (query: string) => {
         console.log("query:", query);
+        setQueryValue(query);
         // setIsSearchQuery(true);
         // if (queryData) setQueryData(null);
         // setQueryLoading(true);
@@ -137,9 +186,9 @@ const InventoryTable = ({
       valueIsAComponent: true,
       customValue: (value: string) => {
         let style: string = "";
-        if (value.toLocaleLowerCase() === "regular") {
+        if (value?.toLocaleLowerCase() === "regular") {
           style = "bg-[#EAEEF2] text-textDarkGrey";
-        } else if (value.toLocaleLowerCase() === "returned") {
+        } else if (value?.toLocaleLowerCase() === "returned") {
           style = "bg-[#FFEBEC] text-errorTwo";
         } else {
           style = "bg-[#FEF5DA] text-textDarkBrown";
@@ -163,7 +212,7 @@ const InventoryTable = ({
           <div className="flex items-center gap-1">
             <NairaSymbol />
             <span className="text-textBlack">
-              {formatNumberWithCommas(value)}
+              {value && formatNumberWithCommas(value)}
             </span>
           </div>
         );
@@ -179,7 +228,7 @@ const InventoryTable = ({
           <div className="flex items-center gap-1">
             <NairaSymbol />
             <span className="text-textBlack">
-              {formatNumberWithCommas(value)}
+              {value && formatNumberWithCommas(value)}
             </span>
           </div>
         );
@@ -200,9 +249,10 @@ const InventoryTable = ({
         return (
           <div className="flex items-center gap-0 w-full">
             <span className="flex items-center justify-center w-[130px] text-textGrey font-bold px-1 h-[24px] bg-[#F6F8FA] border-[0.6px] border-strokeGreyThree rounded-full">
-              {formatNumberWithCommas(value.currentUnits)}/
+              {value.currentUnits && formatNumberWithCommas(value.currentUnits)}
+              /
               <span className="font-normal">
-                {formatNumberWithCommas(value.totalUnits)}
+                {value.totalUnits && formatNumberWithCommas(value.totalUnits)}
               </span>
             </span>
             <div className="flex w-[77%] h-[24px] bg-[#FFFFFC] border-[0.6px] border-strokeGreyThree rounded-full">
@@ -253,9 +303,8 @@ const InventoryTable = ({
           <span
             className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold"
             onClick={() => {
-              // setInventoryID(rowData.id);
+              setInventoryID(rowData.id);
               setIsOpen(true);
-              console.log(value, rowData);
             }}
           >
             View
@@ -265,14 +314,10 @@ const InventoryTable = ({
     },
   ];
 
-  // const getTableData = () => {
-  //   if (queryValue && queryData) {
-  //     return generateInventoryEntries(queryData);
-  //   } else return generateInventoryEntries(data);
-  // };
-
   const getTableData = () => {
-    return inventoryData;
+    if (queryValue && queryData) {
+      return generateInventoryEntries(queryData);
+    } else return generateInventoryEntries(inventoryData);
   };
 
   return (
@@ -282,22 +327,20 @@ const InventoryTable = ({
           tableTitle="INVENTORY"
           filterList={filterList}
           columnList={columnList}
-          // loading={queryLoading || isLoading}
-          loading={isLoading}
+          loading={queryLoading || isLoading}
           tableData={getTableData()}
-          // refreshTable={async () => {
-          //   await refreshTable();
-          //   setQueryData(null);
-          // }}
-          // queryValue={isSearchQuery ? queryValue : ""}
-          queryValue=""
+          refreshTable={async () => {
+            await refreshTable();
+            setQueryData(null);
+          }}
+          queryValue={isSearchQuery ? queryValue : ""}
         />
       </div>
       <InventoryDetailModal
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        // inventorytID={inventoryID}
-        // refreshTable={refreshTable}
+        inventorytID={inventoryID}
+        refreshTable={refreshTable}
         inventoryData={generateRandomInventoryEntry()}
       />
     </>
