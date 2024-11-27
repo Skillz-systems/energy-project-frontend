@@ -39,7 +39,7 @@ const CustomerPage = () => {
     email: "",
     phone: "",
     address: "",
-    addressType: "",
+    addressType: "HOME",
     location: "",
   });
 
@@ -392,7 +392,7 @@ const CustomerPage = () => {
                   required={true}
                   style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
                 />
-                <Input
+                {/* <Input
                   type="text"
                   name="addressType"
                   label="addressType"
@@ -401,7 +401,7 @@ const CustomerPage = () => {
                   placeholder="Address Type"
                   required={true}
                   style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
-                />
+                /> */}
                 <Input
                   type="text"
                   name="location"
