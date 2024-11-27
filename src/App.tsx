@@ -7,6 +7,7 @@ import {
   Dashboard,
   Products,
   Inventory,
+  Agent,
 } from "./Pages/Index";
 import "./index.css";
 import { ErrorProvider } from "./Context/ErrorContext";
@@ -25,6 +26,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/products/*" element={<Products />} />
             <Route path="/inventory/*" element={<Inventory />} />
+            <Route path="/agents/*" element={<Agent />} />
             <Route path="/settings/*" element={<Settings />} />
           </Route>
 
