@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Modal } from "../ModalComponent/Modal";
+// import { Modal } from "../ModalComponent/Modal";
 import TabComponent from "../TabComponent/TabComponent";
 import ListPagination from "../PaginationComponent/ListPagination";
 import { CardComponent } from "../CardComponents/CardComponent";
@@ -9,6 +9,7 @@ import { TableSearch } from "../TableSearchComponent/TableSearch";
 import searchIcon from "../../assets/search.svg";
 import { useGetRequest } from "@/utils/useApiCall";
 import LoadingSpinner from "../Loaders/LoadingSpinner";
+import { Modal } from '@/Components/ModalComponent/ModalComponent/Modal';
 
 type ListDataType = {
   productId: string;

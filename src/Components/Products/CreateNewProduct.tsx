@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal } from "../ModalComponent/Modal";
+// import { Modal } from "../ModalComponent/Modal";
 import { useApiCall, useGetRequest } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
 import {
@@ -14,6 +14,8 @@ import SelectInventoryModal from "./SelectInventoryModal";
 import { observer } from "mobx-react-lite";
 import rootStore from "../../stores/rootStore";
 import { CardComponent } from "../CardComponents/CardComponent";
+// import { Modal } from "../LogoComponent/ModalComponent/Modal";
+import { Modal } from '@/Components/ModalComponent/ModalComponent/Modal';
 
 export type ProductFormType = "newProduct" | "newCategory";
 
@@ -164,7 +166,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
         }
 
         setLoading(false);
-        await refreshTable();
+        await refreshTable!();
       } catch (error) {
         console.error("Product creation failed:", error);
       } finally {

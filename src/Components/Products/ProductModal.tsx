@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Modal } from "../ModalComponent/Modal";
+// import { Modal } from "../ModalComponent/Modal";
 import editInput from "../../assets/settings/editInput.svg";
 import LoadingSpinner from "../Loaders/LoadingSpinner";
 import { DropDown } from "../DropDownComponent/DropDown";
@@ -9,6 +9,7 @@ import InventoryDetails from "./InventoryDetails";
 import StatsDetails from "./StatsDetails";
 import CustomerDetails from "./CustomerDetails";
 import { useGetRequest } from "../../utils/useApiCall";
+import { Modal } from '@/Components/ModalComponent/ModalComponent/Modal';
 
 type ProductDetails = {
   id: string;
