@@ -22,6 +22,7 @@ import cancelled from "../assets/cancelled.svg";
 import productgreen from "../assets/products/productgreen.svg";
 import UserModal from "@/Components/Settings/UserModal";
 import CustomerPagemodal from "./CustomerPagemodal";
+ import { useApiCall, useGetRequest } from "../utils/useApiCall";
 
 const CustomerPage = () => {
   const [tableData, setTableData] = useState([]);
@@ -36,16 +37,17 @@ const CustomerPage = () => {
     firstname: "",
     lastname: "",
     email: "",
-    phonenumber: "",
+    phone: "",
     address: "",
-    addresstype: "",
-
+    addressType: "",
+    location: "",
   });
 
   const [isFormFilled, setIsFormFilled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [allRolesLoading, setAllRolesLoading] = useState(false);
 
+  const { apiCall } = useApiCall(); 
   const handleViewCustomer = async (id: number) => {
     try {
       const response = await fetch(`https://jsonplaceholder.typicode.com/users/${id}`);
@@ -225,25 +227,36 @@ const CustomerPage = () => {
       [name]: value,
     }));
   };
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      console.log("Form Submitted:", formState);
-      setLoading(false);
-      setIsOpen(false);
-    }, 2000);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); 
+    setLoading(true); 
+    console.log("Form submitted");
+    try {
+      await apiCall({
+        endpoint: "/v1/customers/create",
+        method: "post",
+        data: formState,
+        successMessage: "Customer created successfully!",
+      });
+  
+      setFormState({
+        firstname: "",
+        lastname: "",
+        email: "",
+        phone: "",
+        address: "",
+        addressType: "",
+        location: "",
+      });
+  
+      setIsOpen(false); 
+    } catch (error) {
+      console.error("Form submission error:", error);
+    } finally {
+      setLoading(false); 
+    }
   };
-
-  useEffect(() => {
-    refreshTable();
-  }, []);
-
-  useEffect(() => {
-    const filled = Object.values(formState).every((value) => value.trim() !== "");
-    setIsFormFilled(filled);
-  }, [formState]);
-
+  
 
   return (
     <PageLayout pageName="Customers" badge={productsbadge}>
@@ -355,36 +368,43 @@ const CustomerPage = () => {
                 <Input
                   type="text"
                   name="phone"
-                  label="PHONE NUMBER"
-                  value={formState.phonenumber}
+                  label="PHONE"
+                  value={formState.phone}
                   onChange={handleInputChange}
                   placeholder="Phone Number"
                   required={true}
-                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                    }`}
+                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
                 />
 
                 <Input
                   type="text"
-                  name="Address"
+                  name="address"
                   label="Address"
                   value={formState.address}
                   onChange={handleInputChange}
                   placeholder="Address"
                   required={true}
-                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                    }`}
+                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
                 />
                 <Input
                   type="text"
-                  name="Address Type"
-                  label="Address Type"
-                  value={formState.addresstype}
+                  name="addressType"
+                  label="addressType"
+                  value={formState.addressType}
                   onChange={handleInputChange}
                   placeholder="Address Type"
                   required={true}
-                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                    }`}
+                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
+                />
+                <Input
+                  type="text"
+                  name="location"
+                  label="location"
+                  value={formState.location}
+                  onChange={handleInputChange}
+                  placeholder="location"
+                  required={true}
+                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
                 />
               </div>
             )}
@@ -421,8 +441,8 @@ const CustomerPage = () => {
             <CustomerPagemodal
               isOpen={isCustomerModalOpen}
               setIsOpen={() => setIsCustomerModalOpen(false)}
-              customerID={selectedCustomer}
-              refreshTable={()=>{}}
+              customerId={selectedCustomer}
+              refreshTable={() => { }}
             />
           </div>
         </div>
@@ -434,3 +454,7 @@ const CustomerPage = () => {
 };
 
 export default CustomerPage;
+function apiCall(arg0: { endpoint: string; method: string; data: any; successMessage: string; }) {
+  throw new Error("Function not implemented.");
+}
+
