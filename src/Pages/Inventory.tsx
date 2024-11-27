@@ -164,7 +164,10 @@ const Inventory = () => {
             <ActionButton
               label="New Inventory"
               icon={<img src={circleAction} />}
-              onClick={() => setIsOpen(true)}
+              onClick={() => {
+                setFormType("newInventory");
+                setIsOpen(true);
+              }}
             />
             <DropDown {...dropDownList} />
           </div>

@@ -26,7 +26,7 @@ export type CardComponentProps = {
   handleWhatsAppClick?: () => void;
   dropDownList?: {
     items: string[];
-    onClickLink: (index: number) => void;
+    onClickLink: (index: number, cardData?: any) => void;
     defaultStyle: boolean;
     showCustomButton?: boolean;
   };
@@ -46,21 +46,21 @@ export type CardComponentProps = {
   transactionAmount?: number;
   saleId?: string | number;
   productStatus?: string;
-  productId?: string | number;
+  productId?: string;
   installment?: number;
   productPrice?: number;
   productImage?: string;
   productName?: string;
   productUnits?: number;
   onSelectProduct?: (productInfo: {
-    productId: string | number;
+    productId: string;
     productImage: string;
     productTag: string;
     productName: string;
     productPrice: number;
     productUnits: number;
   }) => void;
-  onRemoveProduct?: (productId: string | number) => void;
+  onRemoveProduct?: (productId: string) => void;
   isProductSelected?: boolean;
   readOnly?: boolean;
 };
@@ -432,7 +432,16 @@ export const CardComponent = ({
             {saleId}
           </p>
         ) : variant === "product-no-image" ? (
-          <img src={checkers} width="100%" />
+          <div className="flex items-center justify-center w-full h-[120px]">
+            <div className="relative w-full max-w-[134px] h-full">
+              <img
+                src={productImage || checkers}
+                width="100%"
+                alt="Product"
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
         ) : variant === "inventoryOne" || variant === "inventoryTwo" ? (
           <div className="flex items-center justify-center w-full h-[120px]">
             <div className="relative w-full max-w-[134px] h-full">
@@ -578,7 +587,7 @@ export const CardComponent = ({
         ) : variant === "product-no-image" ? (
           <div className="flex items-center justify-between">
             <p className="flex items-center justify-center bg-paleLightBlue w-max p-2 h-[20px] text-xs font-bold rounded-full">
-              {productTag} - {productId}
+              {productName}
             </p>
             <ProductTag productTag={productTag} />
           </div>
@@ -660,7 +669,7 @@ export const CardComponent = ({
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <DropDown {...dropDownList} />
+          <DropDown {...dropDownList} cardData={productInfo} />
         )}
       </div>
     </div>

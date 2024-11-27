@@ -262,15 +262,25 @@ export const FileInput = ({
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (validateImagesOnly) {
-        if (file && file.type.startsWith("image/")) {
+        if (file.type.startsWith("image/")) {
           setSelectedFile(file);
-          onChange(e);
+          onChange({
+            target: {
+              name,
+              files: e.target.files, // Use files instead of value
+            },
+          } as unknown as React.ChangeEvent<HTMLInputElement>);
         } else {
           alert("Please select an image file.");
         }
       } else {
         setSelectedFile(file);
-        onChange(e);
+        onChange({
+          target: {
+            name,
+            files: e.target.files, // Use files instead of value
+          },
+        } as unknown as React.ChangeEvent<HTMLInputElement>);
       }
     }
   };

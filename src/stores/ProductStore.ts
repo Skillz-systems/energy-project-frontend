@@ -1,7 +1,7 @@
 import { types, Instance } from "mobx-state-tree";
 
 const ProductModel = types.model({
-  productId: types.union(types.string, types.number),
+  productId: types.union(types.string),
   productImage: types.string,
   productTag: types.string,
   productName: types.string,
@@ -17,14 +17,14 @@ const productStore = types
     addProduct(product: Instance<typeof ProductModel>) {
       self.products.push(product);
     },
-    removeProduct(productId: string | number) {
+    removeProduct(productId: string) {
       const index = self.products.findIndex((p) => p.productId === productId);
       if (index !== -1) {
         self.products.splice(index, 1);
       }
     },
     updateProduct(
-      productId: string | number,
+      productId: string,
       updatedFields: Partial<Instance<typeof ProductModel>>
     ) {
       const product = self.products.find((p) => p.productId === productId);
@@ -32,7 +32,7 @@ const productStore = types
         Object.assign(product, updatedFields);
       }
     },
-    getProductById(productId: string | number) {
+    getProductById(productId: string) {
       const product = self.products.find(
         (product) => product.productId === productId
       );
