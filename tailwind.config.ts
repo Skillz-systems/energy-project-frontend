@@ -26,12 +26,21 @@ export default {
         brightBlue: "#007AFF",
         success: "#00AF50",
         successTwo: "#E3FAD6",
+        successThree: "#AEF1A7",
         disabled: "#E2E4EB",
-        blackBrown: "#1E0604"
+        blackBrown: "#1E0604",
+        gold: "#F8CB48",
+        purpleBlue: "#DADFF8",
+        pink: "#F7D3E1",
+        inkBlue: "#8396E7",
+        inkBlueTwo: "#3951B6",
+        paleYellow: "#FFF3D5",
       },
       backgroundImage: {
         primaryGradient: "linear-gradient(to right, #982214, #F8CB48)",
         paleGrayGradient: "linear-gradient(to right, #F6F8FA, #FFFFFF)",
+        paleGrayGradientLeft: "linear-gradient(to left, #F6F8FA, #FFFFFF)",
+        paleCreamGradientLeft: "linear-gradient(to left, #FEF5DA, #FFFFFF)",
       },
       boxShadow: {
         innerCustom: "inset 1px 2px 4px rgba(0, 0, 0, 0.15)",

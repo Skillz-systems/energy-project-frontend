@@ -1,25 +1,29 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import drop from "../../assets/table/dropdown.svg";
 import dateIcon from "../../assets/table/date.svg";
-import { Modal } from "../ModalComponent/Modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-
+import { Icon } from "../Settings/UserModal";
+import edit from "../../assets/edit.svg";
+import { Modal } from "../LogoComponent/ModalComponent/Modal";
 
 export type DropDownType = {
   name?: string;
   items?: string[];
-  onClickLink?: (index: number) => void;
+  onClickLink?: (index?: number) => void;
   buttonImgStyle?: string;
   dropDownContainerStyle?: string;
   isSearch?: boolean;
   isDate?: boolean;
   onDateClick?: (date: string) => void;
+  showCustomButton?: boolean;
+  defaultStyle?: boolean;
 };
 
 export const DropDown = (props: DropDownType) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [showIcon, setShowIcon] = useState<number>();
 
   const {
     name,
@@ -29,8 +33,9 @@ export const DropDown = (props: DropDownType) => {
     dropDownContainerStyle,
     isDate,
     onDateClick,
+    showCustomButton = false,
+    defaultStyle,
   } = props;
-  const [linkIndex, setLinkIndex] = useState<number>(0);
 
   const handleClick = () => {
     if (isDate) {
@@ -41,8 +46,8 @@ export const DropDown = (props: DropDownType) => {
   };
 
   const handleOptionClick = (index: number) => {
-    setLinkIndex(index);
     if (onClickLink) onClickLink(index);
+    setIsOpen(false);
   };
 
   // Handler for date selection
@@ -56,26 +61,38 @@ export const DropDown = (props: DropDownType) => {
 
   return (
     <div className="relative flex w-max">
-      <button
-        className="flex items-center justify-between w-max gap-2 pl-2 pr-1 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full"
-        onClick={handleClick}
+      {showCustomButton ? (
+        <div onClick={handleClick} className="w-max">
+          <Icon icon={edit} />
+        </div>
+      ) : (
+        <button
+          className="flex items-center justify-between w-max gap-2 pl-2 pr-1 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full"
+          onClick={handleClick}
+        >
+          <span className="text-xs font-medium text-textGrey">
+            {isDate && selectedDate
+              ? selectedDate.toLocaleDateString("default", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
+              : name}
+          </span>
+          <img
+            src={isDate ? dateIcon : drop}
+            alt="DropdownIcon"
+            className={`w-4 h-4 ${buttonImgStyle || ""}`}
+          />
+        </button>
+      )}
+      <Modal
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+          setShowIcon(null);
+        }}
       >
-        <span className="text-xs font-medium text-textGrey">
-          {isDate && selectedDate
-            ? selectedDate.toLocaleDateString("default", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })
-            : name}
-        </span>
-        <img
-          src={isDate ? dateIcon : drop}
-          alt="DropdownIcon"
-          className={`w-4 h-4 ${buttonImgStyle || ""}`}
-        />
-      </button>
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
         {isDate ? (
           <div className="absolute top-[35px] right-0 z-50">
             <DatePicker
@@ -87,20 +104,23 @@ export const DropDown = (props: DropDownType) => {
           </div>
         ) : (
           <ul
-            className={`${dropDownContainerStyle} absolute top-[35px] right-0 z-50 flex flex-col gap-1 p-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] shadow-lg w-[168px]`}
+            className={`${dropDownContainerStyle} absolute top-[35px] right-0 z-[100] flex flex-col gap-0.5 p-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] shadow-lg w-[185px]`}
           >
             {items?.map((item, index) => (
               <li
                 key={index}
-                className={`flex items-center justify-between h-[24px] px-2 py-2.5 text-xs rounded-full cursor-pointer 
-                ${linkIndex === index
+                className={`flex items-center justify-between h-max px-2 py-1 text-xs rounded-full cursor-pointer border-[0.4px] border-transparent
+                ${
+                  index === showIcon && !defaultStyle
                     ? "bg-paleLightBlue text-textBlack"
-                    : "hover:bg-gray-100 text-textDarkGrey"
-                  }`}
+                    : "hover:bg-gray-100 text-textDarkGrey hover:border-strokeGreyTwo"
+                }`}
                 onClick={() => handleOptionClick(index)}
+                onMouseEnter={() => setShowIcon(index)}
+                onMouseLeave={() => setShowIcon(null)}
               >
                 {item}
-                {linkIndex === index ? (
+                {index === showIcon && !defaultStyle ? (
                   <svg
                     width="16"
                     height="16"

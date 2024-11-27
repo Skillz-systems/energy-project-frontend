@@ -1,5 +1,5 @@
+import React from "react";
 import { Meta, StoryFn } from "@storybook/react";
-import React from 'react';
 import {
   Input,
   InputType,
@@ -29,11 +29,11 @@ const ToggleTemplate: StoryFn<ToggleInputType> = (args) => (
 
 export const GenericInput = InputTemplate.bind({});
 GenericInput.args = {
-  type: "text",
+  type: "password",
   name: "name",
   label: "Firstname",
   value: "",
-  onChange: () => { },
+  onChange: () => {},
   required: false,
   style: "",
 };
@@ -66,6 +66,7 @@ CustomRadioInput.args = {
 
 export const CustomSelectInput = SelectTemplate.bind({});
 CustomSelectInput.args = {
+  label: "Name",
   name: "name",
   options: [
     {
@@ -78,7 +79,7 @@ CustomSelectInput.args = {
     },
   ],
   value: "Tersoo",
-  onChange: () => { },
+  onChange: () => {},
   required: false,
   style: "",
 };

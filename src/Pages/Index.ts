@@ -1,2 +1,7 @@
-export { default as Settings } from "./Settings/Settings";
-export { default as LoginForm } from "./Login/LoginPage";
+export { default as PageNotFound } from "./PageNotFound";
+export { default as LoginPage } from "./LoginPage";
+export { default as CreatePassword } from "./CreatePassword";
+export { default as Dashboard } from "./Dashboard";
+export { default as Settings } from "./Settings";
+export { default as Products } from "./Products";
+export { default as Inventory } from "./Inventory";

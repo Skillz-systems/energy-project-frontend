@@ -1,124 +1,194 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from "react";
+import logoplain from "../../assets/logoplain.svg";
+import { useNavigate } from "react-router-dom";
+import { MenuButton } from "../MenuComponent/MenuButton";
+import UserProfile from "../UserPill";
+import { useFormattedCurrentDate } from "../../hooks/useFormattedCurrentDate";
+import notification from "../../assets/notification.svg";
+import search from "../../assets/search.svg";
+import close from "../../assets/close.svg";
+import support from "../../assets/support.svg";
+import { DropDown } from "../DropDownComponent/DropDown";
+import Cookies from "js-cookie";
+import useTokens from "../../hooks/useTokens";
+import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
+import { Modal } from "../LogoComponent/ModalComponent/Modal";
 
-interface HeaderProps {
-    logoSrc: string;
-    userProfileSrc: string;
-    userRole: string;
-    date: string;
-    notificationsCount: number;
-}
+const TopNavComponent = () => {
+  const { role } = useTokens();
+  const navigate = useNavigate();
+  const currentDate = useFormattedCurrentDate();
+  const [showSearchInput, setSearchInput] = useState<boolean>(false);
+  const [query, setQuery] = useState<string>("");
 
-const Header: React.FC<HeaderProps> = ({ logoSrc, userProfileSrc, userRole, date, notificationsCount }) => {
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [isActionsModalOpen, setIsActionsModalOpen] = useState(false);
-    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
+  const [isScrolled, setIsScrolled] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
-    const handleLogout = () => {
-        // Implement logout functionality
-        console.log('User logged out');
-        setIsLogoutModalOpen(false);
+  // Handle scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 0) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
     };
 
-    return (
-        <div className="flex items-center justify-between p-2 bg-white shadow">
-            {/* Left Section (Logo and User) */}
-            <div className="flex items-center space-x-4">
-                {/* Logo */}
-                <img src={logoSrc}  className="h-10 cursor-pointer" onClick={() => setIsDropdownOpen(!isDropdownOpen)} />
+    window.addEventListener("scroll", handleScroll);
 
-                {/* Navigation Dropdown */}
-                {isDropdownOpen && (
-                    <div className="absolute mt-12 w-48 bg-white shadow-md rounded">
-                        <ul className="flex flex-col">
-                            <li className="p-2 hover:bg-gray-200 cursor-pointer">Home</li>
-                            <li className="p-2 hover:bg-gray-200 cursor-pointer">Profile</li>
-                            <li className="p-2 hover:bg-gray-200 cursor-pointer">Settings</li>
-                        </ul>
-                    </div>
-                )}
+    // Cleanup the event listener
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
-                {/* Profile Icon */}
-                <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-white">
-                    <img src={userProfileSrc}  className="rounded-full" />
-                </div>
+  const handleSearch = () => {
+    console.log(query);
+    setSearchInput(false);
+  };
 
-                {/* User Role Badge */}
-                <div className="flex items-center space-x-2 bg-gray-200 rounded-full px-4 py-1 text-sm font-medium text-black ">
-                    <img src={userProfileSrc} className="h-6 rounded-full" />
-                    <span>{userRole}</span>
-                </div>
-            </div>
+  const dropDownList = {
+    items: ["My Profile", "Logout"],
+    onClickLink: (index: number) => {
+      console.log("INDEX:", index);
+      switch (index) {
+        case 0:
+          navigate("/settings/profile");
+          break;
+        case 1:
+          Cookies.remove("userData");
+          sessionStorage.clear();
+          navigate("/login");
+          break;
+        default:
+          break;
+      }
+    },
+    showCustomButton: true,
+  };
 
-            {/* Right Section (Date, Icons) */}
-            <div className="flex items-center space-x-4">
-                {/* Date with badge */}
-                <div className="relative">
-                    <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">{date}</span>
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                        {notificationsCount}
-                    </span>
-                </div>
-
-                {/* Calendar Icon */}
-                <button className="p-2 rounded-full bg-gray-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 4h10M4 8h16M4 12h16M4 16h16M4 20h16" />
-                    </svg>
-                </button>
-
-                {/* Search Icon */}
-                <button className="p-2 rounded-full bg-gray-100" onClick={() => setIsSearchOpen(!isSearchOpen)}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 4a7 7 0 017 7v0a7 7 0 01-1.268 3.795l5.166 5.167a1 1 0 01-1.414 1.414l-5.167-5.166A7 7 0 1111 4z" />
-                    </svg>
-                </button>
-
-                {/* Search Input */}
-                {isSearchOpen && (
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search..."
-                        className="border rounded p-1"
-                    />
-                )}
-
-                {/* Ellipsis Icon for Actions */}
-                <button className="p-2 rounded-full bg-gray-100" onClick={() => setIsActionsModalOpen(!isActionsModalOpen)}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 12h.01M12 12h.01M18 12h.01" />
-                    </svg>
-                </button>
-
-                {/* Actions Modal */}
-                {isActionsModalOpen && (
-                    <div className="absolute mt-12 w-48 bg-white shadow-md rounded">
-                        <ul className="flex flex-col">
-                            <li className="p-2 hover:bg-gray-200 cursor-pointer">Action 1</li>
-                            <li className="p-2 hover:bg-gray-200 cursor-pointer">Action 2</li>
-                        </ul>
-                    </div>
-                )}
-
-                {/* Logout Button */}
-                <button className="p-2 rounded-full bg-gray-100" onClick={() => setIsLogoutModalOpen(true)}>
-                    Logout
-                </button>
-
-                {/* Logout Confirmation Modal */}
-                {isLogoutModalOpen && (
-                    <div className="absolute mt-12 w-48 bg-white shadow-md rounded p-2">
-                        <p>Are you sure you want to logout?</p>
-                        <button onClick={handleLogout} className="bg-red-500 text-white rounded px-2 py-1">Yes</button>
-                        <button onClick={() => setIsLogoutModalOpen(false)} className="bg-gray-200 rounded px-2 py-1">Cancel</button>
-                    </div>
-                )}
-            </div>
+  return (
+    <>
+      <header
+        className={`fixed top-0 left-0 z-20 bg-white w-full flex items-start sm:items-center justify-between gap-1 px-2 md:px-8 py-4 h-max transition-shadow ${
+          isScrolled ? "border-b border-b-strokeGreyThree shadow-md" : ""
+        }`}
+      >
+        <div className="flex flex-wrap sm:flex-nowrap items-center w-max gap-1 sm:gap-2">
+          <img
+            src={logoplain}
+            alt="Logo"
+            width="51px"
+            className="w-[25px] sm:w-[51px] cursor-pointer"
+            onClick={() => navigate("/dashboard")}
+          />
+          <MenuButton />
+          <UserProfile role={role.role} />
         </div>
-    );
+        <div className="flex items-center w-max max-w-[350px] gap-1 sm:gap-4">
+          {showSearchInput ? null : (
+            <>
+              <span className="hidden sm:flex items-center justify-center bg-[#F6F8FA] h-[32px] px-2 py-1 text-xs text-textDarkGrey border-[0.6px] border-strokeGreyThree rounded-full">
+                {currentDate}
+              </span>
+              <div
+                className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom transition-all hover:bg-[#E2E4EB]"
+                onClick={() => setIsOpen(true)}
+              >
+                <img
+                  src={notification}
+                  alt="Notification"
+                  className="w-[16px] cursor-pointer"
+                />
+                <span className="animate-ping -top-1.5 -right-1 absolute flex items-center justify-center bg-[#FEF5DA] text-transparent text-[8px] text-center font-medium min-w-4 min-h-4 p-[1px] border border-[#A58730] rounded-full shadow-innerCustom">
+                  7
+                </span>
+                <span className="-top-1.5 -right-1 absolute flex items-center justify-center bg-[#FEF5DA] text-[8px] text-center font-medium min-w-4 min-h-4 p-[1px] border border-[#A58730] rounded-full shadow-innerCustom">
+                  7
+                </span>
+              </div>
+            </>
+          )}
+          {showSearchInput ? (
+            <div className="flex w-full items-center gap-2">
+              <input
+                type="search"
+                className="text-xs font-medium text-textDarkGrey w-full h-[32px] pl-2 pr-1 py-1 border-[0.6px] border-strokeGreyThree rounded-full"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSearch();
+                }}
+                autoFocus
+                placeholder="Enter your query"
+              />
+            </div>
+          ) : (
+            <div
+              className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom transition-all hover:bg-[#E2E4EB]"
+              onClick={() => setSearchInput(true)}
+            >
+              <img
+                src={search}
+                alt="Search"
+                className="w-[16px] cursor-pointer"
+              />
+            </div>
+          )}
+          {showSearchInput ? (
+            <div
+              className="flex items-center justify-center w-[40px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom  transition-all hover:bg-[#E2E4EB]"
+              onClick={() => setSearchInput(false)}
+            >
+              <img
+                src={close}
+                alt="Close"
+                className="w-[20px] h-[20px] cursor-pointer"
+              />
+            </div>
+          ) : (
+            <DropDown {...dropDownList} />
+          )}
+        </div>
+      </header>
+      <Modal
+        layout="right"
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        leftHeaderComponents={
+          <p className="flex items-center justify-center gap-1 bg-[#F6F8FA] w-max px-2 py-1 text-xs text-textDarkGrey border-[0.4px] border-strokeGreyTwo rounded-full">
+            Action Center
+            <span className="flex items-center justify-center max-w-max px-1 border-[0.2px] text-xs rounded-full transition-all bg-[#FEF5DA] text-textDarkBrown border-textDarkBrown">
+              {formatNumberWithSuffix(7)}
+            </span>
+          </p>
+        }
+      >
+        <div className="flex flex-col gap-2 p-4">
+          <div className="flex items-start justify-between gap-4 py-4 border-b-[0.4px] border-strokeGreyThree">
+            <div className="w-[5%]">
+              <img src={support} width="24px" />
+            </div>
+            <div className="flex flex-col gap-2 w-[77.5%]">
+              <p className="text-xs text-textGrey font-bold uppercase">
+                SUPPORT
+              </p>
+              <p className="text-xs text-textDarkGrey">
+                John Ayodele has requested your approval for Dangote Cement EOI
+                Request
+              </p>
+              <button className="text-[10px] px-2 py-0.5 border-[0.4px] border-strokeGreyThree rounded-full w-max hover:font-medium hover:bg-slate-50 transition-all">
+                Return Home
+              </button>
+            </div>
+            <span className="text-[10px] text-textGrey font-medium w-[17.5%]">
+              17 Nov; 12:03pm
+            </span>
+          </div>
+        </div>
+      </Modal>
+    </>
+  );
 };
 
-export default Header;
+export default TopNavComponent;
