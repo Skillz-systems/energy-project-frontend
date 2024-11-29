@@ -1,466 +1,253 @@
-import React, { useState, useEffect } from "react";
-import { GoDotFill } from "react-icons/go";
-import { Table } from "@/Components/TableComponent/Table";
-import { generateCustomerEntries } from "@/Components/TableComponent/sampleData";
-import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
-import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
-import sale from "../assets/titlepill/sale.svg";
-import settings from "../assets/settings/settings.svg";
-import Inventory from "../assets/table/inventory.svg";
-import moneyBag from "../assets/table/moneybag.svg";
-import statusIcon from "../assets/table/status.svg";
-import productsbadge from "../assets/products/productsbadge.png";
-import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
+import { Routes, Route, useLocation } from "react-router-dom";
+import { SideMenu } from "../Components/SideMenuComponent/SideMenu";
+import LoadingSpinner from "../Components/Loaders/LoadingSpinner";
+import { Suspense, useState } from "react";
+import { TitlePill } from "../Components/TitlePillComponent/TitlePill";
+import ActionButton from "../Components/ActionButtonComponent/ActionButton";
 import circleAction from "../assets/settings/addCircle.svg";
-import { DropDown } from "@/Components/DropDownComponent/DropDown";
-import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComponent";
-import { Modal } from "@/Components/LogoComponent/ModalComponent/Modal";
-import { Input, SelectInput } from "@/Components/InputComponent/Input";
-import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
+import { DropDown } from "../Components/DropDownComponent/DropDown";
+import customerBadge from "../assets/settings/settingsBadge.png";
+import customer from "../assets/table/customer.svg";
+import { Input } from "../Components/InputComponent/Input";
+import ProceedButton from "../Components/ProceedButtonComponent/ProceedButtonComponent";
+import { useApiCall, useGetRequest } from "../utils/useApiCall";
+import { observer } from "mobx-react-lite";
+import rootStore from "../stores/rootStore";
 import PageLayout from "./PageLayout";
-import cancelled from "../assets/cancelled.svg";
-import productgreen from "../assets/products/productgreen.svg";
-import UserModal from "@/Components/Settings/UserModal";
-import CustomerPagemodal from "./CustomerPagemodal";
- import { useApiCall, useGetRequest } from "../utils/useApiCall";
+import { Modal } from "@/Components/ModalComponent/ModalComponent/Modal";
+import Customers from "@/Components/Customers/All Customers";
 
-const CustomerPage = () => {
-  const [tableData, setTableData] = useState([]);
-  const [queryLoading, setQueryLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [queryValue, setQueryValue] = useState("");
-  const [isSearchQuery, setIsSearchQuery] = useState(false);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [formState, setFormState] = useState({
-    firstname: "",
-    lastname: "",
-    email: "",
-    phone: "",
-    address: "",
-    addressType: "",
-    location: "",
-  });
 
-  const [isFormFilled, setIsFormFilled] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [allRolesLoading, setAllRolesLoading] = useState(false);
-  
+const defaultFormData = {
+  name: "",
+  email: "",
+  phone: "",
+  address: "",
+};
+
+const CustomerPage = observer(() => {
+  const { customerPageStore } = rootStore;
   const { apiCall } = useApiCall();
-  const handleViewCustomer = async (id: number) => {
-    try {
-      const response = await apiCall({
-        endpoint: `v1/customers/single`, 
-        method: "get",
-        showToast: false, 
-      });
-  
-      if (response?.data) {
-        setSelectedCustomer(response.data); 
-        setIsCustomerModalOpen(true); 
-      }
-    } catch (error) {
-      console.error("Failed to fetch customer details:", error);
-      
-    }
-  };
+  const [formData, setFormData] = useState(defaultFormData);
+  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const refreshTable = async () => {
-    setIsLoading(true);
-    try {
-      const data = generateCustomerEntries(50);
-      setTableData(data);
-    } catch (error) {
-      console.error("Failed to refresh table data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getTableData = () => {
-    if (isSearchQuery && queryValue) {
-      return tableData.filter((entry) =>
-        Object.values(entry).some((value) =>
-          value.toString().toLowerCase().includes(queryValue.toLowerCase())
-        )
-      );
-    }
-    return tableData;
-  };
-
-  useEffect(() => {
-    refreshTable();
-  }, []);
-
-  const filterList = [
-    {
-      name: "Location",
-      items: ["All Status", "Recharge", "One-Time", "Installment"],
-      onClickLink: (index: number) => {
-        console.log("INDEX:", index);
-      },
-    },
-    {
-      name: "Product",
-      items: ["Product Status", "Recharge", "One-Time", "Installment"],
-      onClickLink: (index: number) => {
-        console.log("INDEX:", index);
-      },
-    },
-    {
-      name: "Product Type",
-      items: ["Type Status", "Recharge", "One-Time", "Installment"],
-      onClickLink: (index: number) => {
-        console.log("INDEX:", index);
-      },
-    },
-    {
-      name: "All Status",
-      items: ["All Status", "Recharge", "One-Time", "Installment"],
-      onClickLink: (index: number) => {
-        console.log("INDEX:", index);
-      },
-    },
-    {
-      name: "Search",
-      onSearch: (query: string) => {
-        setQueryValue(query);
-        setIsSearchQuery(true);
-        console.log("Query:", query);
-      },
-      isSearch: true,
-    },
-    {
-      onDateClick: (date: string) => {
-        console.log("Date:", date);
-      },
-      isDate: true,
-    },
-  ];
-
-  const columnList = [
-    { title: "S/N", key: "no" },
-    { title: "NAME", key: "name" },
-    { title: "EMAIL", key: "email" },
-    { title: "LOCATION", key: "location" },
-    {
-      title: "PRODUCT",
-      key: "product",
-      valueIsAComponent: true,
-      customValue: (value: any) => (
-        <span className="px-2 py-1 bg-[#F6F8FA] border-[0.4px] border-strokeGreyTwo rounded-full">
-          {value}
-        </span>
-      ),
-      rightIcon: <img src={moneyBag} alt="product icon" className="ml-auto" />,
-    },
-    {
-      title: "STATUS",
-      key: "status",
-      valueIsAComponent: true,
-      customValue: (value: any) => {
-        let style = "";
-
-        switch (true) {
-          case value.includes("DUE"):
-            style = "text-brightBlue";
-            break;
-          case value.includes("NONE"):
-            style = "";
-            break;
-          case value.includes("DEFAULTED"):
-            style = "text-errorTwo";
-            break;
-          case value.includes("COMPLETED"):
-            style = "text-success";
-            break;
-          default:
-            style = "";
-        }
-
-        return (
-          <span
-            className={`${style} flex items-center gap-0.5 w-max px-2 py-1 bg-[#F6F8FA] border-[0.4px] border-strokeGreyTwo rounded-full`}
-          >
-            <GoDotFill />
-            {value}
-          </span>
-        );
-      },
-      rightIcon: <img src={statusIcon} alt="status icon" className="ml-auto" />,
-    },
-    {
-      title: "ACTIONS",
-      key: "actions",
-      valueIsAComponent: true,
-      customValue: (value, rowData) => (
-        <span
-          onClick={() => handleViewCustomer(rowData.id)}
-          className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer">
-          View
-        </span>
-      ),
-    },
-  ];
+  const userLocation = useLocation();
 
   const navigationList = [
-    { title: "All Customers", link: "/customers", count: "5,050,200" },
-    { title: "New Customers", link: "/new-customers", count: 102 },
-    { title: "Defaulting Customers", link: "/defaulting-customers", count: 120000 },
-    { title: "Barred Customers", link: "/barred-customers", count: "42" },
+    {
+      title: "All Customers",
+      link: "/CustomerPage/all customer",
+      count: customerPageStore.noOfCustomers,
+    },
+    {
+      title: "New Customer",
+      link: "/customers/new",
+    },
+
   ];
+
   const dropDownList = {
-    items: ["Add new user", "Export List"],
-    onClickLink: (index: number) => {
-      switch (index) {
-        case 0:
-          setIsOpen(true);
-          break;
-        case 1:
-          console.log(index);
-          break;
-        default:
-          break;
-      }
+    items: ["Add new customer", "Export List"],
+    onClickLink: (index) => {
+      if (index === 0) setIsOpen(true);
+      if (index === 1) console.log("Export List clicked");
     },
     showCustomButton: true,
   };
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+
+  const {
+    data: tiersList,
+    isLoading: isLoading,
+    error: allRolesError,
+    mutate: refreshTable,
+  } = useGetRequest("/v1/customers", true, 60000);
+
+  const {
+    data: customerData,
+    isLoading: userLoading,
+    mutate: allUsersRefresh,
+  } = useGetRequest("/v1/customers", true, 60000);
+
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormState((prevState) => ({
-      ...prevState,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
     }));
   };
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); 
-    setLoading(true); 
-    console.log("Form submitted");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
     try {
       await apiCall({
-        endpoint: "/v1/customers/create",
+        endpoint: "/v1/customers/add",
         method: "post",
-        data: formState,
+        data: formData,
         successMessage: "Customer created successfully!",
       });
-  
-      setFormState({
-        firstname: "",
-        lastname: "",
-        email: "",
-        phone: "",
-        address: "",
-        addressType: "",
-        location: "",
-      });
-  
-      setIsOpen(false); 
+      setFormData(defaultFormData);
+      setIsOpen(false);
     } catch (error) {
-      console.error("Form submission error:", error);
+      console.error("Customer creation failed:", error);
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
-  
+
+  const isFormFilled = Object.values(formData).some((value) => Boolean(value));
 
   return (
-    <PageLayout pageName="Customers" badge={productsbadge}>
-      <div className="flex w-full flex-col px-2 md:px-8 py-4 gap-2">
-        <div className="flex justify-between items-center mb-4 bg-paleGrayGradient min-h-[64px] w-full px-2">
-          <div className="flex gap-4 items-center">
+    <>
+      <PageLayout pageName="Customers" badge={customerBadge}>
+        {userLocation.pathname === "/customers/all" && (
+          <section className="flex flex-col-reverse sm:flex-row items-center justify-between w-full bg-paleGrayGradient px-2 md:px-8 py-4 gap-2 min-h-[64px]">
             <TitlePill
-              icon={productgreen}
-              iconBgColor="bg-[#E3FAD6]"
+              icon={customer}
+              iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="CUSTOMERS"
-              value="2240"
-              parentClass="w-full max-w-none sm:max-w-[250px]"
+              value={customerPageStore.noOfCustomers || 0}
             />
-            <TitlePill
-              parentClass="w-full max-w-none sm:max-w-[250px]"
-              icon={settings}
-              iconBgColor="bg-[#FDEEC2]"
-              topText="New"
-              bottomText="CUSTOMERS"
-              value="2240"
-            />
-            <TitlePill
-              icon={cancelled}
-              iconBgColor="bg-[#FFDBDE]"
-              topText="Defaulting"
-              bottomText="CUSTOMERS"
-              value="2240"
-              parentClass="w-full max-w-none sm:max-w-[250px]"
-            />
-            <TitlePill
-              icon={cancelled}
-              iconBgColor="bg-[#FDEEC2]"
-              topText="BARRED"
-              bottomText="CUSTOMERS"
-              value="2240"
-              parentClass="w-full max-w-none sm:max-w-[250px]"
-            />
-          </div>
-          <div className="flex w-full items-center justify-between gap-2 sm:w-max sm:justify-start">
-            <ActionButton
-              label="New Customer"
-              icon={<img src={circleAction} />}
-              onClick={() => setIsOpen(true)}
-            />
-            <DropDown {...dropDownList} />
-          </div>
-        </div>
-        <Modal
-          isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
-          layout="right"
-          bodyStyle="pb-[100px]"
-        >
-          <form
-            className="flex flex-col items-center bg-white"
-            onSubmit={handleSubmit}
-          >
-            <div
-              className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${isFormFilled
-                ? "bg-paleCreamGradientLeft"
-                : "bg-paleGrayGradientLeft"
-                }`}
-            >
-              <h2
-                style={{ textShadow: "1px 1px grey" }}
-                className="text-xl text-textBlack font-semibold font-secondary"
-              >
-                New Customer
-              </h2>
+            <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-start">
+              <ActionButton
+                label="New Customer"
+                icon={<img src={circleAction} alt="Add Customer" />}
+                onClick={() => setIsOpen(true)}
+              />
+              <DropDown {...dropDownList} />
             </div>
-            {allRolesLoading ? (
-              <LoadingSpinner parentClass="absolute top-[50%] w-full" />
-            ) : (
-              <div className="flex flex-col items-center justify-center w-full px-4 gap-4 py-8">
-                <Input
-                  type="text"
-                  name="firstname"
-                  label="FIRST NAME"
-                  value={formState.firstname}
-                  onChange={handleInputChange}
-                  placeholder="First Name"
-                  required={true}
-                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                    }`}
+          </section>
+        )}
+        <div className="flex flex-col w-full px-2 py-8 gap-4 lg:flex-row md:p-8">
+          <SideMenu navigationList={navigationList} />
+          <section className="relative flex items-start justify-center min-h-[415px] w-full overflow-hidden">
+            <Suspense fallback={<LoadingSpinner parentClass="absolute top-[50%] w-full" />}>
+              <Routes>
+                <Route
+                  index
+                  element={
+                    <Customers
+                      tiersList={tiersList}
+                      data={customerData}
+                      isLoading={isLoading}
+                      refreshTable={refreshTable}
+                    />
+                  }
                 />
-                <Input
-                  type="text"
-                  name="lastname"
-                  label="LAST NAME"
-                  value={formState.lastname}
-                  onChange={handleInputChange}
-                  placeholder="Last Name"
-                  required={true}
-                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                    }`}
+                <Route
+                  path="all-customers"
+                  element={
+                    <Customers
+                      tiersList={tiersList}
+                      data={customerData}
+                      isLoading={isLoading}
+                      refreshTable={refreshTable}
+                    />
+                  }
                 />
-                <Input
-                  type="email"
-                  name="email"
-                  label="EMAIL"
-                  value={formState.email}
-                  onChange={handleInputChange}
-                  placeholder="Email"
-                  required={true}
-                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                    }`}
+                <Route
+                  path="new-customers"
+                  element={
+                    <div className="flex justify-center items-center h-full">
+                      <p>New Customers Component Coming Soon</p>
+                    </div>
+                  }
                 />
-                <Input
-                  type="text"
-                  name="phone"
-                  label="PHONE"
-                  value={formState.phone}
-                  onChange={handleInputChange}
-                  placeholder="Phone Number"
-                  required={true}
-                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
+                <Route
+                  path="defaulting-customers"
+                  element={
+                    <div className="flex justify-center items-center h-full">
+                      <p>Defaulting Customers Component Coming Soon</p>
+                    </div>
+                  }
                 />
-
-                <Input
-                  type="text"
-                  name="address"
-                  label="Address"
-                  value={formState.address}
-                  onChange={handleInputChange}
-                  placeholder="Address"
-                  required={true}
-                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
+                <Route
+                  path="barred-customers"
+                  element={
+                    <div className="flex justify-center items-center h-full">
+                      <p>Barred Customers Component Coming Soon</p>
+                    </div>
+                  }
                 />
-                <Input
-                  type="text"
-                  name="addressType"
-                  label="addressType"
-                  value={formState.addressType}
-                  onChange={handleInputChange}
-                  placeholder="Address Type"
-                  required={true}
-                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
-                />
-                <Input
-                  type="text"
-                  name="location"
-                  label="location"
-                  value={formState.location}
-                  onChange={handleInputChange}
-                  placeholder="location"
-                  required={true}
-                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
-                />
-              </div>
-            )}
-            <ProceedButton
-              type="submit"
-              loading={loading}
-              variant={isFormFilled ? "gradient" : "gray"}
-            />
-          </form>
-        </Modal>
-
-        <div className="flex flex-row w-full gap-4">
-
-          <div className="flex-shrink-0">
-            <SideMenu navigationList={navigationList} />
-          </div>
+              </Routes>
 
 
-          <div className="flex-grow">
-            <Table
-              tableTitle="ALL CUSTOMERS"
-              filterList={filterList}
-              columnList={columnList}
-              loading={queryLoading || isLoading}
-              tableData={getTableData()}
-              refreshTable={async () => {
-                await refreshTable();
-                setQueryValue("");
-                setIsSearchQuery(false);
-              }}
-              queryValue={isSearchQuery ? queryValue : ""}
-
-            />
-            <CustomerPagemodal
-              isOpen={isCustomerModalOpen}
-              setIsOpen={() => setIsCustomerModalOpen(false)}
-              customerId={selectedCustomer}
-              refreshTable={() => { }}
-            />
-          </div>
+            </Suspense>
+          </section>
         </div>
-      </div>
-    </PageLayout>
-
-
+      </PageLayout >
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        layout="right"
+        bodyStyle="pb-[100px]"
+      >
+        <form
+          className="flex flex-col items-center bg-white"
+          onSubmit={handleSubmit}
+        >
+          <div
+            className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${isFormFilled
+              ? "bg-paleCreamGradientLeft"
+              : "bg-paleGrayGradientLeft"
+              }`}
+          >
+            <h2
+              style={{ textShadow: "1px 1px grey" }}
+              className="text-xl text-textBlack font-semibold font-secondary"
+            >
+              New Customer
+            </h2>
+          </div>
+          <div className="flex flex-col items-center justify-center w-full px-4 gap-4 py-8">
+            <Input
+              type="text"
+              name="name"
+              label="CUSTOMER NAME"
+              value={formData.name}
+              onChange={handleInputChange}
+              placeholder="Customer Name"
+              required
+            />
+            <Input
+              type="email"
+              name="email"
+              label="EMAIL"
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="Email"
+              required
+            />
+            <Input
+              type="text"
+              name="phone"
+              label="PHONE NUMBER"
+              value={formData.phone}
+              onChange={handleInputChange}
+              placeholder="Phone Number"
+              required
+            />
+            <Input
+              type="text"
+              name="address"
+              label="ADDRESS"
+              value={formData.address}
+              onChange={handleInputChange}
+              placeholder="Address"
+              required
+            />
+          </div>
+          <ProceedButton
+            type="submit"
+            loading={loading}
+            variant={isFormFilled ? "gradient" : "gray"}
+          />
+        </form>
+      </Modal>
+    </>
   );
-};
+});
 
 export default CustomerPage;
-function apiCall(arg0: { endpoint: string; method: string; data: any; successMessage: string; }) {
-  throw new Error("Function not implemented.");
-}
-

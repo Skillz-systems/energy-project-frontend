@@ -3,14 +3,14 @@ import { Modal } from "@/Components/ModalComponent/ModalComponent/Modal";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";
 import { useApiCall, useGetRequest } from "@/utils/useApiCall";
-import customerIcon from "../assets/table/customer.svg";
-import callIcon from "../assets/settings/call.svg";
-import messageIcon from "../assets/settings/message.svg";
-import editInputIcon from "../assets/settings/editInput.svg";
-import userIcon from "../assets/settings/user.svg";
+import user from "../../assets/settings/user.svg";
+import call from "../../assets/settings/call.svg";
+import message from "../../assets/settings/message.svg";
+import editInput from "../../assets/settings/editInput.svg";
+
 import { Icon } from "@/Components/Settings/UserModal";
 
-const CustomerModal = ({ isOpen, setIsOpen, customerId, refreshTable }) => {
+const CustomerModal = ({ isOpen, setIsOpen, customerId, refreshTable, tiersList }) => {
     const { apiCall } = useApiCall();
     const { data, isLoading, error } = useGetRequest(
         `/v1/customers`,
@@ -76,7 +76,7 @@ const CustomerModal = ({ isOpen, setIsOpen, customerId, refreshTable }) => {
                 ) : (
                     <button className="flex items-center justify-center w-[24px] h-[24px] bg-white border border-strokeGreyTwo rounded-full hover:bg-slate-100">
                         <img
-                            src={editInputIcon}
+                            src={editInput}
                             alt="Edit Button"
                             width="15px"
                             onClick={() => setEditMode(true)}
@@ -92,14 +92,14 @@ const CustomerModal = ({ isOpen, setIsOpen, customerId, refreshTable }) => {
                     {/* Header */}
                     <header className="flex items-center justify-between bg-paleGrayGradientLeft p-4 border-b">
                         <div className="flex items-center gap-1">
-                            <img src={customerIcon} alt="Customer Icon" />
+                            <img src={user} alt="Customer Icon" />
                             <span className="text-xs font-bold text-textDarkGrey capitalize">
                                 {data?.name || "Customer Name"}
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Icon icon={callIcon} iconText="Call" />
-                            <Icon icon={messageIcon} iconText="Message" />
+                            <Icon icon={call} iconText="Call" />
+                            <Icon icon={message} iconText="Message" />
                             <DropDown {...dropDownList} />
                         </div>
                     </header>
@@ -144,7 +144,7 @@ const CustomerModal = ({ isOpen, setIsOpen, customerId, refreshTable }) => {
                     {/* Details */}
                     <div className="flex flex-col gap-2 p-2.5 border-[0.6px] border-[#8396E7] rounded-[20px]">
                         <p className="flex items-center gap-1 pb-2 w-max text-xs text-textLightGrey font-medium">
-                            <img src={userIcon} alt="User" width="16px" />
+                            <img src={user} alt="User" width="16px" />
                             PERSONAL DETAILS
                         </p>
                         {Object.entries(data || {}).map(([key, value]) => (
