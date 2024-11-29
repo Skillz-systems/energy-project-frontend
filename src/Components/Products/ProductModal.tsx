@@ -1,28 +1,86 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+// import { Modal } from "../ModalComponent/Modal";
 import editInput from "../../assets/settings/editInput.svg";
-// import LoadingSpinner from "../Loaders/LoadingSpinner";
+import LoadingSpinner from "../Loaders/LoadingSpinner";
 import { DropDown } from "../DropDownComponent/DropDown";
 import TabComponent from "../TabComponent/TabComponent";
 import ProductDetails from "./ProductDetails";
 import InventoryDetails from "./InventoryDetails";
 import StatsDetails from "./StatsDetails";
 import CustomerDetails from "./CustomerDetails";
-import { Modal } from "../ModalComponent/ModalComponent/Modal";
-// import { useApiCall, useGetRequest } from "../../utils/useApiCall";
+import { useGetRequest } from "../../utils/useApiCall";
+import { Modal } from '@/Components/ModalComponent/ModalComponent/Modal';
 
-const ProductModal = ({
-  isOpen,
-  setIsOpen,
-  // productID,
-  // refreshTable,
-  productData,
-  inventoryData,
-}) => {
-  // const { apiCall } = useApiCall();
-  // const { data, isLoading, error, mutate } = useGetRequest(
-  //   `/v1/product/single/${productID}`,
-  //   false
-  // );
+type ProductDetails = {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+  price: number;
+  currency: string;
+  paymentModes: string;
+  creatorId: string;
+  categoryId: string;
+  createdAt: string;
+  updatedAt: string;
+  category: {
+    id: string;
+    name: string;
+    parentId: string | null;
+    type: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  creatorDetails: {
+    firstname: string;
+    lastname: string;
+  };
+};
+
+type DataStateWrapperProps = {
+  isLoading: boolean;
+  error: string | null;
+  children: React.ReactNode;
+};
+
+const ProductModal = ({ isOpen, setIsOpen, productID, refreshTable }) => {
+  const fetchSingleProduct = useGetRequest(`/v1/products/${productID}`, false);
+  const fetchProductInventories = useGetRequest(
+    `/v1/products/${productID}/inventory`,
+    false
+  );
+
+  const generateProductEntries = (data: ProductDetails) => {
+    return {
+      productId: data?.id,
+      productImage: data?.image,
+      productName: data?.name,
+      productTag: data?.category?.name,
+      productPrice: data?.price,
+      paymentModes: data?.paymentModes?.split(", ").map((mode) => mode.trim()),
+      datetime: data?.createdAt,
+      name: `${data?.creatorDetails?.firstname} ${data?.creatorDetails?.lastname}`,
+    };
+  };
+
+  const generateProductInventoryEntries = (data: any) => {
+    const entries = data?.inventoryBatches?.map((inventory) => {
+      return {
+        productImage: inventory?.inventoryBatch?.image,
+        productName: inventory?.inventoryBatch?.name,
+        productPrice: inventory?.inventoryBatch?.price,
+      };
+    });
+    return entries;
+  };
+
+  const productData = useMemo(() => {
+    return generateProductEntries(fetchSingleProduct?.data);
+  }, [fetchSingleProduct]);
+
+  const inventoryData = useMemo(() => {
+    return generateProductInventoryEntries(fetchProductInventories?.data);
+  }, [fetchProductInventories]);
 
   const [displayInput, setDisplayInput] = useState<boolean>(false);
   const [tabContent, setTabContent] = useState<string>("productDetails");
@@ -57,6 +115,17 @@ const ProductModal = ({
     { name: "Customers", key: "customers", count: 0 },
   ];
 
+  const DataStateWrapper: React.FC<DataStateWrapperProps> = ({
+    isLoading,
+    error,
+    children,
+  }) => {
+    if (isLoading)
+      return <LoadingSpinner parentClass="absolute top-[50%] w-full" />;
+    if (error) return <div>Oops, an error occurred: {error}</div>;
+    return <>{children}</>;
+  };
+
   return (
     <Modal
       layout="right"
@@ -86,15 +155,10 @@ const ProductModal = ({
         )
       }
     >
-      {/* {isLoading ? (
-        <LoadingSpinner parentClass="absolute top-[50%] w-full" />
-      ) : error ? (
-        <div>Oops, an error occurred: {error}</div>
-      ) : ( */}
       <div className="bg-white">
         <header className="flex items-center justify-between bg-paleGrayGradientLeft p-4 min-h-[64px] border-b-[0.6px] border-b-strokeGreyThree">
           <p className="flex items-center justify-center bg-paleLightBlue w-max p-2 h-[24px] text-textBlack text-xs font-semibold rounded-full">
-            {productData.productTag} - {productData.productId}
+            {productData?.productName}
           </p>
           <div className="flex items-center justify-end gap-2">
             <DropDown {...dropDownList} />
@@ -110,17 +174,30 @@ const ProductModal = ({
             onTabSelect={(key) => setTabContent(key)}
           />
           {tabContent === "productDetails" ? (
-            <ProductDetails {...productData} displayInput={displayInput} />
+            <DataStateWrapper
+              isLoading={fetchSingleProduct.isLoading}
+              error={fetchSingleProduct.error}
+            >
+              <ProductDetails
+                {...productData}
+                displayInput={displayInput}
+                refreshTable={refreshTable}
+              />
+            </DataStateWrapper>
           ) : tabContent === "stats" ? (
             <StatsDetails />
           ) : tabContent === "inventoryDetails" ? (
-            <InventoryDetails inventoryData={inventoryData} />
+            <DataStateWrapper
+              isLoading={fetchProductInventories.isLoading}
+              error={fetchProductInventories.error}
+            >
+              <InventoryDetails inventoryData={inventoryData} />
+            </DataStateWrapper>
           ) : (
             <CustomerDetails />
           )}
         </div>
       </div>
-      {/* )} */}
     </Modal>
   );
 };

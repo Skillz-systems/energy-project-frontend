@@ -11,16 +11,19 @@ import { formatDateTime, formatNumberWithCommas } from "../../utils/helpers";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { SmallFileInput } from "../InputComponent/Input";
 import { LuImagePlus } from "react-icons/lu";
+import { KeyedMutator } from "swr";
 
 interface ProductDetailsProps {
   productId: string;
   productImage: string;
+  productName: string;
   productTag: string;
   productPrice: number;
   paymentModes: string[];
   datetime: string;
   name: string;
   displayInput?: boolean;
+  refreshTable?: KeyedMutator<any>;
 }
 
 export const Tag = ({ name, variant }: { name: string; variant?: string }) => {
@@ -40,12 +43,14 @@ export const Tag = ({ name, variant }: { name: string; variant?: string }) => {
 const ProductDetails: React.FC<ProductDetailsProps> = ({
   productId = "",
   productImage = "",
+  productName = "",
   productTag = "",
   productPrice = 0,
   paymentModes = [],
   datetime = "",
   name = "",
   displayInput = false,
+  refreshTable,
 }) => {
   const [formData, setFormData] = useState({
     productId,
@@ -89,6 +94,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
     setLoading(true);
     try {
       console.log("Submitted Data:", formData);
+      refreshTable();
     } catch (error) {
       console.error(error);
     } finally {
@@ -157,9 +163,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
               className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
             />
           ) : (
-            <p className="text-xs font-bold text-textDarkGrey">
-              {productTag}-{productId}
-            </p>
+            <p className="text-xs font-bold text-textDarkGrey">{productName}</p>
           )}
         </div>
       </div>

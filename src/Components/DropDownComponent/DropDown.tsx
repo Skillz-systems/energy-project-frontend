@@ -10,7 +10,7 @@ import { Modal } from "../LogoComponent/ModalComponent/Modal";
 export type DropDownType = {
   name?: string;
   items?: string[];
-  onClickLink?: (index?: number) => void;
+  onClickLink?: (index?: number, cardData?: any) => void;
   buttonImgStyle?: string;
   dropDownContainerStyle?: string;
   isSearch?: boolean;
@@ -18,6 +18,7 @@ export type DropDownType = {
   onDateClick?: (date: string) => void;
   showCustomButton?: boolean;
   defaultStyle?: boolean;
+  cardData?: any;
 };
 
 export const DropDown = (props: DropDownType) => {
@@ -35,6 +36,7 @@ export const DropDown = (props: DropDownType) => {
     onDateClick,
     showCustomButton = false,
     defaultStyle,
+    cardData,
   } = props;
 
   const handleClick = () => {
@@ -45,8 +47,8 @@ export const DropDown = (props: DropDownType) => {
     }
   };
 
-  const handleOptionClick = (index: number) => {
-    if (onClickLink) onClickLink(index);
+  const handleOptionClick = (index: number, cardData?: any) => {
+    if (onClickLink) onClickLink(index, cardData);
     setIsOpen(false);
   };
 
@@ -115,7 +117,7 @@ export const DropDown = (props: DropDownType) => {
                     ? "bg-paleLightBlue text-textBlack"
                     : "hover:bg-gray-100 text-textDarkGrey hover:border-strokeGreyTwo"
                 }`}
-                onClick={() => handleOptionClick(index)}
+                onClick={() => handleOptionClick(index, cardData)}
                 onMouseEnter={() => setShowIcon(index)}
                 onMouseLeave={() => setShowIcon(null)}
               >

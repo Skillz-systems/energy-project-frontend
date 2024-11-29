@@ -262,15 +262,25 @@ export const FileInput = ({
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (validateImagesOnly) {
-        if (file && file.type.startsWith("image/")) {
+        if (file.type.startsWith("image/")) {
           setSelectedFile(file);
-          onChange(e);
+          onChange({
+            target: {
+              name,
+              files: e.target.files, // Use files instead of value
+            },
+          } as unknown as React.ChangeEvent<HTMLInputElement>);
         } else {
           alert("Please select an image file.");
         }
       } else {
         setSelectedFile(file);
-        onChange(e);
+        onChange({
+          target: {
+            name,
+            files: e.target.files, // Use files instead of value
+          },
+        } as unknown as React.ChangeEvent<HTMLInputElement>);
       }
     }
   };
@@ -350,11 +360,13 @@ export const SmallFileInput = ({
   onChange,
   placeholder,
   iconRight,
+  required,
 }: {
   name: string;
   onChange: (e: any) => void;
   placeholder: string;
   iconRight?: ReactNode;
+  required?: boolean;
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -378,6 +390,7 @@ export const SmallFileInput = ({
         name={name}
         onChange={handleFileChange}
         style={{ display: "none" }}
+        required={required}
       />
       {/* Custom button to trigger file input */}
       <div className="flex items-center justify-between w-full">

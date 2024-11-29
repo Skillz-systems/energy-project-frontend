@@ -24,7 +24,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
-  useIsLoggedIn("/dashboard");
+  useIsLoggedIn("/home");
   if (token) return null;
 
   const redirectPath = searchParams.get("redirect");
@@ -51,7 +51,7 @@ const LoginPage = () => {
       Cookies.set("userData", JSON.stringify(userData), {
         expires: 7,
       }); // Token expires in 7 days
-      navigate(redirectPath || "/dashboard");
+      navigate(redirectPath || "/home");
     } catch (error) {
       console.error("Login failed:", error);
       setErrorMessage(error?.response?.data?.message);

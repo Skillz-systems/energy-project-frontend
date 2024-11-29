@@ -1,32 +1,104 @@
-import React from "react";
+import { Link } from "react-router-dom";
+import { TbAlertTriangleFilled } from "react-icons/tb";
 
-const ErrorPage = ({ errorInformation }: { errorInformation: string }) => {
+export default function ErrorPage({
+  error,
+  resetErrorBoundary,
+}: {
+  error: {
+    title?: string;
+    message?: string;
+    statusCode?: number;
+    isNetworkError?: boolean;
+  };
+  resetErrorBoundary: () => void;
+}) {
+  const networkError = error?.isNetworkError === true;
+  const statusCode = error?.statusCode || 500;
+  const title = error?.title || "Internal Server Error";
+  const message = networkError
+    ? "No Internet Connection, Try checking your network configuration."
+    : error?.message ||
+      "Sorry, something went wrong on our end. We're working to fix it.";
+
   return (
-    <div className="flex flex-col items-center justify-center h-screen space-y-10 bg-slate-200">
-      <h1 className="text-4xl font-bold">Oops. Something went wrong</h1>
-      <div className="flex items-center justify-center w-[60%]">
-        <p className="text-right w-[40%] font-bold text-4xl py-4 pr-6 mr-[0.75em] border-r border-gray-600">
-          {500}
-        </p>
-        <p className="text-left w-[60%] text-sm">
-          {errorInformation || "Internal Server Error"}
-        </p>
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Error content */}
+      <div className="flex-grow flex items-center justify-center">
+        <div className="max-w-md w-full px-4 sm:px-6 lg:px-6">
+          <div className="text-center">
+            <div className="relative">
+              <svg height="0" width="0">
+                <defs>
+                  <linearGradient
+                    id="errorGradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="0%"
+                  >
+                    <stop
+                      offset="0%"
+                      style={{ stopColor: "#982214", stopOpacity: 1 }}
+                    />
+                    <stop
+                      offset="100%"
+                      style={{ stopColor: "#473b15", stopOpacity: 1 }}
+                    />
+                  </linearGradient>
+                </defs>
+              </svg>
+
+              <TbAlertTriangleFilled
+                className="mx-auto h-20 w-20"
+                style={{
+                  fill: "url(#errorGradient)",
+                }}
+              />
+            </div>
+            <h1 className="mt-4 text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl">
+              {statusCode}
+            </h1>
+            <h2 className="mt-2 text-3xl font-semibold text-gray-700">
+              {title}
+            </h2>
+            <p className="mt-2 text-lg text-gray-500">{message}</p>
+            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row mt-6">
+              {!networkError && (
+                <Link
+                  to={"/home"}
+                  className="inline-flex items-center px-5 py-2 text-base font-medium rounded-md text-white bg-errorGradient hover:bg-inversedErrorGradient transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                  onClick={resetErrorBoundary}
+                >
+                  Go back home
+                </Link>
+              )}
+              <div
+                className="inline-flex items-center px-5 py-2 text-base font-medium rounded-md text-white bg-errorGradient hover:bg-inversedErrorGradient transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary cursor-pointer"
+                onClick={() => {
+                  resetErrorBoundary();
+                  window.location.reload();
+                }}
+              >
+                Refresh
+              </div>
+            </div>
+            {!networkError && (
+              <p className="mt-4 text-[15px] text-gray-500">
+                If this problem persists, please contact our support team by
+                sending an email to{" "}
+                <a
+                  href="mailto:support@a4tpowersolutions.com"
+                  className="text-primary hover:underline"
+                >
+                  support@a4tpowersolutions.com
+                </a>
+                .
+              </p>
+            )}
+          </div>
+        </div>
       </div>
-      <p className="text-sm w-[50%] text-center leading-7">
-        Kindly refresh and perform your operation again. If the error persists.
-        Kindly report the issue above to the{" "}
-        <b>Revenue Hub Portal Administrator.</b>
-      </p>
-      <button
-        className="border-1.5 border-[#050505] py-2 px-8 rounded hover:bg-[#050505] hover:text-slate-200"
-        onClick={() => {
-          window.location.reload();
-        }}
-      >
-        Return
-      </button>
     </div>
   );
-};
-
-export default ErrorPage;
+}
