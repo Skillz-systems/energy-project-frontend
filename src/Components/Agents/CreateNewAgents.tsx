@@ -3,7 +3,7 @@ import { Modal } from "../ModalComponent/Modal";
 import { KeyedMutator } from "swr";
 import { Input, SelectInput } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
-
+import { useApiCall } from "../../utils/useApiCall";
 export type AgentsFormType = "newAgents" | "existingAgents";
 
 interface CreateNewAgentsProps {
@@ -14,12 +14,14 @@ interface CreateNewAgentsProps {
 }
 
 const defaultAgentsFormData = {
-  firstName: "",
-  lastName: "",
+  firstname: "",
+  lastname: "",
   email: "",
   phoneNumber: "",
   addressType: "",
-  address: "",
+  location: "",
+  longitude: "",
+  latitude: "",
   existingAgents: "",
 };
 
@@ -38,6 +40,7 @@ const CreateNewAgents = ({
   const [formData, setFormData] = useState(defaultAgentsFormData);
   const [loading, setLoading] = useState(false);
   const [otherFormData, setOtherFormData] = useState(defaultOtherFormData);
+  const { apiCall } = useApiCall(); 
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -60,30 +63,43 @@ const CreateNewAgents = ({
     e.preventDefault();
     setLoading(true);
     
+
     if (formType === "newAgents") {
-      if (!formData) return;
+      if (!isFormFilled) return;
     } else {
       if (!isOtherFormFilled()) return;
     }
 
     try {
-      if (formType === "newAgents") {
-        console.log(formData);
-      } else {
-        console.log(isOtherFormFilled());
-      }
-      setLoading(false);
-    } catch (error) {
-      console.error("Agent creation failed:", error);
-      setLoading(false);
-    } finally {
+      const agentData = {
+        firstname: formData.firstname,
+        lastname: formData.lastname,
+        email: formData.email,
+        addressType: formData.addressType,
+        location: formData.location,
+        longitude: formData.longitude || undefined,
+        latitude: formData.latitude || undefined,
+        emailVerified: true
+      };
+
+      await apiCall({
+        endpoint: "/v1/agents/create",
+        method: "post",
+        data: agentData,
+        successMessage: "Agent created successfully!",
+      });
+
       setLoading(false);
       setIsOpen(false);
+    
       if (formType === "newAgents") {
         setFormData(defaultAgentsFormData);
       } else {
         setOtherFormData(defaultOtherFormData);
       }
+    } catch (error) {
+      console.error("Agent creation failed:", error);
+      setLoading(false);
     }
   };
 
@@ -101,9 +117,9 @@ const CreateNewAgents = ({
       <>
         <Input
           type="text"
-          name="firstName"
+          name="firstname"
           label="First Name"
-          value={formData.firstName}
+          value={formData.firstname}
           onChange={handleInputChange}
           placeholder="First Name"
           required={true}
@@ -111,9 +127,9 @@ const CreateNewAgents = ({
         />
         <Input
           type="text"
-          name="lastName"
+          name="lastname"
           label="Last Name"
-          value={formData.lastName}
+          value={formData.lastname}
           onChange={handleInputChange}
           placeholder="Last Name"
           required={true}
@@ -126,16 +142,6 @@ const CreateNewAgents = ({
           value={formData.email}
           onChange={handleInputChange}
           placeholder="Email"
-          required={true}
-          style={isFormFilled ? "border-strokeCream" : "border-strokeGrey"}
-        />
-        <Input
-          type="text"
-          name="phoneNumber"
-          label="Phone Number"
-          value={formData.phoneNumber}
-          onChange={handleInputChange}
-          placeholder="Phone Number"
           required={true}
           style={isFormFilled ? "border-strokeCream" : "border-strokeGrey"}
         />
@@ -155,11 +161,11 @@ const CreateNewAgents = ({
         />
         <Input
           type="text"
-          name="address"
-          label="Address"
-          value={formData.address}
+          name="location"
+          label="Location"
+          value={formData.location}
           onChange={handleInputChange}
-          placeholder="Address"
+          placeholder="Location"
           required={true}
           style={isFormFilled ? "border-strokeCream" : "border-strokeGrey"}
         />

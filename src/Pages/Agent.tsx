@@ -12,7 +12,7 @@ import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import CreateNewAgents, { AgentsFormType,} from "@/Components/Agents/CreateNewAgents";
-import { generateAgentEntries, generateRandomProductEntries } from "@/Components/TableComponent/sampleData";
+import { generateAgentEntries} from "@/Components/TableComponent/sampleData";
 
 const AgentsTable = lazy(
   () => import("@/Components/Agents/AgentsTable")
@@ -22,14 +22,8 @@ const Agent = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [agentsData, setAgentsData] = useState<any>(null); // Temporary
-  const [productData, setProductData] = useState<any>(null); 
   const [formType, setFormType] = useState<AgentsFormType>("newAgents");
-  //   const {
-  //     data: productData,
-  //     isLoading: productLoading,
-  //     mutate: allProductsRefresh,
-  //   } = useGetRequest("/v1/products", true, 60000);
-
+  
   const navigationList = [
     {
       title: "All Agents",
@@ -169,7 +163,7 @@ const Agent = () => {
                     element={
                       <AgentsTable
                         agentData={agentsData}
-                        isLoading={!agentsData?.length}
+                        // isLoading={!agentsData?.length}
                       />
                     }
                   />
