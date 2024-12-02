@@ -9,8 +9,7 @@ import { Category } from "../Products/CreateNewProduct";
 export type InventoryFormType =
   | "newInventory"
   | "newCategory"
-  | "newSubCategory"
-  | "newLocation";
+  | "newSubCategory";
 
 interface CreatNewInventoryProps {
   isOpen: boolean;
@@ -58,7 +57,6 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
   const [otherFormData, setOtherFormData] = useState({
     newCategory: "",
     newSubCategory: "",
-    newLocation: "",
   });
 
   const fetchInventoryCategories = useGetRequest(
@@ -138,11 +136,46 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
           successMessage: "Inventory created successfully!",
         });
       } else {
-        if (!isOtherFormFilled) return;
-        console.log(isOtherFormFilled());
+        const otherFormValue = isOtherFormFilled();
+        if (!otherFormValue) return;
+
+        const createCategoryData = (newCategory, newSubCategory = null) => ({
+          categories: [
+            {
+              name: newCategory,
+              parentId: "",
+              ...(newSubCategory && {
+                subCategories: [
+                  {
+                    name: newSubCategory,
+                  },
+                ],
+              }),
+            },
+          ],
+        });
+
+        const data =
+          formType === "newCategory"
+            ? createCategoryData(otherFormData.newCategory)
+            : createCategoryData(
+                otherFormData.newCategory,
+                otherFormData.newSubCategory
+              );
+
+        await apiCall({
+          endpoint: "/v1/inventory/category/create",
+          method: "post",
+          data,
+          headers: { "Content-Type": "application/json" },
+          successMessage: `Inventory ${
+            formType === "newSubCategory" ? "Sub-" : ""
+          }Category created successfully!`,
+        });
+
+        setLoading(false);
+        await allInventoryRefresh();
       }
-      setLoading(false);
-      await allInventoryRefresh();
     } catch (error) {
       console.error("Product creation failed:", error);
       setLoading(false);
@@ -155,7 +188,6 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
         setOtherFormData({
           newCategory: "",
           newSubCategory: "",
-          newLocation: "",
         });
       }
     }
@@ -165,16 +197,14 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
   const isOtherFormFilled = () => {
     switch (formType) {
       case "newCategory":
-        return otherFormData.newCategory;
+        return otherFormData.newCategory.trim() ? "newCategory" : null;
       case "newSubCategory":
-        return otherFormData.newSubCategory;
-      case "newLocation":
-        return otherFormData.newLocation;
+        return otherFormData.newSubCategory.trim() ? "newSubCategory" : null;
       default:
-        break;
+        return null;
     }
   };
-
+console.log(fetchInventoryCategories)
   return (
     <Modal
       isOpen={isOpen}
@@ -390,7 +420,11 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                   ? "Sub-Category"
                   : "Location"
               }
-              value={isOtherFormFilled()}
+              value={
+                formType === "newCategory"
+                  ? otherFormData.newCategory
+                  : otherFormData.newSubCategory
+              }
               onChange={(e) =>
                 setOtherFormData((prev) => ({
                   ...prev,

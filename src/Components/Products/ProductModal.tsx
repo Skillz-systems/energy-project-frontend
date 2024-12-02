@@ -45,7 +45,7 @@ type DataStateWrapperProps = {
 const ProductModal = ({ isOpen, setIsOpen, productID, refreshTable }) => {
   const fetchSingleProduct = useGetRequest(`/v1/products/${productID}`, false);
   const fetchProductInventories = useGetRequest(
-    `/v1/products/${productID}/inventory`,
+    productID ? `/v1/products/${productID}/inventory` : "/v1",
     false
   );
 
@@ -156,9 +156,11 @@ const ProductModal = ({ isOpen, setIsOpen, productID, refreshTable }) => {
     >
       <div className="bg-white">
         <header className="flex items-center justify-between bg-paleGrayGradientLeft p-4 min-h-[64px] border-b-[0.6px] border-b-strokeGreyThree">
-          <p className="flex items-center justify-center bg-paleLightBlue w-max p-2 h-[24px] text-textBlack text-xs font-semibold rounded-full">
-            {productData?.productName}
-          </p>
+          {productData?.productName && (
+            <p className="flex items-center justify-center bg-paleLightBlue w-max p-2 h-[24px] text-textBlack text-xs font-semibold rounded-full">
+              {productData?.productName}
+            </p>
+          )}
           <div className="flex items-center justify-end gap-2">
             <DropDown {...dropDownList} />
           </div>

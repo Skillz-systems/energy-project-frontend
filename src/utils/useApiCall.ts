@@ -83,7 +83,7 @@ export const useApiCall = () => {
 
 // SWR hook for GET requests with revalidation
 export const useGetRequest = (
-  endpoint: string,
+  endpoint: string | null | undefined,
   revalidate = true,
   refreshInterval?: number
 ) => {

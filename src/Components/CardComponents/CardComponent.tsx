@@ -371,7 +371,7 @@ export const CardComponent = ({
     <div
       className={`relative flex flex-col ${
         variant === "inventoryOne" || variant === "inventoryTwo"
-          ? `${inventoryMobile ? "w-full" : "w-[49%] "} ${
+          ? `${inventoryMobile ? "w-full" : "w-[47%] md:w-[48%]"} ${
               readOnly ? "md:w-[47%]" : "md:w-[31%]"
             }`
           : "w-[32%] min-w-[204px]"

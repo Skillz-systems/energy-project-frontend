@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Modal } from "../ModalComponent/Modal";
 import editInput from "../../assets/settings/editInput.svg";
 import { DropDown } from "../DropDownComponent/DropDown";
@@ -8,24 +8,76 @@ import InventoryStats from "./InventoryStats";
 import InventoryHistory from "./InventoryHistory";
 import { GoDotFill } from "react-icons/go";
 import { generateRandomInventoryHistoryEntries } from "../TableComponent/sampleData";
-// import LoadingSpinner from "../Loaders/LoadingSpinner";
-// import { useApiCall, useGetRequest } from "../../utils/useApiCall";
+import LoadingSpinner from "../Loaders/LoadingSpinner";
+import { useGetRequest } from "../../utils/useApiCall";
+
+type InventoryData = {
+  id: string;
+  name: string;
+  dateOfManufacture: string;
+  sku: string;
+  image: string;
+  batchNumber: number;
+  costOfItem: number;
+  price: number;
+  numberOfStock: number;
+  remainingQuantity: number;
+  status: string;
+  class: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  inventoryId: string;
+  inventory: {
+    id: string;
+    name: string;
+    manufacturerName: string;
+    inventoryCategoryId: string;
+    inventorySubCategoryId: string;
+    createdAt: string;
+    updatedAt: string;
+    deletedAt: string | null;
+  };
+};
+
+type DataStateWrapperProps = {
+  isLoading: boolean;
+  error: string | null;
+  children: React.ReactNode;
+};
 
 const InventoryDetailModal = ({
   isOpen,
   setIsOpen,
-  inventorytID,
+  inventoryID,
   refreshTable,
-  inventoryData,
 }) => {
-  // const { apiCall } = useApiCall();
-  // const { data, isLoading, error, mutate } = useGetRequest(
-  //   `/v1/inventory/single/${inventoryID}`,
-  //   false
-  // );
-
+  const fetchSingleBatchInventory = useGetRequest(
+    inventoryID ? `/v1/inventory/batch/${inventoryID}` : "/v1",
+    false
+  );
   const [displayInput, setDisplayInput] = useState<boolean>(false);
   const [tabContent, setTabContent] = useState<string>("details");
+
+  const getInventoryData = (data: InventoryData) => {
+    const entries = {
+      inventoryId: data?.id,
+      inventoryImage: data?.image,
+      inventoryName: data?.name,
+      inventoryClass: data?.class,
+      inventoryCategory: "",
+      sku: data?.sku,
+      manufacturerName: data?.inventory?.manufacturerName,
+      dateOfManufacture: data?.dateOfManufacture,
+      numberOfStock: data?.numberOfStock,
+      costPrice: data?.costOfItem,
+      salePrice: data?.price,
+    };
+    return entries;
+  };
+  const inventoryData = useMemo(() => {
+    return getInventoryData(fetchSingleBatchInventory?.data);
+  }, [fetchSingleBatchInventory]);
 
   const handleCancelClick = () => setDisplayInput(false);
 
@@ -69,18 +121,26 @@ const InventoryDetailModal = ({
   ];
 
   const tagStyle = (value: string) => {
-    if (value.toLocaleLowerCase() === "regular") {
+    if (value === "REGULAR") {
       return "bg-[#EAEEF2] text-textDarkGrey";
-    } else if (value.toLocaleLowerCase() === "returned") {
+    } else if (value === "RETURNED") {
       return "bg-[#FFEBEC] text-errorTwo";
     } else {
       return "bg-[#FEF5DA] text-textDarkBrown";
     }
   };
 
-  useEffect(() => {
-    console.log("Current tab content:", tabContent);
-  }, [tabContent]);
+  const DataStateWrapper: React.FC<DataStateWrapperProps> = ({
+    isLoading,
+    error,
+    children,
+  }) => {
+    if (isLoading)
+      return <LoadingSpinner parentClass="absolute top-[50%] w-full" />;
+    if (error) return <div>Oops, an error occurred: {error}</div>;
+    return <>{children}</>;
+  };
+
   return (
     <Modal
       layout="right"
@@ -92,14 +152,16 @@ const InventoryDetailModal = ({
       }}
       leftHeaderContainerClass="pl-2"
       leftHeaderComponents={
-        <span
-          className={`${tagStyle(
-            "regular"
-          )} flex items-center justify-center gap-0.5 w-max px-2 h-[24px] text-xs uppercase rounded-full`}
-        >
-          <GoDotFill width={4} height={4} />
-          {"regular"}
-        </span>
+        inventoryData.inventoryClass && (
+          <span
+            className={`${tagStyle(
+              inventoryData.inventoryClass
+            )} flex items-center justify-center gap-0.5 w-max px-2 h-[24px] text-xs uppercase rounded-full`}
+          >
+            <GoDotFill width={4} height={4} />
+            {inventoryData.inventoryClass}
+          </span>
+        )
       }
       rightHeaderComponents={
         displayInput ? (
@@ -120,16 +182,13 @@ const InventoryDetailModal = ({
         )
       }
     >
-      {/* {isLoading ? (
-        <LoadingSpinner parentClass="absolute top-[50%] w-full" />
-      ) : error ? (
-        <div>Oops, an error occurred: {error}</div>
-      ) : ( */}
       <div className="bg-white">
         <header className="flex items-center justify-between bg-paleGrayGradientLeft p-4 min-h-[64px] border-b-[0.6px] border-b-strokeGreyThree">
-          <p className="flex items-center justify-center bg-[#F6F8FA] w-max px-2 py-1 h-[24px] text-textBlack text-xs border-[0.4px] border-strokeGreyTwo rounded-full">
-            {"MONOCHROMATIC"}
-          </p>
+          {inventoryData.inventoryName && (
+            <p className="flex items-center justify-center bg-[#F6F8FA] w-max px-2 py-1 h-[24px] text-textBlack text-xs border-[0.4px] border-strokeGreyTwo rounded-full">
+              {inventoryData.inventoryName}
+            </p>
+          )}
           <div className="flex items-center justify-end gap-2">
             <DropDown {...dropDownList} />
           </div>
@@ -144,11 +203,17 @@ const InventoryDetailModal = ({
             onTabSelect={(key) => setTabContent(key)}
           />
           {tabContent === "details" ? (
-            <InventoryDetails
-              {...inventoryData}
-              tagStyle={tagStyle}
-              displayInput={displayInput}
-            />
+            <DataStateWrapper
+              isLoading={fetchSingleBatchInventory.isLoading}
+              error={fetchSingleBatchInventory.error}
+            >
+              <InventoryDetails
+                {...inventoryData}
+                tagStyle={tagStyle}
+                displayInput={displayInput}
+                refreshTable={refreshTable}
+              />
+            </DataStateWrapper>
           ) : tabContent === "stats" ? (
             <InventoryStats
             // stats={statsData}
@@ -160,7 +225,6 @@ const InventoryDetailModal = ({
           ) : null}
         </div>
       </div>
-      {/* )} */}
     </Modal>
   );
 };

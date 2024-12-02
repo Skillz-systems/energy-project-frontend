@@ -37,6 +37,25 @@ type InventoryCategoryType = {
   updatedAt: string;
 };
 
+export type BatchType = {
+  id: string;
+  name: string;
+  dateOfManufacture: string | null;
+  sku: string;
+  image: string;
+  batchNumber: number;
+  costOfItem: number;
+  price: number;
+  numberOfStock: number;
+  remainingQuantity: number;
+  status: string;
+  class: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  inventoryId: string;
+};
+
 type AllInventoryType = {
   id: string;
   name: string;
@@ -46,7 +65,7 @@ type AllInventoryType = {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
-  batches: any[];
+  batches: BatchType[];
   inventoryCategory: InventoryCategoryType;
   inventorySubCategory: InventoryCategoryType;
 };
@@ -93,13 +112,18 @@ const SelectInventoryModal = observer(
     );
 
     const generateListDataEntries = (data: any): ListDataType[] => {
-      return data?.inventories?.map((inventory: AllInventoryType) => ({
-        productId: inventory.id,
-        productImage: "",
-        productTag: inventory.inventoryCategory?.name,
-        productName: inventory.name,
-        productPrice: 0,
-      }));
+      return data?.inventories
+        ?.filter(
+          (inventory: AllInventoryType) =>
+            inventory.batches && inventory.batches.length > 0
+        ) // Only include inventories with batch data
+        .map((inventory: AllInventoryType) => ({
+          productId: inventory.batches[0]?.id,
+          productImage: inventory.batches[0]?.image || "",
+          productTag: inventory.inventoryCategory?.name,
+          productName: inventory.name,
+          productPrice: inventory.batches[0]?.price || 0,
+        }));
     };
 
     useEffect(() => {

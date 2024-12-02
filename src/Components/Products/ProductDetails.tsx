@@ -19,7 +19,7 @@ interface ProductDetailsProps {
   productName: string;
   productTag: string;
   productPrice: number;
-  paymentModes: string[];
+  paymentModes: string[] | string;
   datetime: string;
   name: string;
   displayInput?: boolean;
@@ -123,8 +123,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
             <img
               src={productImage}
               alt="Product Image"
-              height={"100%"}
-              className="rounded-full"
+              className="w-full h-full object-contain"
             />
           </div>
         )}
@@ -201,14 +200,20 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
               onChange={handleMultiSelectChange}
               className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-[10px]"
             >
-              <option value="One-Time">One-Time</option>
+              <option value="Single Deposit">Single Deposit</option>
               <option value="Instalmental">Instalmental</option>
             </select>
           ) : (
             <div className="flex items-center w-max gap-1">
-              {paymentModes.map((payment, index) => (
-                <Tag key={index} name={payment} />
-              ))}
+              <div className="flex items-center w-max gap-1">
+                {(Array.isArray(paymentModes) &&
+                typeof paymentModes[0] === "string"
+                  ? paymentModes[0].split(",")
+                  : []
+                ).map((payment, index) => (
+                  <Tag key={index} name={payment.trim().toLocaleUpperCase()} />
+                ))}
+              </div>
             </div>
           )}
         </div>

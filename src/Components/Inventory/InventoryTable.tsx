@@ -5,7 +5,6 @@ import { GoDotFill } from "react-icons/go";
 import { formatNumberWithCommas } from "@/utils/helpers";
 import { NairaSymbol } from "../CardComponents/CardComponent";
 import InventoryDetailModal from "./InventoryDetailModal";
-import { generateRandomInventoryEntry } from "../TableComponent/sampleData";
 // import rootStore from "../../stores/rootStore";
 
 interface InventoryEntries {
@@ -67,10 +66,10 @@ type InventoryType = {
 // Helper function to map the API data to the desired format
 const generateInventoryEntries = (data: any): InventoryEntries[] => {
   const entries: InventoryEntries[] = data?.inventories
-    .filter((item: InventoryType) => item.batches && item.batches.length > 0) // Filter inventories with non-empty batches
+    // .filter((item: InventoryType) => item.batches && item.batches.length > 0) // Filter inventories with non-empty batches
     .map((item: InventoryType, index: number) => {
       return {
-        id: item?.id,
+        id: item?.batches[0]?.id,
         no: index + 1,
         name: { image: item?.batches[0]?.image, text: item?.batches[0]?.name },
         class: item?.batches[0]?.class,
@@ -339,9 +338,8 @@ const InventoryTable = ({
       <InventoryDetailModal
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        inventorytID={inventoryID}
+        inventoryID={inventoryID}
         refreshTable={refreshTable}
-        inventoryData={generateRandomInventoryEntry()}
       />
     </>
   );

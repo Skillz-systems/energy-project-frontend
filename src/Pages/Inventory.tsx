@@ -19,91 +19,94 @@ const InventoryTable = lazy(
   () => import("@/Components/Inventory/InventoryTable")
 );
 
+type InventoryClass = "REGULAR" | "RETURNED" | "REFURBISHED";
+
 const Inventory = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [_inventoryData, setInventoryData] = useState<any>(null); // Temporary
+  const [_inventoryData, setInventoryData] = useState<any>(null);
   const [formType, setFormType] = useState<InventoryFormType>("newInventory");
+  const [inventoryFilter, setInventoryFilter] = useState<string>("");
   const {
     data: inventoryData,
     isLoading: inventoryLoading,
     mutate: allInventoryRefresh,
-  } = useGetRequest("/v1/inventory", true, 60000);
+  } = useGetRequest(
+    `/v1/inventory${inventoryFilter && `?class=${inventoryFilter}`}`,
+    true,
+    60000
+  );
+
+  const fetchInventoryStats = useGetRequest("/v1/inventory/stats", true);
+
+  function getFilteredClassCount(classList: InventoryClass) {
+    const filteredClass =
+      fetchInventoryStats?.data?.inventoryClassCounts.find(
+        (item) => item.inventoryClass === classList
+      ).count || 0;
+    return filteredClass;
+  }
 
   const navigationList = [
     {
       title: "All Inventory",
       link: "/inventory/all",
-      // count: inventoryData?.total,
-      count:
-        inventoryData?.inventories?.filter(
-          (item) => item.batches && item.batches.length > 0
-        )?.length ?? 0,
+      count: fetchInventoryStats?.data?.totalInventoryCount,
     },
-    // {
-    //   title: "Regular",
-    //   link: "/inventory/regular",
-    //   count: 70,
-    // },
-    // {
-    //   title: "Out of stock",
-    //   link: "/inventory/out-of-stock",
-    //   count: 20,
-    // },
-    // {
-    //   title: "Deleted Inventory",
-    //   link: "/inventory/deleted",
-    //   count: 10,
-    // },
+    {
+      title: "Regular",
+      link: "/inventory/regular",
+      count: getFilteredClassCount("REGULAR"),
+    },
+    {
+      title: "Returned",
+      link: "/inventory/returned",
+      count: getFilteredClassCount("RETURNED"),
+    },
+    {
+      title: "Refurbished",
+      link: "/inventory/refurbished",
+      count: getFilteredClassCount("REFURBISHED"),
+    },
   ];
 
   useEffect(() => {
     switch (location.pathname) {
       case "/inventory/all":
+        setInventoryFilter("");
         setInventoryData(inventoryData);
         break;
-      // case "/inventory/regular":
-      //   setInventoryData(inventoryData);
-      //   break;
-      // case "/inventory/out-of-stock":
-      //   setInventoryData(inventoryData);
-      //   break;
-      // case "/inventory/deleted":
-      //   setInventoryData(inventoryData);
-      //   break;
+      case "/inventory/regular":
+        setInventoryFilter("REGULAR");
+        setInventoryData(inventoryData);
+        break;
+      case "/inventory/returned":
+        setInventoryFilter("RETURNED");
+        setInventoryData(inventoryData);
+        break;
+      case "/inventory/refurbished":
+        setInventoryFilter("REFURBISHED");
+        setInventoryData(inventoryData);
+        break;
       default:
+        setInventoryFilter("");
         setInventoryData(inventoryData);
     }
-    setInventoryData(inventoryData);
   }, [location.pathname, inventoryData]);
 
   const dropDownList = {
-    items: [
-      "Add New Inventory",
-      "Create New Category",
-      "Create New Sub-Category",
-      "Create New Location",
-      "Export List",
-    ],
+    items: ["Create New Category", "Create New Sub-Category", "Export List"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
-          setFormType("newInventory");
-          setIsOpen(true);
-          break;
-        case 1:
           setFormType("newCategory");
           setIsOpen(true);
           break;
-        case 2:
+        case 1:
           setFormType("newSubCategory");
           setIsOpen(true);
           break;
-        case 3:
-          setFormType("newLocation");
-          setIsOpen(true);
-          break;
-        case 4:
+        case 2:
           console.log("Exporting list...");
           break;
         default:
@@ -113,7 +116,7 @@ const Inventory = () => {
     showCustomButton: true,
   };
 
-  const inventoryPaths = ["all", "regular", "out-of-stock", "deleted"];
+  const inventoryPaths = ["all", "regular", "returned", "refurbished"];
 
   return (
     <>
@@ -125,32 +128,28 @@ const Inventory = () => {
               iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="INVENTORY"
-              value={
-                inventoryData?.inventories?.filter(
-                  (item) => item.batches && item.batches.length > 0
-                )?.length ?? 0
-              }
+              value={fetchInventoryStats?.data?.totalInventoryCount || 0}
             />
             <TitlePill
               icon={inventorygradient}
               iconBgColor="bg-[#FDEEC2]"
               topText="Regular"
               bottomText="INVENTORY"
-              value={1}
+              value={getFilteredClassCount("REGULAR")}
             />
             <TitlePill
               icon={inventorygradient}
               iconBgColor="bg-[#FDEEC2]"
-              topText="Refurbished"
+              topText="Returned"
               bottomText="INVENTORY"
-              value={0}
+              value={getFilteredClassCount("RETURNED")}
             />
             <TitlePill
               icon={cancelled}
               iconBgColor="bg-[#FFDBDE]"
-              topText="Deleted"
+              topText="Refurbished"
               bottomText="INVENTORY"
-              value={0}
+              value={getFilteredClassCount("REFURBISHED")}
             />
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">

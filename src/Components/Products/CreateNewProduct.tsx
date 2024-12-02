@@ -122,15 +122,9 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
             formData.paymentModes.join(",")
           );
           formSubmissionData.append("categoryId", formData.category);
-          formSubmissionData.append(
-            "inventoryBatchId",
-            ["67463564ccf37eb949a00b26"]
-            // JSON.stringify(
-            //   rootStore.productStore.products.map(
-            //     (product) => product.productId
-            //   )
-            // )
-          );
+          rootStore.productStore.products.forEach((product) => {
+            formSubmissionData.append("inventoryBatchId", product.productId);
+          });
 
           if (formData.productImage instanceof File) {
             formSubmissionData.append("productImage", formData.productImage);
@@ -292,8 +286,8 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                   <SelectMultipleInput
                     label="Payment Modes"
                     options={[
-                      { label: "Instalmental", value: "instalmental" },
-                      { label: "Single Deposit", value: "singleDesposit" },
+                      { label: "Single Deposit", value: "Single Deposit" },
+                      { label: "Instalmental", value: "Instalmental" },
                     ]}
                     value={paymentModes}
                     onChange={(values) =>
