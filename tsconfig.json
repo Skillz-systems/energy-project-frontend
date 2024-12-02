@@ -14,8 +14,8 @@
     },
     "noEmit": true,
     "allowImportingTsExtensions": true, 
-    "target": "esnext",              // Target modern JavaScript
-    "module": "esnext",              // Use ES module system
+    "target": "ES2022",              // Target modern JavaScript
+    "module": "ES2022",              // Use ES module system
     "moduleResolution": "node",      // Resolve modules in Node.js style
     "jsx": "react-jsx",              // For React with automatic JSX runtime
     "esModuleInterop": true,         // For CommonJS interop
