@@ -53,19 +53,19 @@ export type CardComponentProps = {
   productName?: string;
   productUnits?: number;
   onSelectProduct?: (productInfo: {
-    productId: string;
-    productImage: string;
-    productTag: string;
-    productName: string;
-    productPrice: number;
-    productUnits: number;
+    productPrice: any;
+    productUnits: any;
+    productId: string | undefined;
+    productImage: string | undefined;
+    productTag: string | undefined;
+    productName: string | undefined;
   }) => void;
-  onRemoveProduct?: (productId: string) => void;
+  onRemoveProduct?: (productId?: string) => void;
   isProductSelected?: boolean;
   readOnly?: boolean;
 };
 
-export const ProductTag = ({ productTag }: { productTag: string }) => {
+export const ProductTag = ({ productTag }: { productTag?: string }) => {
   return (
     <p
       className={`flex items-center justify-center ${
@@ -130,7 +130,7 @@ export const SimpleTag = ({
   customIcon,
   containerClass,
 }: {
-  text: string | number;
+  text?: string | number;
   showIcon?: boolean;
   dotColour?: string;
   customIcon?: React.ReactNode;
@@ -152,21 +152,21 @@ export const SimpleTag = ({
   );
 };
 
-const DateTimeTag = ({ datetime }: { datetime: string }) => {
+const DateTimeTag = ({ datetime }: { datetime?: string }) => {
   return (
     <div className="flex items-center justify-center gap-1 bg-[#F6F8FA] px-2 py-1 w-max border-[0.4px] border-strokeGreyTwo rounded-full">
       <p className="text-xs text-textDarkGrey font-semibold">
-        {formatDateTime("date", datetime)}
+        {datetime && formatDateTime("date", datetime)}
       </p>
       <GoDotFill color="#E2E4EB" />
       <p className="text-xs text-textDarkGrey">
-        {formatDateTime("time", datetime)}
+        {datetime && formatDateTime("time", datetime)}
       </p>
     </div>
   );
 };
 
-export const NameTag = ({ name }: { name: string }) => {
+export const NameTag = ({ name }: { name?: string }) => {
   return (
     <span className="flex items-center gap-0.5">
       <img src={smile} alt="Smile Icon" />
@@ -327,8 +327,8 @@ export const CardComponent = ({
   readOnly = false,
 }: CardComponentProps) => {
   const inventoryMobile = useBreakpoint("max", 350);
-  const [_productUnits, setProductUnits] = useState<number>(productUnits);
-  const [_productPrice, setProductPrice] = useState<number>(productPrice);
+  const [_productUnits, setProductUnits] = useState<number | any>(productUnits);
+  const [_productPrice, setProductPrice] = useState<number | any>(productPrice);
   const [_selected, setSelected] = useState<boolean>(
     isProductSelected || false
   );
@@ -352,11 +352,15 @@ export const CardComponent = ({
 
   const handleSelectProduct = () => {
     if (!_selected) {
-      onSelectProduct(updatedProductInfo);
-      setSelected(true);
+      if (updatedProductInfo) {
+        // Check if onSelectProduct is defined before calling it
+        onSelectProduct?.(updatedProductInfo);
+        setSelected(true);
+      }
     } else {
       setSelected(false);
       setProductUnits(0);
+      // Ensure onRemoveProduct is called only if defined
       onRemoveProduct?.(productId);
     }
   };
@@ -466,7 +470,7 @@ export const CardComponent = ({
                 : "text-brightBlue"
             }`}
           >
-            <GoDotFill /> {status.toUpperCase()}
+            <GoDotFill /> {status?.toUpperCase()}
           </span>
         ) : variant === "customer" ? (
           <ProductTag productTag={productTag} />
@@ -559,7 +563,7 @@ export const CardComponent = ({
               <div className="flex items-center gap-[1px]">
                 <NairaSymbol />
                 <p className="text-textBlack text-xs">
-                  {formatNumberWithCommas(transactionAmount)}
+                  {transactionAmount && formatNumberWithCommas(transactionAmount)}
                 </p>
               </div>
             </div>
@@ -627,14 +631,14 @@ export const CardComponent = ({
           />
         ) : variant === "product-no-image" ? (
           <SimpleTag
-            text={formatNumberWithCommas(productPrice)}
+            text={productPrice && formatNumberWithCommas(productPrice)}
             dotColour="#49526A"
             customIcon={<NairaSymbol color="#828DA9" />}
             containerClass="bg-successTwo text-textDarkGrey font-bold px-2 py-1 border border-successThree rounded-full"
           />
         ) : variant === "inventoryOne" ? (
           <SimpleTag
-            text={formatNumberWithCommas(productPrice)}
+            text={productPrice && formatNumberWithCommas(productPrice)}
             customIcon={<NairaSymbol color="#828DA9" />}
             containerClass="text-textBlack font-medium px-1 py-0.5 bg-[#eceef1] border-[0.4px] border-strokeGreyTwo rounded-full"
           />
@@ -663,7 +667,7 @@ export const CardComponent = ({
           <QuantitySelector
             onValueChange={(value) => {
               setProductUnits(value);
-              setProductPrice(value * productPrice);
+              setProductPrice(productPrice && value * productPrice);
             }}
             isSelected={_selected}
             onClick={(e) => e.stopPropagation()}

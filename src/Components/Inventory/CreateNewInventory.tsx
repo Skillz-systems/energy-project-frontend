@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Modal } from "../ModalComponent/Modal";
-import { useApiCall, useGetRequest } from "../../utils/useApiCall";
+// import { useApiCall, useGetRequest } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
 import { FileInput, Input, SelectInput } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
+import { Modal } from "../ModalComponent/Modal";
+import { useApiCall, useGetRequest } from "@/utils/useApiCall";
 import { Category } from "../Products/CreateNewProduct";
 
 export type InventoryFormType =
@@ -14,7 +15,7 @@ export type InventoryFormType =
 interface CreatNewInventoryProps {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  allInventoryRefresh?: KeyedMutator<any>;
+  allInventoryRefresh: KeyedMutator<any>;
   formType: InventoryFormType;
 }
 
@@ -64,7 +65,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
     false
   );
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: any) => {
     const { name, value, files } = e.target;
     if (name === "itemPicture" && files && files.length > 0) {
       setFormData((prev) => ({
@@ -139,7 +140,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
         const otherFormValue = isOtherFormFilled();
         if (!otherFormValue) return;
 
-        const createCategoryData = (newCategory, newSubCategory = null) => ({
+        const createCategoryData = (newCategory: any, newSubCategory = null) => ({
           categories: [
             {
               name: newCategory,
@@ -174,7 +175,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
         });
 
         setLoading(false);
-        await allInventoryRefresh();
+         await allInventoryRefresh();
       }
     } catch (error) {
       console.error("Product creation failed:", error);

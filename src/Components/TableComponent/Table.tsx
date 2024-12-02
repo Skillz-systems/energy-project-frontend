@@ -61,7 +61,7 @@ export const Table = (props: TableType) => {
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
-  const totalEntries = tableData?.length;
+  const totalEntries = tableData?.length || 0;
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * entriesPerPage;
     const endIndex = startIndex + entriesPerPage;

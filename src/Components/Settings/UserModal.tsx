@@ -1,5 +1,4 @@
 import LoadingSpinner from "../Loaders/LoadingSpinner";
-import { Modal } from "../ModalComponent/Modal";
 import { useApiCall, useGetRequest } from "../../utils/useApiCall";
 import roletwo from "../../assets/table/roletwo.svg";
 import call from "../../assets/settings/call.svg";
@@ -11,6 +10,7 @@ import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
 import { GoDotFill } from "react-icons/go";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { DropDown } from "../DropDownComponent/DropDown";
+import { Modal } from "../LogoComponent/ModalComponent/Modal";
 
 const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }) => {
   const { apiCall } = useApiCall();

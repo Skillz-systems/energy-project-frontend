@@ -15,6 +15,7 @@ import useTokens from "../../hooks/useTokens";
 import { formatDateTime } from "../../utils/helpers";
 import UserModal from "./UserModal";
 import { DropDown } from "../DropDownComponent/DropDown";
+import { KeyedMutator } from "swr";
 
 const columnList = ["TITLE", "ASSIGNED USERS", "PERMISSIONS", "ACTIONS"];
 const columnWidth = ["w-[15%]", "w-[22.5%]", "w-[50%]", "w-[12.5%]"];
@@ -28,6 +29,12 @@ const RoleAndPermissions = ({
   allRolesError,
   allRolesRefresh,
   rolesList,
+}: {
+  allRoles: any;
+  allRolesLoading: boolean;
+  allRolesError: any;
+  allRolesRefresh: KeyedMutator<any>;
+  rolesList: any;
 }) => {
   const { token } = useTokens();
   const { apiCall } = useApiCall();
@@ -232,7 +239,7 @@ const RoleAndPermissions = ({
             ))}
           </div>
           <div className="flex flex-col">
-            {allRoles.map((role) => (
+            {allRoles.map((role: any) => (
               <div
                 key={role.id}
                 className="flex items-center justify-between w-full border-t-[0.2px] border-t-strokeGreyThree"
@@ -250,7 +257,7 @@ const RoleAndPermissions = ({
                 <div
                   className={`flex items-center flex-wrap gap-2.5 py-2 ${columnWidth[2]}`}
                 >
-                  {role.permissions.map((permission) => (
+                  {role.permissions.map((permission: any) => (
                     <span
                       key={permission.id}
                       className="flex items-center justify-center gap-1 bg-[#F6F8FA] px-2 py-1 text-xs uppercase text-textDarkGrey border-[0.4px] border-strokeGreyThree rounded-full"
@@ -269,7 +276,7 @@ const RoleAndPermissions = ({
                       setIsOpen(true);
                       setModalInfo("view-permissions");
                       const { data } = await getSingleRoleData(role.id);
-                      setSingleRoleData(data.data);
+                      setSingleRoleData(data?.data);
                     }}
                   >
                     View
@@ -324,7 +331,7 @@ const RoleAndPermissions = ({
                 ) : allPermissionsError ? (
                   <p className="text-textDarkGrey">{allPermissionsError}</p>
                 ) : (
-                  allPermissions?.map((permission) => (
+                  allPermissions?.map((permission: any) => (
                     <PermissionComponent
                       key={permission.id}
                       permission={permission}
@@ -439,7 +446,7 @@ const RoleAndPermissions = ({
                         <div className="flex flex-wrap justify-end gap-4 w-[60%]">
                           {singleRoleData?.permissions?.length > 0 ? (
                             singleRoleData?.permissions?.map(
-                              (permission, index) => (
+                              (permission: any, index: number) => (
                                 <span
                                   key={index}
                                   className="flex w-max items-center justify-center gap-1 bg-[#F6F8FA] px-2 py-1 text-xs text-textDarkGrey border-[0.4px] border-strokeGreyThree rounded-full uppercase"
@@ -478,7 +485,7 @@ const RoleAndPermissions = ({
                               </span>
                             ))}
                           </div>
-                          {singleRoleData?.users?.map((user) => (
+                          {singleRoleData?.users?.map((user: any) => (
                             <div
                               key={user.id}
                               className="flex items-center w-full"

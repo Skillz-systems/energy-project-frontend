@@ -50,7 +50,7 @@ export const formatDateTime = (
   }
 };
 
-export function capitalizeFirstLetter(str) {
+export function capitalizeFirstLetter(str: string) {
   if (!str) return str; // Return the original string if it's empty or undefined
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
@@ -59,7 +59,7 @@ export function formatNumberWithCommas(number: number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-export function useIsLoggedIn(route?: string) {
+export function useIsLoggedIn(route: string) {
   const { token } = useTokens();
   const navigate = useNavigate();
   const sessionRedirect = sessionStorage.getItem("redirect");

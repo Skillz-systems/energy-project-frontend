@@ -1,16 +1,16 @@
 import { useState } from "react";
 import drop from "../../assets/table/dropdown.svg";
 import dateIcon from "../../assets/table/date.svg";
-import { Modal } from "../ModalComponent/Modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Icon } from "../Settings/UserModal";
 import edit from "../../assets/edit.svg";
+import { Modal } from "../LogoComponent/ModalComponent/Modal";
 
 export type DropDownType = {
   name?: string;
   items?: string[];
-  onClickLink?: (index?: number, cardData?: any) => void;
+  onClickLink?: (index: number, cardData?: any) => void;
   buttonImgStyle?: string;
   dropDownContainerStyle?: string;
   isSearch?: boolean;
@@ -24,7 +24,7 @@ export type DropDownType = {
 export const DropDown = (props: DropDownType) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [showIcon, setShowIcon] = useState<number>();
+  const [showIcon, setShowIcon] = useState<number | null>();
 
   const {
     name,

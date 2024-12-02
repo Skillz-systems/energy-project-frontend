@@ -23,7 +23,7 @@ interface ProductDetailsProps {
   datetime: string;
   name: string;
   displayInput?: boolean;
-  refreshTable?: KeyedMutator<any>;
+  refreshTable: KeyedMutator<any>;
 }
 
 export const Tag = ({ name, variant }: { name: string; variant?: string }) => {

@@ -67,7 +67,6 @@ CustomRadioInput.args = {
 export const CustomSelectInput = SelectTemplate.bind({});
 CustomSelectInput.args = {
   label: "Name",
-  name: "name",
   options: [
     {
       label: "One-off",

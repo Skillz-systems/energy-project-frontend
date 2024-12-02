@@ -42,7 +42,7 @@ const Inventory = () => {
   function getFilteredClassCount(classList: InventoryClass) {
     const filteredClass =
       fetchInventoryStats?.data?.inventoryClassCounts.find(
-        (item) => item.inventoryClass === classList
+        (item: { inventoryClass: string; }) => item.inventoryClass === classList
       ).count || 0;
     return filteredClass;
   }
@@ -199,8 +199,9 @@ const Inventory = () => {
         <CreateNewInventory
           isOpen={isOpen}
           setIsOpen={setIsOpen}
-          formType={formType}
-        />
+          formType={formType} 
+          allInventoryRefresh={ allInventoryRefresh}        
+          />
       ) : null}
     </>
   );

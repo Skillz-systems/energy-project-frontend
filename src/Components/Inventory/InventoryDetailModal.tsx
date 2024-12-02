@@ -10,6 +10,7 @@ import { GoDotFill } from "react-icons/go";
 import { generateRandomInventoryHistoryEntries } from "../TableComponent/sampleData";
 import LoadingSpinner from "../Loaders/LoadingSpinner";
 import { useGetRequest } from "../../utils/useApiCall";
+import { KeyedMutator } from "swr";
 
 type InventoryData = {
   id: string;
@@ -46,11 +47,23 @@ type DataStateWrapperProps = {
   children: React.ReactNode;
 };
 
+export type TabNamesType = {
+  name: string;
+  key: string;
+  count: null;
+  id?: any;
+};
+
 const InventoryDetailModal = ({
   isOpen,
   setIsOpen,
   inventoryID,
   refreshTable,
+}: {
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  inventoryID: string;
+  refreshTable: KeyedMutator<any>;
 }) => {
   const fetchSingleBatchInventory = useGetRequest(
     inventoryID ? `/v1/inventory/batch/${inventoryID}` : "/v1",
@@ -114,7 +127,7 @@ const InventoryDetailModal = ({
     showCustomButton: true,
   };
 
-  const tabNames = [
+  const tabNames: TabNamesType[] = [
     { name: "Details", key: "details", count: null },
     { name: "Stats", key: "stats", count: null },
     { name: "History", key: "history", count: null },

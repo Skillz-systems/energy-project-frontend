@@ -70,7 +70,7 @@ const Settings = observer(() => {
   const fetchAllRoles = useGetRequest("/v1/roles", true, 60000);
   const fetchAllUsers = useGetRequest("/v1/users", true, 60000);
 
-  const rolesList = fetchAllRoles.data?.map((item) => ({
+  const rolesList = fetchAllRoles.data?.map((item: { role: any; id: any; }) => ({
     label: item.role,
     value: item.id,
   }));

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal } from "../ModalComponent/Modal";
+// import { Modal } from "../ModalComponent/Modal";
 import { useApiCall, useGetRequest } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
 import {
@@ -14,6 +14,8 @@ import SelectInventoryModal from "./SelectInventoryModal";
 import { observer } from "mobx-react-lite";
 import rootStore from "../../stores/rootStore";
 import { CardComponent } from "../CardComponents/CardComponent";
+// import { Modal } from "../LogoComponent/ModalComponent/Modal";
+import { Modal } from '@/Components/ModalComponent/Modal';
 
 export type ProductFormType = "newProduct" | "newCategory";
 
@@ -81,7 +83,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
     //   60000
     // );
 
-    const handleInputChange = (e) => {
+    const handleInputChange = (e: { target: { name: any; value: any; files: any; }; }) => {
       const { name, value, files } = e.target;
       if (name === "productImage" && files && files.length > 0) {
         setFormData((prev) => ({
@@ -158,7 +160,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
         }
 
         setLoading(false);
-        await refreshTable();
+        await refreshTable!();
       } catch (error) {
         console.error("Product creation failed:", error);
       } finally {

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Modal } from "../ModalComponent/Modal";
+// import { Modal } from "../ModalComponent/Modal";
 import editInput from "../../assets/settings/editInput.svg";
 import LoadingSpinner from "../Loaders/LoadingSpinner";
 import { DropDown } from "../DropDownComponent/DropDown";
@@ -9,6 +9,8 @@ import InventoryDetails from "./InventoryDetails";
 import StatsDetails from "./StatsDetails";
 import CustomerDetails from "./CustomerDetails";
 import { useGetRequest } from "../../utils/useApiCall";
+import { Modal } from "@/Components/ModalComponent/Modal";
+import { KeyedMutator } from "swr";
 
 type ProductDetails = {
   id: string;
@@ -42,7 +44,17 @@ type DataStateWrapperProps = {
   children: React.ReactNode;
 };
 
-const ProductModal = ({ isOpen, setIsOpen, productID, refreshTable }) => {
+const ProductModal = ({
+  isOpen,
+  setIsOpen,
+  productID,
+  refreshTable,
+}: {
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  productID: string;
+  refreshTable: KeyedMutator<any>;
+}) => {
   const fetchSingleProduct = useGetRequest(`/v1/products/${productID}`, false);
   const fetchProductInventories = useGetRequest(
     productID ? `/v1/products/${productID}/inventory` : "/v1",
@@ -63,13 +75,17 @@ const ProductModal = ({ isOpen, setIsOpen, productID, refreshTable }) => {
   };
 
   const generateProductInventoryEntries = (data: any) => {
-    const entries = data?.inventoryBatches?.map((inventory) => {
-      return {
-        productImage: inventory?.inventoryBatch?.image,
-        productName: inventory?.inventoryBatch?.name,
-        productPrice: inventory?.inventoryBatch?.price,
-      };
-    });
+    const entries = data?.inventoryBatches?.map(
+      (inventory: {
+        inventoryBatch: { image: any; name: any; price: any };
+      }) => {
+        return {
+          productImage: inventory?.inventoryBatch?.image,
+          productName: inventory?.inventoryBatch?.name,
+          productPrice: inventory?.inventoryBatch?.price,
+        };
+      }
+    );
     return entries;
   };
 

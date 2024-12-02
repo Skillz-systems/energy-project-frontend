@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Modal } from "../ModalComponent/Modal";
+// import { Modal } from "../ModalComponent/Modal";
 import TabComponent from "../TabComponent/TabComponent";
 import ListPagination from "../PaginationComponent/ListPagination";
 import { CardComponent } from "../CardComponents/CardComponent";
@@ -9,6 +9,8 @@ import { TableSearch } from "../TableSearchComponent/TableSearch";
 import searchIcon from "../../assets/search.svg";
 import { useGetRequest } from "@/utils/useApiCall";
 import LoadingSpinner from "../Loaders/LoadingSpinner";
+import { Modal } from "@/Components/ModalComponent/Modal";
+import { TabNamesType } from "../Inventory/InventoryDetailModal";
 
 type ListDataType = {
   productId: string;
@@ -86,13 +88,15 @@ const SelectInventoryModal = observer(
       false
     );
 
-    const tabNames = useMemo(() => {
+    const tabNames: TabNamesType[] = useMemo(() => {
       return (
-        fetchAllInventoryCategories.data?.map((data) => ({
-          name: data.name,
-          key: data.name,
-          id: data.id,
-        })) || []
+        fetchAllInventoryCategories.data?.map(
+          (data: { name: any; id: any }) => ({
+            name: data.name,
+            key: data.name,
+            id: data.id,
+          })
+        ) || []
       );
     }, [fetchAllInventoryCategories.data]);
 
@@ -209,7 +213,9 @@ const SelectInventoryModal = observer(
               }))}
               onTabSelect={(key) => {
                 setTabContent(key);
-                const selectedTab = tabNames.find((tab) => tab.key === key);
+                const selectedTab = tabNames.find(
+                  (tab: { key: string }) => tab.key === key
+                );
                 setInventoryCategoryId(selectedTab?.id || "");
                 setCurrentPage(1);
               }}
