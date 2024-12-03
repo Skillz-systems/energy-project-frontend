@@ -20,7 +20,6 @@
   outline: 0;
   box-sizing: border-box;
   min-height: 100vh;
-  position: relative;
 }
 
 html,
@@ -175,6 +174,21 @@ table {
 
 .test {
   border: 1px solid red;
+}
+
+/* Global scrollbar styles (for all browsers) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3f4f6; /* Tailwind Gray 100 */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9ca3af; /* Tailwind Gray 400 */
+  border-radius: 9999px;
 }
 
 /* https://css-loaders.com/colorful/ */

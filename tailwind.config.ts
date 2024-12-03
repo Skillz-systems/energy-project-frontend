@@ -1,4 +1,7 @@
 /** @type {import('tailwindcss').Config} */
+import scrollbarPlugin from "tailwind-scrollbar";
+import plugin from "tailwindcss/plugin";
+
 export default {
   mode: "jit",
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
@@ -35,6 +38,8 @@ export default {
         inkBlue: "#8396E7",
         inkBlueTwo: "#3951B6",
         paleYellow: "#FFF3D5",
+        chalk: "#FFFFFC",
+        grape: "#EAD2D0",
       },
       backgroundImage: {
         primaryGradient: "linear-gradient(to right, #982214, #F8CB48)",
@@ -51,5 +56,21 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    scrollbarPlugin({ nocompatible: true }),
+    plugin(function ({ addUtilities }) {
+      // Custom scrollbar utilities (optional)
+      addUtilities({
+        ".scrollbar-thin": {
+          "scrollbar-width": "thin",
+        },
+        ".scrollbar-thumb-gray-400": {
+          "scrollbar-color": "#9CA3AF transparent",
+        },
+        ".scrollbar-track-gray-100": {
+          "scrollbar-color": "transparent #F3F4F6",
+        },
+      });
+    }),
+  ],
 };
