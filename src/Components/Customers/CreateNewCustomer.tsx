@@ -1,31 +1,31 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
 import { useApiCall } from "@/utils/useApiCall";
 import LoadingSpinner from "../Loaders/LoadingSpinner";
-import { Input, SelectInput } from "../InputComponent/Input";
+import { Input, } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { Modal } from "../ModalComponent/ModalComponent/Modal";
 
 const defaultFormData = {
-  email: "",
-  password: "",
   firstname: "",
   lastname: "",
+  email: "",
   phone: "",
-  role: "",
+  addressType: "", // Key matches form field
   location: "",
 };
 
-const CreateNewUserModal = ({
+const CreateNewCustomerModal = ({
   isOpen,
   setIsOpen,
-  allRolesLoading,
-  rolesList,
-  allUsersRefresh,
+  allAddressTypesLoading,
+  addressTypesList,
+  allCustomersRefresh,
 }) => {
   const { apiCall } = useApiCall();
   const [formData, setFormData] = useState(defaultFormData);
   const [loading, setLoading] = useState<boolean>(false);
+
+
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -37,35 +37,36 @@ const CreateNewUserModal = ({
     }));
   };
 
-  const handleSelectChange = (name: string, values: string | string[]) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: values,
-    }));
-  };
+  
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+
     if (!formData) return;
+
     try {
       await apiCall({
-        endpoint: "/v1/auth/add-user",
+        endpoint: "/v1/customers/create",
         method: "post",
         data: formData,
-        successMessage: "User created successfully!",
+        successMessage: "Customer created successfully!",
       });
       setLoading(false);
-      await allUsersRefresh();
+      await allCustomersRefresh();
     } catch (error) {
-      console.error("User creation failed:", error);
+      console.error("Customer creation failed:", error);
+      setLoading(false);
+      // Optionally handle the error gracefully, e.g., show a notification
     }
-    setLoading(false);
+
     setIsOpen(false);
     setFormData(defaultFormData);
   };
 
   const isFormFilled = Object.values(formData).some((value) => Boolean(value));
+
+
 
   return (
     <Modal
@@ -79,20 +80,19 @@ const CreateNewUserModal = ({
         onSubmit={handleSubmit}
       >
         <div
-          className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${
-            isFormFilled
-              ? "bg-paleCreamGradientLeft"
-              : "bg-paleGrayGradientLeft"
-          }`}
+          className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${isFormFilled
+            ? "bg-paleCreamGradientLeft"
+            : "bg-paleGrayGradientLeft"
+            }`}
         >
           <h2
             style={{ textShadow: "1px 1px grey" }}
             className="text-xl text-textBlack font-semibold font-secondary"
           >
-            New User
+            New Customer
           </h2>
         </div>
-        {allRolesLoading ? (
+        {allAddressTypesLoading ? (
           <LoadingSpinner parentClass="absolute top-[50%] w-full" />
         ) : (
           <>
@@ -105,9 +105,8 @@ const CreateNewUserModal = ({
                 onChange={handleInputChange}
                 placeholder="First Name"
                 required={true}
-                style={`${
-                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                }`}
+                style={`${isFormFilled ? "border-strokeCream" : "border-strokeGrey"
+                  }`}
               />
               <Input
                 type="text"
@@ -117,9 +116,8 @@ const CreateNewUserModal = ({
                 onChange={handleInputChange}
                 placeholder="Last Name"
                 required={true}
-                style={`${
-                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                }`}
+                style={`${isFormFilled ? "border-strokeCream" : "border-strokeGrey"
+                  }`}
               />
               <Input
                 type="email"
@@ -129,9 +127,8 @@ const CreateNewUserModal = ({
                 onChange={handleInputChange}
                 placeholder="Email"
                 required={true}
-                style={`${
-                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                }`}
+                style={`${isFormFilled ? "border-strokeCream" : "border-strokeGrey"
+                  }`}
               />
               <Input
                 type="text"
@@ -141,24 +138,21 @@ const CreateNewUserModal = ({
                 onChange={handleInputChange}
                 placeholder="Phone Number"
                 required={true}
-                style={`${
-                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                }`}
+                style={`${isFormFilled ? "border-strokeCream" : "border-strokeGrey"
+                  }`}
               />
 
-              <SelectInput
-                label="Role"
-                options={rolesList}
-                value={formData.role}
-                onChange={(selectedValue) =>
-                  handleSelectChange("role", selectedValue)
-                }
+              <Input
+                type="text"
+                name="addressType" 
+                label="Address Type"
+                value={formData.addressType}
+                onChange={handleInputChange}
+                placeholder="Address Type"
                 required={true}
-                placeholder="Select a role"
-                style={`${
-                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                }`}
+                style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
               />
+
               <Input
                 type="text"
                 name="location"
@@ -167,9 +161,8 @@ const CreateNewUserModal = ({
                 onChange={handleInputChange}
                 placeholder="Location"
                 required={true}
-                style={`${
-                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                }`}
+                style={`${isFormFilled ? "border-strokeCream" : "border-strokeGrey"
+                  }`}
               />
             </div>
             <ProceedButton
@@ -184,4 +177,4 @@ const CreateNewUserModal = ({
   );
 };
 
-export default CreateNewUserModal;
+export default CreateNewCustomerModal;

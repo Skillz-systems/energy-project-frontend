@@ -35,7 +35,7 @@ function App() {
             <Route path="/products/*" element={<Products />} />
             <Route path="/inventory/*" element={<Inventory />} />
             <Route path="/settings/*" element={<Settings />} />
-            <Route path="/customers" element={<CustomerPage />} />
+            <Route path="/customers/*" element={<CustomerPage />} />
             {/* Other protected routes */}
           </Route>
 

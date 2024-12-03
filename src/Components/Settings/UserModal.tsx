@@ -422,6 +422,7 @@ const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }) => {
   );
 };
 
+
 export default UserModal;
 
 const DetailComponent = ({

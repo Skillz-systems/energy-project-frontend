@@ -7,18 +7,29 @@ import user from "../../assets/settings/user.svg";
 import call from "../../assets/settings/call.svg";
 import message from "../../assets/settings/message.svg";
 import editInput from "../../assets/settings/editInput.svg";
-
 import { Icon } from "@/Components/Settings/UserModal";
 
-const CustomerModal = ({ isOpen, setIsOpen, customerId, refreshTable, tiersList }) => {
+
+interface CustomerData {
+    firstname: string;
+    lastname: string;
+    email: string;
+    phonenumber: string;
+    addresstype: string;
+    location: string;
+    customerId?: string; // Add other properties as needed
+}
+
+
+
+const CustomerModal = ({ isOpen, setIsOpen, customerId, refreshTable, customerList }) => {
+
     const { apiCall } = useApiCall();
-    const { data, isLoading, error } = useGetRequest(
-        `/v1/customers`,
-        false
-    );
 
     const [activeNav, setActiveNav] = useState(0);
     const [editMode, setEditMode] = useState(false);
+    const [data, setData] = useState<CustomerData | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     const tabs = [
         "Customer Details",
@@ -30,14 +41,42 @@ const CustomerModal = ({ isOpen, setIsOpen, customerId, refreshTable, tiersList 
     ];
 
     useEffect(() => {
-        
+        if (customerId) {
+            const fetchCustomer = async () => {
+                try {
+                    setIsLoading(true);
+                    const response = await apiCall({
+                        endpoint: `/v1/customers/single/${customerId}`,
+                        method: "get",
+                    });
+                    console.log("API Response:", response.data);
+                    const customer = response.data || {};
+
+                    setData({
+                        firstname: customer.firstname || "N/A",
+                        lastname: customer.lastname || "N/A",
+                        email: customer.email || "N/A",
+                        phonenumber: customer.phone || "N/A", 
+                        addresstype: customer.addressType || "N/A", 
+                        location: customer.location || "N/A",
+                        customerId: customer.id || "N/A",
+                    });
+                } catch (error) {
+                    console.error("Error fetching customer:", error);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            fetchCustomer();
+        }
     }, [customerId]);
+
 
     const handleDelete = async () => {
         if (window.confirm(`Are you sure you want to delete ${data?.name}?`)) {
             try {
                 await apiCall({
-                    endpoint: `/v1/customers/{id}`,
+                    endpoint: `/v1/customers/${customerId}`,
                     method: "delete",
                     successMessage: "Customer deleted successfully!",
                 });
@@ -89,12 +128,11 @@ const CustomerModal = ({ isOpen, setIsOpen, customerId, refreshTable, tiersList 
                 <LoadingSpinner parentClass="absolute top-[50%] w-full" />
             ) : (
                 <div>
-                    {/* Header */}
                     <header className="flex items-center justify-between bg-paleGrayGradientLeft p-4 border-b">
                         <div className="flex items-center gap-1">
                             <img src={user} alt="Customer Icon" />
                             <span className="text-xs font-bold text-textDarkGrey capitalize">
-                                {data?.name || "Customer Name"}
+                                {data?.customerId || "Customer Name"}
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -104,15 +142,14 @@ const CustomerModal = ({ isOpen, setIsOpen, customerId, refreshTable, tiersList 
                         </div>
                     </header>
 
-                    {/* Tab Navigation */}
                     <div className="w-full px-4 py-2">
                         <div className="flex items-center p-0.5 w-max border-[0.6px] border-strokeGreyThree rounded-full">
                             {tabs.map((tab, index) => (
                                 <span
                                     key={index}
                                     className={`group flex items-center justify-center gap-3 px-2 py-1 min-h-[24px] rounded-full text-xs font-medium hover:cursor-pointer ${activeNav === index
-                                            ? "bg-primaryGradient text-white"
-                                            : "bg-white text-textGrey"
+                                        ? "bg-primaryGradient text-white"
+                                        : "bg-white text-textGrey"
                                         }`}
                                     onClick={() => setActiveNav(index)}
                                 >
@@ -120,8 +157,8 @@ const CustomerModal = ({ isOpen, setIsOpen, customerId, refreshTable, tiersList 
                                     {index === 2 && (
                                         <span
                                             className={`flex items-center justify-center max-w-max px-1 border-[0.2px] text-xs rounded-full transition-all ${activeNav === index
-                                                    ? "bg-[#FEF5DA] text-textDarkBrown border-textDarkBrown"
-                                                    : "bg-[#EAEEF2] text-textDarkGrey border-strokeGrey group-hover:bg-[#FEF5DA] group-hover:text-textDarkBrown group-hover:border-textDarkBrown"
+                                                ? "bg-[#FEF5DA] text-textDarkBrown border-textDarkBrown"
+                                                : "bg-[#EAEEF2] text-textDarkGrey border-strokeGrey group-hover:bg-[#FEF5DA] group-hover:text-textDarkBrown group-hover:border-textDarkBrown"
                                                 }`}
                                         >
                                             0
@@ -132,28 +169,26 @@ const CustomerModal = ({ isOpen, setIsOpen, customerId, refreshTable, tiersList 
                         </div>
                     </div>
 
-                    {/* Tab Content */}
                     <div className="p-2.5 border-[0.6px] border-[#8396E7] rounded- mb-2 ">
                         <DetailComponent
                             label="User ID"
-                            value={data?.id || "N/A"}
+                            value={data?.customerId || "N/A"}
                             parentClass="mb-2 "
                         />
                     </div>
 
-                    {/* Details */}
                     <div className="flex flex-col gap-2 p-2.5 border-[0.6px] border-[#8396E7] rounded-[20px]">
                         <p className="flex items-center gap-1 pb-2 w-max text-xs text-textLightGrey font-medium">
                             <img src={user} alt="User" width="16px" />
                             PERSONAL DETAILS
                         </p>
-                        {Object.entries(data || {}).map(([key, value]) => (
-                            <DetailComponent
-                                key={key}
-                                label={key.replace(/_/g, " ")}
-                                value={data.id || "N/A"}
-                            />
-                        ))}
+                        <DetailComponent label="First Name" value={data?.firstname || "N/A"} />
+                        <DetailComponent label="Last Name" value={data?.lastname || "N/A"} />
+                        <DetailComponent label="Email" value={data?.email || "N/A"} />
+                        <DetailComponent label="Phone Number" value={data?.phonenumber || "N/A"} />
+                        <DetailComponent label="Address Type" value={data?.addresstype || "N/A"} />
+                        <DetailComponent label="Location" value={data?.location || "N/A"} />
+
                     </div>
                 </div>
             )}
@@ -166,8 +201,8 @@ export default CustomerModal;
 const DetailComponent = ({
     label,
     value,
-    parentClass,
-    valueClass,
+    parentClass = "",
+    valueClass = "",
 }: {
     label: string;
     value: string | number;

@@ -8,10 +8,10 @@
   ],
   "include": ["src", "./jest.setup.ts"],
   "compilerOptions": {
-     "baseUrl": "./src",
-    "paths": {
-      "@/*": ["./*"]
-    },
+   //  "baseUrl": "./src",
+   // "paths": {
+   //   "@/*": ["./*"]
+   // },
     "noEmit": true,
     "allowImportingTsExtensions": true,
     "target": "esnext", // Target modern JavaScript

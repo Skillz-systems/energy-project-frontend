@@ -77,7 +77,7 @@ export const Table = (props: TableType) => {
           <header className="flex items-center justify-between gap-2 px-4 py-2 border-[0.6px] border-strokeGreyThree rounded-full">
             <div className="w-[230px] h-[24px] bg-gray-100 border-[0.6px] border-strokeGreyThree rounded-full"></div>
             <div className="flex items-center justify-end gap-2">
-              {filterList.map((_filter, index) => (
+              {filterList?.map((_filter, index) => (
                 <div
                   key={index}
                   className="w-[88px] h-[24px] bg-gray-100 border-[0.6px] border-strokeGreyThree rounded-full"
@@ -162,7 +162,7 @@ export const Table = (props: TableType) => {
                     </button>
                   </div>
                   <div className="flex items-center justify-end gap-2">
-                    {filterList.map((filter, index) =>
+                    {filterList?.map((filter, index) =>
                       filter.isSearch ? (
                         <TableSearch
                           key={index}
