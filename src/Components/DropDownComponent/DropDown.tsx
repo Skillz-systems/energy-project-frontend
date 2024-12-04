@@ -5,7 +5,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Icon } from "../Settings/UserModal";
 import edit from "../../assets/edit.svg";
-import { Modal } from "../LogoComponent/ModalComponent/Modal";
+import { Modal } from '@/Components/ModalComponent/Modal';
 
 export type DropDownType = {
   name?: string;

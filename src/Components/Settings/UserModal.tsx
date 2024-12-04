@@ -10,7 +10,8 @@ import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
 import { GoDotFill } from "react-icons/go";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { DropDown } from "../DropDownComponent/DropDown";
-import { Modal } from "../LogoComponent/ModalComponent/Modal";
+import { Modal } from '@/Components/ModalComponent/Modal';
+
 
 const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }) => {
   const { apiCall } = useApiCall();

@@ -14,7 +14,6 @@ import SelectInventoryModal from "./SelectInventoryModal";
 import { observer } from "mobx-react-lite";
 import rootStore from "../../stores/rootStore";
 import { CardComponent } from "../CardComponents/CardComponent";
-// import { Modal } from "../LogoComponent/ModalComponent/Modal";
 import { Modal } from '@/Components/ModalComponent/Modal';
 
 export type ProductFormType = "newProduct" | "newCategory";

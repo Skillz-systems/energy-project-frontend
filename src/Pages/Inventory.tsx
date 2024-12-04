@@ -43,7 +43,7 @@ const Inventory = () => {
     const filteredClass =
       fetchInventoryStats?.data?.inventoryClassCounts.find(
         (item: { inventoryClass: string; }) => item.inventoryClass === classList
-      ).count || 0;
+      )?.count || 0;
     return filteredClass;
   }
 
@@ -51,7 +51,7 @@ const Inventory = () => {
     {
       title: "All Inventory",
       link: "/inventory/all",
-      count: fetchInventoryStats?.data?.totalInventoryCount,
+      count: fetchInventoryStats?.data?.totalInventoryCount || 0,
     },
     {
       title: "Regular",

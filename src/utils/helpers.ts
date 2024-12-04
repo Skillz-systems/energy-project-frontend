@@ -14,7 +14,7 @@ export function copyToClipboard(value: any) {
   navigator.clipboard
     .writeText(textToCopy)
     .then(() => {
-      alert(`Text copied to clipboard: ${textToCopy}`);
+      toast.info(`Copied to "${textToCopy}" clipboard.`);
     })
     .catch((err) => {
       console.error("Failed to copy text: ", err);
@@ -67,7 +67,6 @@ export function useIsLoggedIn(route: string) {
   useEffect(() => {
     if (token) {
       navigate(sessionRedirect || route);
-      toast.info("You are already logged in!");
     }
   }, [token, navigate, route, sessionRedirect]);
 }
