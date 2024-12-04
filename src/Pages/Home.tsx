@@ -70,7 +70,8 @@ const Home = () => {
 
   const newHomeData: SectionData[] = homeData.map((data: SectionData) => ({
     ...data,
-    notificationCount: notificationCounts[data.sectionName],
+    notificationCount:
+      notificationCounts[data.sectionName as keyof typeof notificationCounts],
   }));
 
   return (
@@ -84,10 +85,10 @@ const Home = () => {
               if (!isMobile) navigate(section.location);
             }}
           >
-            {section.notificationCount > 0 ? (
+            {section?.notificationCount && section.notificationCount > 0 ? (
               <div
                 className={`flex items-center justify-center ${
-                  section.notificationCount >= 10 ? "bg-grape" : "bg-[#FDEEC2]"
+                  section?.notificationCount >= 10 ? "bg-grape" : "bg-[#FDEEC2]"
                 } w-max h-[24px] pl-3 pr-0.5 gap-2 text-textDarkGrey text-[11px] font-medium md:font-normal rounded-full`}
               >
                 Your attention is needed

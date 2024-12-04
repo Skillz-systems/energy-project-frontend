@@ -15,7 +15,7 @@ import useTokens from "../../hooks/useTokens";
 import { formatDateTime } from "../../utils/helpers";
 import UserModal from "./UserModal";
 import { DropDown } from "../DropDownComponent/DropDown";
-import { Modal } from '@/Components/ModalComponent/ModalComponent/Modal';
+import { Modal } from "../ModalComponent/Modal";
 import { KeyedMutator } from "swr";
 
 const columnList = ["TITLE", "ASSIGNED USERS", "PERMISSIONS", "ACTIONS"];

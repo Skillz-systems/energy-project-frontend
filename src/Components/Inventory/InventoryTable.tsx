@@ -102,8 +102,8 @@ const InventoryTable = ({
   const [inventoryID, setInventoryID] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
   const [queryData, setQueryData] = useState<any>(null);
-  const [queryLoading, setQueryLoading] = useState<boolean>(false);
-  const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
+  const [queryLoading] = useState<boolean>(false);
+  const [isSearchQuery] = useState<boolean>(false);
 
   // useEffect(() => {
   //   if (data?.total) {
@@ -297,7 +297,7 @@ const InventoryTable = ({
       title: "ACTIONS",
       key: "actions",
       valueIsAComponent: true,
-      customValue: (value, rowData) => {
+      customValue: (_: any, rowData: any) => {
         return (
           <span
             className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold"
@@ -329,7 +329,7 @@ const InventoryTable = ({
           loading={queryLoading || isLoading}
           tableData={getTableData()}
           refreshTable={async () => {
-            await refreshTable();
+            await refreshTable!();
             setQueryData(null);
           }}
           queryValue={isSearchQuery ? queryValue : ""}
@@ -339,7 +339,7 @@ const InventoryTable = ({
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         inventoryID={inventoryID}
-        refreshTable={refreshTable}
+        refreshTable={refreshTable!}
       />
     </>
   );

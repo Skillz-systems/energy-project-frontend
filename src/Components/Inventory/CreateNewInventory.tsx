@@ -140,7 +140,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
         const otherFormValue = isOtherFormFilled();
         if (!otherFormValue) return;
 
-        const createCategoryData = (newCategory: any, newSubCategory = null) => ({
+        const createCategoryData = (newCategory: any, newSubCategory?: any) => ({
           categories: [
             {
               name: newCategory,
@@ -161,7 +161,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
             ? createCategoryData(otherFormData.newCategory)
             : createCategoryData(
                 otherFormData.newCategory,
-                otherFormData.newSubCategory
+                otherFormData?.newSubCategory ?? ""
               );
 
         await apiCall({

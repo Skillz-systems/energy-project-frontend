@@ -1,7 +1,6 @@
 import { Meta, StoryFn } from "@storybook/react";
 import { SideMenu, SideMenuType } from "./SideMenu";
 import { MemoryRouter } from "react-router-dom";
-import React from 'react';
 
 export default {
   title: "Components/SideMenu",

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { GoDotFill } from "react-icons/go";
 import { Table } from "@/Components/TableComponent/Table";
-import { generateCustomerEntries } from "@/Components/TableComponent/sampleData";
+import {
+  generateCustomerEntries,
+  Entry,
+} from "@/Components/TableComponent/sampleData";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import settings from "../assets/settings/settings.svg";
@@ -22,8 +25,8 @@ import CustomerPagemodal from "./CustomerPagemodal";
 import { useApiCall } from "../utils/useApiCall";
 
 const CustomerPage = () => {
-  const [tableData, setTableData] = useState([]);
-  const [queryLoading, setQueryLoading] = useState<boolean>(false);
+  const [tableData, setTableData] = useState<Entry[]>([]);
+  const [queryLoading] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [queryValue, setQueryValue] = useState("");
   const [isSearchQuery, setIsSearchQuery] = useState(false);
@@ -40,12 +43,12 @@ const CustomerPage = () => {
     location: "",
   });
 
-  const [isFormFilled, setIsFormFilled] = useState<boolean>(false);
+  const [isFormFilled] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
-  const [allRolesLoading, setAllRolesLoading] = useState<boolean>(false);
+  const [allRolesLoading] = useState<boolean>(false);
 
   const { apiCall } = useApiCall();
-  const handleViewCustomer = async (id: number) => {
+  const handleViewCustomer = async (_: number) => {
     try {
       const response = await apiCall({
         endpoint: `v1/customers/single`,
@@ -190,7 +193,7 @@ const CustomerPage = () => {
       title: "ACTIONS",
       key: "actions",
       valueIsAComponent: true,
-      customValue: (value: any, rowData: { id: number; }) => (
+      customValue: (_: any, rowData: { id: number; }) => (
         <span
           onClick={() => handleViewCustomer(rowData.id)}
           className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer"

@@ -10,7 +10,7 @@ import { GoDotFill } from "react-icons/go";
 import { generateRandomInventoryHistoryEntries } from "../TableComponent/sampleData";
 // import LoadingSpinner from "../Loaders/LoadingSpinner";
 // import { useApiCall, useGetRequest } from "../../utils/useApiCall";
-import { Modal } from '@/Components/ModalComponent/ModalComponent/Modal';
+import { Modal } from '../ModalComponent/Modal';
 import LoadingSpinner from "../Loaders/LoadingSpinner";
 import { useGetRequest } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";

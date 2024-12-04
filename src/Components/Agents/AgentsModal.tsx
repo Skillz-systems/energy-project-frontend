@@ -4,30 +4,29 @@ import { DropDown } from "../DropDownComponent/DropDown";
 import TabComponent from "../TabComponent/TabComponent";
 import { useGetRequest } from "../../utils/useApiCall";
 
-interface AgentUser {
-  id: string;
-  firstname: string;
-  lastname: string;
-  email: string;
-  location: string;
-  addressType: string;
-  status: string;
-  emailVerified: boolean;
-}
+// interface AgentUser {
+//   id: string;
+//   firstname: string;
+//   lastname: string;
+//   email: string;
+//   location: string;
+//   addressType: string;
+//   status: string;
+//   emailVerified: boolean;
+// }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface Agent {
-  id: string;
-  agentId: number;
-  createdAt: string;
-  updatedAt: string;
-  user: AgentUser;
-}
+// interface Agent {
+//   id: string;
+//   agentId: number;
+//   createdAt: string;
+//   updatedAt: string;
+//   user: AgentUser;
+// }
 const AgentModal = ({
   isOpen,
   setIsOpen,
   agentId,
-}) => {
+}: any) => {
   //const { apiCall } = useApiCall();
   const { data, isLoading, error } = useGetRequest(
     `/v1/agents/${agentId}`,

@@ -276,7 +276,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                               productUnits={data.productUnits}
                               readOnly={true}
                               onRemoveProduct={(productId) =>
-                                rootStore.productStore.removeProduct(productId)
+                                rootStore.productStore.removeProduct(productId as string)
                               }
                             />
                           );

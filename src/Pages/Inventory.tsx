@@ -43,7 +43,7 @@ const Inventory = () => {
     const filteredClass =
       fetchInventoryStats?.data?.inventoryClassCounts.find(
         (item: { inventoryClass: string; }) => item.inventoryClass === classList
-      ).count || 0;
+      )?.count || 0;
     return filteredClass;
   }
 

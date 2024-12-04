@@ -47,7 +47,7 @@ const AgentsTable = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAgentDetailsModalOpen, setIsAgentDetailsModalOpen] = useState<boolean>(false);
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
-  const [pagination, setPagination] = useState({
+  const [, setPagination] = useState({
     page: 1,
     limit: 10,
     total: 0,

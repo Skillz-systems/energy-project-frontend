@@ -143,7 +143,7 @@ const SelectInventoryModal = observer(
           const tabData = await fetchTabData(inventoryCategoryId);
           setDynamicListData((prevListData) => [
             ...prevListData.filter((d) => d.name !== tabContent),
-            { name: tabContent, data: tabData },
+            { name: tabContent, data: tabData ?? [] },
           ]);
         }
       };
@@ -280,10 +280,10 @@ const SelectInventoryModal = observer(
                       productName={data.productName}
                       productPrice={data.productPrice}
                       onSelectProduct={(productInfo) => {
-                        rootStore.productStore.addProduct(productInfo);
+                        rootStore.productStore.addProduct(productInfo as any);
                       }}
                       onRemoveProduct={(productId) =>
-                        rootStore.productStore.removeProduct(productId)
+                        rootStore.productStore.removeProduct(productId as string)
                       }
                       isProductSelected={rootStore.productStore.products.some(
                         (p) => p.productId === data.productId
