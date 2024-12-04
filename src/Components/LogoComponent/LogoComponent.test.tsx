@@ -2,8 +2,6 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import LogoComponent from './LogoComponent';
-import React from 'react';
-
 
 describe('LogoComponent', () => {
   it('renders with the nav variant', () => {

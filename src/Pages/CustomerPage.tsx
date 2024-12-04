@@ -4,9 +4,7 @@ import { Table } from "@/Components/TableComponent/Table";
 import { generateCustomerEntries } from "@/Components/TableComponent/sampleData";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
-import sale from "../assets/titlepill/sale.svg";
 import settings from "../assets/settings/settings.svg";
-import Inventory from "../assets/table/inventory.svg";
 import moneyBag from "../assets/table/moneybag.svg";
 import statusIcon from "../assets/table/status.svg";
 import productsbadge from "../assets/products/productsbadge.png";
@@ -15,24 +13,23 @@ import circleAction from "../assets/settings/addCircle.svg";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";
 import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComponent";
 import { Modal } from "@/Components/LogoComponent/ModalComponent/Modal";
-import { Input, SelectInput } from "@/Components/InputComponent/Input";
+import { Input } from "@/Components/InputComponent/Input";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import PageLayout from "./PageLayout";
 import cancelled from "../assets/cancelled.svg";
 import productgreen from "../assets/products/productgreen.svg";
-import UserModal from "@/Components/Settings/UserModal";
 import CustomerPagemodal from "./CustomerPagemodal";
- import { useApiCall, useGetRequest } from "../utils/useApiCall";
+import { useApiCall } from "../utils/useApiCall";
 
 const CustomerPage = () => {
   const [tableData, setTableData] = useState([]);
-  const [queryLoading, setQueryLoading] = useState(false);
+  const [queryLoading, setQueryLoading] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [queryValue, setQueryValue] = useState("");
   const [isSearchQuery, setIsSearchQuery] = useState(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<string | any>(null);
   const [formState, setFormState] = useState({
     firstname: "",
     lastname: "",
@@ -43,26 +40,25 @@ const CustomerPage = () => {
     location: "",
   });
 
-  const [isFormFilled, setIsFormFilled] = useState(false);
+  const [isFormFilled, setIsFormFilled] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
-  const [allRolesLoading, setAllRolesLoading] = useState(false);
-  
+  const [allRolesLoading, setAllRolesLoading] = useState<boolean>(false);
+
   const { apiCall } = useApiCall();
   const handleViewCustomer = async (id: number) => {
     try {
       const response = await apiCall({
-        endpoint: `v1/customers/single`, 
+        endpoint: `v1/customers/single`,
         method: "get",
-        showToast: false, 
+        showToast: false,
       });
-  
+
       if (response?.data) {
-        setSelectedCustomer(response.data); 
-        setIsCustomerModalOpen(true); 
+        setSelectedCustomer(response.data);
+        setIsCustomerModalOpen(true);
       }
     } catch (error) {
       console.error("Failed to fetch customer details:", error);
-      
     }
   };
 
@@ -81,7 +77,7 @@ const CustomerPage = () => {
   const getTableData = () => {
     if (isSearchQuery && queryValue) {
       return tableData.filter((entry) =>
-        Object.values(entry).some((value) =>
+        Object.values(entry).some((value: any) =>
           value.toString().toLowerCase().includes(queryValue.toLowerCase())
         )
       );
@@ -194,10 +190,11 @@ const CustomerPage = () => {
       title: "ACTIONS",
       key: "actions",
       valueIsAComponent: true,
-      customValue: (value, rowData) => (
+      customValue: (value: any, rowData: { id: number; }) => (
         <span
           onClick={() => handleViewCustomer(rowData.id)}
-          className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer">
+          className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer"
+        >
           View
         </span>
       ),
@@ -207,7 +204,11 @@ const CustomerPage = () => {
   const navigationList = [
     { title: "All Customers", link: "/customers", count: "5,050,200" },
     { title: "New Customers", link: "/new-customers", count: 102 },
-    { title: "Defaulting Customers", link: "/defaulting-customers", count: 120000 },
+    {
+      title: "Defaulting Customers",
+      link: "/defaulting-customers",
+      count: 120000,
+    },
     { title: "Barred Customers", link: "/barred-customers", count: "42" },
   ];
   const dropDownList = {
@@ -226,7 +227,9 @@ const CustomerPage = () => {
     },
     showCustomButton: true,
   };
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormState((prevState) => ({
       ...prevState,
@@ -234,8 +237,8 @@ const CustomerPage = () => {
     }));
   };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); 
-    setLoading(true); 
+    e.preventDefault();
+    setLoading(true);
     console.log("Form submitted");
     try {
       await apiCall({
@@ -244,7 +247,7 @@ const CustomerPage = () => {
         data: formState,
         successMessage: "Customer created successfully!",
       });
-  
+
       setFormState({
         firstname: "",
         lastname: "",
@@ -254,15 +257,14 @@ const CustomerPage = () => {
         addressType: "",
         location: "",
       });
-  
-      setIsOpen(false); 
+
+      setIsOpen(false);
     } catch (error) {
       console.error("Form submission error:", error);
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
-  
 
   return (
     <PageLayout pageName="Customers" badge={productsbadge}>
@@ -322,10 +324,11 @@ const CustomerPage = () => {
             onSubmit={handleSubmit}
           >
             <div
-              className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${isFormFilled
-                ? "bg-paleCreamGradientLeft"
-                : "bg-paleGrayGradientLeft"
-                }`}
+              className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${
+                isFormFilled
+                  ? "bg-paleCreamGradientLeft"
+                  : "bg-paleGrayGradientLeft"
+              }`}
             >
               <h2
                 style={{ textShadow: "1px 1px grey" }}
@@ -346,8 +349,9 @@ const CustomerPage = () => {
                   onChange={handleInputChange}
                   placeholder="First Name"
                   required={true}
-                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                    }`}
+                  style={`${
+                    isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                  }`}
                 />
                 <Input
                   type="text"
@@ -357,8 +361,9 @@ const CustomerPage = () => {
                   onChange={handleInputChange}
                   placeholder="Last Name"
                   required={true}
-                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                    }`}
+                  style={`${
+                    isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                  }`}
                 />
                 <Input
                   type="email"
@@ -368,8 +373,9 @@ const CustomerPage = () => {
                   onChange={handleInputChange}
                   placeholder="Email"
                   required={true}
-                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-                    }`}
+                  style={`${
+                    isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                  }`}
                 />
                 <Input
                   type="text"
@@ -379,7 +385,9 @@ const CustomerPage = () => {
                   onChange={handleInputChange}
                   placeholder="Phone Number"
                   required={true}
-                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
+                  style={`${
+                    isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                  }`}
                 />
 
                 <Input
@@ -390,7 +398,9 @@ const CustomerPage = () => {
                   onChange={handleInputChange}
                   placeholder="Address"
                   required={true}
-                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
+                  style={`${
+                    isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                  }`}
                 />
                 {/* <Input
                   type="text"
@@ -410,7 +420,9 @@ const CustomerPage = () => {
                   onChange={handleInputChange}
                   placeholder="location"
                   required={true}
-                  style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
+                  style={`${
+                    isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
+                  }`}
                 />
               </div>
             )}
@@ -423,11 +435,9 @@ const CustomerPage = () => {
         </Modal>
 
         <div className="flex flex-row w-full gap-4">
-
           <div className="flex-shrink-0">
             <SideMenu navigationList={navigationList} />
           </div>
-
 
           <div className="flex-grow">
             <Table
@@ -442,25 +452,18 @@ const CustomerPage = () => {
                 setIsSearchQuery(false);
               }}
               queryValue={isSearchQuery ? queryValue : ""}
-
             />
             <CustomerPagemodal
               isOpen={isCustomerModalOpen}
               setIsOpen={() => setIsCustomerModalOpen(false)}
               customerId={selectedCustomer}
-              refreshTable={() => { }}
+              refreshTable={refreshTable}
             />
           </div>
         </div>
       </div>
     </PageLayout>
-
-
   );
 };
 
 export default CustomerPage;
-function apiCall(arg0: { endpoint: string; method: string; data: any; successMessage: string; }) {
-  throw new Error("Function not implemented.");
-}
-

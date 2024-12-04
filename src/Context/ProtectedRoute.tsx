@@ -26,8 +26,8 @@ const ProtectedRouteWrapper: React.FC = () => {
 
   if (!token) {
     // If the user is not authenticated, redirect to login with the current path as a redirect query param
-    //const loginRoute = `/login?redirect=${encodeURIComponent(location.pathname)}`;
-    //return <Navigate to={loginRoute} replace />;
+    const loginRoute = `/login?redirect=${encodeURIComponent(location.pathname)}`;
+    return <Navigate to={loginRoute} replace />;
   } else {
     // If authenticated and not on an unprotected route, render the nested routes
     return <Outlet />;

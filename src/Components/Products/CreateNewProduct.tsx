@@ -15,7 +15,7 @@ import { observer } from "mobx-react-lite";
 import rootStore from "../../stores/rootStore";
 import { CardComponent } from "../CardComponents/CardComponent";
 // import { Modal } from "../LogoComponent/ModalComponent/Modal";
-import { Modal } from '@/Components/ModalComponent/ModalComponent/Modal';
+import { Modal } from '@/Components/ModalComponent/Modal';
 
 export type ProductFormType = "newProduct" | "newCategory";
 
@@ -83,7 +83,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
     //   60000
     // );
 
-    const handleInputChange = (e) => {
+    const handleInputChange = (e: { target: { name: any; value: any; files: any; }; }) => {
       const { name, value, files } = e.target;
       if (name === "productImage" && files && files.length > 0) {
         setFormData((prev) => ({
@@ -124,15 +124,9 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
             formData.paymentModes.join(",")
           );
           formSubmissionData.append("categoryId", formData.category);
-          formSubmissionData.append(
-            "inventoryBatchId",
-            ["67463564ccf37eb949a00b26"]
-            // JSON.stringify(
-            //   rootStore.productStore.products.map(
-            //     (product) => product.productId
-            //   )
-            // )
-          );
+          rootStore.productStore.products.forEach((product) => {
+            formSubmissionData.append("inventoryBatchId", product.productId);
+          });
 
           if (formData.productImage instanceof File) {
             formSubmissionData.append("productImage", formData.productImage);
@@ -294,8 +288,8 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                   <SelectMultipleInput
                     label="Payment Modes"
                     options={[
-                      { label: "Instalmental", value: "instalmental" },
-                      { label: "Single Deposit", value: "singleDesposit" },
+                      { label: "Single Deposit", value: "Single Deposit" },
+                      { label: "Instalmental", value: "Instalmental" },
                     ]}
                     value={paymentModes}
                     onChange={(values) =>

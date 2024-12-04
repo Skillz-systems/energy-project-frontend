@@ -14,7 +14,7 @@ const LoginPage = () => {
   const { apiCall } = useApiCall();
   const { id: userId, token: remember_token } = useParams();
   const [userLoading, setUserLoading] = useState<boolean>(false);
-  const [userInfo, setUserInfo] = useState(null);
+  const [userInfo, setUserInfo] = useState<any>(null);
   const [userInfoError, setUserInfoError] = useState(null);
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
@@ -31,7 +31,7 @@ const LoginPage = () => {
       });
       console.log(response);
       setUserInfo(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       setUserInfoError(error);
     } finally {
