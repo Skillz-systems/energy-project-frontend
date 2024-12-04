@@ -62,7 +62,7 @@ type EntryTwo = {
 };
 
 // Generate 'n' random entries
-export const generateAgentEntries = (count: number): EntryTwo[] => {
+export const generateAgentEntries = (count: number, p0: { classTags: string[]; }): EntryTwo[] => {
   const names = ["Naomi Gambo", "John Doe", "Mary Jane", "David Smith"];
   const status = ["active", "barred", "reported"];
   const numbers = [

@@ -32,6 +32,7 @@ const ProtectedRouteWrapper: React.FC = () => {
     // If authenticated and not on an unprotected route, render the nested routes
     return <Outlet />;
   }
+  return <Outlet />;
 };
 
 export default ProtectedRouteWrapper;
