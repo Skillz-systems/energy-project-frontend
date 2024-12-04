@@ -50,7 +50,7 @@ export const formatDateTime = (
   }
 };
 
-export function capitalizeFirstLetter(str) {
+export function capitalizeFirstLetter(str: string) {
   if (!str) return str; // Return the original string if it's empty or undefined
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
@@ -66,7 +66,7 @@ export function useIsLoggedIn(route?: string) {
 
   useEffect(() => {
     if (token) {
-      navigate(sessionRedirect || route);
+      navigate(sessionRedirect || route || "");
       toast.info("You are already logged in!");
     }
   }, [token, navigate, route, sessionRedirect]);

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import lightCheckeredBg from "../../assets/lightCheckeredBg.png";
 import addCircleGold from "../../assets/settings/addCircleGold.svg";
 import { GoDotFill } from "react-icons/go";
-import { Modal } from "../ModalComponent/Modal";
+// import { Modal } from "../ModalComponent/Modal";
 import { Input, ToggleInput } from "../InputComponent/Input";
 import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
 import role from "../../assets/table/role.svg";
@@ -15,6 +15,7 @@ import useTokens from "../../hooks/useTokens";
 import { formatDateTime } from "../../utils/helpers";
 import UserModal from "./UserModal";
 import { DropDown } from "../DropDownComponent/DropDown";
+import { Modal } from '@/Components/ModalComponent/ModalComponent/Modal';
 
 const columnList = ["TITLE", "ASSIGNED USERS", "PERMISSIONS", "ACTIONS"];
 const columnWidth = ["w-[15%]", "w-[22.5%]", "w-[50%]", "w-[12.5%]"];

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal } from "../ModalComponent/Modal";
+// import { Modal } from "../ModalComponent/Modal";
 import editInput from "../../assets/settings/editInput.svg";
 import { DropDown } from "../DropDownComponent/DropDown";
 import TabComponent from "../TabComponent/TabComponent";
@@ -10,6 +10,7 @@ import { GoDotFill } from "react-icons/go";
 import { generateRandomInventoryHistoryEntries } from "../TableComponent/sampleData";
 // import LoadingSpinner from "../Loaders/LoadingSpinner";
 // import { useApiCall, useGetRequest } from "../../utils/useApiCall";
+import { Modal } from '@/Components/ModalComponent/ModalComponent/Modal';
 
 const InventoryDetailModal = ({
   isOpen,

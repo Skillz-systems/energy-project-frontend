@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Modal } from "../ModalComponent/Modal";
+// import { Modal } from "../ModalComponent/Modal";
 import { useApiCall } from "@/utils/useApiCall";
 import LoadingSpinner from "../Loaders/LoadingSpinner";
 import { Input, SelectInput } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
+import { Modal } from '@/Components/ModalComponent/ModalComponent/Modal';
 
 const defaultFormData = {
   email: "",
