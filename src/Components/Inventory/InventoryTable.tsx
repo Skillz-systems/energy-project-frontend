@@ -5,7 +5,7 @@ import { GoDotFill } from "react-icons/go";
 import { formatNumberWithCommas } from "@/utils/helpers";
 import { NairaSymbol } from "../CardComponents/CardComponent";
 import InventoryDetailModal from "./InventoryDetailModal";
-// import rootStore from "../../stores/rootStore";
+import { useApiCall } from "@/utils/useApiCall";
 
 interface InventoryEntries {
   id: string;
@@ -65,9 +65,8 @@ type InventoryType = {
 
 // Helper function to map the API data to the desired format
 const generateInventoryEntries = (data: any): InventoryEntries[] => {
-  const entries: InventoryEntries[] = data?.inventories
-    // .filter((item: InventoryType) => item.batches && item.batches.length > 0) // Filter inventories with non-empty batches
-    .map((item: InventoryType, index: number) => {
+  const entries: InventoryEntries[] = data?.inventories.map(
+    (item: InventoryType, index: number) => {
       return {
         id: item?.batches[0]?.id,
         no: index + 1,
@@ -82,7 +81,8 @@ const generateInventoryEntries = (data: any): InventoryEntries[] => {
         },
         deleted: item?.batches[0]?.deletedAt ?? false,
       };
-    });
+    }
+  );
 
   return entries;
 };
@@ -96,8 +96,7 @@ const InventoryTable = ({
   isLoading: boolean;
   refreshTable?: KeyedMutator<any>;
 }) => {
-  // const { inventoryStore } = rootStore;
-  // const { apiCall } = useApiCall();
+  const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [inventoryID, setInventoryID] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
@@ -105,42 +104,52 @@ const InventoryTable = ({
   const [queryLoading, setQueryLoading] = useState<boolean>(false);
   const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
 
-  // useEffect(() => {
-  //   if (data?.total) {
-  //     inventoryStore.updateInventoryStats(data.total);
-  //   }
-  // }, [data?.total, inventoryStore]);
-
   const filterList = [
     {
       name: "Class",
       items: ["Regular", "Returned", "Refurbished"],
-      onClickLink: (index: number) => {
-        console.log("INDEX:", index);
+      onClickLink: async (index: number) => {
+        setIsSearchQuery(false);
+        const selectedClass = ["REGULAR", "RETURNED", "REFURBISHED"][index];
+        setQueryValue(selectedClass);
+        setQueryLoading(true);
+        try {
+          const response = await apiCall({
+            endpoint: `/v1/inventory?class=${encodeURIComponent(
+              selectedClass
+            )}`,
+            method: "get",
+            successMessage: "",
+            showToast: false,
+          });
+          setQueryData(response.data);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setQueryLoading(false);
+        }
       },
     },
     {
       name: "Search",
       onSearch: async (query: string) => {
-        console.log("query:", query);
+        setIsSearchQuery(true);
+        if (queryData) setQueryData(null);
+        setQueryLoading(true);
         setQueryValue(query);
-        // setIsSearchQuery(true);
-        // if (queryData) setQueryData(null);
-        // setQueryLoading(true);
-        // setQueryValue(query);
-        // try {
-        //   const response = await apiCall({
-        //     endpoint: `/v1/inventory?search=${encodeURIComponent(query)}`,
-        //     method: "get",
-        //     successMessage: "",
-        //     showToast: false,
-        //   });
-        //   setQueryData(response.data);
-        // } catch (error) {
-        //   console.error(error);
-        // } finally {
-        //   setQueryLoading(false);
-        // }
+        try {
+          const response = await apiCall({
+            endpoint: `/v1/inventory?search=${encodeURIComponent(query)}`,
+            method: "get",
+            successMessage: "",
+            showToast: false,
+          });
+          setQueryData(response.data);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setQueryLoading(false);
+        }
       },
       isSearch: true,
     },

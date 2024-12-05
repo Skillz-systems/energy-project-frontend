@@ -42,7 +42,9 @@ export const TitlePill = (props: TitlePillType) => {
       <div className="flex items-center justify-end w-max gap-1">
         {leftIcon && leftIcon}
         <p className="text-xl font-medium text-textBlack">
-          {value && formatNumberWithCommas(Number(value))}
+          {typeof value === "number" && !isNaN(value)
+            ? formatNumberWithCommas(value)
+            : value}
         </p>
       </div>
     </div>

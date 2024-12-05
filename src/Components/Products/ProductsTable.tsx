@@ -3,7 +3,7 @@ import { Table } from "../TableComponent/Table";
 import { CardComponent } from "../CardComponents/CardComponent";
 import ProductModal from "./ProductModal";
 import { KeyedMutator } from "swr";
-// import { useApiCall } from "../../utils/useApiCall";
+import { useApiCall } from "../../utils/useApiCall";
 
 interface AllProductEntries {
   productId: string;
@@ -37,27 +37,42 @@ const ProductsTable = ({
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
 }) => {
-  // const { apiCall } = useApiCall();
+  const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [productId, setProductId] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
   const [queryData, setQueryData] = useState<any>(null);
-  // const [queryLoading, setQueryLoading] = useState<boolean>(false);
-  // const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
+  const [queryLoading, setQueryLoading] = useState<boolean>(false);
+  const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
 
   const filterList = [
-    {
-      name: "All Products",
-      items: ["SHS", "EAAS", "Rootop"],
-      onClickLink: (index: number) => {
-        console.log("INDEX:", index);
-      },
-    },
+    // {
+    //   name: "All Products",
+    //   items: ["SHS", "EAAS", "Rootop"],
+    //   onClickLink: (index: number) => {
+    //     console.log("INDEX:", index);
+    //   },
+    // },
     {
       name: "Search",
-      onSearch: (query: string) => {
-        console.log("Query:", query);
+      onSearch: async (query: string) => {
+        setIsSearchQuery(true);
+        if (queryData) setQueryData(null);
+        setQueryLoading(true);
         setQueryValue(query);
+        try {
+          const response = await apiCall({
+            endpoint: `/v1/products?search=${encodeURIComponent(query)}`,
+            method: "get",
+            successMessage: "",
+            showToast: false,
+          });
+          setQueryData(response.data);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setQueryLoading(false);
+        }
       },
       isSearch: true,
     },
@@ -101,7 +116,7 @@ const ProductsTable = ({
         tableTitle="ALL PRODUCTS"
         tableClassname="flex flex-wrap items-center gap-4"
         tableData={getTableData()}
-        loading={isLoading}
+        loading={queryLoading || isLoading}
         filterList={filterList}
         cardComponent={(data) => {
           return data?.map((item: AllProductEntries, index) => (
@@ -121,7 +136,7 @@ const ProductsTable = ({
           await refreshTable();
           setQueryData(null);
         }}
-        queryValue={queryValue}
+        queryValue={isSearchQuery ? queryValue : ""}
       />
       <ProductModal
         isOpen={isOpen}

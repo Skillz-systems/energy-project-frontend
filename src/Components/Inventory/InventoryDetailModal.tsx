@@ -196,7 +196,11 @@ const InventoryDetailModal = ({
       }
     >
       <div className="bg-white">
-        <header className="flex items-center justify-between bg-paleGrayGradientLeft p-4 min-h-[64px] border-b-[0.6px] border-b-strokeGreyThree">
+        <header
+          className={`flex items-center ${
+            inventoryData.inventoryName ? "justify-between" : "justify-end"
+          } bg-paleGrayGradientLeft p-4 min-h-[64px] border-b-[0.6px] border-b-strokeGreyThree`}
+        >
           {inventoryData.inventoryName && (
             <p className="flex items-center justify-center bg-[#F6F8FA] w-max px-2 py-1 h-[24px] text-textBlack text-xs border-[0.4px] border-strokeGreyTwo rounded-full">
               {inventoryData.inventoryName}

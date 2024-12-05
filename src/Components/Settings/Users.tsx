@@ -66,7 +66,7 @@ const Users = observer(
 
     const filterList = [
       {
-        name: "All Roles",
+        name: "Roles",
         items: [
           "All Roles",
           ...(rolesList

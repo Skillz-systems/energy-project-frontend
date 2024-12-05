@@ -57,6 +57,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
   const [loading, setLoading] = useState(false);
   const [otherFormData, setOtherFormData] = useState({
     newCategory: "",
+    parentId: "",
     newSubCategory: "",
   });
 
@@ -84,6 +85,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
     setFormData((prev) => ({
       ...prev,
       [name]: values,
+      ...(name === "category" && { subCategory: "" }), // Clear subCategory if category changes
     }));
   };
 
@@ -137,14 +139,21 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
           successMessage: "Inventory created successfully!",
         });
       } else {
-        const otherFormValue = isOtherFormFilled();
-        if (!otherFormValue) return;
+        const { newCategory, newSubCategory, parentId } = otherFormData;
+        if (
+          (formType === "newCategory" && !newCategory) ||
+          (formType !== "newCategory" && (!parentId || !newSubCategory))
+        ) {
+          return;
+        }
 
-        const createCategoryData = (newCategory: any, newSubCategory = null) => ({
+        const createCategoryData = (
+          newCategory: string,
+          newSubCategory = null
+        ) => ({
           categories: [
             {
               name: newCategory,
-              parentId: "",
               ...(newSubCategory && {
                 subCategories: [
                   {
@@ -156,27 +165,33 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
           ],
         });
 
-        const data =
-          formType === "newCategory"
-            ? createCategoryData(otherFormData.newCategory)
-            : createCategoryData(
-                otherFormData.newCategory,
-                otherFormData.newSubCategory
-              );
+        const createSubCategoryData = (
+          newSubCategory: string,
+          parentId: string
+        ) => ({
+          categories: [
+            {
+              name: newSubCategory,
+              parentId: parentId,
+            },
+          ],
+        });
 
         await apiCall({
           endpoint: "/v1/inventory/category/create",
           method: "post",
-          data,
+          data:
+            formType === "newCategory"
+              ? createCategoryData(newCategory, newSubCategory)
+              : createSubCategoryData(newSubCategory, parentId),
           headers: { "Content-Type": "application/json" },
           successMessage: `Inventory ${
             formType === "newSubCategory" ? "Sub-" : ""
           }Category created successfully!`,
         });
-
-        setLoading(false);
-         await allInventoryRefresh();
       }
+      setLoading(false);
+      await allInventoryRefresh();
     } catch (error) {
       console.error("Product creation failed:", error);
       setLoading(false);
@@ -188,6 +203,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
       } else {
         setOtherFormData({
           newCategory: "",
+          parentId: "",
           newSubCategory: "",
         });
       }
@@ -195,17 +211,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
   };
 
   const isFormFilled = Object.values(formData).some((value) => Boolean(value));
-  const isOtherFormFilled = () => {
-    switch (formType) {
-      case "newCategory":
-        return otherFormData.newCategory.trim() ? "newCategory" : null;
-      case "newSubCategory":
-        return otherFormData.newSubCategory.trim() ? "newSubCategory" : null;
-      default:
-        return null;
-    }
-  };
-console.log(fetchInventoryCategories)
+
   return (
     <Modal
       isOpen={isOpen}
@@ -233,9 +239,7 @@ console.log(fetchInventoryCategories)
               ? "Inventory"
               : formType === "newCategory"
               ? "Category"
-              : formType === "newSubCategory"
-              ? "Sub-Category"
-              : "Location"}
+              : "Sub-Category"}
           </h2>
         </div>
         <div className="flex flex-col items-center justify-center w-full px-[2.5em] gap-4 py-8">
@@ -278,29 +282,41 @@ console.log(fetchInventoryCategories)
                 }
               />
 
-              <SelectInput
-                label="Sub-Category"
-                options={
-                  fetchInventoryCategories.data?.flatMap(
-                    (category: Category) =>
-                      category.children?.length
-                        ? category.children.map((child) => ({
-                            label: child.name, // Use the child name for the label
-                            value: child.id, // Use the child id for the value
-                          }))
-                        : [] // Exclude categories without children
-                  ) || [{ label: "", value: "" }]
-                }
-                value={formData.subCategory}
-                onChange={(selectedValue) =>
-                  handleSelectChange("subCategory", selectedValue)
-                }
-                required={true}
-                placeholder="Choose Item Sub-Category"
-                style={
-                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                }
-              />
+              <div
+                style={{
+                  width: "100%",
+                  display: formData.category ? "block" : "none",
+                  maxHeight: formData.category ? "300px" : "0",
+                  transition: "max-height 0.3s ease-in-out",
+                  visibility: formData.category ? "visible" : "hidden",
+                  opacity: formData.category ? 1 : 0,
+                  transitionProperty: "max-height, visibility, opacity",
+                }}
+              >
+                <SelectInput
+                  label="Sub-Category"
+                  options={
+                    fetchInventoryCategories.data
+                      ?.find(
+                        (category: Category) =>
+                          category.id === formData.category
+                      )
+                      ?.children?.map((child) => ({
+                        label: child.name,
+                        value: child.id,
+                      })) || []
+                  }
+                  value={formData.subCategory}
+                  onChange={(selectedValue) =>
+                    handleSelectChange("subCategory", selectedValue)
+                  }
+                  required={!!formData.category} // Required only if a category is selected
+                  placeholder="Choose Item Sub-Category"
+                  style={
+                    isFormFilled ? "border-strokeCream" : "border-strokeGrey"
+                  }
+                />
+              </div>
 
               <Input
                 type="text"
@@ -405,49 +421,79 @@ console.log(fetchInventoryCategories)
               />
             </>
           ) : (
-            <Input
-              type="text"
-              name={
-                formType === "newCategory"
-                  ? "newCategory"
-                  : formType === "newSubCategory"
-                  ? "newSubCategory"
-                  : "newLocation"
-              }
-              label={
-                formType === "newCategory"
-                  ? "Category"
-                  : formType === "newSubCategory"
-                  ? "Sub-Category"
-                  : "Location"
-              }
-              value={
-                formType === "newCategory"
-                  ? otherFormData.newCategory
-                  : otherFormData.newSubCategory
-              }
-              onChange={(e) =>
-                setOtherFormData((prev) => ({
-                  ...prev,
-                  [formType === "newCategory"
-                    ? "newCategory"
-                    : formType === "newSubCategory"
-                    ? "newSubCategory"
-                    : "newLocation"]: e.target.value,
-                }))
-              }
-              placeholder={`Enter a New ${
-                formType === "newCategory"
-                  ? "Category"
-                  : formType === "newSubCategory"
-                  ? "Sub-Category"
-                  : "Location"
-              }`}
-              required={true}
-              style={
-                isOtherFormFilled() ? "border-strokeCream" : "border-strokeGrey"
-              }
-            />
+            <>
+              {formType === "newCategory" ? (
+                <Input
+                  type="text"
+                  name="newCategory"
+                  label="Category"
+                  value={otherFormData.newCategory}
+                  onChange={(e) =>
+                    setOtherFormData((prev) => ({
+                      ...prev,
+                      ["newCategory"]: e.target.value,
+                    }))
+                  }
+                  placeholder="Enter a New Category"
+                  required={true}
+                  style={
+                    otherFormData.newCategory || otherFormData.newSubCategory
+                      ? "border-strokeCream"
+                      : "border-strokeGrey"
+                  }
+                />
+              ) : (
+                <>
+                  <SelectInput
+                    label="Category"
+                    options={
+                      fetchInventoryCategories.data?.map(
+                        (category: Category) => ({
+                          label: category.name,
+                          value: category.id,
+                        })
+                      ) || [{ label: "", value: "" }]
+                    }
+                    value={otherFormData.parentId}
+                    onChange={(selectedValue) =>
+                      setOtherFormData((prev) => ({
+                        ...prev,
+                        parentId: selectedValue,
+                      }))
+                    }
+                    required={true}
+                    placeholder="Choose Item Category"
+                    style={
+                      otherFormData.parentId || otherFormData.newSubCategory
+                        ? "border-strokeCream"
+                        : "border-strokeGrey"
+                    }
+                  />
+                </>
+              )}
+
+              <Input
+                type="text"
+                name="newSubCategory"
+                label="Sub-Category"
+                value={otherFormData.newSubCategory}
+                onChange={(e) =>
+                  setOtherFormData((prev) => ({
+                    ...prev,
+                    ["newSubCategory"]: e.target.value,
+                  }))
+                }
+                placeholder="Enter a New Sub-Category"
+                required={formType === "newCategory" ? false : true}
+                style={
+                  otherFormData.newSubCategory ||
+                  otherFormData.newCategory ||
+                  otherFormData.parentId
+                    ? "border-strokeCream"
+                    : "border-strokeGrey"
+                }
+              />
+            </>
           )}
         </div>
         <ProceedButton

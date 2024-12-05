@@ -119,11 +119,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
             iconRight={<LuImagePlus />}
           />
         ) : (
-          <div className="flex items-center justify-center w-full p-2 max-w-[100px] h-[100px] gap-2 border-[0.6px] border-strokeCream rounded-full">
+          <div className="flex items-center justify-center w-full p-2 max-w-[100px] h-[100px] gap-2 border-[0.6px] border-strokeCream rounded-full overflow-clip">
             <img
               src={productImage}
               alt="Product Image"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover"
             />
           </div>
         )}

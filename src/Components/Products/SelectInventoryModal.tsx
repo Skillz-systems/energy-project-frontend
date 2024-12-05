@@ -74,6 +74,7 @@ type AllInventoryType = {
 
 const SelectInventoryModal = observer(
   ({ isInventoryOpen, setIsInventoryOpen }: InventoryModalProps) => {
+    const [queryValue, setQueryValue] = useState<string>("");
     const [inventoryCategoryId, setInventoryCategoryId] = useState<string>("");
     const [dynamicListData, setDynamicListData] = useState<
       ProductInventoryType[]
@@ -116,18 +117,13 @@ const SelectInventoryModal = observer(
     );
 
     const generateListDataEntries = (data: any): ListDataType[] => {
-      return data?.inventories
-        ?.filter(
-          (inventory: AllInventoryType) =>
-            inventory.batches && inventory.batches.length > 0
-        ) // Only include inventories with batch data
-        .map((inventory: AllInventoryType) => ({
-          productId: inventory.batches[0]?.id,
-          productImage: inventory.batches[0]?.image || "",
-          productTag: inventory.inventoryCategory?.name,
-          productName: inventory.name,
-          productPrice: inventory.batches[0]?.price || 0,
-        }));
+      return data?.inventories.map((inventory: AllInventoryType) => ({
+        productId: inventory.batches[0]?.id,
+        productImage: inventory.batches[0]?.image || "",
+        productTag: inventory.inventoryCategory?.name,
+        productName: inventory.name,
+        productPrice: inventory.batches[0]?.price || 0,
+      }));
     };
 
     useEffect(() => {
@@ -159,8 +155,16 @@ const SelectInventoryModal = observer(
     const paginatedData = useMemo(() => {
       const startIndex = (currentPage - 1) * entriesPerPage;
       const endIndex = startIndex + entriesPerPage;
-      return currentTabData.slice(startIndex, endIndex);
-    }, [currentPage, entriesPerPage, currentTabData]);
+      const filteredData = currentTabData.filter(
+        (item) => item.productName === queryValue
+      );
+
+      if (queryValue) {
+        return filteredData?.slice(startIndex, endIndex);
+      } else {
+        return currentTabData.slice(startIndex, endIndex);
+      }
+    }, [currentPage, entriesPerPage, currentTabData, queryValue]);
 
     const getTabName =
       tabNames.find((tab) => tab.key === tabContent)?.name || "";
@@ -254,10 +258,10 @@ const SelectInventoryModal = observer(
               <TableSearch
                 name={"Search"}
                 onSearch={(query: string) => {
-                  console.log(query);
+                  setQueryValue(query);
                 }}
-                queryValue={""}
-                refreshTable={() => Promise.resolve()}
+                queryValue={queryValue}
+                refreshTable={fetchInventoryCategoryById.mutate}
                 placeholder={`Search ${getTabName} here`}
                 containerClass="w-full"
                 inputContainerStyle="w-full"

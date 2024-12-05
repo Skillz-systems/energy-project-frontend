@@ -6,7 +6,7 @@ export type SideMenuType = {
   navigationList: {
     title: string;
     link: string;
-    count?: number | string;
+    count?: number;
     onClick?: () => void;
   }[];
   parentClass?: string;
@@ -42,16 +42,18 @@ export const SideMenu = (props: SideMenuType) => {
           >
             {item.title}
           </p>
-          <span
-            className={`flex items-center justify-center max-w-max px-1 border-[0.2px] text-xs rounded-full transition-all
+          {item.count >= 0 ? (
+            <span
+              className={`flex items-center justify-center max-w-max px-1 border-[0.2px] text-xs rounded-full transition-all
               ${
                 location.pathname === item.link
                   ? "bg-[#FEF5DA] text-textDarkBrown border-textDarkBrown"
                   : "bg-[#EAEEF2] text-textDarkGrey border-strokeGrey group-hover:bg-[#FEF5DA] group-hover:text-textDarkBrown group-hover:border-textDarkBrown"
               }`}
-          >
-            {formatNumberWithSuffix(item.count)}
-          </span>
+            >
+              {formatNumberWithSuffix(item.count)}
+            </span>
+          ) : null}
         </Link>
       ))}
     </div>

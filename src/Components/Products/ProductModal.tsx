@@ -171,7 +171,11 @@ const ProductModal = ({
       }
     >
       <div className="bg-white">
-        <header className="flex items-center justify-between bg-paleGrayGradientLeft p-4 min-h-[64px] border-b-[0.6px] border-b-strokeGreyThree">
+        <header
+          className={`flex items-center ${
+            productData?.productName ? "justify-between" : "justify-end"
+          } bg-paleGrayGradientLeft p-4 min-h-[64px] border-b-[0.6px] border-b-strokeGreyThree`}
+        >
           {productData?.productName && (
             <p className="flex items-center justify-center bg-paleLightBlue w-max p-2 h-[24px] text-textBlack text-xs font-semibold rounded-full">
               {productData?.productName}
