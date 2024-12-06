@@ -54,7 +54,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     productId,
-    productImage: "",
+    productImage: productImage ?? "",
     productTag,
     productPrice,
     paymentModes,
