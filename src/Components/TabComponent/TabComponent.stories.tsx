@@ -67,7 +67,7 @@ Default.args = {
   tabs: tabNames.map(({ name, key }) => ({
     name,
     key,
-    count: fetchedData[key].length,
+    count: fetchedData[key as keyof typeof fetchedData].length,
   })),
   onTabSelect: (key: string) => console.log("Selected tab:", key),
 };

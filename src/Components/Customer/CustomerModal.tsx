@@ -44,7 +44,7 @@ const CustomerModal = ({
       lastName: data?.lastname,
       email: data?.email,
       phoneNumber: data?.phone,
-      addressType: data?.addressType,
+      addressType: data?.addressType ?? "",
       location: data?.location,
     };
   };
@@ -178,7 +178,7 @@ const CustomerModal = ({
             </DataStateWrapper>
           ) : (
             <div>
-              {tabNames.find((item) => item.key === tabContent).name} Coming
+              {tabNames?.find((item) => item.key === tabContent)?.name} Coming
               Soon
             </div>
           )}

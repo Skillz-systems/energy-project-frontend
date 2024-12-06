@@ -52,13 +52,14 @@ const Settings = observer(() => {
 
   const dropDownList = {
     items: ["Add new user", "Export List"],
-    onClickLink: (index: number) => {
+    onClickLink: (index: number, cardData: any) => {
       switch (index) {
         case 0:
           setIsOpen(true);
           break;
         case 1:
           console.log(index);
+          console.log(cardData);
           break;
         default:
           break;
@@ -70,7 +71,7 @@ const Settings = observer(() => {
   const fetchAllRoles = useGetRequest("/v1/roles", true, 60000);
   const fetchAllUsers = useGetRequest("/v1/users", true, 60000);
 
-  const rolesList = fetchAllRoles.data?.map((item: { role: any; id: any; }) => ({
+  const rolesList = fetchAllRoles.data?.map((item: any) => ({
     label: item.role,
     value: item.id,
   }));

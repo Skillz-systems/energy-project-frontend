@@ -32,7 +32,7 @@ export const TableSearch = (props: TableSearchType) => {
   const [query, setQuery] = useState<string>("");
 
   const handleSearch = () => {
-    if (onSearch) onSearch(query);
+    if (onSearch && query) onSearch(query);
     setIsSearching(false);
   };
 
@@ -43,7 +43,7 @@ export const TableSearch = (props: TableSearchType) => {
     if (value === "" && refreshTable) {
       await refreshTable();
       setIsSearching(false);
-      setQueryValue("");
+      if (setQueryValue) setQueryValue("");
     }
   };
 

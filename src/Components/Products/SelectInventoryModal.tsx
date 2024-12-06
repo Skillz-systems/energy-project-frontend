@@ -144,10 +144,17 @@ const SelectInventoryModal = observer(
       const fetchData = async () => {
         if (inventoryCategoryId) {
           const tabData = await fetchTabData(inventoryCategoryId);
-          setDynamicListData((prevListData) => [
-            ...prevListData.filter((d) => d.name !== tabContent),
-            { name: tabContent, data: tabData },
-          ]);
+          if (tabData) {
+            setDynamicListData((prevListData) => [
+              ...prevListData.filter((d) => d.name !== tabContent),
+              { name: tabContent, data: tabData },
+            ]);
+          } else {
+            console.error(
+              "No Tab data fetched for inventoryCategoryId:",
+              inventoryCategoryId
+            );
+          }
         }
       };
       fetchData();
@@ -313,7 +320,8 @@ const SelectInventoryModal = observer(
                       productName={data.productName}
                       productPrice={data.productPrice}
                       onSelectProduct={(productInfo) => {
-                        rootStore.productStore.addProduct(productInfo);
+                        if (productInfo)
+                          rootStore.productStore.addProduct(productInfo);
                       }}
                       onRemoveProduct={(productId) =>
                         rootStore.productStore.removeProduct(productId)

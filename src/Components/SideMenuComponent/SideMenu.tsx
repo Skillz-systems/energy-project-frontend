@@ -42,7 +42,7 @@ export const SideMenu = (props: SideMenuType) => {
           >
             {item.title}
           </p>
-          {item.count >= 0 ? (
+          {item.count && item.count >= 0 ? (
             <span
               className={`flex items-center justify-center max-w-max px-1 border-[0.2px] text-xs rounded-full transition-all
               ${

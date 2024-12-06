@@ -14,10 +14,10 @@ const productStore = types
     products: types.array(ProductModel),
   })
   .actions((self) => ({
-    addProduct(product: Instance<typeof ProductModel>) {
+    addProduct(product: any) {
       self.products.push(product);
     },
-    removeProduct(productId: string) {
+    removeProduct(productId?: string) {
       const index = self.products.findIndex((p) => p.productId === productId);
       if (index !== -1) {
         self.products.splice(index, 1);

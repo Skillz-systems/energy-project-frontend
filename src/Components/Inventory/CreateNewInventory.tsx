@@ -149,7 +149,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
 
         const createCategoryData = (
           newCategory: string,
-          newSubCategory = null
+          newSubCategory?: string
         ) => ({
           categories: [
             {
@@ -301,7 +301,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                         (category: Category) =>
                           category.id === formData.category
                       )
-                      ?.children?.map((child) => ({
+                      ?.children?.map((child: { name: any; id: any }) => ({
                         label: child.name,
                         value: child.id,
                       })) || []

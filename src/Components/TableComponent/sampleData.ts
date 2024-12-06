@@ -4,7 +4,7 @@ import batteries from "../../assets/table/battery.avif";
 import controllers from "../../assets/table/controllers.avif";
 import accessories from "../../assets/table/accessory.avif";
 
-type Entry = {
+export type Entry = {
   no: number;
   name: string;
   email: string;
@@ -62,7 +62,7 @@ type EntryTwo = {
 };
 
 // Generate 'n' random entries
-export const generateAgentEntries = (count: number): EntryTwo[] => {
+export const generateAgentEntries = (count: number, _: { classTags: string[]; }): EntryTwo[] => {
   const names = ["Naomi Gambo", "John Doe", "Mary Jane", "David Smith"];
   const status = ["active", "barred", "reported"];
   const numbers = [
@@ -307,7 +307,7 @@ export const generateRandomProductInventoryEntries = (...counts: number[]) => {
       name: item,
       data: Array.from({ length: counts[index] }, (_, i) => ({
         productId: 100000 + index * 1000 + i, // Generate unique IDs
-        productImage: getRandomProductImage(item),
+        productImage: getRandomProductImage(item) || "",
         productTag: getRandomItem(["Lima", "Sigma"]),
         productName: getRandomProductName(item),
         productPrice: getRandomItem(productPrices),

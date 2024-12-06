@@ -46,12 +46,12 @@ const CardTemplate: StoryFn<any> = () => {
           showCustomButton: true,
         }}
       />
-      {/* <ProductModal
+      <ProductModal
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         productID={""}
-        refreshTable={() => {}}
-      /> */}
+        refreshTable={Promise.resolve}
+      />
     </>
   );
 };

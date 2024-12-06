@@ -1,7 +1,6 @@
 import { Meta, StoryFn } from "@storybook/react";
 import { SideMenu, SideMenuType } from "./SideMenu";
 import { MemoryRouter } from "react-router-dom";
-import React from 'react';
 
 export default {
   title: "Components/SideMenu",
@@ -20,7 +19,7 @@ sideMenu.args = {
     {
       title: "All Customer",
       link: "/all-customers",
-      count: "5,050,200",
+      count: 50,
     },
     {
       title: "New Customers",
@@ -35,7 +34,7 @@ sideMenu.args = {
     {
       title: "Barred Customers",
       link: "/barred-customers",
-      count: "42",
+      count: 50,
     },
   ],
 };

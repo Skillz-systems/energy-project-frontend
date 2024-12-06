@@ -13,7 +13,7 @@ import { DropDown } from "../DropDownComponent/DropDown";
 import { Modal } from '@/Components/ModalComponent/Modal';
 
 
-const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }) => {
+const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }: any) => {
   const { apiCall } = useApiCall();
   const { data, isLoading, error, mutate } = useGetRequest(
     `/v1/users/single/${userID}`,
@@ -72,8 +72,8 @@ const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }) => {
     // Remove all spaces from each field in formData
     if (formData) {
       Object.keys(formData).forEach((key) => {
-        if (typeof formData[key] === "string") {
-          formData[key] = formData[key].replace(/\s+/g, "");
+        if (typeof formData[key as keyof typeof formData] === "string") {
+          formData[key as keyof typeof formData] = formData[key as keyof typeof formData].replace(/\s+/g, "");
         }
       });
     }
@@ -327,7 +327,7 @@ const UserModal = ({ isOpen, setIsOpen, userID, refreshTable, rolesList }) => {
                         required={false}
                         className="px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
                       >
-                        {rolesList.map((option) => (
+                        {rolesList.map((option: any) => (
                           <option
                             key={option.value}
                             value={option.value}

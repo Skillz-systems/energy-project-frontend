@@ -354,7 +354,8 @@ export const CardComponent = ({
     if (!_selected) {
       if (updatedProductInfo) {
         // Check if onSelectProduct is defined before calling it
-        onSelectProduct?.(updatedProductInfo);
+        if (updatedProductInfo && onSelectProduct)
+          onSelectProduct(updatedProductInfo);
         setSelected(true);
       }
     } else {
@@ -563,7 +564,8 @@ export const CardComponent = ({
               <div className="flex items-center gap-[1px]">
                 <NairaSymbol />
                 <p className="text-textBlack text-xs">
-                  {transactionAmount && formatNumberWithCommas(transactionAmount)}
+                  {transactionAmount &&
+                    formatNumberWithCommas(transactionAmount)}
                 </p>
               </div>
             </div>

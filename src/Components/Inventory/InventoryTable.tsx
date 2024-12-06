@@ -94,7 +94,7 @@ const InventoryTable = ({
 }: {
   inventoryData: any;
   isLoading: boolean;
-  refreshTable?: KeyedMutator<any>;
+  refreshTable: KeyedMutator<any>;
 }) => {
   const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -306,7 +306,7 @@ const InventoryTable = ({
       title: "ACTIONS",
       key: "actions",
       valueIsAComponent: true,
-      customValue: (value, rowData) => {
+      customValue: (_value: any, rowData: { id: string }) => {
         return (
           <span
             className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold"

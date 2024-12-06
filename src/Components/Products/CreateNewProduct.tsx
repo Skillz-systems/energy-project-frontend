@@ -14,7 +14,7 @@ import SelectInventoryModal from "./SelectInventoryModal";
 import { observer } from "mobx-react-lite";
 import rootStore from "../../stores/rootStore";
 import { CardComponent } from "../CardComponents/CardComponent";
-import { Modal } from '@/Components/ModalComponent/Modal';
+import { Modal } from "@/Components/ModalComponent/Modal";
 
 export type ProductFormType = "newProduct" | "newCategory";
 
@@ -82,7 +82,9 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
     //   60000
     // );
 
-    const handleInputChange = (e: { target: { name: any; value: any; files: any; }; }) => {
+    const handleInputChange = (e: {
+      target: { name: any; value: any; files: any };
+    }) => {
       const { name, value, files } = e.target;
       if (name === "productImage" && files && files.length > 0) {
         setFormData((prev) => ({

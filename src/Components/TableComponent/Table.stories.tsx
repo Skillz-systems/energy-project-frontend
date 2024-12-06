@@ -163,7 +163,7 @@ cardStyle.args = {
     },
   ],
   tableClassname: "flex flex-wrap items-center gap-4",
-  tableData: generateAgentEntries(50),
+  tableData: generateAgentEntries(50, { classTags: [] }),
   tableType: "card",
   cardComponent: (
     data: {

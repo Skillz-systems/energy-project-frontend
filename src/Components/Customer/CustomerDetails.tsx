@@ -51,12 +51,12 @@ const CustomerDetails = ({
     // }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       console.log("Submitted Data:", formData);
-      refreshTable();
+      if (refreshTable) await refreshTable();
     } catch (error) {
       console.error(error);
     } finally {
@@ -155,7 +155,7 @@ const CustomerDetails = ({
             </select>
           ) : (
             <p className="text-xs font-bold text-textDarkGrey">
-              {data.addressType ?? "N/A"}
+              {data.addressType || "N/A"}
             </p>
           )}
         </div>
@@ -172,7 +172,7 @@ const CustomerDetails = ({
             />
           ) : (
             <p className="text-xs font-bold text-textDarkGrey">
-              {data.location ?? "N/A"}
+              {data.location || "N/A"}
             </p>
           )}
         </div>
