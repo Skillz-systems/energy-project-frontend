@@ -5,6 +5,7 @@ export type TableSearchType = {
   name?: string;
   onSearch?: (query: string) => void;
   queryValue?: string;
+  setQueryValue?: React.Dispatch<React.SetStateAction<string>>;
   refreshTable?: () => Promise<any>;
   placeholder?: string;
   containerClass?: string;
@@ -19,6 +20,7 @@ export const TableSearch = (props: TableSearchType) => {
     name,
     onSearch,
     queryValue,
+    setQueryValue,
     refreshTable,
     placeholder,
     containerClass,
@@ -42,6 +44,7 @@ export const TableSearch = (props: TableSearchType) => {
     if (value === "" && refreshTable) {
       await refreshTable();
       setIsSearching(false);
+      setQueryValue("");
     }
   };
 

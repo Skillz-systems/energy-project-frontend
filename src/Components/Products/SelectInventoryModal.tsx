@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 // import { Modal } from "../ModalComponent/Modal";
 import TabComponent from "../TabComponent/TabComponent";
 import ListPagination from "../PaginationComponent/ListPagination";
@@ -74,6 +80,7 @@ type AllInventoryType = {
 
 const SelectInventoryModal = observer(
   ({ isInventoryOpen, setIsInventoryOpen }: InventoryModalProps) => {
+    const [isPending, startTransition] = useTransition();
     const [queryValue, setQueryValue] = useState<string>("");
     const [inventoryCategoryId, setInventoryCategoryId] = useState<string>("");
     const [dynamicListData, setDynamicListData] = useState<
@@ -155,14 +162,17 @@ const SelectInventoryModal = observer(
     const paginatedData = useMemo(() => {
       const startIndex = (currentPage - 1) * entriesPerPage;
       const endIndex = startIndex + entriesPerPage;
-      const filteredData = currentTabData.filter(
-        (item) => item.productName === queryValue
-      );
+      const filteredData = currentTabData.filter((item) => {
+        const queryWords = queryValue.toLowerCase().split(/\s+/); // Split queryValue into words
+        const productName = item.productName.toLowerCase();
+
+        return queryWords.some((word) => productName.includes(word)); // Check if any word matches
+      });
 
       if (queryValue) {
         return filteredData?.slice(startIndex, endIndex);
       } else {
-        return currentTabData.slice(startIndex, endIndex);
+        return currentTabData?.slice(startIndex, endIndex);
       }
     }, [currentPage, entriesPerPage, currentTabData, queryValue]);
 
@@ -181,6 +191,20 @@ const SelectInventoryModal = observer(
     };
 
     const itemsSelected = rootStore.productStore.products.length;
+
+    const handleTabSelect = useCallback(
+      (key: string) => {
+        startTransition(() => {
+          setTabContent(key);
+          const selectedTab = tabNames.find(
+            (tab: { key: string }) => tab.key === key
+          );
+          setInventoryCategoryId(selectedTab?.id || "");
+          setCurrentPage(1);
+        });
+      },
+      [tabNames]
+    );
 
     return (
       <Modal
@@ -215,18 +239,19 @@ const SelectInventoryModal = observer(
                 key,
                 count: null,
               }))}
-              onTabSelect={(key) => {
-                setTabContent(key);
-                const selectedTab = tabNames.find(
-                  (tab: { key: string }) => tab.key === key
-                );
-                setInventoryCategoryId(selectedTab?.id || "");
-                setCurrentPage(1);
-              }}
+              onTabSelect={handleTabSelect}
             />
             <div className="flex items-center justify-between w-full">
               <ListPagination
-                totalItems={currentTabData.length}
+                totalItems={
+                  queryValue
+                    ? currentTabData.filter((item) =>
+                        item.productName
+                          .toLowerCase()
+                          .includes(queryValue.toLowerCase())
+                      ).length
+                    : currentTabData.length
+                }
                 itemsPerPage={entriesPerPage}
                 currentPage={currentPage}
                 onPageChange={handlePageChange}
@@ -259,8 +284,10 @@ const SelectInventoryModal = observer(
                 name={"Search"}
                 onSearch={(query: string) => {
                   setQueryValue(query);
+                  setCurrentPage(1);
                 }}
                 queryValue={queryValue}
+                setQueryValue={setQueryValue}
                 refreshTable={fetchInventoryCategoryById.mutate}
                 placeholder={`Search ${getTabName} here`}
                 containerClass="w-full"
@@ -271,7 +298,9 @@ const SelectInventoryModal = observer(
               />
             </div>
             <div className="flex flex-wrap items-center gap-4">
-              {paginatedData?.length > 0 ? (
+              {isPending ? (
+                <LoadingSpinner parentClass="absolute top-[50%] w-full" />
+              ) : paginatedData?.length > 0 ? (
                 paginatedData?.map((data, index) => {
                   return (
                     <CardComponent
