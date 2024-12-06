@@ -19,7 +19,6 @@ export const TableSearch = (props: TableSearchType) => {
   const {
     name,
     onSearch,
-    queryValue,
     setQueryValue,
     refreshTable,
     placeholder,
@@ -30,7 +29,7 @@ export const TableSearch = (props: TableSearchType) => {
     icon,
   } = props;
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [query, setQuery] = useState<string>(queryValue);
+  const [query, setQuery] = useState<string>("");
 
   const handleSearch = () => {
     if (onSearch) onSearch(query);
@@ -52,7 +51,7 @@ export const TableSearch = (props: TableSearchType) => {
     <div
       className={`relative flex ${containerClass ? containerClass : "w-max "}`}
     >
-      {queryValue || isSearching ? (
+      {isSearching ? (
         // Input field is shown when isSearching is true
         <div className={`flex items-center gap-2 ${inputContainerStyle}`}>
           <input

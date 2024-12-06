@@ -4,7 +4,7 @@ import { Table } from "../TableComponent/Table";
 import { GoDotFill } from "react-icons/go";
 import clock from "../../assets/table/clock.svg";
 import CustomerDetailModal from "./CustomerDetailModal";
-// import rootStore from "../../stores/rootStore";
+import { useApiCall } from "@/utils/useApiCall";
 
 interface CustomerEntries {
   id: string;
@@ -97,8 +97,7 @@ const CustomerTable = ({
   isLoading: boolean;
   refreshTable?: KeyedMutator<any>;
 }) => {
-  // const { customerStore } = rootStore;
-  // const { apiCall } = useApiCall();
+  const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [customerID, setCustomerID] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
@@ -106,63 +105,86 @@ const CustomerTable = ({
   const [queryLoading, setQueryLoading] = useState<boolean>(false);
   const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
 
-  // useEffect(() => {
-  //   if (data?.total) {
-  //     customerStore.updateCustomerStats(data.total);
-  //   }
-  // }, [data?.total, customerStore]);
-
   const filterList = [
     {
       name: "Location",
-      items: ["Abuja", "Lagos", "Portharcourt", "Kano"],
-      onClickLink: (index: number) => {
-        console.log("INDEX:", index);
+      onSearch: async (query: string) => {
+        setQueryValue(query);
+        setIsSearchQuery(true);
+        if (queryData) setQueryData(null);
+        setQueryLoading(true);
+        setQueryValue(query);
+        try {
+          const response = await apiCall({
+            endpoint: `/v1/customers?location=${encodeURIComponent(query)}`,
+            method: "get",
+            successMessage: "",
+            showToast: false,
+          });
+          setQueryData(response.data);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setQueryLoading(false);
+        }
       },
+      isSearch: true,
     },
-    {
-      name: "Product",
-      items: ["Product One", "Product Two"],
-      onClickLink: (index: number) => {
-        console.log("INDEX:", index);
-      },
-    },
-    {
-      name: "Product Type",
-      items: ["Product Type One", "Product Type Two"],
-      onClickLink: (index: number) => {
-        console.log("INDEX:", index);
-      },
-    },
+    // {
+    //   name: "Product",
+    //   items: ["Product One", "Product Two"],
+    //   onClickLink: (index: number) => {
+    //     console.log("INDEX:", index);
+    //   },
+    // },
     {
       name: "Status",
       items: ["New", "Active", "Defaulted", "Barred"],
-      onClickLink: (index: number) => {
-        console.log("INDEX:", index);
+      onClickLink: async (index: number) => {
+        const data = ["New", "Active", "Defaulted", "Barred"].map((item) =>
+          item.toLocaleLowerCase()
+        );
+        const query = data[index];
+        setQueryValue(query);
+        if (queryData) setQueryData(null);
+        setQueryLoading(true);
+        setQueryValue(query);
+        try {
+          const response = await apiCall({
+            endpoint: `/v1/customers?status=${encodeURIComponent(query)}`,
+            method: "get",
+            successMessage: "",
+            showToast: false,
+          });
+          setQueryData(response.data);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setQueryLoading(false);
+        }
       },
     },
     {
       name: "Search",
-      onSearch: (query: string) => {
-        console.log("query:", query);
+      onSearch: async (query: string) => {
         setQueryValue(query);
-        // setIsSearchQuery(true);
-        // if (queryData) setQueryData(null);
-        // setQueryLoading(true);
-        // setQueryValue(query);
-        // try {
-        //   const response = await apiCall({
-        //     endpoint: `/v1/customers?search=${encodeURIComponent(query)}`,
-        //     method: "get",
-        //     successMessage: "",
-        //     showToast: false,
-        //   });
-        //   setQueryData(response.data);
-        // } catch (error) {
-        //   console.error(error);
-        // } finally {
-        //   setQueryLoading(false);
-        // }
+        setIsSearchQuery(true);
+        if (queryData) setQueryData(null);
+        setQueryLoading(true);
+        setQueryValue(query);
+        try {
+          const response = await apiCall({
+            endpoint: `/v1/customers?search=${encodeURIComponent(query)}`,
+            method: "get",
+            successMessage: "",
+            showToast: false,
+          });
+          setQueryData(response.data);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setQueryLoading(false);
+        }
       },
       isSearch: true,
     },

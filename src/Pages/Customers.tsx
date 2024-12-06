@@ -178,7 +178,7 @@ const Customers = () => {
         <CreateNewCustomer
           isOpen={isOpen}
           setIsOpen={setIsOpen}
-          allInventoryRefresh={allCustomerRefresh}
+          allCustomerRefresh={allCustomerRefresh}
         />
       ) : null}
     </>
