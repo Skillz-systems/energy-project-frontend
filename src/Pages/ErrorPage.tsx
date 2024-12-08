@@ -18,8 +18,7 @@ export default function ErrorPage({
   const title = error?.title || "Internal Server Error";
   const message = networkError
     ? "No Internet Connection, Try checking your network configuration."
-    : error?.message ||
-      "Sorry, something went wrong on our end. We're working to fix it.";
+    : "Sorry, something went wrong on our end. We're working to fix it.";
 
   return (
     <div className="min-h-screen bg-white flex flex-col">

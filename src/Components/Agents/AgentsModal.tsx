@@ -3,42 +3,48 @@ import { Modal } from "../ModalComponent/Modal";
 import { DropDown } from "../DropDownComponent/DropDown";
 import TabComponent from "../TabComponent/TabComponent";
 import { useGetRequest } from "../../utils/useApiCall";
+import { KeyedMutator } from "swr";
+import LoadingSpinner from "../Loaders/LoadingSpinner";
+import editInput from "../../assets/settings/editInput.svg";
+import AgentDetails, { AgentUserType } from "./AgentDetails";
 
-// interface AgentUser {
-//   id: string;
-//   firstname: string;
-//   lastname: string;
-//   email: string;
-//   location: string;
-//   addressType: string;
-//   status: string;
-//   emailVerified: boolean;
-// }
+type DataStateWrapperProps = {
+  isLoading: boolean;
+  error: string | null;
+  children: React.ReactNode;
+};
 
-// interface Agent {
-//   id: string;
-//   agentId: number;
-//   createdAt: string;
-//   updatedAt: string;
-//   user: AgentUser;
-// }
 const AgentModal = ({
   isOpen,
   setIsOpen,
-  agentId,
-}: any) => {
-  //const { apiCall } = useApiCall();
-  const { data, isLoading, error } = useGetRequest(
-    `/v1/agents/${agentId}`,
-    false
-  );
-
+  agentID,
+  refreshTable,
+}: {
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  agentID: string;
+  refreshTable: KeyedMutator<any>;
+}) => {
   const [displayInput, setDisplayInput] = useState<boolean>(false);
   const [tabContent, setTabContent] = useState<string>("agentDetails");
 
-  const handleCancelClick = () => {
-    setDisplayInput(false);
+  const fetchSingleAgent = useGetRequest(`/v1/agents/${agentID}`, false);
+
+  const generateAgentEntries = (data: any): AgentUserType => {
+    return {
+      id: data?.id,
+      firstname: data?.user?.firstname,
+      lastname: data?.user?.lastname,
+      email: data?.user?.email,
+      phone: data?.user?.phone,
+      location: data?.user?.location,
+      addressType: data?.user?.addressType,
+      status: data?.user?.status,
+      emailVerified: data?.user?.emailVerified,
+    };
   };
+
+  const handleCancelClick = () => setDisplayInput(false);
 
   const dropDownList = {
     items: ["Edit Agent", "Cancel Agent"],
@@ -46,7 +52,6 @@ const AgentModal = ({
       switch (index) {
         case 0:
           setDisplayInput(true);
-          console.log("Edit Agent");
           break;
         case 1:
           console.log("Cancel Agent");
@@ -61,10 +66,24 @@ const AgentModal = ({
 
   const tabNames = [
     { name: "Agent Details", key: "agentDetails", count: null },
-    { name: "Stats", key: "stats", count: null },
-    { name: "Transactions", key: "transactions", count: null },
-    { name: "Customers", key: "customers", count: 0 },
+    { name: "Customer", key: "customer", count: 0 },
+    { name: "Inventory", key: "inventory", count: 0 },
+    { name: "Transactions", key: "transactions", count: 0 },
+    { name: "Stats", key: "stats", count: 0 },
+    { name: "Sales", key: "sales", count: 0 },
+    { name: "Tickets", key: "tickets", count: 0 },
   ];
+
+  const DataStateWrapper: React.FC<DataStateWrapperProps> = ({
+    isLoading,
+    error,
+    children,
+  }) => {
+    if (isLoading)
+      return <LoadingSpinner parentClass="absolute top-[50%] w-full" />;
+    if (error) return <div>Oops, an error occurred: {error}</div>;
+    return <>{children}</>;
+  };
 
   return (
     <Modal
@@ -90,49 +109,58 @@ const AgentModal = ({
             className="flex items-center justify-center w-[24px] h-[24px] bg-white border border-strokeGreyTwo rounded-full hover:bg-slate-100"
             onClick={() => setDisplayInput(true)}
           >
-            {/* <img src={editInput} alt="Edit Button" width="15px" /> */}
+            <img src={editInput} alt="Edit Button" width="15px" />
           </button>
         )
       }
     >
-      {isLoading ? (
-        <div>Loading...</div>
-      ) : error ? (
-        <div>Oops, an error occurred: {error}</div>
-      ) : (
-        <div className="bg-white">
-          <header className="flex items-center justify-between bg-paleGrayGradientLeft p-4 min-h-[64px] border-b-[0.6px] border-b-strokeGreyThree">
+      <div className="bg-white">
+        <header
+          className={`flex items-center ${
+            fetchSingleAgent?.data?.user?.firstname
+              ? "justify-between"
+              : "justify-end"
+          } bg-paleGrayGradientLeft p-4 min-h-[64px] border-b-[0.6px] border-b-strokeGreyThree`}
+        >
+          {fetchSingleAgent?.data?.user?.firstname ? (
             <p className="flex items-center justify-center bg-paleLightBlue w-max p-2 h-[24px] text-textBlack text-xs font-semibold rounded-full">
-              {data.agentId} - {data.user.firstname} {data.user.lastname}
+              {fetchSingleAgent?.data?.user?.firstname}{" "}
+              {fetchSingleAgent?.data?.user?.lastname}
             </p>
-            <div className="flex items-center justify-end gap-2">
-              <DropDown {...dropDownList} />
-            </div>
-          </header>
-          <div className="flex flex-col w-full gap-4 px-4 py-2">
-            <TabComponent
-              tabs={tabNames.map(({ name, key, count }) => ({
-                name,
-                key,
-                count,
-              }))}
-              onTabSelect={(key) => setTabContent(key)}
-            />
-            {tabContent === "agentDetails" && (
-              <div>
-                <h2>Agent Details</h2>
-                <p>Agent ID: {data.agentId}</p>
-                <p>Name: {data.user.firstname} {data.user.lastname}</p>
-                <p>Email: {data.user.email}</p>
-                <p>Location: {data.user.location}</p>
-                <p>Address Type: {data.user.addressType}</p>
-                <p>Status: {data.user.status}</p>
-                <p>Email Verified: {data.user.emailVerified ? 'Yes' : 'No'}</p>
-              </div>
-            )}
+          ) : null}
+          <div className="flex items-center justify-end gap-2">
+            <DropDown {...dropDownList} />
           </div>
+        </header>
+        <div className="flex flex-col w-full gap-4 px-4 py-2">
+          <TabComponent
+            tabs={tabNames.map(({ name, key, count }) => ({
+              name,
+              key,
+              count,
+            }))}
+            onTabSelect={(key) => setTabContent(key)}
+            tabsContainerClass="p-2 rounded-[20px]"
+          />
+          {tabContent === "agentDetails" ? (
+            <DataStateWrapper
+              isLoading={fetchSingleAgent.isLoading}
+              error={fetchSingleAgent.error}
+            >
+              <AgentDetails
+                {...generateAgentEntries(fetchSingleAgent.data)}
+                refreshTable={refreshTable}
+                displayInput={displayInput}
+              />
+            </DataStateWrapper>
+          ) : (
+            <div>
+              {tabNames?.find((item) => item.key === tabContent)?.name} Coming
+              Soon
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </Modal>
   );
 };

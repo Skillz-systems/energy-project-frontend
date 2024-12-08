@@ -34,14 +34,17 @@ const Settings = observer(() => {
     {
       title: "Profile",
       link: "/settings/profile",
+      count: null,
     },
     {
       title: "Role and Permissions",
       link: "/settings/role-permissions",
+      count: null,
     },
     {
       title: "Change Password",
       link: "/settings/change-password",
+      count: null,
     },
     {
       title: "Users",

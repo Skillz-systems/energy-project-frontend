@@ -6,8 +6,7 @@ export type SideMenuType = {
   navigationList: {
     title: string;
     link: string;
-    count?: number;
-    onClick?: () => void;
+    count: number | null;
   }[];
   parentClass?: string;
 };
@@ -31,7 +30,6 @@ export const SideMenu = (props: SideMenuType) => {
                 ? "bg-primaryGradient"
                 : "bg-white hover:bg-[#F6F8FA]"
             }`}
-          // onClick={item.onClick && item.onClick}
         >
           <p
             className={`text-xs font-medium transition-all ${
@@ -42,7 +40,7 @@ export const SideMenu = (props: SideMenuType) => {
           >
             {item.title}
           </p>
-          {item.count && item.count >= 0 ? (
+          {item?.count !== null ? (
             <span
               className={`flex items-center justify-center max-w-max px-1 border-[0.2px] text-xs rounded-full transition-all
               ${
@@ -51,7 +49,7 @@ export const SideMenu = (props: SideMenuType) => {
                   : "bg-[#EAEEF2] text-textDarkGrey border-strokeGrey group-hover:bg-[#FEF5DA] group-hover:text-textDarkBrown group-hover:border-textDarkBrown"
               }`}
             >
-              {formatNumberWithSuffix(item.count)}
+              {formatNumberWithSuffix(item?.count)}
             </span>
           ) : null}
         </Link>

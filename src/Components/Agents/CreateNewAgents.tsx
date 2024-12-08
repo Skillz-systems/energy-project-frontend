@@ -4,13 +4,11 @@ import { KeyedMutator } from "swr";
 import { Input, SelectInput } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { useApiCall } from "../../utils/useApiCall";
-export type AgentsFormType = "newAgents" | "existingAgents";
 
 interface CreateNewAgentsProps {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  allAgentsRefresh?: KeyedMutator<any>;
-  formType: AgentsFormType;
+  refreshTable: KeyedMutator<any>;
 }
 
 const defaultAgentsFormData = {
@@ -22,25 +20,17 @@ const defaultAgentsFormData = {
   location: "",
   longitude: "",
   latitude: "",
-  existingAgents: "",
-};
-
-const defaultOtherFormData = {
-  existingAgents: "",
-  newCategory: "",
-  newSubCategory: "",
-  newLocation: "",
+  emailVerified: true,
 };
 
 const CreateNewAgents = ({
   isOpen,
   setIsOpen,
-  formType,
+  refreshTable,
 }: CreateNewAgentsProps) => {
   const [formData, setFormData] = useState(defaultAgentsFormData);
   const [loading, setLoading] = useState(false);
-  const [otherFormData, setOtherFormData] = useState(defaultOtherFormData);
-  const { apiCall } = useApiCall(); 
+  const { apiCall } = useApiCall();
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -62,13 +52,8 @@ const CreateNewAgents = ({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    
 
-    if (formType === "newAgents") {
-      if (!isFormFilled) return;
-    } else {
-      if (!isOtherFormFilled()) return;
-    }
+    if (!isFormFilled) return;
 
     try {
       const agentData = {
@@ -77,9 +62,9 @@ const CreateNewAgents = ({
         email: formData.email,
         addressType: formData.addressType,
         location: formData.location,
-        longitude: formData.longitude || undefined,
-        latitude: formData.latitude || undefined,
-        emailVerified: true
+        longitude: formData.longitude || "",
+        latitude: formData.latitude || "",
+        emailVerified: true,
       };
 
       await apiCall({
@@ -90,13 +75,9 @@ const CreateNewAgents = ({
       });
 
       setLoading(false);
+      await refreshTable();
       setIsOpen(false);
-    
-      if (formType === "newAgents") {
-        setFormData(defaultAgentsFormData);
-      } else {
-        setOtherFormData(defaultOtherFormData);
-      }
+      setFormData(defaultAgentsFormData);
     } catch (error) {
       console.error("Agent creation failed:", error);
       setLoading(false);
@@ -104,13 +85,6 @@ const CreateNewAgents = ({
   };
 
   const isFormFilled = Object.values(formData).some((value) => Boolean(value));
-  
-  const isOtherFormFilled = () => {
-    if (formType === "existingAgents") {
-      return Boolean(otherFormData.existingAgents);
-    }
-    return false;
-  };
 
   const renderForm = () => {
     const formFields = (
@@ -148,8 +122,8 @@ const CreateNewAgents = ({
         <SelectInput
           label="Address Type (Home/Work)"
           options={[
-            { label: "Home", value: "home" },
-            { label: "Work", value: "work" },
+            { label: "Home", value: "HOME" },
+            { label: "Work", value: "WORK" },
           ]}
           value={formData.addressType}
           onChange={(selectedValue) =>
@@ -188,14 +162,16 @@ const CreateNewAgents = ({
       >
         <div
           className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${
-            isFormFilled ? "bg-paleCreamGradientLeft" : "bg-paleGrayGradientLeft"
+            isFormFilled
+              ? "bg-paleCreamGradientLeft"
+              : "bg-paleGrayGradientLeft"
           }`}
         >
           <h2
             style={{ textShadow: "1px 1px grey" }}
             className="text-xl text-textBlack font-semibold font-secondary"
           >
-            {formType === "newAgents" ? "New Agents" : "Existing Agents"}
+            New Agents
           </h2>
         </div>
         <div className="flex flex-col items-center justify-center w-full px-[2.5em] gap-4 py-8">

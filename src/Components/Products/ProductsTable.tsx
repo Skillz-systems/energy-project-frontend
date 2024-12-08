@@ -138,12 +138,14 @@ const ProductsTable = ({
         }}
         queryValue={isSearchQuery ? queryValue : ""}
       />
-      <ProductModal
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        productID={productId}
-        refreshTable={refreshTable}
-      />
+      {isOpen && (
+        <ProductModal
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          productID={productId}
+          refreshTable={refreshTable}
+        />
+      )}
     </>
   );
 };
