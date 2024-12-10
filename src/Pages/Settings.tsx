@@ -1,5 +1,4 @@
 import { Routes, Route, useLocation } from "react-router-dom";
-import useGlobalErrorBoundary from "@/hooks/useGlobalErrorBoundary";
 import { SideMenu } from "../Components/SideMenuComponent/SideMenu";
 import Profile from "../Components/Settings/Profile";
 import LoadingSpinner from "../Components/Loaders/LoadingSpinner";
@@ -11,8 +10,6 @@ import circleAction from "../assets/settings/addCircle.svg";
 import { DropDown } from "../Components/DropDownComponent/DropDown";
 import settingsbadge from "../assets/settings/settingsbadge.png";
 import { useGetRequest } from "../utils/useApiCall";
-import { observer } from "mobx-react-lite";
-import rootStore from "../stores/rootStore";
 import PageLayout from "./PageLayout";
 import CreateNewUserModal from "@/Components/Settings/CreateNewUserModal";
 
@@ -24,10 +21,10 @@ const ChangePassword = lazy(
 );
 const Users = lazy(() => import("../Components/Settings/Users"));
 
-const Settings = observer(() => {
-  const { settingsStore } = rootStore;
-  const { handleErrorBoundary } = useGlobalErrorBoundary();
+const Settings = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const fetchAllRoles = useGetRequest("/v1/roles", true, 60000);
+  const fetchAllUsers = useGetRequest("/v1/users", true, 60000);
 
   const userlocation = useLocation();
   const navigationList = [
@@ -49,7 +46,7 @@ const Settings = observer(() => {
     {
       title: "Users",
       link: "/settings/users",
-      count: settingsStore.noOfUsers,
+      count: fetchAllUsers?.data?.total || 0,
     },
   ];
 
@@ -61,7 +58,6 @@ const Settings = observer(() => {
           setIsOpen(true);
           break;
         case 1:
-          console.log(index);
           console.log(cardData);
           break;
         default:
@@ -71,38 +67,10 @@ const Settings = observer(() => {
     showCustomButton: true,
   };
 
-  const fetchAllRoles = useGetRequest("/v1/roles", true, 60000);
-  const fetchAllUsers = useGetRequest("/v1/users", true, 60000);
-
   const rolesList = fetchAllRoles.data?.map((item: any) => ({
     label: item.role,
     value: item.id,
   }));
-
-  if (fetchAllRoles.error)
-    handleErrorBoundary(fetchAllRoles.error, fetchAllUsers.isNetworkError);
-  if (fetchAllUsers.error)
-    handleErrorBoundary(fetchAllUsers.error, fetchAllUsers.isNetworkError);
-
-  // const tersoo = true;
-  // let rolesList;
-  // let fetchAllRoles;
-  // let fetchAllUsers;
-
-  // if (tersoo) {
-  //   fetchAllRoles = useGetRequest("/v1/roles", true, 60000);
-  //   fetchAllUsers = useGetRequest("/v1/users", true, 60000);
-
-  //   rolesList = fetchAllRoles.data?.map((item) => ({
-  //     label: item.role,
-  //     value: item.id,
-  //   }));
-
-  //   if (fetchAllRoles.error)
-  //     handleErrorBoundary(fetchAllRoles.error, fetchAllUsers.isNetworkError);
-  //   if (fetchAllUsers.error)
-  //     handleErrorBoundary(fetchAllUsers.error, fetchAllUsers.isNetworkError);
-  // }
 
   return (
     <>
@@ -114,7 +82,7 @@ const Settings = observer(() => {
               iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="USERS"
-              value={settingsStore.noOfUsers || 0}
+              value={fetchAllUsers?.data?.total || 0}
             />
             <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-start">
               <ActionButton
@@ -158,6 +126,7 @@ const Settings = observer(() => {
                       data={fetchAllUsers.data}
                       isLoading={fetchAllUsers.isLoading}
                       refreshTable={fetchAllUsers.mutate}
+                      errorData={fetchAllUsers.errorStates}
                     />
                   }
                 />
@@ -169,12 +138,12 @@ const Settings = observer(() => {
       <CreateNewUserModal
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        allRolesLoading={fetchAllRoles.isLoading}
         rolesList={rolesList}
         allUsersRefresh={fetchAllRoles.mutate}
+        allRolesError={fetchAllRoles.error}
       />
     </>
   );
-});
+};
 
 export default Settings;

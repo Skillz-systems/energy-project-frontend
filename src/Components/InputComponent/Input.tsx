@@ -2,6 +2,7 @@ import { ChangeEvent, ReactNode, useEffect, useRef } from "react";
 import { CgChevronDown } from "react-icons/cg";
 import { useState } from "react";
 import { LuImagePlus } from "react-icons/lu";
+import useBreakpoint from "@/hooks/useBreakpoint";
 
 const Asterik = () => {
   return (
@@ -92,6 +93,7 @@ export const Input = ({
           className={`relative autofill-parent ${
             type === "hidden" ? "hidden" : "flex"
           } ${style} ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
+        ${value ? "border-strokeCream" : "border-strokeGrey"}
           items-center w-full max-w-full px-[1.1em] py-[1.25em] gap-1 rounded-3xl h-[48px] border-[0.6px]
           transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
           onClick={onClick}
@@ -129,7 +131,7 @@ export const Input = ({
           {iconRight && iconRight}
         </div>
         {errorMessage && (
-          <p className="-mt-3 px-[1.1em] pb-2 text-sm text-errorTwo font-medium">
+          <p className="-mt-3 px-[1.3em] text-xs text-errorTwo font-semibold w-full">
             {errorMessage}
           </p>
         )}
@@ -138,6 +140,55 @@ export const Input = ({
   } else {
     return "Input Type Not Allowed";
   }
+};
+
+export const SmallInput = ({
+  type = "text",
+  name,
+  value,
+  onChange,
+  required = false,
+  placeholder = "",
+  disabled = false,
+  checked,
+  readOnly = false,
+  className = "",
+  errorMessage,
+}: {
+  type: AllowedInputTypes;
+  name: string;
+  value: string | number;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  required?: boolean;
+  placeholder?: string;
+  disabled?: boolean;
+  checked?: boolean;
+  readOnly?: boolean;
+  className?: string;
+  errorMessage?: string;
+}) => {
+  const mobileStyle = useBreakpoint("max", 500);
+  return (
+    <div className={`${!mobileStyle ? "w-full max-w-[160px]" : "w-max"}`}>
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        required={required}
+        disabled={disabled}
+        checked={checked}
+        readOnly={readOnly}
+        placeholder={placeholder}
+        className={`px-2 py-1 w-full border-[0.6px] border-strokeGreyThree rounded-full ${className}`}
+      />
+      {errorMessage && (
+        <p className="mt-0.5 px-2 text-[11px] text-errorTwo font-semibold w-full">
+          {errorMessage}
+        </p>
+      )}
+    </div>
+  );
 };
 
 type ModalInputType = {
@@ -457,16 +508,17 @@ export const RadioInput = ({
   };
 
   return (
-    <div
-      className={`flex 
+    <>
+      <div
+        className={`flex 
         ${radioParentStyle}
         ${radioLayout === "row" ? "flex-row" : "flex-col"} gap-2`}
-    >
-      {radioOptions.map((option, index) => (
-        <label
-          key={option.value}
-          htmlFor={`${name}-${index}`}
-          className={`flex items-center justify-center bg-white w-max max-w-[400px] h-[40px] px-[1em] py-[0.2em] 
+      >
+        {radioOptions.map((option, index) => (
+          <label
+            key={option.value}
+            htmlFor={`${name}-${index}`}
+            className={`flex items-center justify-center bg-white w-max max-w-[400px] h-[40px] px-[1em] py-[0.2em] 
             gap-3 rounded-3xl text-base text-center text-textGrey font-semibold transition-all
             border border-strokeGreyTwo cursor-pointer 
             ${
@@ -474,25 +526,26 @@ export const RadioInput = ({
                 ? `${radioSelectedStyle} bg-primaryGradient text-white`
                 : ""
             }`}
-        >
-          <input
-            type="radio"
-            id={`${name}-${index}`}
-            name={name}
-            value={option.value}
-            onChange={() => handleChange(option.value)}
-            required={required}
-            className="hidden"
-          />
-          <span
-            className="flex items-center justify-center"
-            style={{ backgroundColor: option.bgColour, color: option.color }}
           >
-            {option.label}
-          </span>
-        </label>
-      ))}
-    </div>
+            <input
+              type="radio"
+              id={`${name}-${index}`}
+              name={name}
+              value={option.value}
+              onChange={() => handleChange(option.value)}
+              required={required}
+              className="hidden"
+            />
+            <span
+              className="flex items-center justify-center"
+              style={{ backgroundColor: option.bgColour, color: option.color }}
+            >
+              {option.label}
+            </span>
+          </label>
+        ))}
+      </div>
+    </>
   );
 };
 
@@ -513,6 +566,7 @@ export type SelectInputType = {
   icon?: ReactNode;
   iconStyle?: string;
   iconPosition?: "left" | "right";
+  errorMessage?: string;
 };
 
 export const SelectInput = ({
@@ -526,6 +580,7 @@ export const SelectInput = ({
   style,
   icon = <CgChevronDown color="black" title="Show options" />,
   iconStyle = "text-lg",
+  errorMessage,
 }: SelectInputType) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [valueLabel, setValueLabel] = useState<string | number>("");
@@ -567,56 +622,64 @@ export const SelectInput = ({
   }, [isOpen]);
 
   return (
-    <div ref={dropdownRef} className={`relative w-full max-w-full`}>
-      <div
-        className={`relative flex items-center
-        w-full max-w-full h-[48px] px-[1.25em] py-[1.25em] 
+    <>
+      <div ref={dropdownRef} className={`relative w-full max-w-full`}>
+        <div
+          className={`relative flex items-center
+          w-full max-w-full h-[48px] px-[1.25em] py-[1.25em] 
         rounded-3xl text-sm text-textGrey border-[0.6px] gap-1 cursor-pointer
         transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
         ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
+        ${value ? "border-strokeCream" : "border-strokeGrey"}
         ${style}`}
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-      >
-        <span
-          className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out ${
-            value ? "opacity-100" : "opacity-0"
-          }`}
+          onClick={() => !disabled && setIsOpen(!isOpen)}
         >
-          {label.toUpperCase()}
-        </span>
-        {required && <Asterik />}
+          <span
+            className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out ${
+              value ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            {label.toUpperCase()}
+          </span>
+          {required && <Asterik />}
 
-        <div className="w-full">
-          {value ? (
-            <span className="font-semibold text-textBlack uppercase">
-              {valueLabel}
-            </span>
-          ) : (
-            <span className="text-textGrey italic">{placeholder}</span>
-          )}
+          <div className="w-full">
+            {value ? (
+              <span className="font-semibold text-textBlack uppercase">
+                {valueLabel}
+              </span>
+            ) : (
+              <span className="text-textGrey italic">{placeholder}</span>
+            )}
+          </div>
+
+          <span className={`${iconStyle} absolute right-3 p-[0.3em]`}>
+            {icon}
+          </span>
         </div>
-
-        <span className={`${iconStyle} absolute right-3 p-[0.3em]`}>
-          {icon}
-        </span>
+        {isOpen && (
+          <div className="absolute mt-1.5 flex flex-col gap-1 bg-white p-2 border border-strokeGreyTwo rounded-[20px] w-full max-h-60 overflow-y-auto shadow-lg z-10">
+            {options.map((option) => (
+              <div
+                key={option.value}
+                className="text-xs capitalize text-textDarkGrey cursor-pointer px-2 py-1 border border-transparent hover:bg-[#F6F8FA] hover:border hover:border-strokeGreyTwo hover:rounded-full"
+                onClick={() => {
+                  handleSelect(option.value);
+                  setValueLabel(option.label);
+                }}
+              >
+                {option.label}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-      {isOpen && (
-        <div className="absolute mt-1.5 flex flex-col gap-1 bg-white p-2 border border-strokeGreyTwo rounded-[20px] w-full max-h-60 overflow-y-auto shadow-lg z-10">
-          {options.map((option) => (
-            <div
-              key={option.value}
-              className="text-xs capitalize text-textDarkGrey cursor-pointer px-2 py-1 border border-transparent hover:bg-[#F6F8FA] hover:border hover:border-strokeGreyTwo hover:rounded-full"
-              onClick={() => {
-                handleSelect(option.value);
-                setValueLabel(option.label);
-              }}
-            >
-              {option.label}
-            </div>
-          ))}
-        </div>
+      {errorMessage && (
+        <p className="-mt-3 px-[1.3em] text-xs text-errorTwo font-semibold w-full">
+          {errorMessage}
+        </p>
       )}
-    </div>
+    </>
   );
 };
 
