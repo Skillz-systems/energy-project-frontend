@@ -113,6 +113,7 @@ const Settings = () => {
                       allRolesLoading={fetchAllRoles.isLoading}
                       allRolesError={fetchAllRoles.error}
                       allRolesRefresh={fetchAllRoles.mutate}
+                      allRolesErrorStates={fetchAllRoles.errorStates}
                       rolesList={rolesList}
                     />
                   }

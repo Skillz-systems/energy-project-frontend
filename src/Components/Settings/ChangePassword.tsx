@@ -9,7 +9,7 @@ import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 
 const changePasswordSchema = z
   .object({
-    oldPassword: z.string(),
+    oldPassword: z.string().trim(),
     newPassword: z
       .string()
       .min(8, { message: "New password must be at least 8 characters long" })
@@ -21,10 +21,14 @@ const changePasswordSchema = z
       })
       .regex(/[0-9]/, {
         message: "New password must contain at least one number",
-      }),
-    confirmPassword: z.string().min(8, {
-      message: "Confirmation password must be at least 8 characters long",
-    }),
+      })
+      .trim(),
+    confirmPassword: z
+      .string()
+      .min(8, {
+        message: "Confirmation password must be at least 8 characters long",
+      })
+      .trim(),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: "New password and confirmation password must match",
@@ -65,27 +69,17 @@ const ChangePassword = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-
     setLoading(true);
-    // Remove all spaces from password fields
-    if (formData) {
-      formData.oldPassword = formData.oldPassword.replace(/\s+/g, "");
-      formData.newPassword = formData.newPassword.replace(/\s+/g, "");
-      formData.confirmPassword = formData.confirmPassword.replace(/\s+/g, "");
-    }
 
     try {
-      // Validate form data using Zod schema
-      changePasswordSchema.parse(formData);
-
-      // Use apiCall to handle the password change
+      const validatedData = changePasswordSchema.parse(formData);
       await apiCall({
         endpoint: `/v1/auth/change-password`,
         method: "post",
         data: {
-          oldPassword: formData.oldPassword,
-          password: formData.newPassword,
-          confirmPassword: formData.confirmPassword,
+          oldPassword: validatedData.oldPassword,
+          password: validatedData.newPassword,
+          confirmPassword: validatedData.confirmPassword,
         },
         successMessage: "Password changed successfully!",
       });
@@ -112,10 +106,7 @@ const ChangePassword = () => {
     formData.oldPassword || formData.newPassword || formData.confirmPassword;
 
   return (
-    <form
-      className="relative flex flex-col justify-end bg-white p-4 w-full lg:max-w-[700px] min-h-[414px] border-[0.6px] border-strokeGreyThree rounded-[20px]"
-      onSubmit={handleSubmit}
-    >
+    <form className="relative flex flex-col justify-end bg-white p-4 w-full lg:max-w-[700px] min-h-[414px] border-[0.6px] border-strokeGreyThree rounded-[20px]">
       <img
         src={lightCheckeredBg}
         alt="Light Checkered Background"
@@ -133,9 +124,6 @@ const ChangePassword = () => {
           onChange={handleChange}
           required={true}
           placeholder="OLD PASSWORD"
-          style={`${
-            isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-          } max-w-none`}
           errorMessage={errors.oldPassword || ""}
           iconRight={
             <img
@@ -153,9 +141,6 @@ const ChangePassword = () => {
           onChange={handleChange}
           required={true}
           placeholder="ENTER NEW PASSWORD"
-          style={`${
-            isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-          } max-w-none`}
           errorMessage={errors.newPassword || ""}
           iconRight={
             <img
@@ -173,9 +158,6 @@ const ChangePassword = () => {
           onChange={handleChange}
           required={true}
           placeholder="CONFIRM NEW PASSWORD"
-          style={`${
-            isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-          } max-w-none`}
           errorMessage={errors.confirmPassword || ""}
           iconRight={
             <img
@@ -188,8 +170,10 @@ const ChangePassword = () => {
         <div className="flex items-center justify-center w-full pt-5 pb-5">
           <ProceedButton
             type="submit"
-            loading={loading}
             variant={isFormFilled ? "gradient" : "gray"}
+            loading={loading}
+            disabled={!isFormFilled}
+            onClick={handleSubmit}
           />
         </div>
       </div>

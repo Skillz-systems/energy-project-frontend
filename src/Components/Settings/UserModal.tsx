@@ -27,26 +27,6 @@ const UserModal = ({
     true
   );
 
-  // const handleCancelClick = () => {
-  //   if (unsavedChanges) {
-  //     // setErrorMessage(
-  //     //   "You have unsaved changes. Please submit your changes before exiting edit mode."
-  //     // );
-  //   } else {
-  //     setDisplayInput(false);
-  //     // setErrorMessage("");
-
-  //     // setFormData({
-  //     //   firstname: data?.firstname || "",
-  //     //   lastname: data?.lastname || "",
-  //     //   email: data?.email || "",
-  //     //   phone: data?.phone || "",
-  //     //   location: data?.location || "",
-  //     // });
-  //     // setDesignation(data?.role?.id || "");
-  //   }
-  // };
-
   const handleCallClick = () => {
     const callURL = `tel:${data?.phone}`;
     window.open(callURL, "_self");
@@ -197,6 +177,7 @@ const UserModal = ({
               errorStates={errorStates}
               refreshData={mutate}
               className="pb-44"
+              errorMessage="Failed to fetch staff information"
             >
               <StaffDetails
                 data={data}

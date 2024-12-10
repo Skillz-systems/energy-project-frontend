@@ -21,17 +21,19 @@ interface UserEntries {
 
 // Helper function to map the API data to the desired format
 const generateUserEntries = (data: any): UserEntries[] => {
-  const entries: UserEntries[] = data?.users.map((user: any, index: number) => {
-    return {
-      id: user?.id,
-      no: index + 1,
-      name: `${user?.firstname} ${user?.lastname}`,
-      email: user?.email,
-      location: user?.location || "N/A",
-      role: user?.role?.role.toUpperCase(),
-      status: user?.status.toUpperCase(),
-    };
-  });
+  const entries: UserEntries[] = data?.users?.map(
+    (user: any, index: number) => {
+      return {
+        id: user?.id,
+        no: index + 1,
+        name: `${user?.firstname} ${user?.lastname}`,
+        email: user?.email,
+        location: user?.location || "N/A",
+        role: user?.role?.role?.toUpperCase(),
+        status: user?.status?.toUpperCase(),
+      };
+    }
+  );
 
   return entries;
 };

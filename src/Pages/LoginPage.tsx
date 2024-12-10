@@ -158,6 +158,7 @@ const LoginPage = () => {
                 type="submit"
                 loading={loading}
                 variant={email || password ? "gradient" : "gray"}
+                disabled={!email || !password}
               />
               {isForgotPassword ? (
                 <em

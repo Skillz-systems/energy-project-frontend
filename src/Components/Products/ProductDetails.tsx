@@ -221,7 +221,12 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 
       {displayInput ? (
         <div className="flex items-center justify-center w-full pt-5 pb-5">
-          <ProceedButton type="submit" loading={loading} variant={"gray"} />
+          <ProceedButton
+            type="submit"
+            loading={loading}
+            variant={"gray"}
+            disabled={false}
+          />
         </div>
       ) : (
         <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">

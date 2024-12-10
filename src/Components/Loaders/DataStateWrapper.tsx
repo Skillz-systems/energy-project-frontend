@@ -7,6 +7,7 @@ import { KeyedMutator } from "swr";
 export type DataStateWrapperProps = {
   isLoading: boolean;
   error: string | null;
+  errorMessage?: string;
   errorStates: ApiErrorStatesType;
   errorClass?: string;
   refreshData: KeyedMutator<any>;
@@ -18,6 +19,7 @@ export const DataStateWrapper: React.FC<DataStateWrapperProps> = ({
   isLoading,
   error,
   errorStates,
+  errorMessage,
   errorClass,
   refreshData,
   className,
@@ -28,7 +30,7 @@ export const DataStateWrapper: React.FC<DataStateWrapperProps> = ({
   if (error)
     return (
       <ErrorComponent
-        message="Failed to fetch user information."
+        message={errorMessage || "Failed to fetch data."}
         className={errorClass}
         refreshData={refreshData}
         errorData={errorStates}

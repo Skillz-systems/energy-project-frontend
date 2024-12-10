@@ -131,9 +131,6 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
 
           if (formData.productImage instanceof File) {
             formSubmissionData.append("productImage", formData.productImage);
-          } else {
-            alert("No Image");
-            return;
           }
 
           // Make the API call
@@ -162,12 +159,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
 
         setLoading(false);
         await refreshTable!();
-      } catch (error) {
-        console.error("Product creation failed:", error);
-      } finally {
-        setLoading(false);
         setIsOpen(false);
-
         if (formType === "newProduct") {
           setFormData(defaultFormData);
           rootStore.productStore.emptyProducts();
@@ -176,6 +168,9 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
             categoryName: "",
           });
         }
+      } catch (error) {
+        setLoading(false);
+        console.error("Product creation failed:", error);
       }
     };
 
@@ -320,7 +315,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                     name="productImage"
                     label="PRODUCT IMAGE"
                     onChange={handleInputChange}
-                    required={false}
+                    required={true}
                     placeholder="Upload Product Image"
                     style={
                       isFormFilled ? "border-strokeCream" : "border-strokeGrey"
@@ -350,6 +345,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
               type="submit"
               loading={loading}
               variant={isFormFilled ? "gradient" : "gray"}
+              disabled={formType === "newProduct" ? !isFormFilled : false}
             />
           </form>
         </Modal>

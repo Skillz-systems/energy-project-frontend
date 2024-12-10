@@ -313,7 +313,12 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
 
       {displayInput && (
         <div className="flex items-center justify-center w-full pt-5 pb-5">
-          <ProceedButton type="submit" loading={loading} variant={"gray"} />
+          <ProceedButton
+            type="submit"
+            loading={loading}
+            variant={"gray"}
+            disabled={false}
+          />
         </div>
       )}
     </form>

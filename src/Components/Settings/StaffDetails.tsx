@@ -6,7 +6,7 @@ import { useApiCall } from "@/utils/useApiCall";
 import { KeyedMutator } from "swr";
 import { Tag } from "../Products/ProductDetails";
 import { z } from "zod";
-import { SmallInput } from "../InputComponent/Input";
+import { SmallInput, SmallSelectInput } from "../InputComponent/Input";
 
 // Define the validation schema using Zod
 const userSchema = z
@@ -112,11 +112,11 @@ const StaffDetails = ({
 
     if (unsavedChanges) {
       try {
-        const validationData = userSchema.parse(formData);
+        const validatedData = userSchema.parse(formData);
         await apiCall({
           endpoint: `/v1/users/${data.id}`,
           method: "patch",
-          data: validationData,
+          data: validatedData,
           successMessage: "User updated successfully!",
         });
         await refreshUserData();
@@ -153,7 +153,7 @@ const StaffDetails = ({
           STAFF ID
         </p>
         <DetailComponent label="User ID" value={data.id} parentClass="mb-2" />
-        <div className="flex items-center justify-between bg-white w-full text-textDarkGrey text-xs rounded-full z-10 p-2.5 h-[44px] border-[0.6px] border-strokeGreyThree">
+        <div className="flex items-start justify-between bg-white w-full text-textDarkGrey text-xs rounded-full z-10 p-2.5 h-[44px] border-[0.6px] border-strokeGreyThree">
           <span className="flex items-center justify-center bg-[#F6F8FA] text-textBlack text-xs p-2 h-[24px] rounded-full">
             Designation
           </span>
@@ -162,29 +162,20 @@ const StaffDetails = ({
               {data.role.role}
             </span>
           ) : (
-            <select
+            <SmallSelectInput
               name="role"
-              value={designation || data.role.id}
+              value={designation}
+              options={rolesList || []}
               onChange={(e) => {
                 setDesignation(e.target.value);
               }}
               required={false}
-              className="px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
-            >
-              {rolesList?.map((option: any) => (
-                <option
-                  key={option.value}
-                  value={option.value}
-                  className="capitalize"
-                >
-                  {option.label}
-                </option>
-              )) || []}
-            </select>
+              placeholder="Select a role"
+            />
           )}
         </div>
         {!rolesList && displayInput && (
-          <p className="mt-2 px-[1.3em] text-xs text-right text-errorTwo font-semibold w-full">
+          <p className="mt-2 pr-1.5 text-xs text-right text-errorTwo font-semibold w-full">
             Failed to fetch user roles.
           </p>
         )}

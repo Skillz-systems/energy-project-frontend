@@ -181,6 +181,7 @@ const CreateNewAgents = ({
           type="submit"
           loading={loading}
           variant={isFormFilled ? "gradient" : "gray"}
+          disabled={!isFormFilled}
         />
       </form>
     </Modal>

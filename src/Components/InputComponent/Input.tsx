@@ -191,6 +191,55 @@ export const SmallInput = ({
   );
 };
 
+export const SmallSelectInput = ({
+  name,
+  value,
+  options,
+  onChange,
+  required = false,
+  placeholder = "Select an option",
+  className = "",
+  errorMessage,
+}: {
+  name: string;
+  value: string | number;
+  options: { label: string; value: string }[];
+  onChange: (event: ChangeEvent<HTMLSelectElement>) => void;
+  required?: boolean;
+  placeholder?: string;
+  className?: string;
+  errorMessage?: string;
+}) => {
+  const mobileStyle = useBreakpoint("max", 500);
+  return (
+    <div className={`${!mobileStyle ? "w-full max-w-[160px]" : "w-max"}`}>
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        required={required}
+        className={`px-2 py-1 w-full border-[0.6px] border-strokeGreyThree rounded-full ${className}`}
+      >
+        <option value="">{placeholder}</option>
+        {options.map((option: any) => (
+          <option
+            key={option.value}
+            value={option.value}
+            className="w-full capitalize"
+          >
+            {option.label}
+          </option>
+        ))}
+      </select>
+      {errorMessage && (
+        <p className="mt-0.5 px-2 text-[11px] text-errorTwo font-semibold w-full">
+          {errorMessage}
+        </p>
+      )}
+    </div>
+  );
+};
+
 type ModalInputType = {
   type: string;
   name: string;
