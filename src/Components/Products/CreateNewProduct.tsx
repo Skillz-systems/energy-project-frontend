@@ -15,6 +15,7 @@ import rootStore from "../../stores/rootStore";
 import { CardComponent } from "../CardComponents/CardComponent";
 import { Modal } from "@/Components/ModalComponent/Modal";
 import { z } from "zod";
+import { ProductStore } from "@/stores/ProductStore";
 
 export type ProductFormType = "newProduct" | "newCategory";
 
@@ -334,7 +335,11 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                         })}
                       </div>
                     }
-                    errorMessage={getFieldError("inventoryBatchId")}
+                    errorMessage={
+                      !ProductStore.doesProductCategoriesExist
+                        ? "Failed to fetch inventory categories"
+                        : getFieldError("inventoryBatchId")
+                    }
                   />
                   <SelectMultipleInput
                     label="Payment Modes"

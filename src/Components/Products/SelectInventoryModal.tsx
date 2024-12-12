@@ -1,11 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useTransition,
-} from "react";
-// import { Modal } from "../ModalComponent/Modal";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import TabComponent from "../TabComponent/TabComponent";
 import ListPagination from "../PaginationComponent/ListPagination";
 import { CardComponent } from "../CardComponents/CardComponent";
@@ -13,10 +6,12 @@ import rootStore from "../../stores/rootStore";
 import { observer } from "mobx-react-lite";
 import { TableSearch } from "../TableSearchComponent/TableSearch";
 import searchIcon from "../../assets/search.svg";
+import wrong from "../../assets/table/wrong.png";
 import { useGetRequest } from "@/utils/useApiCall";
-import LoadingSpinner from "../Loaders/LoadingSpinner";
 import { Modal } from "@/Components/ModalComponent/Modal";
 import { TabNamesType } from "../Inventory/InventoryDetailModal";
+import { DataStateWrapper } from "../Loaders/DataStateWrapper";
+import { ProductStore } from "@/stores/ProductStore";
 
 type ListDataType = {
   productId: string;
@@ -80,7 +75,6 @@ type AllInventoryType = {
 
 const SelectInventoryModal = observer(
   ({ isInventoryOpen, setIsInventoryOpen }: InventoryModalProps) => {
-    const [isPending, startTransition] = useTransition();
     const [queryValue, setQueryValue] = useState<string>("");
     const [inventoryCategoryId, setInventoryCategoryId] = useState<string>("");
     const [dynamicListData, setDynamicListData] = useState<
@@ -95,6 +89,14 @@ const SelectInventoryModal = observer(
       "/v1/inventory/categories",
       false
     );
+
+    useEffect(() => {
+      if (fetchAllInventoryCategories?.error) {
+        ProductStore.setProductCategoriesExist(false);
+      } else {
+        ProductStore.setProductCategoriesExist(true);
+      }
+    }, [fetchAllInventoryCategories]);
 
     const tabNames: TabNamesType[] = useMemo(() => {
       return (
@@ -149,11 +151,6 @@ const SelectInventoryModal = observer(
               ...prevListData.filter((d) => d.name !== tabContent),
               { name: tabContent, data: tabData },
             ]);
-          } else {
-            console.error(
-              "No Tab data fetched for inventoryCategoryId:",
-              inventoryCategoryId
-            );
           }
         }
       };
@@ -201,14 +198,12 @@ const SelectInventoryModal = observer(
 
     const handleTabSelect = useCallback(
       (key: string) => {
-        startTransition(() => {
-          setTabContent(key);
-          const selectedTab = tabNames.find(
-            (tab: { key: string }) => tab.key === key
-          );
-          setInventoryCategoryId(selectedTab?.id || "");
-          setCurrentPage(1);
-        });
+        setTabContent(key);
+        const selectedTab = tabNames.find(
+          (tab: { key: string }) => tab.key === key
+        );
+        setInventoryCategoryId(selectedTab?.id || "");
+        setCurrentPage(1);
       },
       [tabNames]
     );
@@ -232,13 +227,13 @@ const SelectInventoryModal = observer(
         }
         rightHeaderContainerClass="h-full items-start"
       >
-        {fetchAllInventoryCategories.isLoading ? (
-          <LoadingSpinner parentClass="absolute top-[50%] w-full" />
-        ) : fetchAllInventoryCategories.error ? (
-          <div>
-            Oops, an error occurred: {fetchAllInventoryCategories.error}
-          </div>
-        ) : (
+        <DataStateWrapper
+          isLoading={fetchAllInventoryCategories?.isLoading}
+          error={fetchAllInventoryCategories?.error}
+          errorStates={fetchAllInventoryCategories?.errorStates}
+          refreshData={fetchAllInventoryCategories?.mutate}
+          errorMessage="Failed to fetch inventory categories"
+        >
           <div className="flex flex-col gap-2 px-4 py-8">
             <TabComponent
               tabs={tabNames.map(({ name, key }) => ({
@@ -304,42 +299,55 @@ const SelectInventoryModal = observer(
                 icon={searchIcon}
               />
             </div>
-            <div className="flex flex-wrap items-center gap-4">
-              {isPending ? (
-                <LoadingSpinner parentClass="absolute top-[50%] w-full" />
-              ) : paginatedData?.length > 0 ? (
-                paginatedData?.map((data, index) => {
-                  return (
-                    <CardComponent
-                      key={`${data.productId}-${index}`}
-                      variant={"inventoryTwo"}
-                      dropDownList={dropDownList}
-                      productId={data.productId}
-                      productImage={data.productImage}
-                      productTag={data.productTag}
-                      productName={data.productName}
-                      productPrice={data.productPrice}
-                      onSelectProduct={(productInfo) => {
-                        if (productInfo)
-                          rootStore.productStore.addProduct(productInfo);
-                      }}
-                      onRemoveProduct={(productId) =>
-                        rootStore.productStore.removeProduct(productId)
-                      }
-                      isProductSelected={rootStore.productStore.products.some(
-                        (p) => p.productId === data.productId
-                      )}
+            <DataStateWrapper
+              isLoading={fetchInventoryCategoryById?.isLoading}
+              error={fetchInventoryCategoryById?.error}
+              errorStates={fetchInventoryCategoryById?.errorStates}
+              refreshData={fetchInventoryCategoryById?.mutate}
+              errorMessage={`Failed to fetch inventory list for "${getTabName}".`}
+            >
+              <div className="flex flex-wrap items-center justify-center h-full gap-4">
+                {paginatedData?.length > 0 ? (
+                  paginatedData?.map((data, index) => {
+                    return (
+                      <CardComponent
+                        key={`${data.productId}-${index}`}
+                        variant={"inventoryTwo"}
+                        dropDownList={dropDownList}
+                        productId={data.productId}
+                        productImage={data.productImage}
+                        productTag={data.productTag}
+                        productName={data.productName}
+                        productPrice={data.productPrice}
+                        onSelectProduct={(productInfo) => {
+                          if (productInfo)
+                            rootStore.productStore.addProduct(productInfo);
+                        }}
+                        onRemoveProduct={(productId) =>
+                          rootStore.productStore.removeProduct(productId)
+                        }
+                        isProductSelected={rootStore.productStore.products.some(
+                          (p) => p.productId === data.productId
+                        )}
+                      />
+                    );
+                  })
+                ) : (
+                  <div className="flex flex-col items-center justify-center w-full h-full pt-16">
+                    <img
+                      src={wrong}
+                      alt="No data available"
+                      className="w-[100px]"
                     />
-                  );
-                })
-              ) : (
-                <p className="text-sm text-textBlack font-medium">
-                  No Data {getTabName} Available
-                </p>
-              )}
-            </div>
+                    <p className="text-textBlack font-medium">
+                      No data available
+                    </p>
+                  </div>
+                )}
+              </div>
+            </DataStateWrapper>
           </div>
-        )}
+        </DataStateWrapper>
       </Modal>
     );
   }

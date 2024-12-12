@@ -12,6 +12,7 @@ const ProductModel = types.model({
 const productStore = types
   .model({
     products: types.array(ProductModel),
+    doesProductCategoriesExist: types.boolean,
   })
   .actions((self) => ({
     addProduct(product: any) {
@@ -41,10 +42,14 @@ const productStore = types
     emptyProducts() {
       self.products.clear();
     },
+    setProductCategoriesExist(value: boolean) {
+      self.doesProductCategoriesExist = value;
+    },
   }));
 
 export const ProductStore = productStore.create({
   products: [],
+  doesProductCategoriesExist: true,
 });
 
 export type ProductStoreType = Instance<typeof productStore>;
