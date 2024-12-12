@@ -127,6 +127,7 @@ const Settings = () => {
                       data={fetchAllUsers.data}
                       isLoading={fetchAllUsers.isLoading}
                       refreshTable={fetchAllUsers.mutate}
+                      error={fetchAllUsers.error}
                       errorData={fetchAllUsers.errorStates}
                     />
                   }
@@ -136,13 +137,15 @@ const Settings = () => {
           </section>
         </div>
       </PageLayout>
-      <CreateNewUserModal
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        rolesList={rolesList}
-        allUsersRefresh={fetchAllRoles.mutate}
-        allRolesError={fetchAllRoles.error}
-      />
+      {isOpen && (
+        <CreateNewUserModal
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          rolesList={rolesList}
+          allUsersRefresh={fetchAllRoles.mutate}
+          allRolesError={fetchAllRoles.error}
+        />
+      )}
     </>
   );
 };

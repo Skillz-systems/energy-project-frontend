@@ -4,6 +4,7 @@ import { KeyedMutator } from "swr";
 import { Input, SelectInput } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { useApiCall } from "../../utils/useApiCall";
+import { z } from "zod";
 
 interface CreateNewAgentsProps {
   isOpen: boolean;
@@ -11,12 +12,35 @@ interface CreateNewAgentsProps {
   refreshTable: KeyedMutator<any>;
 }
 
+const agentSchema = z.object({
+  firstname: z.string().min(1, "First name is required"),
+  lastname: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email address"),
+  phoneNumber: z
+    .string()
+    .trim()
+    .max(20, "Phone number cannot be more than 20 digits")
+    .transform((val) => val.replace(/\s+/g, ""))
+    .optional(),
+  addressType: z
+    .enum(["HOME", "WORK"], {
+      errorMap: () => ({ message: "Please select an address type" }),
+    })
+    .default("HOME"),
+  location: z.string().min(1, "Location is required"),
+  longitude: z.string().optional(),
+  latitude: z.string().optional(),
+  emailVerified: z.boolean(),
+});
+
+type AgentFormData = z.infer<typeof agentSchema>;
+
 const defaultAgentsFormData = {
   firstname: "",
   lastname: "",
   email: "",
   phoneNumber: "",
-  addressType: "",
+  addressType: "HOME" as "HOME" | "WORK",
   location: "",
   longitude: "",
   latitude: "",
@@ -28,9 +52,13 @@ const CreateNewAgents = ({
   setIsOpen,
   refreshTable,
 }: CreateNewAgentsProps) => {
-  const [formData, setFormData] = useState(defaultAgentsFormData);
-  const [loading, setLoading] = useState(false);
   const { apiCall } = useApiCall();
+  const [formData, setFormData] = useState<AgentFormData>(
+    defaultAgentsFormData
+  );
+  const [loading, setLoading] = useState(false);
+  const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -40,6 +68,7 @@ const CreateNewAgents = ({
       ...prev,
       [name]: value,
     }));
+    resetFormErrors(name);
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -47,44 +76,49 @@ const CreateNewAgents = ({
       ...prev,
       [name]: value,
     }));
+    resetFormErrors(name);
+  };
+
+  const resetFormErrors = (name: string) => {
+    // Clear the error for this field when the user starts typing
+    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+    setApiError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
-    if (!isFormFilled) return;
-
     try {
-      const agentData = {
-        firstname: formData.firstname,
-        lastname: formData.lastname,
-        email: formData.email,
-        addressType: formData.addressType,
-        location: formData.location,
-        longitude: formData.longitude || "",
-        latitude: formData.latitude || "",
-        emailVerified: true,
-      };
-
+      const validatedData = agentSchema.parse(formData);
       await apiCall({
         endpoint: "/v1/agents/create",
         method: "post",
-        data: agentData,
+        data: validatedData,
         successMessage: "Agent created successfully!",
       });
 
-      setLoading(false);
       await refreshTable();
       setIsOpen(false);
       setFormData(defaultAgentsFormData);
-    } catch (error) {
-      console.error("Agent creation failed:", error);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        setFormErrors(error.issues);
+      } else {
+        const message =
+          error?.response?.data?.message || "Internal Server Error";
+        setApiError(`Agent creation failed: ${message}.`);
+      }
+    } finally {
       setLoading(false);
     }
   };
 
-  const isFormFilled = Object.values(formData).some((value) => Boolean(value));
+  const isFormFilled = agentSchema.safeParse(formData).success;
+
+  const getFieldError = (fieldName: string) => {
+    return formErrors.find((error) => error.path[0] === fieldName)?.message;
+  };
 
   const renderForm = () => {
     const formFields = (
@@ -97,7 +131,7 @@ const CreateNewAgents = ({
           onChange={handleInputChange}
           placeholder="First Name"
           required={true}
-          style={isFormFilled ? "border-strokeCream" : "border-strokeGrey"}
+          errorMessage={getFieldError("firstname")}
         />
         <Input
           type="text"
@@ -107,7 +141,7 @@ const CreateNewAgents = ({
           onChange={handleInputChange}
           placeholder="Last Name"
           required={true}
-          style={isFormFilled ? "border-strokeCream" : "border-strokeGrey"}
+          errorMessage={getFieldError("lastname")}
         />
         <Input
           type="email"
@@ -117,7 +151,7 @@ const CreateNewAgents = ({
           onChange={handleInputChange}
           placeholder="Email"
           required={true}
-          style={isFormFilled ? "border-strokeCream" : "border-strokeGrey"}
+          errorMessage={getFieldError("email")}
         />
         <SelectInput
           label="Address Type (Home/Work)"
@@ -131,7 +165,7 @@ const CreateNewAgents = ({
           }
           required={true}
           placeholder="Address type (Home/Work)"
-          style={isFormFilled ? "border-strokeCream" : "border-strokeGrey"}
+          errorMessage={getFieldError("addressType")}
         />
         <Input
           type="text"
@@ -141,7 +175,7 @@ const CreateNewAgents = ({
           onChange={handleInputChange}
           placeholder="Location"
           required={true}
-          style={isFormFilled ? "border-strokeCream" : "border-strokeGrey"}
+          errorMessage={getFieldError("location")}
         />
       </>
     );
@@ -154,11 +188,12 @@ const CreateNewAgents = ({
       isOpen={isOpen}
       onClose={() => setIsOpen(false)}
       layout="right"
-      bodyStyle="pb-[100px]"
+      bodyStyle="pb-44"
     >
       <form
         className="flex flex-col items-center bg-white"
         onSubmit={handleSubmit}
+        noValidate
       >
         <div
           className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${
@@ -174,15 +209,20 @@ const CreateNewAgents = ({
             New Agents
           </h2>
         </div>
-        <div className="flex flex-col items-center justify-center w-full px-[2.5em] gap-4 py-8">
+        <div className="flex flex-col items-center justify-center w-full px-4 gap-4 py-8">
           {renderForm()}
+          {apiError && (
+            <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
+              {apiError}
+            </div>
+          )}
+          <ProceedButton
+            type="submit"
+            loading={loading}
+            variant={isFormFilled ? "gradient" : "gray"}
+            disabled={!isFormFilled}
+          />
         </div>
-        <ProceedButton
-          type="submit"
-          loading={loading}
-          variant={isFormFilled ? "gradient" : "gray"}
-          disabled={!isFormFilled}
-        />
       </form>
     </Modal>
   );

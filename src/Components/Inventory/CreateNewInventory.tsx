@@ -306,7 +306,6 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
       setSubCatgoryFormData(defaultSubCategoryData);
       setIsOpen(false);
     } catch (error: any) {
-      console.error(error);
       if (error instanceof z.ZodError) {
         setFormErrors(error.issues);
       } else {

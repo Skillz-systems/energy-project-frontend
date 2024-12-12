@@ -222,7 +222,6 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
         rootStore.productStore.emptyProducts();
         setOtherFormData(OtherSubmissonData);
       } catch (error: any) {
-        console.error(error);
         if (error instanceof z.ZodError) {
           setFormErrors(error.issues);
         } else {

@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Table } from "../TableComponent/Table";
 import { CardComponent } from "../CardComponents/CardComponent";
 import AgentsModal from "./AgentsModal";
-import { useApiCall } from "../../utils/useApiCall";
+import { ApiErrorStatesType, useApiCall } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
+import { ErrorComponent } from "@/Pages/ErrorPage";
 
 type UserType = {
   id: string;
@@ -73,10 +74,14 @@ const AgentsTable = ({
   agentData,
   isLoading,
   refreshTable,
+  error,
+  errorData,
 }: {
   agentData: any;
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
+  error: any;
+  errorData: ApiErrorStatesType;
 }) => {
   const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -218,62 +223,73 @@ const AgentsTable = ({
 
   return (
     <>
-      <Table
-        tableType="card"
-        tableTitle="ALL AGENTS"
-        tableClassname="flex flex-wrap items-center gap-4"
-        tableData={getTableData()}
-        loading={queryLoading || isLoading}
-        filterList={filterList}
-        cardComponent={(data) => {
-          return data?.map((item: AgentEntries, index) => (
-            <CardComponent
-              key={index}
-              variant="agent"
-              productId={item.id}
-              name={item.name}
-              status={item.status}
-              onGoingSales={item.onGoingSales}
-              inventoryInPossession={item.inventoryInPossession}
-              sales={item.sales}
-              registeredCustomers={item.registeredCustomers}
-              handleCallClick={() => {
-                if (item.email) {
-                  const callURL = `tel:${item.email}`;
-                  window.open(callURL, "_self");
-                }
-              }}
-              handleWhatsAppClick={() => {
-                if (item.phone) {
-                  const whatsappURL = `https://wa.me/${item.phone}`;
-                  window.open(whatsappURL, "_blank");
-                }
-              }}
-              dropDownList={dropDownList}
+      {!error ? (
+        <div className="w-full">
+          <Table
+            tableType="card"
+            tableTitle="ALL AGENTS"
+            tableClassname="flex flex-wrap items-center gap-4"
+            tableData={getTableData()}
+            loading={queryLoading || isLoading}
+            filterList={filterList}
+            cardComponent={(data) => {
+              return data?.map((item: AgentEntries, index) => (
+                <CardComponent
+                  key={index}
+                  variant="agent"
+                  productId={item.id}
+                  name={item.name}
+                  status={item.status}
+                  onGoingSales={item.onGoingSales}
+                  inventoryInPossession={item.inventoryInPossession}
+                  sales={item.sales}
+                  registeredCustomers={item.registeredCustomers}
+                  handleCallClick={() => {
+                    if (item.email) {
+                      const callURL = `tel:${item.email}`;
+                      window.open(callURL, "_self");
+                    }
+                  }}
+                  handleWhatsAppClick={() => {
+                    if (item.phone) {
+                      const whatsappURL = `https://wa.me/${item.phone}`;
+                      window.open(whatsappURL, "_blank");
+                    }
+                  }}
+                  dropDownList={dropDownList}
+                />
+              ));
+            }}
+            refreshTable={async () => {
+              await refreshTable();
+              setQueryData(null);
+            }}
+            queryValue={isSearchQuery ? queryValue : ""}
+            // pagination={{
+            //   page: pagination.page,
+            //   limit: pagination.limit,
+            //   total: pagination.total,
+            //   lastPage: pagination.lastPage,
+            //   onPageChange: (page) => fetchAgents(page)
+            // }}
+          />
+          {isOpen && agentId && (
+            <AgentsModal
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              agentID={agentId}
+              refreshTable={refreshTable}
             />
-          ));
-        }}
-        refreshTable={async () => {
-          await refreshTable();
-          setQueryData(null);
-        }}
-        queryValue={isSearchQuery ? queryValue : ""}
-        // pagination={{
-        //   page: pagination.page,
-        //   limit: pagination.limit,
-        //   total: pagination.total,
-        //   lastPage: pagination.lastPage,
-        //   onPageChange: (page) => fetchAgents(page)
-        // }}
-      />
-      {isOpen ? (
-        <AgentsModal
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-          agentID={agentId}
-          refreshTable={refreshTable}
+          )}
+        </div>
+      ) : (
+        <ErrorComponent
+          message="Failed to fetch agent list."
+          className="rounded-[20px]"
+          refreshData={refreshTable}
+          errorData={errorData}
         />
-      ) : null}
+      )}
     </>
   );
 };

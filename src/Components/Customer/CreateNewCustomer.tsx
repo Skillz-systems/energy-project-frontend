@@ -4,12 +4,42 @@ import { KeyedMutator } from "swr";
 import { Modal } from "../ModalComponent/Modal";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { Input, SelectInput } from "../InputComponent/Input";
+import { z } from "zod";
 
 interface CreatNewCustomerProps {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   allCustomerRefresh: KeyedMutator<any>;
 }
+
+const customerSchema = z.object({
+  firstname: z.string().min(1, "First name is required"),
+  lastname: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email address"),
+  phone: z
+    .string()
+    .trim()
+    .min(1, "Phone number is required")
+    .max(20, "Phone number cannot be more than 20 digits")
+    .transform((val) => val.replace(/\s+/g, "")),
+  location: z.string().trim().min(1, "Address is required"),
+  addressType: z
+    .enum(["HOME", "WORK"], {
+      errorMap: () => ({ message: "Please select an address type" }),
+    })
+    .default("HOME"),
+});
+
+type CustomerFormData = z.infer<typeof customerSchema>;
+
+const defaultFormData = {
+  firstname: "",
+  lastname: "",
+  email: "",
+  phone: "",
+  addressType: "HOME" as "HOME" | "WORK",
+  location: "",
+};
 
 const CreateNewCustomer = ({
   isOpen,
@@ -18,15 +48,9 @@ const CreateNewCustomer = ({
 }: CreatNewCustomerProps) => {
   const { apiCall } = useApiCall();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    firstname: "",
-    lastname: "",
-    email: "",
-    phone: "",
-    address: "",
-    addressType: "",
-    location: "",
-  });
+  const [formData, setFormData] = useState<CustomerFormData>(defaultFormData);
+  const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -36,6 +60,7 @@ const CreateNewCustomer = ({
       ...prev,
       [name]: value,
     }));
+    resetFormErrors(name);
   };
 
   const handleSelectChange = (name: string, values: string) => {
@@ -43,45 +68,49 @@ const CreateNewCustomer = ({
       ...prev,
       [name]: values,
     }));
+    resetFormErrors(name);
+  };
+
+  const resetFormErrors = (name: string) => {
+    // Clear the error for this field when the user starts typing
+    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+    setApiError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    if (!formData) return;
 
     try {
-      const newData = {
-        ...formData,
-        phone: formData.phone.replace(/\s+/g, ""),
-      };
+      const validatedData = customerSchema.parse(formData);
       await apiCall({
         endpoint: "/v1/customers/create",
         method: "post",
-        data: newData,
+        data: validatedData,
         successMessage: "Customer created successfully!",
       });
 
       await allCustomerRefresh();
-      setLoading(false);
       setIsOpen(false);
-      setFormData({
-        firstname: "",
-        lastname: "",
-        email: "",
-        phone: "",
-        address: "",
-        addressType: "",
-        location: "",
-      });
-    } catch (error) {
-      console.error("Form submission error:", error);
+      setFormData(defaultFormData);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        setFormErrors(error.issues);
+      } else {
+        const message =
+          error?.response?.data?.message || "Internal Server Error";
+        setApiError(`Customer creation failed: ${message}.`);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const isFormFilled = Object.values(formData).some((value) => Boolean(value));
+  const isFormFilled = customerSchema.safeParse(formData).success;
+
+  const getFieldError = (fieldName: string) => {
+    return formErrors.find((error) => error.path[0] === fieldName)?.message;
+  };
 
   return (
     <Modal
@@ -93,6 +122,7 @@ const CreateNewCustomer = ({
       <form
         className="flex flex-col items-center bg-white"
         onSubmit={handleSubmit}
+        noValidate
       >
         <div
           className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${
@@ -108,7 +138,7 @@ const CreateNewCustomer = ({
             New Customer
           </h2>
         </div>
-        <div className="flex flex-col items-center justify-center w-full px-[2.5em] gap-4 py-8">
+        <div className="flex flex-col items-center justify-center w-full px-4 gap-4 py-8">
           <Input
             type="text"
             name="firstname"
@@ -117,7 +147,7 @@ const CreateNewCustomer = ({
             onChange={handleInputChange}
             placeholder="First Name"
             required={true}
-            style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
+            errorMessage={getFieldError("firstname")}
           />
           <Input
             type="text"
@@ -127,7 +157,7 @@ const CreateNewCustomer = ({
             onChange={handleInputChange}
             placeholder="Last Name"
             required={true}
-            style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
+            errorMessage={getFieldError("lastname")}
           />
           <Input
             type="email"
@@ -137,7 +167,7 @@ const CreateNewCustomer = ({
             onChange={handleInputChange}
             placeholder="Email"
             required={true}
-            style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
+            errorMessage={getFieldError("email")}
           />
           <Input
             type="text"
@@ -147,7 +177,7 @@ const CreateNewCustomer = ({
             onChange={handleInputChange}
             placeholder="Phone Number"
             required={true}
-            style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
+            errorMessage={getFieldError("phone")}
           />
           <SelectInput
             label="Address Type"
@@ -161,7 +191,7 @@ const CreateNewCustomer = ({
             }
             required={false}
             placeholder="Choose Address Type"
-            style={isFormFilled ? "border-strokeCream" : "border-strokeGrey"}
+            errorMessage={getFieldError("addressType")}
           />
           <Input
             type="text"
@@ -171,15 +201,20 @@ const CreateNewCustomer = ({
             onChange={handleInputChange}
             placeholder="Address"
             required={false}
-            style={`${isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"}`}
+            errorMessage={getFieldError("location")}
+          />
+          {apiError && (
+            <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
+              {apiError}
+            </div>
+          )}
+          <ProceedButton
+            type="submit"
+            loading={loading}
+            variant={isFormFilled ? "gradient" : "gray"}
+            disabled={!isFormFilled}
           />
         </div>
-        <ProceedButton
-          type="submit"
-          loading={loading}
-          variant={isFormFilled ? "gradient" : "gray"}
-          disabled={!isFormFilled}
-        />
       </form>
     </Modal>
   );

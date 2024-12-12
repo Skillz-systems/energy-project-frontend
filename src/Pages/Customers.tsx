@@ -25,6 +25,8 @@ const Customers = () => {
     data: customerData,
     isLoading: customerLoading,
     mutate: allCustomerRefresh,
+    error: allCustomerError,
+    errorStates: allCustomerErrorStates,
   } = useGetRequest(
     `/v1/customers${customerFilter && `?status=${customerFilter}`}`,
     true,
@@ -165,6 +167,8 @@ const Customers = () => {
                         customerData={_customerData}
                         isLoading={customerLoading}
                         refreshTable={allCustomerRefresh}
+                        error={allCustomerError}
+                        errorData={allCustomerErrorStates}
                       />
                     }
                   />
@@ -174,13 +178,13 @@ const Customers = () => {
           </section>
         </div>
       </PageLayout>
-      {isOpen ? (
+      {isOpen && (
         <CreateNewCustomer
           isOpen={isOpen}
           setIsOpen={setIsOpen}
           allCustomerRefresh={allCustomerRefresh}
         />
-      ) : null}
+      )}
     </>
   );
 };

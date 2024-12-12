@@ -9,14 +9,8 @@ import TabComponent from "../TabComponent/TabComponent";
 import { Icon } from "../Settings/UserModal";
 import call from "../../assets/settings/call.svg";
 import message from "../../assets/settings/message.svg";
-import LoadingSpinner from "../Loaders/LoadingSpinner";
 import CustomerDetails, { DetailsType } from "./CustomerDetails";
-
-type DataStateWrapperProps = {
-  isLoading: boolean;
-  error: string | null;
-  children: React.ReactNode;
-};
+import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 
 const CustomerModal = ({
   isOpen,
@@ -91,17 +85,6 @@ const CustomerModal = ({
     window.open(whatsappURL, "_blank");
   };
 
-  const DataStateWrapper: React.FC<DataStateWrapperProps> = ({
-    isLoading,
-    error,
-    children,
-  }) => {
-    if (isLoading)
-      return <LoadingSpinner parentClass="absolute top-[50%] w-full" />;
-    if (error) return <div>Oops, an error occurred: {error}</div>;
-    return <>{children}</>;
-  };
-
   return (
     <Modal
       layout="right"
@@ -167,8 +150,11 @@ const CustomerModal = ({
           />
           {tabContent === "customerDetails" ? (
             <DataStateWrapper
-              isLoading={fetchSingleCustomer.isLoading}
-              error={fetchSingleCustomer.error}
+              isLoading={fetchSingleCustomer?.isLoading}
+              error={fetchSingleCustomer?.error}
+              errorStates={fetchSingleCustomer?.errorStates}
+              refreshData={fetchSingleCustomer?.mutate}
+              errorMessage="Failed to fetch customer details"
             >
               <CustomerDetails
                 {...generateCustomerEntries(fetchSingleCustomer?.data)}

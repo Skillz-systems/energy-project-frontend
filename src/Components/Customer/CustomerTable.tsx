@@ -4,7 +4,8 @@ import { Table } from "../TableComponent/Table";
 import { GoDotFill } from "react-icons/go";
 import clock from "../../assets/table/clock.svg";
 import CustomerModal from "./CustomerModal";
-import { useApiCall } from "@/utils/useApiCall";
+import { ApiErrorStatesType, useApiCall } from "@/utils/useApiCall";
+import { ErrorComponent } from "@/Pages/ErrorPage";
 
 interface CustomerEntries {
   id: string;
@@ -92,10 +93,14 @@ const CustomerTable = ({
   customerData,
   isLoading,
   refreshTable,
+  error,
+  errorData,
 }: {
   customerData: any;
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
+  error: any;
+  errorData: ApiErrorStatesType;
 }) => {
   const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -275,28 +280,37 @@ const CustomerTable = ({
 
   return (
     <>
-      <div className="w-full">
-        <Table
-          tableTitle="CUSTOMERS"
-          filterList={filterList}
-          columnList={columnList}
-          loading={queryLoading || isLoading}
-          tableData={getTableData()}
-          refreshTable={async () => {
-            await refreshTable();
-            setQueryData(null);
-          }}
-          queryValue={isSearchQuery ? queryValue : ""}
+      {!error ? (
+        <div className="w-full">
+          <Table
+            tableTitle="CUSTOMERS"
+            filterList={filterList}
+            columnList={columnList}
+            loading={queryLoading || isLoading}
+            tableData={getTableData()}
+            refreshTable={async () => {
+              await refreshTable();
+              setQueryData(null);
+            }}
+            queryValue={isSearchQuery ? queryValue : ""}
+          />
+          {isOpen && customerID && (
+            <CustomerModal
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              customerID={customerID}
+              refreshTable={refreshTable}
+            />
+          )}
+        </div>
+      ) : (
+        <ErrorComponent
+          message="Failed to fetch customer list."
+          className="rounded-[20px]"
+          refreshData={refreshTable}
+          errorData={errorData}
         />
-      </div>
-      {isOpen ? (
-        <CustomerModal
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-          customerID={customerID}
-          refreshTable={refreshTable}
-        />
-      ) : null}
+      )}
     </>
   );
 };

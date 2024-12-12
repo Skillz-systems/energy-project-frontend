@@ -43,12 +43,14 @@ const Users = ({
   data,
   isLoading,
   refreshTable,
+  error,
   errorData,
 }: {
   rolesList: any;
   data: any;
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
+  error: any;
   errorData: ApiErrorStatesType;
 }) => {
   const { apiCall } = useApiCall();
@@ -189,7 +191,7 @@ const Users = ({
   };
   return (
     <>
-      {!errorData?.errorStates[0]?.errorExists ? (
+      {!error ? (
         <div className="w-full">
           <Table
             tableTitle="USERS"

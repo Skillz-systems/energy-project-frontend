@@ -26,6 +26,8 @@ const Agent = () => {
     data: agentData,
     isLoading: agentLoading,
     mutate: allAgentRefresh,
+    error: allAgentError,
+    errorStates: allAgentErrorStates,
   } = useGetRequest(
     `/v1/agents${agentFilter && `?status=${agentFilter}`}`,
     true,
@@ -51,7 +53,7 @@ const Agent = () => {
         setAgentFilter("");
         setAgentsData(agentData);
     }
-  }, [location.pathname, agentData]);
+  }, [location.pathname, agentData, allAgentErrorStates]);
 
   const navigationList = [
     {
@@ -156,6 +158,8 @@ const Agent = () => {
                         agentData={agentsData}
                         isLoading={agentLoading}
                         refreshTable={allAgentRefresh}
+                        error={allAgentError}
+                        errorData={allAgentErrorStates}
                       />
                     }
                   />
@@ -165,13 +169,13 @@ const Agent = () => {
           </section>
         </div>
       </PageLayout>
-      {isOpen ? (
+      {isOpen && (
         <CreateNewAgents
           isOpen={isOpen}
           setIsOpen={setIsOpen}
           refreshTable={allAgentRefresh}
         />
-      ) : null}
+      )}
     </>
   );
 };

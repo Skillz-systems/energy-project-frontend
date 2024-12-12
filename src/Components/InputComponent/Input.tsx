@@ -682,7 +682,7 @@ export const SelectInput = ({
           <div className="w-full">
             {value ? (
               <span className="font-semibold text-textBlack uppercase">
-                {valueLabel}
+                {valueLabel || value}
               </span>
             ) : (
               <span className="text-textGrey italic">{placeholder}</span>

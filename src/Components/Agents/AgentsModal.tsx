@@ -4,15 +4,9 @@ import { DropDown } from "../DropDownComponent/DropDown";
 import TabComponent from "../TabComponent/TabComponent";
 import { useGetRequest } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
-import LoadingSpinner from "../Loaders/LoadingSpinner";
 import editInput from "../../assets/settings/editInput.svg";
 import AgentDetails, { AgentUserType } from "./AgentDetails";
-
-type DataStateWrapperProps = {
-  isLoading: boolean;
-  error: string | null;
-  children: React.ReactNode;
-};
+import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 
 const AgentModal = ({
   isOpen,
@@ -74,17 +68,6 @@ const AgentModal = ({
     { name: "Tickets", key: "tickets", count: 0 },
   ];
 
-  const DataStateWrapper: React.FC<DataStateWrapperProps> = ({
-    isLoading,
-    error,
-    children,
-  }) => {
-    if (isLoading)
-      return <LoadingSpinner parentClass="absolute top-[50%] w-full" />;
-    if (error) return <div>Oops, an error occurred: {error}</div>;
-    return <>{children}</>;
-  };
-
   return (
     <Modal
       layout="right"
@@ -144,8 +127,11 @@ const AgentModal = ({
           />
           {tabContent === "agentDetails" ? (
             <DataStateWrapper
-              isLoading={fetchSingleAgent.isLoading}
-              error={fetchSingleAgent.error}
+              isLoading={fetchSingleAgent?.isLoading}
+              error={fetchSingleAgent?.error}
+              errorStates={fetchSingleAgent?.errorStates}
+              refreshData={fetchSingleAgent?.mutate}
+              errorMessage="Failed to fetch agent details"
             >
               <AgentDetails
                 {...generateAgentEntries(fetchSingleAgent.data)}

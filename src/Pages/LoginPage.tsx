@@ -53,7 +53,6 @@ const LoginPage = () => {
       }); // Token expires in 7 days
       navigate(redirectPath || "/home");
     } catch (error: any) {
-      console.error("Login failed:", error);
       setErrorMessage(error?.response?.data?.message);
     }
     setLoading(false);

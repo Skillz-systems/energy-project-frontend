@@ -33,11 +33,13 @@ const ProductsTable = ({
   productData,
   isLoading,
   refreshTable,
+  error,
   errorData,
 }: {
   productData: any;
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
+  error: any;
   errorData: ApiErrorStatesType;
 }) => {
   const { apiCall } = useApiCall();
@@ -114,7 +116,7 @@ const ProductsTable = ({
 
   return (
     <>
-      {!errorData?.errorStates[0]?.errorExists ? (
+      {!error ? (
         <div className="w-full">
           <Table
             tableType="card"

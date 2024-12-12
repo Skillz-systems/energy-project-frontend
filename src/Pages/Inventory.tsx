@@ -197,14 +197,14 @@ const Inventory = () => {
           </section>
         </div>
       </PageLayout>
-      {isOpen ? (
+      {isOpen && (
         <CreateNewInventory
           isOpen={isOpen}
           setIsOpen={setIsOpen}
           formType={formType}
           allInventoryRefresh={allInventoryRefresh}
         />
-      ) : null}
+      )}
     </>
   );
 };

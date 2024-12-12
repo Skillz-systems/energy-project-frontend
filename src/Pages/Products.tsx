@@ -30,6 +30,7 @@ const Products = () => {
     data: productData,
     isLoading: productLoading,
     mutate: allProductsRefresh,
+    error: allProductsError,
     errorStates: allProductsErrorStates,
   } = useGetRequest("/v1/products", true, 60000);
 
@@ -180,6 +181,7 @@ const Products = () => {
                         productData={_productData}
                         isLoading={productLoading}
                         refreshTable={allProductsRefresh}
+                        error={allProductsError}
                         errorData={allProductsErrorStates}
                       />
                     }
@@ -190,12 +192,14 @@ const Products = () => {
           </section>
         </div>
       </PageLayout>
-      <CreateNewProduct
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        refreshTable={allProductsRefresh}
-        formType={formType}
-      />
+      {isOpen && (
+        <CreateNewProduct
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          refreshTable={allProductsRefresh}
+          formType={formType}
+        />
+      )}
     </>
   );
 };
