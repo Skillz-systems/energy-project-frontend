@@ -701,7 +701,7 @@ export const SelectInput = ({
         </div>
         {isOpen && (
           <div className="absolute mt-1.5 flex flex-col gap-1 bg-white p-2 border border-strokeGreyTwo rounded-[20px] w-full max-h-60 overflow-y-auto shadow-lg z-10">
-            {options.map((option) => (
+            {options?.map((option) => (
               <div
                 key={option.value}
                 className="text-xs capitalize text-textDarkGrey cursor-pointer px-2 py-1 border border-transparent hover:bg-[#F6F8FA] hover:border hover:border-strokeGreyTwo hover:rounded-full"
