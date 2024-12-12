@@ -347,12 +347,14 @@ const InventoryTable = ({
             }}
             queryValue={isSearchQuery ? queryValue : ""}
           />
-          <InventoryDetailModal
-            isOpen={isOpen}
-            setIsOpen={setIsOpen}
-            inventoryID={inventoryID}
-            refreshTable={refreshTable}
-          />
+          {inventoryID && isOpen ? (
+            <InventoryDetailModal
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              inventoryID={inventoryID}
+              refreshTable={refreshTable}
+            />
+          ) : null}
         </div>
       ) : (
         <ErrorComponent

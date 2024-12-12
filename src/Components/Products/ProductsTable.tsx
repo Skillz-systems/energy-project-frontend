@@ -3,7 +3,8 @@ import { Table } from "../TableComponent/Table";
 import { CardComponent } from "../CardComponents/CardComponent";
 import ProductModal from "./ProductModal";
 import { KeyedMutator } from "swr";
-import { useApiCall } from "../../utils/useApiCall";
+import { ApiErrorStatesType, useApiCall } from "../../utils/useApiCall";
+import { ErrorComponent } from "@/Pages/ErrorPage";
 
 interface AllProductEntries {
   productId: string;
@@ -32,10 +33,12 @@ const ProductsTable = ({
   productData,
   isLoading,
   refreshTable,
+  errorData,
 }: {
   productData: any;
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
+  errorData: ApiErrorStatesType;
 }) => {
   const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -111,39 +114,50 @@ const ProductsTable = ({
 
   return (
     <>
-      <Table
-        tableType="card"
-        tableTitle="ALL PRODUCTS"
-        tableClassname="flex flex-wrap items-center gap-4"
-        tableData={getTableData()}
-        loading={queryLoading || isLoading}
-        filterList={filterList}
-        cardComponent={(data) => {
-          return data?.map((item: AllProductEntries, index) => (
-            <CardComponent
-              key={index}
-              variant="product-no-image"
-              productId={item.productId}
-              productImage={item.productImage}
-              productName={item.productName}
-              productTag={item.productTag}
-              productPrice={item.productPrice}
-              dropDownList={dropDownList}
+      {!errorData?.errorStates[0]?.errorExists ? (
+        <div className="w-full">
+          <Table
+            tableType="card"
+            tableTitle="ALL PRODUCTS"
+            tableClassname="flex flex-wrap items-center gap-4"
+            tableData={getTableData()}
+            loading={queryLoading || isLoading}
+            filterList={filterList}
+            cardComponent={(data) => {
+              return data?.map((item: AllProductEntries, index) => (
+                <CardComponent
+                  key={index}
+                  variant="product-no-image"
+                  productId={item.productId}
+                  productImage={item.productImage}
+                  productName={item.productName}
+                  productTag={item.productTag}
+                  productPrice={item.productPrice}
+                  dropDownList={dropDownList}
+                />
+              ));
+            }}
+            refreshTable={async () => {
+              await refreshTable();
+              setQueryData(null);
+            }}
+            queryValue={isSearchQuery ? queryValue : ""}
+          />
+          {productId && isOpen ? (
+            <ProductModal
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              productID={productId}
+              refreshTable={refreshTable}
             />
-          ));
-        }}
-        refreshTable={async () => {
-          await refreshTable();
-          setQueryData(null);
-        }}
-        queryValue={isSearchQuery ? queryValue : ""}
-      />
-      {isOpen && (
-        <ProductModal
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-          productID={productId}
-          refreshTable={refreshTable}
+          ) : null}
+        </div>
+      ) : (
+        <ErrorComponent
+          message="Failed to fetch product list."
+          className="rounded-[20px]"
+          refreshData={refreshTable}
+          errorData={errorData}
         />
       )}
     </>

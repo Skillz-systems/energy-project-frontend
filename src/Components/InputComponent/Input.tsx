@@ -269,60 +269,61 @@ export const ModalInput = ({
   itemsSelected,
 }: ModalInputType) => {
   return (
-    <div className="flex items-center justify-center gap-2 w-full">
-      <div
-        className={`flex relative ${
-          isItemsSelected ? "flex-col" : "flex-row"
-        } items-center gap-[4px] ${style} ${
-          disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"
-        }  w-full max-w-full py-[1.25em] ${
-          isItemsSelected ? "rounded-[20px]" : "rounded-3xl h-[48px]"
-        } border-[0.6px] 
-          transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent `}
-      >
-        {isItemsSelected && (
-          <span className="absolute flex left-[1.6em] -top-2 z-50 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out opacity-100">
-            {label.toUpperCase()}
-          </span>
-        )}
-
+    <div className="w-full">
+      <div className="flex items-center justify-center gap-2 w-full">
         <div
-          className={`flex items-center pl-[1.1em] ${
-            isItemsSelected ? "w-full" : "w-max"
-          }`}
+          className={`flex relative ${
+            isItemsSelected
+              ? "flex-col rounded-[20px] border-strokeCream"
+              : "flex-row rounded-3xl h-[48px] border-strokeGrey"
+          } items-center gap-[4px] ${style} ${
+            disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"
+          }  w-full max-w-full py-[1.25em] border-[0.6px] transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent `}
         >
-          {isItemsSelected ? (
-            <span
-              className="w-full text-sm font-semibold text-textBlack cursor-pointer"
-              onClick={onClick}
-            >
-              Change {name} selected
+          {isItemsSelected && (
+            <span className="absolute flex left-[1.6em] -top-2 z-50 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out opacity-100">
+              {label.toUpperCase()}
             </span>
-          ) : (
-            required && <Asterik />
           )}
-        </div>
 
-        {isItemsSelected ? (
           <div
-            className={`flex flex-col items-center justify-start not-italic text-textBlack w-full px-[1.1em] max-h-[550px] overflow-y-auto
+            className={`flex items-center pl-[1.1em] ${
+              isItemsSelected ? "w-full" : "w-max"
+            }`}
+          >
+            {isItemsSelected ? (
+              <span
+                className="w-full text-sm font-semibold text-textBlack cursor-pointer"
+                onClick={onClick}
+              >
+                Change {name} selected
+              </span>
+            ) : (
+              required && <Asterik />
+            )}
+          </div>
+
+          {isItemsSelected ? (
+            <div
+              className={`flex flex-col items-center justify-start not-italic text-textBlack w-full px-[1.1em] max-h-[550px] overflow-y-auto
             ${isItemsSelected ? "opacity-100" : "opacity-0"}
           
           `}
-          >
-            {itemsSelected}
-          </div>
-        ) : type === "button" ? (
-          <span
-            className="w-full text-sm text-textGrey italic cursor-pointer"
-            onClick={onClick}
-          >
-            {placeholder}
-          </span>
-        ) : null}
+            >
+              {itemsSelected}
+            </div>
+          ) : type === "button" ? (
+            <span
+              className="w-full text-sm text-textGrey italic cursor-pointer"
+              onClick={onClick}
+            >
+              {placeholder}
+            </span>
+          ) : null}
+        </div>
       </div>
       {errorMessage && (
-        <p className="mt-1 px-[1.1em] pb-2 text-sm text-errorTwo font-medium">
+        <p className="mt-1 px-[1.3em] text-xs text-errorTwo font-semibold w-full">
           {errorMessage}
         </p>
       )}
@@ -711,7 +712,7 @@ export const SelectInput = ({
       </div>
       {errorMessage && (
         <p className="mt-1 px-[1.3em] text-xs text-errorTwo font-semibold w-full">
-          {errorMessage || "This field is required"}
+          {errorMessage}
         </p>
       )}
     </div>
@@ -729,6 +730,7 @@ export type MultipleSelectInputType = {
   style?: string;
   icon?: ReactNode;
   iconStyle?: string;
+  errorMessage?: string;
 };
 
 export const SelectMultipleInput = ({
@@ -742,6 +744,7 @@ export const SelectMultipleInput = ({
   style,
   icon = <CgChevronDown />,
   iconStyle = "text-lg",
+  errorMessage,
 }: MultipleSelectInputType) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -784,56 +787,64 @@ export const SelectMultipleInput = ({
   }, [isOpen]);
 
   return (
-    <div ref={dropdownRef} className={`relative w-full max-w-full `}>
-      <div
-        className={`relative flex items-center justify-between 
+    <div className="w-full">
+      <div ref={dropdownRef} className={`relative w-full max-w-full `}>
+        <div
+          className={`relative flex items-center justify-between 
           ${style}
+          ${value ? "border-strokeCream" : "border-strokeGrey"}
           ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"} 
           w-full h-[48px] px-[1.3em] py-[1em] cursor-pointer
           rounded-3xl text-sm text-textGrey border-[0.6px] gap-[4.23px]
           transition-all focus:outline-none focus:ring-2 focus:ring-primary`}
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-      >
-        <span
-          className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] 
+          onClick={() => !disabled && setIsOpen(!isOpen)}
+        >
+          <span
+            className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] 
             transition-opacity duration-500 ease-in-out
             ${value.length > 0 ? "opacity-100" : "opacity-0"}`}
-        >
-          {label.toUpperCase()}
-        </span>
+          >
+            {label.toUpperCase()}
+          </span>
 
-        {required && <Asterik />}
+          {required && <Asterik />}
 
-        <div className="w-full">
-          {value.length > 0 ? (
-            <span className="font-semibold text-textBlack">
-              {value.length} selected
-            </span>
-          ) : (
-            <span className="text-textGrey italic">{placeholder}</span>
-          )}
+          <div className="w-full">
+            {value.length > 0 ? (
+              <span className="font-semibold text-textBlack">
+                {value.length} selected
+              </span>
+            ) : (
+              <span className="text-textGrey italic">{placeholder}</span>
+            )}
+          </div>
+          <span className={`${iconStyle}`}>{icon}</span>
         </div>
-        <span className={`${iconStyle}`}>{icon}</span>
+
+        {isOpen && (
+          <div className="absolute mt-1.5 flex flex-col gap-0 bg-white p-2 border border-strokeGreyTwo rounded-[20px] w-full max-h-60 overflow-y-auto shadow-lg z-10">
+            {options.map((option) => (
+              <label
+                key={option.value}
+                className="flex items-center text-xs capitalize text-textDarkGrey cursor-pointer px-2 py-1 border border-transparent hover:bg-[#F6F8FA] hover:border hover:border-strokeGreyTwo hover:rounded-full"
+              >
+                <input
+                  type="checkbox"
+                  value={option.value}
+                  checked={value.includes(option.value)}
+                  onChange={() => handleCheckboxChange(option.value)}
+                  className="mr-2 w-3 h-3"
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
+        )}
       </div>
-
-      {isOpen && (
-        <div className="absolute mt-1.5 flex flex-col gap-0 bg-white p-2 border border-strokeGreyTwo rounded-[20px] w-full max-h-60 overflow-y-auto shadow-lg z-10">
-          {options.map((option) => (
-            <label
-              key={option.value}
-              className="flex items-center text-xs capitalize text-textDarkGrey cursor-pointer px-2 py-1 border border-transparent hover:bg-[#F6F8FA] hover:border hover:border-strokeGreyTwo hover:rounded-full"
-            >
-              <input
-                type="checkbox"
-                value={option.value}
-                checked={value.includes(option.value)}
-                onChange={() => handleCheckboxChange(option.value)}
-                className="mr-2 w-3 h-3"
-              />
-              {option.label}
-            </label>
-          ))}
-        </div>
+      {errorMessage && (
+        <p className="mt-1 px-[1.3em] text-xs text-errorTwo font-semibold w-full">
+          {errorMessage}
+        </p>
       )}
     </div>
   );

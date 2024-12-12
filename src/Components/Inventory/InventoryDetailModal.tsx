@@ -1,8 +1,9 @@
-import React, { lazy, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Modal } from "../ModalComponent/Modal";
 import editInput from "../../assets/settings/editInput.svg";
 import { DropDown } from "../DropDownComponent/DropDown";
 import TabComponent from "../TabComponent/TabComponent";
+import InventoryDetails from "./InventoryDetails";
 import InventoryStats from "./InventoryStats";
 import InventoryHistory from "./InventoryHistory";
 import { GoDotFill } from "react-icons/go";
@@ -10,8 +11,6 @@ import { generateRandomInventoryHistoryEntries } from "../TableComponent/sampleD
 import { useGetRequest } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
-
-const InventoryDetails = lazy(() => import("./InventoryDetails"));
 
 type InventoryData = {
   id: string;
@@ -61,7 +60,7 @@ const InventoryDetailModal = ({
   refreshTable: KeyedMutator<any>;
 }) => {
   const fetchSingleBatchInventory = useGetRequest(
-    inventoryID ? `/v1/inventory/batch/${inventoryID}` : "/v1",
+    `/v1/inventory/batch/${inventoryID}`,
     false
   );
   const [displayInput, setDisplayInput] = useState<boolean>(false);
@@ -209,7 +208,7 @@ const InventoryDetailModal = ({
               error={fetchSingleBatchInventory?.error}
               errorStates={fetchSingleBatchInventory?.errorStates}
               refreshData={fetchSingleBatchInventory?.mutate}
-              errorMessage="Failed to fetch single inventory information"
+              errorMessage="Failed to fetch inventory details"
             >
               <InventoryDetails
                 {...inventoryData}
