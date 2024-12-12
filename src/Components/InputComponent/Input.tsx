@@ -53,7 +53,9 @@ export type InputType = {
   iconLeft?: ReactNode;
   iconRight?: ReactNode;
   style?: string;
+  className?: string;
   errorMessage?: string;
+  errorClass?: string;
 };
 
 export const Input = ({
@@ -71,7 +73,9 @@ export const Input = ({
   iconLeft,
   iconRight,
   style,
+  className,
   errorMessage,
+  errorClass,
 }: InputType) => {
   const similarTypes = [
     "text",
@@ -88,13 +92,15 @@ export const Input = ({
 
   if (similarTypes.includes(type)) {
     return (
-      <div className="w-full">
+      <div className={`w-full ${className}`}>
         <div
           className={`relative autofill-parent ${
             type === "hidden" ? "hidden" : "flex"
-          } ${style} ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
+          } ${style ? style : "max-w-full"} ${
+            disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"
+          }
         ${value ? "border-strokeCream" : "border-strokeGrey"}
-          items-center w-full max-w-full px-[1.1em] py-[1.25em] gap-1 rounded-3xl h-[48px] border-[0.6px]
+          items-center w-full  px-[1.1em] py-[1.25em] gap-1 rounded-3xl h-[48px] border-[0.6px]
           transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
           onClick={onClick}
         >
@@ -131,7 +137,7 @@ export const Input = ({
           {iconRight && iconRight}
         </div>
         {errorMessage && (
-          <p className="mt-1 px-[1.3em] text-xs text-errorTwo font-semibold w-full">
+          <p className={`mt-1 px-[1.3em] text-xs text-errorTwo font-semibold w-full ${errorClass}`}>
             {errorMessage}
           </p>
         )}
