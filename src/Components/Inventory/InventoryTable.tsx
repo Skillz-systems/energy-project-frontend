@@ -5,7 +5,8 @@ import { GoDotFill } from "react-icons/go";
 import { formatNumberWithCommas } from "@/utils/helpers";
 import { NairaSymbol } from "../CardComponents/CardComponent";
 import InventoryDetailModal from "./InventoryDetailModal";
-import { useApiCall } from "@/utils/useApiCall";
+import { ApiErrorStatesType, useApiCall } from "@/utils/useApiCall";
+import { ErrorComponent } from "@/Pages/ErrorPage";
 
 interface InventoryEntries {
   id: string;
@@ -91,10 +92,12 @@ const InventoryTable = ({
   inventoryData,
   isLoading,
   refreshTable,
+  errorData,
 }: {
   inventoryData: any;
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
+  errorData: ApiErrorStatesType;
 }) => {
   const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -330,26 +333,35 @@ const InventoryTable = ({
 
   return (
     <>
-      <div className="w-full">
-        <Table
-          tableTitle="INVENTORY"
-          filterList={filterList}
-          columnList={columnList}
-          loading={queryLoading || isLoading}
-          tableData={getTableData()}
-          refreshTable={async () => {
-            await refreshTable();
-            setQueryData(null);
-          }}
-          queryValue={isSearchQuery ? queryValue : ""}
+      {!errorData?.errorStates[0]?.errorExists ? (
+        <div className="w-full">
+          <Table
+            tableTitle="INVENTORY"
+            filterList={filterList}
+            columnList={columnList}
+            loading={queryLoading || isLoading}
+            tableData={getTableData()}
+            refreshTable={async () => {
+              await refreshTable();
+              setQueryData(null);
+            }}
+            queryValue={isSearchQuery ? queryValue : ""}
+          />
+          <InventoryDetailModal
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            inventoryID={inventoryID}
+            refreshTable={refreshTable}
+          />
+        </div>
+      ) : (
+        <ErrorComponent
+          message="Failed to fetch inventory list."
+          className="rounded-[20px]"
+          refreshData={refreshTable}
+          errorData={errorData}
         />
-      </div>
-      <InventoryDetailModal
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        inventoryID={inventoryID}
-        refreshTable={refreshTable}
-      />
+      )}
     </>
   );
 };

@@ -146,7 +146,7 @@ const StaffDetails = ({
   };
 
   return (
-    <form className="flex flex-col gap-4">
+    <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
       <div className="p-2.5 border-[0.6px] border-[#8396E7] rounded-[20px]">
         <p className="flex items-center gap-1 pb-2 w-max text-xs text-textLightGrey font-medium">
           <img src={user} alt="User" width="16px" />
@@ -221,7 +221,6 @@ const StaffDetails = ({
             variant={isFormFilled ? "gradient" : "gray"}
             loading={loading}
             disabled={!isFormFilled}
-            onClick={handleSubmit}
           />
         </div>
       ) : (

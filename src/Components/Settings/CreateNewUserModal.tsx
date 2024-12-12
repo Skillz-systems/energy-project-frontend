@@ -119,7 +119,7 @@ const CreateNewUserModal = ({
       isOpen={isOpen}
       onClose={() => setIsOpen(false)}
       layout="right"
-      bodyStyle="pb-[100px]"
+      bodyStyle="pb-44"
     >
       <form className="flex flex-col items-center bg-white">
         <div

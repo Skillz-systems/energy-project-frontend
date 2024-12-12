@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-// import { useApiCall, useGetRequest } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
 import { FileInput, Input, SelectInput } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { Modal } from "../ModalComponent/Modal";
 import { useApiCall, useGetRequest } from "@/utils/useApiCall";
 import { Category } from "../Products/CreateNewProduct";
+import { z } from "zod";
 
 export type InventoryFormType =
   | "newInventory"
@@ -19,32 +19,144 @@ interface CreatNewInventoryProps {
   formType: InventoryFormType;
 }
 
-interface InventoryFormData {
-  className: string;
-  category: string;
-  subCategory: string;
-  itemName: string;
-  manufacturerName: string;
-  dateOfManufacture: string;
-  sku: string;
-  numberOfStock: string;
-  costPrice: string;
-  salePrice: string;
-  itemPicture: File | null;
-}
-const defaultInventoryFormData: InventoryFormData = {
-  className: "",
-  category: "",
-  subCategory: "",
-  itemName: "",
+const formSchema = z.object({
+  class: z
+    .string()
+    .trim()
+    .min(1, "Inventory Class is required")
+    .regex(/^(REGULAR|RETURNED|REFURBISHED)$/, "Invalid Inventory Class")
+    .default(""),
+  inventoryCategoryId: z
+    .string()
+    .trim()
+    .min(1, "Inventory Category is required")
+    .default(""),
+  inventorySubCategoryId: z
+    .string()
+    .trim()
+    .min(1, "Inventory Sub Category is required")
+    .default(""),
+  name: z
+    .string()
+    .trim()
+    .min(1, "Inventory Name is required")
+    .max(50, "Inventory Name cannot exceed 50 characters"),
+  manufacturerName: z
+    .string()
+    .trim()
+    .min(1, "Manufacturer Name is required")
+    .max(50, "Manufacturer Name cannot exceed 50 characters"),
+  dateOfManufacture: z
+    .string()
+    .trim()
+    .optional()
+    .refine(
+      (date) => !date || !isNaN(Date.parse(date)),
+      "Invalid Date of Manufacture"
+    )
+    .default(""),
+  sku: z
+    .string()
+    .trim()
+    .regex(
+      /^[a-zA-Z0-9-]*$/,
+      "SKU can only contain letters, numbers, and dashes"
+    )
+    .max(50, "SKU cannot exceed 50 characters")
+    .optional()
+    .default(""),
+  numberOfStock: z
+    .string()
+    .trim()
+    .regex(/^\d+$/, "Number of stock must be a valid integer")
+    .transform(Number)
+    .refine((num) => num > 0, "Number of stock must be greater than 0")
+    .transform((value) => value.toString()),
+  costOfItem: z
+    .string()
+    .trim()
+    .regex(
+      /^\d+(\.\d{1,2})?$/,
+      "Cost Price must be a valid number with up to 2 decimal places"
+    )
+    .transform(Number)
+    .refine((num) => num > 0, "Cost Price must be greater than 0")
+    .transform((value) => value.toString()),
+  price: z
+    .string()
+    .trim()
+    .regex(
+      /^\d+(\.\d{1,2})?$/,
+      "Sale Price must be a valid number with up to 2 decimal places"
+    )
+    .transform(Number)
+    .refine((num) => num > 0, "Sale Price must be greater than 0")
+    .transform((value) => value.toString()),
+  inventoryImage: z
+    .instanceof(File)
+    .refine(
+      (file) =>
+        ["image/png", "image/jpeg", "image/jpg", "image/svg+xml"].includes(
+          file.type
+        ),
+      {
+        message: "Only PNG, JPEG, JPG, or SVG files are allowed.",
+      }
+    )
+    .nullable()
+    .default(null),
+});
+
+const defaultInventoryFormData = {
+  class: "",
+  inventoryCategoryId: "",
+  inventorySubCategoryId: "",
+  name: "",
   manufacturerName: "",
   dateOfManufacture: "",
   sku: "",
   numberOfStock: "",
-  costPrice: "",
-  salePrice: "",
-  itemPicture: null,
+  costOfItem: "",
+  price: "",
+  inventoryImage: null,
 };
+
+const createCategoryDataSchema = z.object({
+  newCategory: z
+    .string()
+    .trim()
+    .min(1, "Inventory Class is required")
+    .max(50, "Sub Category Name cannot exceed 50 characters"),
+  newSubCategory: z
+    .string()
+    .trim()
+    .max(50, "Sub Category Name cannot exceed 50 characters")
+    .optional()
+    .default(""),
+});
+
+const createSubCategoryDataSchema = z.object({
+  parentId: z.string().trim().min(1, "Inventory Category is required"),
+  newSubCategory: z
+    .string()
+    .trim()
+    .min(1, "Inventory Sub Category Name is required")
+    .max(50, "Sub Category Name cannot exceed 50 characters"),
+});
+
+const defaultCategoryData = {
+  newCategory: "",
+  newSubCategory: "",
+};
+
+const defaultSubCategoryData = {
+  newSubCategory: "",
+  parentId: "",
+};
+
+type FormData = z.infer<typeof formSchema>;
+type CategoryFormData = z.infer<typeof createCategoryDataSchema>;
+type SubCategoryFormData = z.infer<typeof createSubCategoryDataSchema>;
 
 const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
   isOpen,
@@ -53,22 +165,37 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
   formType,
 }) => {
   const { apiCall } = useApiCall();
-  const [formData, setFormData] = useState(defaultInventoryFormData);
+  const [formData, setFormData] = useState<FormData>(defaultInventoryFormData);
+  const [categoryFormData, setCatgoryFormData] =
+    useState<CategoryFormData>(defaultCategoryData);
+  const [subCategoryFormData, setSubCatgoryFormData] =
+    useState<SubCategoryFormData>(defaultSubCategoryData);
   const [loading, setLoading] = useState(false);
-  const [otherFormData, setOtherFormData] = useState({
-    newCategory: "",
-    parentId: "",
-    newSubCategory: "",
-  });
+  const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const fetchInventoryCategories = useGetRequest(
     "/v1/inventory/categories",
     false
   );
 
+  const isFormFilled =
+    formType === "newInventory"
+      ? Object.values(formData).some((value) => Boolean(value)) &&
+        formSchema.safeParse(formData).success
+      : formType === "newCategory"
+      ? createCategoryDataSchema.safeParse(categoryFormData).success
+      : createSubCategoryDataSchema.safeParse(subCategoryFormData).success;
+
+  const resetFormErrors = (name: string) => {
+    // Clear the error for this field when the user starts typing
+    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+    setApiError(null);
+  };
+
   const handleInputChange = (e: any) => {
     const { name, value, files } = e.target;
-    if (name === "itemPicture" && files && files.length > 0) {
+    if (name === "inventoryImage" && files && files.length > 0) {
       setFormData((prev) => ({
         ...prev,
         itemPicture: files[0],
@@ -79,14 +206,16 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
         [name]: value,
       }));
     }
+    resetFormErrors(name);
   };
 
   const handleSelectChange = (name: string, values: string) => {
     setFormData((prev) => ({
       ...prev,
       [name]: values,
-      ...(name === "category" && { subCategory: "" }), // Clear subCategory if category changes
+      ...(name === "inventoryCategoryId" && { inventorySubCategoryId: "" }), // Clear subCategory if category changes
     }));
+    resetFormErrors(name);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -94,70 +223,55 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
     setLoading(true);
     try {
       if (formType === "newInventory") {
-        if (!formData) return;
+        const formSubmissionData = new FormData(e.currentTarget);
 
-        // Create FormData instance for multipart/form-data
-        const formSubmissionData = new FormData();
+        // Convert form data to an object
+        const formFields = Object.fromEntries(formSubmissionData.entries());
+        const validatedData = formSchema.parse({
+          class: formData.class,
+          inventoryCategoryId: formData.inventoryCategoryId,
+          inventorySubCategoryId: formData.inventorySubCategoryId,
+          ...formFields,
+        });
+        const submissionData = new FormData();
 
-        // Append fields to FormData
-        formSubmissionData.append("class", formData.className);
-        formSubmissionData.append("inventoryCategoryId", formData.category);
-        formSubmissionData.append(
-          "inventorySubCategoryId",
-          formData.subCategory
-        );
-        formSubmissionData.append("name", formData.itemName);
-        formSubmissionData.append(
-          "manufacturerName",
-          formData.manufacturerName
-        );
-        formSubmissionData.append(
-          "dateOfManufacture",
-          formData.dateOfManufacture
-        );
-        formSubmissionData.append("sku", formData.sku);
-        formSubmissionData.append("numberOfStock", formData.numberOfStock);
-        formSubmissionData.append("costOfItem", formData.costPrice);
-        formSubmissionData.append("price", formData.salePrice);
-
-        if (formData.itemPicture instanceof File) {
-          formSubmissionData.append("inventoryImage", formData.itemPicture);
-        } else {
-          alert("No Image Selected");
-          return;
-        }
-        // Log the FormData entries to debug
-        for (const pair of formSubmissionData.entries()) {
-          console.log(pair[0], pair[1]);
-        }
+        // Iterate and append validated data to FormData
+        Object.entries(validatedData).forEach(([key, value]) => {
+          if (value instanceof File) {
+            submissionData.append(key, value);
+          } else if (value !== null && value !== undefined) {
+            submissionData.append(key, String(value));
+          }
+        });
 
         await apiCall({
           endpoint: "/v1/inventory/create",
           method: "post",
-          data: formSubmissionData,
+          data: submissionData,
           headers: { "Content-Type": "multipart/form-data" },
           successMessage: "Inventory created successfully!",
         });
+
+        await allInventoryRefresh();
+        setFormData(defaultInventoryFormData);
+        setIsOpen(false);
       } else {
-        const { newCategory, newSubCategory, parentId } = otherFormData;
-        if (
-          (formType === "newCategory" && !newCategory) ||
-          (formType !== "newCategory" && (!parentId || !newSubCategory))
-        ) {
-          return;
+        let validatedData;
+        if (formType === "newCategory") {
+          validatedData = createCategoryDataSchema.parse(categoryFormData);
+        } else {
+          validatedData =
+            createSubCategoryDataSchema.parse(subCategoryFormData);
         }
 
-        const createCategoryData = (
-          newCategory: string,
-          newSubCategory?: string
-        ) => ({
+        const createCategoryData = (data: CategoryFormData) => ({
           categories: [
             {
-              name: newCategory,
-              ...(newSubCategory && {
+              name: data.newCategory,
+              ...(data.newSubCategory && {
                 subCategories: [
                   {
-                    name: newSubCategory,
+                    name: data.newSubCategory,
                   },
                 ],
               }),
@@ -165,14 +279,11 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
           ],
         });
 
-        const createSubCategoryData = (
-          newSubCategory: string,
-          parentId: string
-        ) => ({
+        const createSubCategoryData = (data: SubCategoryFormData) => ({
           categories: [
             {
-              name: newSubCategory,
-              parentId: parentId,
+              name: data.newSubCategory,
+              parentId: data.parentId,
             },
           ],
         });
@@ -182,35 +293,35 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
           method: "post",
           data:
             formType === "newCategory"
-              ? createCategoryData(newCategory, newSubCategory)
-              : createSubCategoryData(newSubCategory, parentId),
+              ? createCategoryData(validatedData as CategoryFormData)
+              : createSubCategoryData(validatedData as SubCategoryFormData),
           headers: { "Content-Type": "application/json" },
           successMessage: `Inventory ${
             formType === "newSubCategory" ? "Sub-" : ""
-          }Category created successfully!`,
+          } Category created successfully!`,
         });
       }
-      setLoading(false);
       await allInventoryRefresh();
-    } catch (error) {
-      console.error("Product creation failed:", error);
-      setLoading(false);
+      setCatgoryFormData(defaultCategoryData);
+      setSubCatgoryFormData(defaultSubCategoryData);
+      setIsOpen(false);
+    } catch (error: any) {
+      console.error(error);
+      if (error instanceof z.ZodError) {
+        setFormErrors(error.issues);
+      } else {
+        const message =
+          error?.response?.data?.message || "Internal Server Error";
+        setApiError(`Inventory creation failed: ${message}.`);
+      }
     } finally {
       setLoading(false);
-      setIsOpen(false);
-      if (formType === "newInventory") {
-        setFormData(defaultInventoryFormData);
-      } else {
-        setOtherFormData({
-          newCategory: "",
-          parentId: "",
-          newSubCategory: "",
-        });
-      }
     }
   };
 
-  const isFormFilled = Object.values(formData).some((value) => Boolean(value));
+  const getFieldError = (fieldName: string) => {
+    return formErrors.find((error) => error.path[0] === fieldName)?.message;
+  };
 
   return (
     <Modal
@@ -222,6 +333,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
       <form
         className="flex flex-col items-center bg-white"
         onSubmit={handleSubmit}
+        noValidate
       >
         <div
           className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${
@@ -252,15 +364,13 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                   { label: "Returned", value: "RETURNED" },
                   { label: "Refurbished", value: "REFURBISHED" },
                 ]}
-                value={formData.className}
+                value={formData.class}
                 onChange={(selectedValue) =>
-                  handleSelectChange("className", selectedValue)
+                  handleSelectChange("class", selectedValue)
                 }
                 required={true}
                 placeholder="Choose Inventory Class"
-                style={
-                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                }
+                errorMessage={getFieldError("class")}
               />
 
               <SelectInput
@@ -271,26 +381,25 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                     value: category.id,
                   })) || [{ label: "", value: "" }]
                 }
-                value={formData.category}
+                value={formData.inventoryCategoryId}
                 onChange={(selectedValue) =>
-                  handleSelectChange("category", selectedValue)
+                  handleSelectChange("inventoryCategoryId", selectedValue)
                 }
                 required={true}
                 placeholder="Choose Item Category"
-                style={
-                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                }
+                errorMessage={getFieldError("inventoryCategoryId")}
               />
 
               <div
                 style={{
                   width: "100%",
-                  display: formData.category ? "block" : "none",
-                  maxHeight: formData.category ? "300px" : "0",
-                  transition: "max-height 0.3s ease-in-out",
-                  visibility: formData.category ? "visible" : "hidden",
-                  opacity: formData.category ? 1 : 0,
-                  transitionProperty: "max-height, visibility, opacity",
+                  display: formData.inventoryCategoryId ? "block" : "none",
+                  transition: "0.3s ease-in-out",
+                  visibility: formData.inventoryCategoryId
+                    ? "visible"
+                    : "hidden",
+                  opacity: formData.inventoryCategoryId ? 1 : 0,
+                  transitionProperty: "visibility, opacity",
                 }}
               >
                 <SelectInput
@@ -299,36 +408,32 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                     fetchInventoryCategories.data
                       ?.find(
                         (category: Category) =>
-                          category.id === formData.category
+                          category.id === formData.inventoryCategoryId
                       )
                       ?.children?.map((child: { name: any; id: any }) => ({
                         label: child.name,
                         value: child.id,
                       })) || []
                   }
-                  value={formData.subCategory}
+                  value={formData.inventorySubCategoryId}
                   onChange={(selectedValue) =>
-                    handleSelectChange("subCategory", selectedValue)
+                    handleSelectChange("inventorySubCategoryId", selectedValue)
                   }
-                  required={!!formData.category} // Required only if a category is selected
+                  required={!!formData.inventoryCategoryId} // Required only if a category is selected
                   placeholder="Choose Item Sub-Category"
-                  style={
-                    isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                  }
+                  errorMessage={getFieldError("inventorySubCategoryId")}
                 />
               </div>
 
               <Input
                 type="text"
-                name="itemName"
+                name="name"
                 label="Name"
-                value={formData.itemName}
+                value={formData.name}
                 onChange={handleInputChange}
                 placeholder="Item Name"
                 required={true}
-                style={
-                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                }
+                errorMessage={getFieldError("name")}
               />
 
               <Input
@@ -339,9 +444,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                 onChange={handleInputChange}
                 placeholder="Manufacturer Name"
                 required={true}
-                style={
-                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                }
+                errorMessage={getFieldError("manufacturerName")}
               />
 
               <Input
@@ -352,9 +455,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                 onChange={handleInputChange}
                 placeholder="Date Of Manufacture"
                 required={false}
-                style={
-                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                }
+                errorMessage={getFieldError("dateOfManufacture")}
               />
 
               <Input
@@ -365,9 +466,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                 onChange={handleInputChange}
                 placeholder="SKU"
                 required={false}
-                style={
-                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                }
+                errorMessage={getFieldError("sku")}
               />
 
               <Input
@@ -378,46 +477,39 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                 onChange={handleInputChange}
                 placeholder="Number of Stock"
                 required={true}
-                style={
-                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                }
+                errorMessage={getFieldError("numberOfStock")}
               />
 
               <Input
                 type="number"
-                name="costPrice"
+                name="costOfItem"
                 label="Cost Price"
-                value={formData.costPrice}
+                value={formData.costOfItem}
                 onChange={handleInputChange}
                 placeholder="Cost of Item"
                 required={true}
-                style={
-                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                }
+                errorMessage={getFieldError("costOfItem")}
               />
 
               <Input
                 type="number"
-                name="salePrice"
+                name="price"
                 label="Sale Price"
-                value={formData.salePrice}
+                value={formData.price}
                 onChange={handleInputChange}
                 placeholder="Price of Item"
                 required={true}
-                style={
-                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                }
+                errorMessage={getFieldError("price")}
               />
 
               <FileInput
-                name="itemPicture"
+                name="inventoryImage"
                 label="Item Picture"
                 onChange={handleInputChange}
                 required={true}
+                accept=".jpg,.jpeg,.png,.svg"
                 placeholder="Item Picture"
-                style={
-                  isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                }
+                errorMessage={getFieldError("inventoryImage")}
               />
             </>
           ) : (
@@ -427,20 +519,18 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                   type="text"
                   name="newCategory"
                   label="Category"
-                  value={otherFormData.newCategory}
-                  onChange={(e) =>
-                    setOtherFormData((prev) => ({
+                  value={categoryFormData.newCategory}
+                  onChange={(e) => {
+                    const { name, value } = e.target;
+                    setCatgoryFormData((prev) => ({
                       ...prev,
-                      ["newCategory"]: e.target.value,
-                    }))
-                  }
+                      [name]: value,
+                    }));
+                    resetFormErrors(name);
+                  }}
                   placeholder="Enter a New Category"
                   required={true}
-                  style={
-                    otherFormData.newCategory || otherFormData.newSubCategory
-                      ? "border-strokeCream"
-                      : "border-strokeGrey"
-                  }
+                  errorMessage={getFieldError("newCategory")}
                 />
               ) : (
                 <>
@@ -454,20 +544,17 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                         })
                       ) || [{ label: "", value: "" }]
                     }
-                    value={otherFormData.parentId}
-                    onChange={(selectedValue) =>
-                      setOtherFormData((prev) => ({
+                    value={subCategoryFormData.parentId}
+                    onChange={(selectedValue) => {
+                      setSubCatgoryFormData((prev) => ({
                         ...prev,
                         parentId: selectedValue,
-                      }))
-                    }
+                      }));
+                      resetFormErrors("parentId");
+                    }}
                     required={true}
                     placeholder="Choose Item Category"
-                    style={
-                      otherFormData.parentId || otherFormData.newSubCategory
-                        ? "border-strokeCream"
-                        : "border-strokeGrey"
-                    }
+                    errorMessage={getFieldError("parentId")}
                   />
                 </>
               )}
@@ -476,32 +563,45 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                 type="text"
                 name="newSubCategory"
                 label="Sub-Category"
-                value={otherFormData.newSubCategory}
-                onChange={(e) =>
-                  setOtherFormData((prev) => ({
-                    ...prev,
-                    ["newSubCategory"]: e.target.value,
-                  }))
+                value={
+                  formType === "newCategory"
+                    ? categoryFormData.newSubCategory
+                    : subCategoryFormData.newSubCategory
                 }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (formType === "newCategory") {
+                    setCatgoryFormData((prev) => ({
+                      ...prev,
+                      newSubCategory: value,
+                    }));
+                  } else {
+                    setSubCatgoryFormData((prev) => ({
+                      ...prev,
+                      newSubCategory: value,
+                    }));
+                  }
+                  resetFormErrors("newSubCategory");
+                }}
                 placeholder="Enter a New Sub-Category"
                 required={formType === "newCategory" ? false : true}
-                style={
-                  otherFormData.newSubCategory ||
-                  otherFormData.newCategory ||
-                  otherFormData.parentId
-                    ? "border-strokeCream"
-                    : "border-strokeGrey"
-                }
+                errorMessage={getFieldError("newSubCategory")}
               />
             </>
           )}
+          {apiError && (
+            <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
+              {apiError}
+            </div>
+          )}
+          <ProceedButton
+            type="submit"
+            loading={loading}
+            variant={isFormFilled ? "gradient" : "gray"}
+            // disabled={!isFormFilled}
+            disabled={false}
+          />
         </div>
-        <ProceedButton
-          type="submit"
-          loading={loading}
-          variant={isFormFilled ? "gradient" : "gray"}
-          disabled={formType === "newInventory" ? !isFormFilled : false}
-        />
       </form>
     </Modal>
   );

@@ -1,16 +1,17 @@
-import React, { useMemo, useState } from "react";
+import React, { lazy, useMemo, useState } from "react";
 import { Modal } from "../ModalComponent/Modal";
 import editInput from "../../assets/settings/editInput.svg";
 import { DropDown } from "../DropDownComponent/DropDown";
 import TabComponent from "../TabComponent/TabComponent";
-import InventoryDetails from "./InventoryDetails";
 import InventoryStats from "./InventoryStats";
 import InventoryHistory from "./InventoryHistory";
 import { GoDotFill } from "react-icons/go";
 import { generateRandomInventoryHistoryEntries } from "../TableComponent/sampleData";
-import LoadingSpinner from "../Loaders/LoadingSpinner";
 import { useGetRequest } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
+import { DataStateWrapper } from "../Loaders/DataStateWrapper";
+
+const InventoryDetails = lazy(() => import("./InventoryDetails"));
 
 type InventoryData = {
   id: string;
@@ -39,12 +40,6 @@ type InventoryData = {
     updatedAt: string;
     deletedAt: string | null;
   };
-};
-
-type DataStateWrapperProps = {
-  isLoading: boolean;
-  error: string | null;
-  children: React.ReactNode;
 };
 
 export type TabNamesType = {
@@ -143,21 +138,10 @@ const InventoryDetailModal = ({
     }
   };
 
-  const DataStateWrapper: React.FC<DataStateWrapperProps> = ({
-    isLoading,
-    error,
-    children,
-  }) => {
-    if (isLoading)
-      return <LoadingSpinner parentClass="absolute top-[50%] w-full" />;
-    if (error) return <div>Oops, an error occurred: {error}</div>;
-    return <>{children}</>;
-  };
-
   return (
     <Modal
       layout="right"
-      bodyStyle="pb-44 overflow-auto"
+      bodyStyle="pb-44"
       isOpen={isOpen}
       onClose={() => {
         setTabContent("details");
@@ -221,8 +205,11 @@ const InventoryDetailModal = ({
           />
           {tabContent === "details" ? (
             <DataStateWrapper
-              isLoading={fetchSingleBatchInventory.isLoading}
-              error={fetchSingleBatchInventory.error}
+              isLoading={fetchSingleBatchInventory?.isLoading}
+              error={fetchSingleBatchInventory?.error}
+              errorStates={fetchSingleBatchInventory?.errorStates}
+              refreshData={fetchSingleBatchInventory?.mutate}
+              errorMessage="Failed to fetch single inventory information"
             >
               <InventoryDetails
                 {...inventoryData}

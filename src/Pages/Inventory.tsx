@@ -31,6 +31,7 @@ const Inventory = () => {
     data: inventoryData,
     isLoading: inventoryLoading,
     mutate: allInventoryRefresh,
+    errorStates: allInventoryErrorStates,
   } = useGetRequest(
     `/v1/inventory${inventoryFilter && `?class=${inventoryFilter}`}`,
     true,
@@ -42,7 +43,7 @@ const Inventory = () => {
   function getFilteredClassCount(classList: InventoryClass) {
     const filteredClass =
       fetchInventoryStats?.data?.inventoryClassCounts.find(
-        (item: { inventoryClass: string; }) => item.inventoryClass === classList
+        (item: { inventoryClass: string }) => item.inventoryClass === classList
       )?.count || 0;
     return filteredClass;
   }
@@ -186,6 +187,7 @@ const Inventory = () => {
                         inventoryData={_inventoryData}
                         isLoading={inventoryLoading}
                         refreshTable={allInventoryRefresh}
+                        errorData={allInventoryErrorStates}
                       />
                     }
                   />
@@ -199,9 +201,9 @@ const Inventory = () => {
         <CreateNewInventory
           isOpen={isOpen}
           setIsOpen={setIsOpen}
-          formType={formType} 
-          allInventoryRefresh={ allInventoryRefresh}        
-          />
+          formType={formType}
+          allInventoryRefresh={allInventoryRefresh}
+        />
       ) : null}
     </>
   );

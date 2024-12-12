@@ -103,10 +103,17 @@ const ChangePassword = () => {
   };
 
   const isFormFilled =
-    formData.oldPassword || formData.newPassword || formData.confirmPassword;
+    (formData.oldPassword ||
+      formData.newPassword ||
+      formData.confirmPassword) &&
+    changePasswordSchema.safeParse(formData).success;
 
   return (
-    <form className="relative flex flex-col justify-end bg-white p-4 w-full lg:max-w-[700px] min-h-[414px] border-[0.6px] border-strokeGreyThree rounded-[20px]">
+    <form
+      className="relative flex flex-col justify-end bg-white p-4 w-full lg:max-w-[700px] min-h-[414px] border-[0.6px] border-strokeGreyThree rounded-[20px]"
+      onSubmit={handleSubmit}
+      noValidate
+    >
       <img
         src={lightCheckeredBg}
         alt="Light Checkered Background"
@@ -173,7 +180,6 @@ const ChangePassword = () => {
             variant={isFormFilled ? "gradient" : "gray"}
             loading={loading}
             disabled={!isFormFilled}
-            onClick={handleSubmit}
           />
         </div>
       </div>

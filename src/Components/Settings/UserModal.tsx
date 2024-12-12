@@ -90,6 +90,7 @@ const UserModal = ({
   return (
     <Modal
       layout="right"
+      bodyStyle="pb-44"
       isOpen={isOpen}
       onClose={() => {
         setIsOpen(false);
@@ -176,7 +177,6 @@ const UserModal = ({
               error={error}
               errorStates={errorStates}
               refreshData={mutate}
-              className="pb-44"
               errorMessage="Failed to fetch staff information"
             >
               <StaffDetails

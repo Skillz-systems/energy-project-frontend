@@ -57,7 +57,11 @@ const EditPermissions = ({
       refreshData={allPermissionsRefresh}
       errorMessage="Failed to fetch permissions."
     >
-      <form className="flex flex-col bg-white pb-8">
+      <form
+        className="flex flex-col bg-white pb-8"
+        onSubmit={handleSubmitRoleCreation}
+        noValidate
+      >
         <div
           className={`flex items-center justify-center px-4 min-h-[64px] bg-paleGrayGradientLeft border-b-[0.6px] border-strokeGreyThree ${
             isFormFilled
@@ -112,7 +116,6 @@ const EditPermissions = ({
                 variant={isFormFilled ? "gradient" : "gray"}
                 loading={loading}
                 disabled={!isFormFilled}
-                onClick={handleSubmitRoleCreation}
               />
             </div>
           )}

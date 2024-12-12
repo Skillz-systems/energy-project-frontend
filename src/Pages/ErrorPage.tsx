@@ -117,23 +117,23 @@ export const ErrorComponent = ({
   errorData: ApiErrorStatesType;
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
-  const previousErrorCount = useRef(errorData.errorStates[0].errorCount);
+  const previousErrorCount = useRef(errorData?.errorStates[0]?.errorCount);
 
   const handleRefetch = async () => {
     setLoading(true);
     try {
-      if (refreshData && errorData.errorStates[0].errorCount < 5) {
+      if (refreshData && errorData?.errorStates[0]?.errorCount < 5) {
         await refreshData();
       } else window.location.reload();
     } catch {
       setLoading(false);
     }
     // Check if error count has changed, and if so, stop the loading state
-    if (errorData.errorStates[0].errorCount !== previousErrorCount.current) {
+    if (errorData?.errorStates[0]?.errorCount !== previousErrorCount?.current) {
       setLoading(false);
     }
     // Update the previous error count for future comparisons
-    previousErrorCount.current = errorData.errorStates[0].errorCount;
+    previousErrorCount.current = errorData?.errorStates[0]?.errorCount;
   };
 
   return (
@@ -167,12 +167,12 @@ export const ErrorComponent = ({
         />
       </div>
       <p className="mt-2 text-base sm:text-lg text-primary text-center font-semibold sm:max-w-[65%]">
-        {errorData.isNetworkError
+        {errorData?.isNetworkError
           ? "No Internet Connection, Try checking your network configuration."
           : "Internal Server Error."}
       </p>
       <p className="text-sm text-textBlack text-center">
-        {errorData.errorStates[0].errorCount < 5
+        {errorData?.errorStates[0]?.errorCount < 5
           ? message
           : "Blocked fetch dues to multiple errors. Try again later."}
       </p>
@@ -182,7 +182,7 @@ export const ErrorComponent = ({
       >
         {loading
           ? "Refetching..."
-          : errorData.errorStates[0].errorCount < 5
+          : errorData?.errorStates[0]?.errorCount < 5
           ? "Refetch"
           : "Refresh"}
       </div>

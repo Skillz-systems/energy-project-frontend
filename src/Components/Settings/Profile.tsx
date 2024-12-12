@@ -149,7 +149,11 @@ const Profile = () => {
   };
 
   return (
-    <form className="relative flex flex-col justify-end bg-white p-2 md:p-4 w-full max-w-[700px] min-h-[414px] rounded-[20px]">
+    <form
+      className="relative flex flex-col justify-end bg-white p-2 md:p-4 w-full max-w-[700px] min-h-[414px] rounded-[20px]"
+      onSubmit={handleSubmit}
+      noValidate
+    >
       <img
         src={lightCheckeredBg}
         alt="Light Checkered Background"
@@ -238,7 +242,6 @@ const Profile = () => {
               variant={isFormFilled ? "gradient" : "gray"}
               loading={loading}
               disabled={!isFormFilled}
-              onClick={handleSubmit}
             />
           </div>
         ) : null}

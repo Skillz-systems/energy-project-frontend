@@ -88,7 +88,7 @@ export const Input = ({
 
   if (similarTypes.includes(type)) {
     return (
-      <>
+      <div className="w-full">
         <div
           className={`relative autofill-parent ${
             type === "hidden" ? "hidden" : "flex"
@@ -131,11 +131,11 @@ export const Input = ({
           {iconRight && iconRight}
         </div>
         {errorMessage && (
-          <p className="-mt-3 px-[1.3em] text-xs text-errorTwo font-semibold w-full">
+          <p className="mt-1 px-[1.3em] text-xs text-errorTwo font-semibold w-full">
             {errorMessage}
           </p>
         )}
-      </>
+      </div>
     );
   } else {
     return "Input Type Not Allowed";
@@ -322,7 +322,7 @@ export const ModalInput = ({
         ) : null}
       </div>
       {errorMessage && (
-        <p className="-mt-3 px-[1.1em] pb-2 text-sm text-errorTwo font-medium">
+        <p className="mt-1 px-[1.1em] pb-2 text-sm text-errorTwo font-medium">
           {errorMessage}
         </p>
       )}
@@ -333,15 +333,14 @@ export const ModalInput = ({
 export type FileInputType = {
   name: string;
   label: string;
-  value?: string | number;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   disabled?: boolean;
   required: boolean;
   iconRight?: ReactNode;
   style?: string;
+  accept?: string;
   errorMessage?: string;
-  validateImagesOnly?: boolean;
 };
 
 export const FileInput = ({
@@ -353,35 +352,22 @@ export const FileInput = ({
   required = false,
   iconRight,
   style,
+  accept = "*/*",
   errorMessage,
-  validateImagesOnly = true,
 }: FileInputType) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (validateImagesOnly) {
-        if (file.type.startsWith("image/")) {
-          setSelectedFile(file);
-          onChange({
-            target: {
-              name,
-              files: e.target.files, // Use files instead of value
-            },
-          } as unknown as React.ChangeEvent<HTMLInputElement>);
-        } else {
-          alert("Please select an image file.");
-        }
-      } else {
-        setSelectedFile(file);
-        onChange({
-          target: {
-            name,
-            files: e.target.files, // Use files instead of value
-          },
-        } as unknown as React.ChangeEvent<HTMLInputElement>);
-      }
+      // Simply set the selected file and pass it to the parent via onChange
+      setSelectedFile(file);
+      onChange({
+        target: {
+          name,
+          files: e.target.files, // Pass the file to parent
+        },
+      } as unknown as React.ChangeEvent<HTMLInputElement>);
     }
   };
 
@@ -390,10 +376,11 @@ export const FileInput = ({
   };
 
   return (
-    <>
+    <div className="w-full">
       <div
         className={`relative autofill-parent flex
           ${style} 
+          ${selectedFile ? "border-strokeCream" : "border-strokeGrey"}
           ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
           items-center w-full max-w-full h-[48px] px-[1.1em] py-[1.25em] 
           gap-1 rounded-3xl border-[0.6px] cursor-pointer
@@ -417,7 +404,7 @@ export const FileInput = ({
           onChange={handleFileChange}
           disabled={disabled}
           style={{ display: "none" }}
-          accept={validateImagesOnly ? "image/*" : "*/*"}
+          accept={accept}
         />
         {/* Custom button to trigger file input */}
         <div className="flex items-center justify-between w-full">
@@ -447,11 +434,11 @@ export const FileInput = ({
         </div>
       </div>
       {errorMessage && (
-        <p className="-mt-3 px-[1.1em] pb-2 text-sm text-errorTwo font-medium">
+        <p className="mt-1 px-[1.3em] text-xs text-errorTwo font-semibold w-full">
           {errorMessage}
         </p>
       )}
-    </>
+    </div>
   );
 };
 
@@ -671,22 +658,21 @@ export const SelectInput = ({
   }, [isOpen]);
 
   return (
-    <>
+    <div className="w-full">
       <div ref={dropdownRef} className={`relative w-full max-w-full`}>
         <div
           className={`relative flex items-center
-          w-full max-w-full h-[48px] px-[1.25em] py-[1.25em] 
-        rounded-3xl text-sm text-textGrey border-[0.6px] gap-1 cursor-pointer
-        transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
-        ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
-        ${value ? "border-strokeCream" : "border-strokeGrey"}
-        ${style}`}
+            w-full max-w-full h-[48px] px-[1.25em] py-[1.25em] 
+            rounded-3xl text-sm text-textGrey border-[0.6px] gap-1 cursor-pointer
+            transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
+            ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
+            ${value ? "border-strokeCream" : "border-strokeGrey"}
+            ${style}`}
           onClick={() => !disabled && setIsOpen(!isOpen)}
         >
           <span
-            className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out ${
-              value ? "opacity-100" : "opacity-0"
-            }`}
+            className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out
+              ${value ? "opacity-100" : "opacity-0"}`}
           >
             {label.toUpperCase()}
           </span>
@@ -724,11 +710,11 @@ export const SelectInput = ({
         )}
       </div>
       {errorMessage && (
-        <p className="-mt-3 px-[1.3em] text-xs text-errorTwo font-semibold w-full">
-          {errorMessage}
+        <p className="mt-1 px-[1.3em] text-xs text-errorTwo font-semibold w-full">
+          {errorMessage || "This field is required"}
         </p>
       )}
-    </>
+    </div>
   );
 };
 

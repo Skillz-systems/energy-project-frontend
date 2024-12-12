@@ -127,31 +127,32 @@ const RoleAndPermissions = ({
           </div>
         </div>
       </DataStateWrapper>
-      {isOpen && (
-        <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} layout="right">
-          {modalInfo === "edit-permissions" ? (
-            <EditPermissions setIsOpen={setIsOpen} />
-          ) : (
-            singlePermissionId && (
-              <ViewRolePermissions
-                singlePermissionId={singlePermissionId}
-                setUserID={setUserID}
-                setIsOpen={setIsOpen}
-                setIsUserOpen={setIsUserOpen}
-              />
-            )
-          )}
-        </Modal>
-      )}
-      {isUserOpen && (
-        <UserModal
-          isOpen={isUserOpen}
-          setIsOpen={setIsUserOpen}
-          userID={userID}
-          refreshTable={allRolesRefresh}
-          rolesList={rolesList}
-        />
-      )}
+      <Modal
+        bodyStyle="pb-44"
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        layout="right"
+      >
+        {modalInfo === "edit-permissions" ? (
+          <EditPermissions setIsOpen={setIsOpen} />
+        ) : (
+          singlePermissionId && (
+            <ViewRolePermissions
+              singlePermissionId={singlePermissionId}
+              setUserID={setUserID}
+              setIsOpen={setIsOpen}
+              setIsUserOpen={setIsUserOpen}
+            />
+          )
+        )}
+      </Modal>
+      <UserModal
+        isOpen={isUserOpen}
+        setIsOpen={setIsUserOpen}
+        userID={userID}
+        refreshTable={allRolesRefresh}
+        rolesList={rolesList}
+      />
     </>
   );
 };
