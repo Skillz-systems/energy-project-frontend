@@ -5,7 +5,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Icon } from "../Settings/UserModal";
 import edit from "../../assets/edit.svg";
-import { Modal } from "../LogoComponent/ModalComponent/Modal";
+import { Modal } from "@/Components/ModalComponent/Modal";
 
 export type DropDownType = {
   name?: string;
@@ -106,7 +106,7 @@ export const DropDown = (props: DropDownType) => {
           </div>
         ) : (
           <ul
-            className={`${dropDownContainerStyle} absolute top-[35px] right-0 z-[100] flex flex-col gap-0.5 p-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] shadow-lg w-[185px]`}
+            className={`${dropDownContainerStyle} absolute top-[35px] right-0 z-[1000] flex flex-col gap-0.5 p-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] shadow-lg w-[200px]`}
           >
             {items?.map((item, index) => (
               <li

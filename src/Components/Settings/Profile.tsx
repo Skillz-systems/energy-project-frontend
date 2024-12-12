@@ -8,19 +8,40 @@ import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { useApiCall } from "../../utils/useApiCall";
 import useTokens from "../../hooks/useTokens";
 import Cookies from "js-cookie";
+import { SmallInput } from "../InputComponent/Input";
+import { z } from "zod";
+
+// Define the validation schema using Zod
+const profileSchema = z
+  .object({
+    firstname: z.string().trim(),
+    lastname: z.string().trim(),
+    email: z.string().trim().email("Invalid email format"),
+    phone: z
+      .string()
+      .trim()
+      .transform((val) => val.replace(/\s+/g, "")),
+    location: z.string().trim(),
+  })
+  .partial();
+
+type FormData = z.infer<typeof profileSchema>;
 
 const Profile = () => {
   const userData = useTokens();
   const { apiCall } = useApiCall();
-  const [displayInput, setDisplayInput] = useState<boolean>(false);
-  const [formData, setFormData] = useState({
+  const defaultData = {
     firstname: userData.firstname || "",
     lastname: userData.lastname || "",
     email: userData.email || "",
     phone: userData.phone || "",
     location: userData.location || "",
-  });
+  };
+  const [displayInput, setDisplayInput] = useState<boolean>(false);
+  const [formData, setFormData] = useState<FormData>(defaultData);
   const [loading, setLoading] = useState<boolean>(false);
+  const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
+  const [apiError, setApiError] = useState<string | null>(null);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
 
   const fieldLabels: { [key: string]: string } = {
@@ -36,64 +57,71 @@ const Profile = () => {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setUnsavedChanges(true);
+
+    // Check for unsaved changes by comparing the new value with the original value in `userData`
+    if (userData[name as keyof FormData] !== value) {
+      setUnsavedChanges(true);
+    } else {
+      setUnsavedChanges(false);
+    }
+    // Clear the error for this field when the user starts typing
+    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+    setApiError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+    setApiError(null);
 
-    if (!formData) return;
+    if (unsavedChanges) {
+      try {
+        const validatedData = profileSchema.parse(formData);
+        await apiCall({
+          endpoint: "/v1/users",
+          method: "patch",
+          data: validatedData,
+          successMessage: "User updated successfully!",
+        });
 
-    // Remove all spaces from the relevant fields
-    formData.firstname = formData.firstname?.replace(/\s+/g, "") || "";
-    formData.lastname = formData.lastname?.replace(/\s+/g, "") || "";
-    formData.email = formData.email?.replace(/\s+/g, "") || "";
-    formData.phone = formData.phone?.replace(/\s+/g, "") || "";
-    formData.location = formData.location?.replace(/\s+/g, "") || "";
+        // Update the cookies with the new user data
+        const updatedUserData = {
+          ...userData,
+          firstname: formData.firstname,
+          lastname: formData.lastname,
+          email: formData.email,
+          phone: formData.phone,
+          location: formData.location,
+        };
 
-    try {
-      await apiCall({
-        endpoint: "/v1/users",
-        method: "patch",
-        data: formData,
-        successMessage: "User updated successfully!",
-      });
-
-      // Update the cookies with the new user data
-      const updatedUserData = {
-        ...userData,
-        firstname: formData.firstname,
-        lastname: formData.lastname,
-        email: formData.email,
-        phone: formData.phone,
-        location: formData.location,
-      };
-
-      Cookies.set("userData", JSON.stringify(updatedUserData));
-      setUnsavedChanges(false);
-    } catch (error) {
-      console.error("User update failed:", error);
-    } finally {
-      setLoading(false);
-      setDisplayInput(false);
+        Cookies.set("userData", JSON.stringify(updatedUserData));
+        setUnsavedChanges(false);
+        setDisplayInput(false);
+      } catch (error: any) {
+        if (error instanceof z.ZodError) {
+          setFormErrors(error.issues);
+        } else {
+          const message =
+            error?.response?.data?.message || "Internal Server Error";
+          setApiError(`Failed to update user: ${message}.`);
+        }
+      }
     }
+    setLoading(false);
   };
 
   const handleCancelClick = () => {
     setDisplayInput(false);
     setUnsavedChanges(false);
-
-    setFormData({
-      firstname: userData.firstname || "",
-      lastname: userData.lastname || "",
-      email: userData.email || "",
-      phone: userData.phone || "",
-      location: userData.location || "",
-    });
+    setFormData(defaultData);
   };
 
-  const isFormFilled = unsavedChanges;
+  const isFormFilled =
+    unsavedChanges && profileSchema.safeParse(formData).success;
+
+  const getFieldError = (fieldName: string) => {
+    return formErrors.find((error) => error.path[0] === fieldName)?.message;
+  };
 
   const DetailComponent = ({
     label,
@@ -124,6 +152,7 @@ const Profile = () => {
     <form
       className="relative flex flex-col justify-end bg-white p-2 md:p-4 w-full max-w-[700px] min-h-[414px] rounded-[20px]"
       onSubmit={handleSubmit}
+      noValidate
     >
       <img
         src={lightCheckeredBg}
@@ -164,7 +193,7 @@ const Profile = () => {
           {Object.entries(formData).map(([fieldName, fieldValue]) => (
             <div
               key={fieldName}
-              className="flex items-center justify-between bg-white w-full text-textDarkGrey text-xs rounded-full"
+              className="flex items-start justify-between bg-white w-full text-textDarkGrey text-xs rounded-full"
             >
               <span className="flex items-center justify-center bg-[#F6F8FA] text-textBlack text-xs p-2 h-[24px] rounded-full">
                 {fieldLabels[fieldName]}
@@ -182,14 +211,14 @@ const Profile = () => {
                   )}
                 </span>
               ) : (
-                <input
+                <SmallInput
                   type="text"
                   name={fieldName}
                   value={fieldValue}
                   onChange={handleInputChange}
                   required={true}
                   placeholder={`Enter your ${fieldLabels[fieldName]}`}
-                  className="px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
+                  errorMessage={getFieldError(fieldName)}
                 />
               )}
             </div>
@@ -201,12 +230,18 @@ const Profile = () => {
           parentClass="z-10 p-2.5 h-[44px] border-[0.6px] border-strokeGreyThree"
           valueClass="flex items-center justify-center bg-paleLightBlue text-textBlack font-semibold p-2 h-[24px] rounded-full capitalize"
         />
+        {apiError && (
+          <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
+            {apiError}
+          </div>
+        )}
         {displayInput ? (
-          <div className="flex items-center justify-center w-full pt-5 pb-5">
+          <div className="flex items-center justify-center w-full pt-2 pb-5">
             <ProceedButton
               type="submit"
-              loading={loading}
               variant={isFormFilled ? "gradient" : "gray"}
+              loading={loading}
+              disabled={!isFormFilled}
             />
           </div>
         ) : null}

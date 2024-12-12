@@ -5,7 +5,8 @@ import { GoDotFill } from "react-icons/go";
 import { formatNumberWithCommas } from "@/utils/helpers";
 import { NairaSymbol } from "../CardComponents/CardComponent";
 import InventoryDetailModal from "./InventoryDetailModal";
-// import rootStore from "../../stores/rootStore";
+import { ApiErrorStatesType, useApiCall } from "@/utils/useApiCall";
+import { ErrorComponent } from "@/Pages/ErrorPage";
 
 interface InventoryEntries {
   id: string;
@@ -65,9 +66,8 @@ type InventoryType = {
 
 // Helper function to map the API data to the desired format
 const generateInventoryEntries = (data: any): InventoryEntries[] => {
-  const entries: InventoryEntries[] = data?.inventories
-    // .filter((item: InventoryType) => item.batches && item.batches.length > 0) // Filter inventories with non-empty batches
-    .map((item: InventoryType, index: number) => {
+  const entries: InventoryEntries[] = data?.inventories.map(
+    (item: InventoryType, index: number) => {
       return {
         id: item?.batches[0]?.id,
         no: index + 1,
@@ -82,7 +82,8 @@ const generateInventoryEntries = (data: any): InventoryEntries[] => {
         },
         deleted: item?.batches[0]?.deletedAt ?? false,
       };
-    });
+    }
+  );
 
   return entries;
 };
@@ -91,56 +92,67 @@ const InventoryTable = ({
   inventoryData,
   isLoading,
   refreshTable,
+  errorData,
 }: {
   inventoryData: any;
   isLoading: boolean;
-  refreshTable?: KeyedMutator<any>;
+  refreshTable: KeyedMutator<any>;
+  errorData: ApiErrorStatesType;
 }) => {
-  // const { inventoryStore } = rootStore;
-  // const { apiCall } = useApiCall();
+  const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [inventoryID, setInventoryID] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
   const [queryData, setQueryData] = useState<any>(null);
-  const [queryLoading] = useState<boolean>(false);
-  const [isSearchQuery] = useState<boolean>(false);
-
-  // useEffect(() => {
-  //   if (data?.total) {
-  //     inventoryStore.updateInventoryStats(data.total);
-  //   }
-  // }, [data?.total, inventoryStore]);
+  const [queryLoading, setQueryLoading] = useState<boolean>(false);
+  const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
 
   const filterList = [
     {
       name: "Class",
       items: ["Regular", "Returned", "Refurbished"],
-      onClickLink: (index: number) => {
-        console.log("INDEX:", index);
+      onClickLink: async (index: number) => {
+        setIsSearchQuery(false);
+        const selectedClass = ["REGULAR", "RETURNED", "REFURBISHED"][index];
+        setQueryValue(selectedClass);
+        setQueryLoading(true);
+        try {
+          const response = await apiCall({
+            endpoint: `/v1/inventory?class=${encodeURIComponent(
+              selectedClass
+            )}`,
+            method: "get",
+            successMessage: "",
+            showToast: false,
+          });
+          setQueryData(response.data);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setQueryLoading(false);
+        }
       },
     },
     {
       name: "Search",
       onSearch: async (query: string) => {
-        console.log("query:", query);
+        setIsSearchQuery(true);
+        if (queryData) setQueryData(null);
+        setQueryLoading(true);
         setQueryValue(query);
-        // setIsSearchQuery(true);
-        // if (queryData) setQueryData(null);
-        // setQueryLoading(true);
-        // setQueryValue(query);
-        // try {
-        //   const response = await apiCall({
-        //     endpoint: `/v1/inventory?search=${encodeURIComponent(query)}`,
-        //     method: "get",
-        //     successMessage: "",
-        //     showToast: false,
-        //   });
-        //   setQueryData(response.data);
-        // } catch (error) {
-        //   console.error(error);
-        // } finally {
-        //   setQueryLoading(false);
-        // }
+        try {
+          const response = await apiCall({
+            endpoint: `/v1/inventory?search=${encodeURIComponent(query)}`,
+            method: "get",
+            successMessage: "",
+            showToast: false,
+          });
+          setQueryData(response.data);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setQueryLoading(false);
+        }
       },
       isSearch: true,
     },
@@ -297,7 +309,7 @@ const InventoryTable = ({
       title: "ACTIONS",
       key: "actions",
       valueIsAComponent: true,
-      customValue: (_: any, rowData: any) => {
+      customValue: (_value: any, rowData: { id: string }) => {
         return (
           <span
             className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold"
@@ -321,26 +333,37 @@ const InventoryTable = ({
 
   return (
     <>
-      <div className="w-full">
-        <Table
-          tableTitle="INVENTORY"
-          filterList={filterList}
-          columnList={columnList}
-          loading={queryLoading || isLoading}
-          tableData={getTableData()}
-          refreshTable={async () => {
-            await refreshTable!();
-            setQueryData(null);
-          }}
-          queryValue={isSearchQuery ? queryValue : ""}
+      {!errorData?.errorStates[0]?.errorExists ? (
+        <div className="w-full">
+          <Table
+            tableTitle="INVENTORY"
+            filterList={filterList}
+            columnList={columnList}
+            loading={queryLoading || isLoading}
+            tableData={getTableData()}
+            refreshTable={async () => {
+              await refreshTable();
+              setQueryData(null);
+            }}
+            queryValue={isSearchQuery ? queryValue : ""}
+          />
+          {inventoryID && isOpen ? (
+            <InventoryDetailModal
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              inventoryID={inventoryID}
+              refreshTable={refreshTable}
+            />
+          ) : null}
+        </div>
+      ) : (
+        <ErrorComponent
+          message="Failed to fetch inventory list."
+          className="rounded-[20px]"
+          refreshData={refreshTable}
+          errorData={errorData}
         />
-      </div>
-      <InventoryDetailModal
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        inventoryID={inventoryID}
-        refreshTable={refreshTable!}
-      />
+      )}
     </>
   );
 };

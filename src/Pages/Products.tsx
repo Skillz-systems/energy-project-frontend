@@ -23,13 +23,15 @@ const ProductsTable = lazy(
 const Products = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [_productData, setProductData] = useState<any>(null); // Temporary
+  const [_productData, setProductData] = useState<any>(null);
   const [formType, setFormType] = useState<ProductFormType>("newProduct");
 
   const {
     data: productData,
     isLoading: productLoading,
     mutate: allProductsRefresh,
+    error: allProductsError,
+    errorStates: allProductsErrorStates,
   } = useGetRequest("/v1/products", true, 60000);
 
   const fetchAllProductStats = useGetRequest(
@@ -42,7 +44,7 @@ const Products = () => {
     {
       title: "All Product",
       link: "/products/all",
-      count: fetchAllProductStats.data?.allProducts,
+      count: fetchAllProductStats.data?.allProducts || 0,
     },
     // {
     //   title: "SHS",
@@ -114,7 +116,7 @@ const Products = () => {
               iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="PRODUCTS"
-              value={fetchAllProductStats.data?.allProducts}
+              value={fetchAllProductStats.data?.allProducts || 0}
             />
             <TitlePill
               icon={productgreen}
@@ -179,6 +181,8 @@ const Products = () => {
                         productData={_productData}
                         isLoading={productLoading}
                         refreshTable={allProductsRefresh}
+                        error={allProductsError}
+                        errorData={allProductsErrorStates}
                       />
                     }
                   />
@@ -188,12 +192,14 @@ const Products = () => {
           </section>
         </div>
       </PageLayout>
-      <CreateNewProduct
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        refreshTable={allProductsRefresh}
-        formType={formType}
-      />
+      {isOpen && (
+        <CreateNewProduct
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          refreshTable={allProductsRefresh}
+          formType={formType}
+        />
+      )}
     </>
   );
 };

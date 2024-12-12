@@ -12,12 +12,13 @@ const ProductModel = types.model({
 const productStore = types
   .model({
     products: types.array(ProductModel),
+    doesProductCategoriesExist: types.boolean,
   })
   .actions((self) => ({
-    addProduct(product: Instance<typeof ProductModel>) {
+    addProduct(product: any) {
       self.products.push(product);
     },
-    removeProduct(productId: string) {
+    removeProduct(productId?: string) {
       const index = self.products.findIndex((p) => p.productId === productId);
       if (index !== -1) {
         self.products.splice(index, 1);
@@ -41,10 +42,14 @@ const productStore = types
     emptyProducts() {
       self.products.clear();
     },
+    setProductCategoriesExist(value: boolean) {
+      self.doesProductCategoriesExist = value;
+    },
   }));
 
 export const ProductStore = productStore.create({
   products: [],
+  doesProductCategoriesExist: true,
 });
 
 export type ProductStoreType = Instance<typeof productStore>;

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-// import { Modal } from "../ModalComponent/Modal";
+import { Modal } from "../ModalComponent/Modal";
 import editInput from "../../assets/settings/editInput.svg";
 import { DropDown } from "../DropDownComponent/DropDown";
 import TabComponent from "../TabComponent/TabComponent";
@@ -8,12 +8,9 @@ import InventoryStats from "./InventoryStats";
 import InventoryHistory from "./InventoryHistory";
 import { GoDotFill } from "react-icons/go";
 import { generateRandomInventoryHistoryEntries } from "../TableComponent/sampleData";
-// import LoadingSpinner from "../Loaders/LoadingSpinner";
-// import { useApiCall, useGetRequest } from "../../utils/useApiCall";
-import { Modal } from '../ModalComponent/Modal';
-import LoadingSpinner from "../Loaders/LoadingSpinner";
 import { useGetRequest } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
+import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 
 type InventoryData = {
   id: string;
@@ -44,12 +41,6 @@ type InventoryData = {
   };
 };
 
-type DataStateWrapperProps = {
-  isLoading: boolean;
-  error: string | null;
-  children: React.ReactNode;
-};
-
 export type TabNamesType = {
   name: string;
   key: string;
@@ -69,7 +60,7 @@ const InventoryDetailModal = ({
   refreshTable: KeyedMutator<any>;
 }) => {
   const fetchSingleBatchInventory = useGetRequest(
-    inventoryID ? `/v1/inventory/batch/${inventoryID}` : "/v1",
+    `/v1/inventory/batch/${inventoryID}`,
     false
   );
   const [displayInput, setDisplayInput] = useState<boolean>(false);
@@ -146,21 +137,10 @@ const InventoryDetailModal = ({
     }
   };
 
-  const DataStateWrapper: React.FC<DataStateWrapperProps> = ({
-    isLoading,
-    error,
-    children,
-  }) => {
-    if (isLoading)
-      return <LoadingSpinner parentClass="absolute top-[50%] w-full" />;
-    if (error) return <div>Oops, an error occurred: {error}</div>;
-    return <>{children}</>;
-  };
-
   return (
     <Modal
       layout="right"
-      bodyStyle="pb-44 overflow-auto"
+      bodyStyle="pb-44"
       isOpen={isOpen}
       onClose={() => {
         setTabContent("details");
@@ -199,7 +179,11 @@ const InventoryDetailModal = ({
       }
     >
       <div className="bg-white">
-        <header className="flex items-center justify-between bg-paleGrayGradientLeft p-4 min-h-[64px] border-b-[0.6px] border-b-strokeGreyThree">
+        <header
+          className={`flex items-center ${
+            inventoryData.inventoryName ? "justify-between" : "justify-end"
+          } bg-paleGrayGradientLeft p-4 min-h-[64px] border-b-[0.6px] border-b-strokeGreyThree`}
+        >
           {inventoryData.inventoryName && (
             <p className="flex items-center justify-center bg-[#F6F8FA] w-max px-2 py-1 h-[24px] text-textBlack text-xs border-[0.4px] border-strokeGreyTwo rounded-full">
               {inventoryData.inventoryName}
@@ -220,8 +204,11 @@ const InventoryDetailModal = ({
           />
           {tabContent === "details" ? (
             <DataStateWrapper
-              isLoading={fetchSingleBatchInventory.isLoading}
-              error={fetchSingleBatchInventory.error}
+              isLoading={fetchSingleBatchInventory?.isLoading}
+              error={fetchSingleBatchInventory?.error}
+              errorStates={fetchSingleBatchInventory?.errorStates}
+              refreshData={fetchSingleBatchInventory?.mutate}
+              errorMessage="Failed to fetch inventory details"
             >
               <InventoryDetails
                 {...inventoryData}

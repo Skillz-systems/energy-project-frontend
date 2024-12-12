@@ -354,7 +354,8 @@ export const CardComponent = ({
     if (!_selected) {
       if (updatedProductInfo) {
         // Check if onSelectProduct is defined before calling it
-        onSelectProduct?.(updatedProductInfo);
+        if (updatedProductInfo && onSelectProduct)
+          onSelectProduct(updatedProductInfo);
         setSelected(true);
       }
     } else {
@@ -405,11 +406,11 @@ export const CardComponent = ({
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 330 330"
             >
-              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+              <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
               <g
                 id="SVGRepo_tracerCarrier"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               ></g>
               <g id="SVGRepo_iconCarrier">
                 <g>
@@ -563,7 +564,8 @@ export const CardComponent = ({
               <div className="flex items-center gap-[1px]">
                 <NairaSymbol />
                 <p className="text-textBlack text-xs">
-                  {transactionAmount && formatNumberWithCommas(transactionAmount)}
+                  {transactionAmount &&
+                    formatNumberWithCommas(transactionAmount)}
                 </p>
               </div>
             </div>

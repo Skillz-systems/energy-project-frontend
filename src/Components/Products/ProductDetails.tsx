@@ -54,7 +54,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     productId,
-    productImage: "",
+    productImage: productImage ?? "",
     productTag,
     productPrice,
     paymentModes,
@@ -119,11 +119,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
             iconRight={<LuImagePlus />}
           />
         ) : (
-          <div className="flex items-center justify-center w-full p-2 max-w-[100px] h-[100px] gap-2 border-[0.6px] border-strokeCream rounded-full">
+          <div className="flex items-center justify-center w-full p-2 max-w-[100px] h-[100px] gap-2 border-[0.6px] border-strokeCream rounded-full overflow-clip">
             <img
               src={productImage}
               alt="Product Image"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover"
             />
           </div>
         )}
@@ -221,7 +221,12 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 
       {displayInput ? (
         <div className="flex items-center justify-center w-full pt-5 pb-5">
-          <ProceedButton type="submit" loading={loading} variant={"gray"} />
+          <ProceedButton
+            type="submit"
+            loading={loading}
+            variant={"gray"}
+            disabled={false}
+          />
         </div>
       ) : (
         <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">

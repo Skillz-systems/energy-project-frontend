@@ -164,6 +164,7 @@ const LoginPage = () => {
               type="submit"
               loading={loading}
               variant={newPassword || confirmPassword ? "gradient" : "gray"}
+              disabled={false}
             />
           </div>
         </form>

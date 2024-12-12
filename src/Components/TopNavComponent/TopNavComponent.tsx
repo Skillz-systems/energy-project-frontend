@@ -12,7 +12,7 @@ import { DropDown } from "../DropDownComponent/DropDown";
 import Cookies from "js-cookie";
 import useTokens from "../../hooks/useTokens";
 import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
-import { Modal } from "../LogoComponent/ModalComponent/Modal";
+import { Modal } from '@/Components/ModalComponent/Modal';
 
 const TopNavComponent = () => {
   const { role } = useTokens();
