@@ -7,6 +7,7 @@ import inventoryIcon from "../../assets/inventory/inventoryIcon.svg";
 import { GoDotFill } from "react-icons/go";
 import { formatDateTime, formatNumberWithCommas } from "@/utils/helpers";
 import { NairaSymbol } from "../CardComponents/CardComponent";
+import { KeyedMutator } from "swr";
 
 type InventoryDetailsProps = {
   inventoryId: string | number;
@@ -22,6 +23,7 @@ type InventoryDetailsProps = {
   salePrice: number;
   displayInput?: boolean;
   tagStyle: (value: string) => string;
+  refreshTable: KeyedMutator<any>;
 };
 
 const InventoryDetails: React.FC<InventoryDetailsProps> = ({
@@ -38,6 +40,7 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
   salePrice = 0,
   displayInput = false,
   tagStyle,
+  refreshTable,
 }) => {
   const [formData, setFormData] = useState({
     inventoryId,
@@ -77,6 +80,7 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
     setLoading(true);
     try {
       console.log("Submitted Data:", formData);
+      refreshTable();
     } catch (error) {
       console.error(error);
     } finally {
@@ -106,8 +110,7 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
             <img
               src={inventoryImage}
               alt="Inventory Image"
-              height={"100%"}
-              className="rounded-full"
+              className="w-full h-full object-contain"
             />
           </div>
         )}
@@ -145,18 +148,18 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
               required={true}
               className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-[10px]"
             >
-              <option value="regular">Regular</option>
-              <option value="returned">Returned</option>
-              <option value="refurbished">Refurbished</option>
+              <option value="REGULAR">Regular</option>
+              <option value="RETURNED">Returned</option>
+              <option value="REFURBISHED">Refurbished</option>
             </select>
           ) : (
             <span
               className={`${tagStyle(
-                "regular"
+                inventoryClass
               )} flex items-center justify-center gap-0.5 w-max px-2 h-[24px] text-xs uppercase rounded-full`}
             >
               <GoDotFill width={4} height={4} />
-              {"regular"}
+              {inventoryClass}
             </span>
           )}
         </div>
@@ -174,11 +177,13 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
               <option value="inverter">Inverter</option>
               <option value="battery">Batttery</option>
             </select>
-          ) : (
+          ) : inventoryCategory ? (
             <span className="flex items-center justify-center bg-[#FEF5DA] gap-0.5 w-max px-2 h-[24px] text-textDarkBrown text-xs uppercase rounded-full">
               <GoDotFill width={4} height={4} />
               {inventoryCategory}
             </span>
+          ) : (
+            <p className="text-xs font-bold text-textDarkGrey">N/A</p>
           )}
         </div>
         <div className="flex items-center justify-between">
@@ -194,7 +199,9 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
               className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
             />
           ) : (
-            <p className="text-xs font-bold text-textDarkGrey">{sku}</p>
+            <p className="text-xs font-bold text-textDarkGrey">
+              {sku ? sku : "N/A"}
+            </p>
           )}
         </div>
       </div>
@@ -235,7 +242,9 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
             />
           ) : (
             <p className="text-xs font-bold text-textDarkGrey">
-              {formatDateTime("date", dateOfManufacture)}
+              {dateOfManufacture
+                ? formatDateTime("date", dateOfManufacture)
+                : "N/A"}
             </p>
           )}
         </div>

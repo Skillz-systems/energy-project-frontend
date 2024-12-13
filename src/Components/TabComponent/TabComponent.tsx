@@ -4,7 +4,7 @@ import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
 export interface Tab {
   name: string;
   key: string;
-  count?: number;
+  count?: number | null;
 }
 
 export interface TabComponentProps {
@@ -49,7 +49,7 @@ const TabComponent: React.FC<TabComponentProps> = ({
                 : "bg-[#EAEEF2] text-textDarkGrey border-strokeGrey group-hover:bg-[#FEF5DA] group-hover:text-textDarkBrown group-hover:border-textDarkBrown"
             }`}
             >
-              {formatNumberWithSuffix(tab.count)}
+              {tab.count && formatNumberWithSuffix(tab.count)}
             </span>
           )}
         </div>

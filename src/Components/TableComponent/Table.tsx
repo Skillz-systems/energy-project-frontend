@@ -133,7 +133,7 @@ export const Table = (props: TableType) => {
             className="bg-[#F6F8FA] px-4 py-1 text-textDarkGrey font-medium border border-strokeGreyTwo mt-4 rounded-full hover:text-textBlack transition-all"
             onClick={async () => {
               setRefreshing(true);
-              await refreshTable();
+              await refreshTable!();
               setRefreshing(false);
             }}
           >
@@ -154,7 +154,7 @@ export const Table = (props: TableType) => {
                       className="bg-white text-xs px-2 py-1 text-textDarkGrey font-medium border border-strokeGreyTwo rounded-full hover:text-textBlack hover:border-textBlack transition-all"
                       onClick={async () => {
                         setRefreshing(true);
-                        await refreshTable();
+                        await refreshTable!();
                         setRefreshing(false);
                       }}
                     >
@@ -185,7 +185,7 @@ export const Table = (props: TableType) => {
                   <table>
                     <thead>
                       <tr className="h-[32px]">
-                        {columnList.map((column, index) => (
+                        {columnList?.map((column, index) => (
                           <th
                             key={index}
                             className={`${column.styles} p-2 text-xs font-light text-left text-textDarkGrey border-b-[0.2px] border-[#E0E0E0]`}
@@ -207,7 +207,7 @@ export const Table = (props: TableType) => {
                           key={rowIndex}
                           className="h-[40px] hover:opacity-80"
                         >
-                          {columnList.map((column, colIndex) => {
+                          {columnList?.map((column, colIndex) => {
                             const cellValue = row[column.key];
 
                             return (
@@ -227,7 +227,7 @@ export const Table = (props: TableType) => {
                                     <span>{cellValue || "-"}</span>
                                     {colIndex === 0 ||
                                     colIndex ===
-                                      columnList.length - 1 ? null : (
+                                      columnList?.length - 1 ? null : (
                                       <span
                                         className="flex items-center justify-center w-5 h-5 rounded-full cursor-pointer"
                                         onClick={() =>

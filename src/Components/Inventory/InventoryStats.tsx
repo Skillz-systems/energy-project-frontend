@@ -2,7 +2,6 @@ import { TitlePill } from "../TitlePillComponent/TitlePill";
 import inventorygradient from "../../assets/inventory/inventorygradient.svg";
 import stockgreen from "../../assets/inventory/stockvalue.svg";
 import giftgradient from "../../assets/inventory/gift.svg";
-import { formatNumberWithCommas } from "@/utils/helpers";
 import { NairaSymbol } from "../CardComponents/CardComponent";
 
 const InventoryStats = () =>
@@ -15,7 +14,7 @@ const InventoryStats = () =>
           iconBgColor="bg-[#FDEEC2]"
           topText="All Time Number of"
           bottomText="STOCK"
-          value={formatNumberWithCommas(4309)}
+          value={4309}
           parentClass="w-full"
         />
         <TitlePill
@@ -24,7 +23,7 @@ const InventoryStats = () =>
           topText="All Time Value of"
           bottomText="STOCK"
           leftIcon={<NairaSymbol />}
-          value={formatNumberWithCommas(1590790)}
+          value={1590790}
           parentClass="w-full"
         />
         <TitlePill
@@ -32,7 +31,7 @@ const InventoryStats = () =>
           iconBgColor="bg-[#FDEEC2]"
           topText="Available"
           bottomText="STOCK"
-          value={formatNumberWithCommas(2000)}
+          value={2000}
           parentClass="w-full"
         />
         <TitlePill
@@ -41,7 +40,7 @@ const InventoryStats = () =>
           topText="Value of Available"
           bottomText="STOCK"
           leftIcon={<NairaSymbol />}
-          value={formatNumberWithCommas(600000)}
+          value={600000}
           parentClass="w-full"
         />
         <TitlePill

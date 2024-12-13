@@ -1,3 +1,14 @@
+import React, { useEffect } from "react";
+import { GoDotFill } from "react-icons/go";
+import { Table } from "@/Components/TableComponent/Table";
+import {
+  generateCustomerEntries,
+  Entry,
+} from "@/Components/TableComponent/sampleData";
+
+import moneyBag from "../assets/table/moneybag.svg";
+import statusIcon from "../assets/table/status.svg";
+import productsbadge from "../assets/products/productsbadge.png";
 import { Routes, Route, useLocation } from "react-router-dom";
 import useGlobalErrorBoundary from "@/hooks/useGlobalErrorBoundary";
 import { SideMenu } from "../Components/SideMenuComponent/SideMenu";

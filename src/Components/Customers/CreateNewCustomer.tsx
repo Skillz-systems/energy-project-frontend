@@ -3,14 +3,15 @@ import { useApiCall } from "@/utils/useApiCall";
 import LoadingSpinner from "../Loaders/LoadingSpinner";
 import { Input, } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
-import { Modal } from "../ModalComponent/ModalComponent/Modal";
+import { Modal } from "../ModalComponent/Modal";
+
 
 const defaultFormData = {
   firstname: "",
   lastname: "",
   email: "",
   phone: "",
-  addressType: "", // Key matches form field
+  addressType: "", 
   location: "",
 };
 
@@ -55,9 +56,7 @@ const CreateNewCustomerModal = ({
       setLoading(false);
       await allCustomersRefresh();
     } catch (error) {
-      console.error("Customer creation failed:", error);
       setLoading(false);
-      // Optionally handle the error gracefully, e.g., show a notification
     }
 
     setIsOpen(false);
@@ -65,8 +64,6 @@ const CreateNewCustomerModal = ({
   };
 
   const isFormFilled = Object.values(formData).some((value) => Boolean(value));
-
-
 
   return (
     <Modal

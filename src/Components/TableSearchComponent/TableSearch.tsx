@@ -28,10 +28,10 @@ export const TableSearch = (props: TableSearchType) => {
     icon,
   } = props;
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [query, setQuery] = useState<string>(queryValue);
+  const [query, setQuery] = useState<string | undefined>(queryValue);
 
   const handleSearch = () => {
-    if (onSearch) onSearch(query);
+    if (onSearch && query) onSearch(query);
     setIsSearching(false);
   };
 

@@ -1,5 +1,3 @@
-import React from "react";
-
 const StatsDetails = () => {
   return <div>StatsDetails Coming Soon</div>;
 };

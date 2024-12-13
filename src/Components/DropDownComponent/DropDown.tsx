@@ -10,7 +10,7 @@ import { Modal } from "../LogoComponent/ModalComponent/Modal";
 export type DropDownType = {
   name?: string;
   items?: string[];
-  onClickLink?: (index?: number, cardData?: any) => void;
+  onClickLink?: (index: number, cardData?: any) => void;
   buttonImgStyle?: string;
   dropDownContainerStyle?: string;
   isSearch?: boolean;
@@ -24,7 +24,7 @@ export type DropDownType = {
 export const DropDown = (props: DropDownType) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [showIcon, setShowIcon] = useState<number>();
+  const [showIcon, setShowIcon] = useState<number | null>();
 
   const {
     name,

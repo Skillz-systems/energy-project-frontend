@@ -5,7 +5,6 @@ import { GoDotFill } from "react-icons/go";
 import { formatNumberWithCommas } from "@/utils/helpers";
 import { NairaSymbol } from "../CardComponents/CardComponent";
 import InventoryDetailModal from "./InventoryDetailModal";
-import { generateRandomInventoryEntry } from "../TableComponent/sampleData";
 // import rootStore from "../../stores/rootStore";
 
 interface InventoryEntries {
@@ -67,10 +66,10 @@ type InventoryType = {
 // Helper function to map the API data to the desired format
 const generateInventoryEntries = (data: any): InventoryEntries[] => {
   const entries: InventoryEntries[] = data?.inventories
-    .filter((item: InventoryType) => item.batches && item.batches.length > 0) // Filter inventories with non-empty batches
+    // .filter((item: InventoryType) => item.batches && item.batches.length > 0) // Filter inventories with non-empty batches
     .map((item: InventoryType, index: number) => {
       return {
-        id: item?.id,
+        id: item?.batches[0]?.id,
         no: index + 1,
         name: { image: item?.batches[0]?.image, text: item?.batches[0]?.name },
         class: item?.batches[0]?.class,
@@ -103,8 +102,8 @@ const InventoryTable = ({
   const [inventoryID, setInventoryID] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
   const [queryData, setQueryData] = useState<any>(null);
-  const [queryLoading, setQueryLoading] = useState<boolean>(false);
-  const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
+  const [queryLoading] = useState<boolean>(false);
+  const [isSearchQuery] = useState<boolean>(false);
 
   // useEffect(() => {
   //   if (data?.total) {
@@ -298,7 +297,7 @@ const InventoryTable = ({
       title: "ACTIONS",
       key: "actions",
       valueIsAComponent: true,
-      customValue: (value, rowData) => {
+      customValue: (_: any, rowData: any) => {
         return (
           <span
             className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold"
@@ -330,7 +329,7 @@ const InventoryTable = ({
           loading={queryLoading || isLoading}
           tableData={getTableData()}
           refreshTable={async () => {
-            await refreshTable();
+            await refreshTable!();
             setQueryData(null);
           }}
           queryValue={isSearchQuery ? queryValue : ""}
@@ -339,9 +338,8 @@ const InventoryTable = ({
       <InventoryDetailModal
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        inventorytID={inventoryID}
-        refreshTable={refreshTable}
-        inventoryData={generateRandomInventoryEntry()}
+        inventoryID={inventoryID}
+        refreshTable={refreshTable!}
       />
     </>
   );

@@ -8,6 +8,7 @@ import {
   Products,
   Inventory,
   Home,
+  Agent,
 } from "./Pages/Index";
 import "./index.css";
 import ProtectedRouteWrapper from "./Context/ProtectedRoute";
@@ -34,6 +35,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/products/*" element={<Products />} />
             <Route path="/inventory/*" element={<Inventory />} />
+            <Route path="/agents/*" element={<Agent />} />
             <Route path="/settings/*" element={<Settings />} />
             <Route path="/customers/*" element={<CustomerPage />} />
             {/* Other protected routes */}

@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import useTokens from "../hooks/useTokens";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
@@ -50,7 +50,7 @@ export const formatDateTime = (
   }
 };
 
-export function capitalizeFirstLetter(str) {
+export function capitalizeFirstLetter(str: string) {
   if (!str) return str; // Return the original string if it's empty or undefined
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
@@ -59,15 +59,24 @@ export function formatNumberWithCommas(number: number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-export function useIsLoggedIn(route?: string) {
+export function useIsLoggedIn(route: string) {
   const { token } = useTokens();
   const navigate = useNavigate();
   const sessionRedirect = sessionStorage.getItem("redirect");
 
   useEffect(() => {
     if (token) {
-      navigate(sessionRedirect || route);
+      navigate(sessionRedirect || route || "");
       toast.info("You are already logged in!");
     }
   }, [token, navigate, route, sessionRedirect]);
 }
+
+export const useScrollToTop = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Ensure the scroll position resets
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [location.pathname]);
+};

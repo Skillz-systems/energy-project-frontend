@@ -9,7 +9,8 @@ import { TableSearch } from "../TableSearchComponent/TableSearch";
 import searchIcon from "../../assets/search.svg";
 import { useGetRequest } from "@/utils/useApiCall";
 import LoadingSpinner from "../Loaders/LoadingSpinner";
-import { Modal } from '@/Components/ModalComponent/ModalComponent/Modal';
+import { Modal } from "@/Components/ModalComponent/Modal";
+import { TabNamesType } from "../Inventory/InventoryDetailModal";
 
 type ListDataType = {
   productId: string;
@@ -38,6 +39,25 @@ type InventoryCategoryType = {
   updatedAt: string;
 };
 
+export type BatchType = {
+  id: string;
+  name: string;
+  dateOfManufacture: string | null;
+  sku: string;
+  image: string;
+  batchNumber: number;
+  costOfItem: number;
+  price: number;
+  numberOfStock: number;
+  remainingQuantity: number;
+  status: string;
+  class: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  inventoryId: string;
+};
+
 type AllInventoryType = {
   id: string;
   name: string;
@@ -47,7 +67,7 @@ type AllInventoryType = {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
-  batches: any[];
+  batches: BatchType[];
   inventoryCategory: InventoryCategoryType;
   inventorySubCategory: InventoryCategoryType;
 };
@@ -68,13 +88,15 @@ const SelectInventoryModal = observer(
       false
     );
 
-    const tabNames = useMemo(() => {
+    const tabNames: TabNamesType[] = useMemo(() => {
       return (
-        fetchAllInventoryCategories.data?.map((data) => ({
-          name: data.name,
-          key: data.name,
-          id: data.id,
-        })) || []
+        fetchAllInventoryCategories.data?.map(
+          (data: { name: any; id: any }) => ({
+            name: data.name,
+            key: data.name,
+            id: data.id,
+          })
+        ) || []
       );
     }, [fetchAllInventoryCategories.data]);
 
@@ -94,13 +116,18 @@ const SelectInventoryModal = observer(
     );
 
     const generateListDataEntries = (data: any): ListDataType[] => {
-      return data?.inventories?.map((inventory: AllInventoryType) => ({
-        productId: inventory.id,
-        productImage: "",
-        productTag: inventory.inventoryCategory?.name,
-        productName: inventory.name,
-        productPrice: 0,
-      }));
+      return data?.inventories
+        ?.filter(
+          (inventory: AllInventoryType) =>
+            inventory.batches && inventory.batches.length > 0
+        ) // Only include inventories with batch data
+        .map((inventory: AllInventoryType) => ({
+          productId: inventory.batches[0]?.id,
+          productImage: inventory.batches[0]?.image || "",
+          productTag: inventory.inventoryCategory?.name,
+          productName: inventory.name,
+          productPrice: inventory.batches[0]?.price || 0,
+        }));
     };
 
     useEffect(() => {
@@ -116,7 +143,7 @@ const SelectInventoryModal = observer(
           const tabData = await fetchTabData(inventoryCategoryId);
           setDynamicListData((prevListData) => [
             ...prevListData.filter((d) => d.name !== tabContent),
-            { name: tabContent, data: tabData },
+            { name: tabContent, data: tabData ?? [] },
           ]);
         }
       };
@@ -186,7 +213,9 @@ const SelectInventoryModal = observer(
               }))}
               onTabSelect={(key) => {
                 setTabContent(key);
-                const selectedTab = tabNames.find((tab) => tab.key === key);
+                const selectedTab = tabNames.find(
+                  (tab: { key: string }) => tab.key === key
+                );
                 setInventoryCategoryId(selectedTab?.id || "");
                 setCurrentPage(1);
               }}
@@ -251,10 +280,10 @@ const SelectInventoryModal = observer(
                       productName={data.productName}
                       productPrice={data.productPrice}
                       onSelectProduct={(productInfo) => {
-                        rootStore.productStore.addProduct(productInfo);
+                        rootStore.productStore.addProduct(productInfo as any);
                       }}
                       onRemoveProduct={(productId) =>
-                        rootStore.productStore.removeProduct(productId)
+                        rootStore.productStore.removeProduct(productId as string)
                       }
                       isProductSelected={rootStore.productStore.products.some(
                         (p) => p.productId === data.productId

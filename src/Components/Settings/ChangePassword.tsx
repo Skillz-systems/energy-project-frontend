@@ -58,7 +58,7 @@ const ChangePassword = () => {
   const togglePasswordVisibility = (field: string) => {
     setPasswordVisibility((prev) => ({
       ...prev,
-      [field]: !prev[field],
+      [field]: !prev[field as keyof typeof prev],
     }));
   };
 

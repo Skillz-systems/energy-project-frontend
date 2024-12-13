@@ -1,4 +1,4 @@
-import { ChangeEvent, MouseEvent, ReactNode, useEffect, useRef } from "react";
+import { ChangeEvent, ReactNode, useEffect, useRef } from "react";
 import { CgChevronDown } from "react-icons/cg";
 import { useState } from "react";
 import { LuImagePlus } from "react-icons/lu";
@@ -44,7 +44,7 @@ export type InputType = {
   value: string | number;
   onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
-  onClick?: (event?: MouseEvent<HTMLInputElement>) => void;
+  onClick?: (event?: any) => void;
   disabled?: boolean;
   required: boolean;
   checked?: boolean;

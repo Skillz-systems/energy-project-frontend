@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
-
 import { useApiCall } from "@/utils/useApiCall";
 import LoadingSpinner from "../Loaders/LoadingSpinner";
 import { Input, SelectInput } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
-import { Modal } from "../ModalComponent/ModalComponent/Modal";
+import { Modal } from "../ModalComponent/Modal";
 
 const defaultFormData = {
   email: "",
@@ -22,7 +22,7 @@ const CreateNewUserModal = ({
   allRolesLoading,
   rolesList,
   allUsersRefresh,
-}) => {
+}: any) => {
   const { apiCall } = useApiCall();
   const [formData, setFormData] = useState(defaultFormData);
   const [loading, setLoading] = useState<boolean>(false);

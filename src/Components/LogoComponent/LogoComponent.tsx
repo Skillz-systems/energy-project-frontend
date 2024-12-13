@@ -1,6 +1,4 @@
-
 import logo from '../assets/images/logo.png';
-import React from 'react';
 interface LogoProps {
   variant?: 'nav' | 'auth';
 }

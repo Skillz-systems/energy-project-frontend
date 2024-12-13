@@ -70,7 +70,7 @@ const Users = observer(
         items: [
           "All Roles",
           ...(rolesList
-            ? rolesList.map((role) => capitalizeFirstLetter(role.label))
+            ? rolesList.map((role: any) => capitalizeFirstLetter(role.label))
             : []),
         ],
         onClickLink: async (index: number) => {
@@ -172,7 +172,7 @@ const Users = observer(
         title: "ACTIONS",
         key: "actions",
         valueIsAComponent: true,
-        customValue: (value, rowData) => {
+        customValue: (_: any, rowData: any) => {
           return (
             <span
               className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold"

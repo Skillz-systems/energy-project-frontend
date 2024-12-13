@@ -1,3 +1,4 @@
+import { formatNumberWithCommas } from "@/utils/helpers";
 import { ReactNode } from "react";
 
 export type TitlePillType = {
@@ -7,7 +8,7 @@ export type TitlePillType = {
   topText: string;
   bottomText: string;
   leftIcon?: ReactNode;
-  value: string | number;
+  value: number | string;
 };
 
 export const TitlePill = (props: TitlePillType) => {
@@ -40,7 +41,9 @@ export const TitlePill = (props: TitlePillType) => {
       </div>
       <div className="flex items-center justify-end w-max gap-1">
         {leftIcon && leftIcon}
-        <p className="text-xl font-medium text-textBlack">{value}</p>
+        <p className="text-xl font-medium text-textBlack">
+          {value && formatNumberWithCommas(Number(value))}
+        </p>
       </div>
     </div>
   );
