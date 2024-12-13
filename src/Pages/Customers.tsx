@@ -178,13 +178,11 @@ const Customers = () => {
           </section>
         </div>
       </PageLayout>
-      {isOpen && (
-        <CreateNewCustomer
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-          allCustomerRefresh={allCustomerRefresh}
-        />
-      )}
+      <CreateNewCustomer
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        allCustomerRefresh={allCustomerRefresh}
+      />
     </>
   );
 };

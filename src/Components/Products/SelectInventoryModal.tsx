@@ -111,7 +111,7 @@ const SelectInventoryModal = observer(
     }, [fetchAllInventoryCategories.data]);
 
     const fetchInventoryCategoryById = useGetRequest(
-      `/v1/inventory?categoryId=${_categoryId}`
+      `/v1/inventory?inventoryCategoryId=${_categoryId}`
     );
 
     const fetchTabData = useCallback(
@@ -306,7 +306,13 @@ const SelectInventoryModal = observer(
               refreshData={fetchInventoryCategoryById?.mutate}
               errorMessage={`Failed to fetch inventory list for "${getTabName}".`}
             >
-              <div className="flex flex-wrap items-center justify-center h-full gap-4">
+              <div
+                className={`flex flex-wrap ${
+                  fetchInventoryCategoryById?.error
+                    ? "justify-center"
+                    : "justify-start"
+                } items-center h-full gap-4`}
+              >
                 {paginatedData?.length > 0 ? (
                   paginatedData?.map((data, index) => {
                     return (

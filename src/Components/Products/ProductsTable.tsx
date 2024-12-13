@@ -145,14 +145,14 @@ const ProductsTable = ({
             }}
             queryValue={isSearchQuery ? queryValue : ""}
           />
-          {productId && isOpen ? (
+          {productId && (
             <ProductModal
               isOpen={isOpen}
               setIsOpen={setIsOpen}
               productID={productId}
               refreshTable={refreshTable}
             />
-          ) : null}
+          )}
         </div>
       ) : (
         <ErrorComponent
