@@ -2,7 +2,6 @@ import useTokens from "../hooks/useTokens";
 import axios, { AxiosRequestConfig, AxiosError } from "axios";
 import useSWR from "swr";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import Cookies from "js-cookie";
 import { Location, useLocation } from "react-router-dom";
 import { useState } from "react";

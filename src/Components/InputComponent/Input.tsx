@@ -263,7 +263,6 @@ type ModalInputType = {
 
 export const ModalInput = ({
   type = "text",
-  name,
   label,
   placeholder = "Enter your firstname",
   onClick,
@@ -302,7 +301,7 @@ export const ModalInput = ({
                 className="w-full text-sm font-semibold text-textBlack cursor-pointer"
                 onClick={onClick}
               >
-                Change {name} selected
+                Change {label.toLowerCase()} selected
               </span>
             ) : (
               required && <Asterik />

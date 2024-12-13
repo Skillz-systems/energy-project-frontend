@@ -597,8 +597,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
             type="submit"
             loading={loading}
             variant={isFormFilled ? "gradient" : "gray"}
-            // disabled={!isFormFilled}
-            disabled={false}
+            disabled={!isFormFilled}
           />
         </div>
       </form>

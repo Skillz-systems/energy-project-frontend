@@ -41,7 +41,7 @@ const Customers = () => {
         setCustomerData(customerData);
         break;
       case "/customers/new":
-        setCustomerFilter("");
+        setCustomerFilter("new");
         setCustomerData(customerData);
         break;
       case "/customers/active":

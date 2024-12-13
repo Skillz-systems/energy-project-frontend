@@ -11,7 +11,7 @@ export function copyToClipboard(value: any) {
   const textToCopy = String(value);
 
   navigator.clipboard.writeText(textToCopy).then(() => {
-    toast.info(`Copied to "${textToCopy}" clipboard.`);
+    toast.info(`Copied "${textToCopy}" to clipboard.`);
   });
 }
 
