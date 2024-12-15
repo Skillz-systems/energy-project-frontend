@@ -73,3 +73,8 @@ export const useScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location.pathname]);
 };
+
+export const checkIfArraysAreEqual = (arr1: string[], arr2: string[]) => {
+  if (arr1.length !== arr2.length) return false;
+  return arr1.every((item) => arr2.includes(item));
+};

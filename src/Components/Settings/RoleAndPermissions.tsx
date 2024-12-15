@@ -33,7 +33,29 @@ const RoleAndPermissions = ({
   const [isUserOpen, setIsUserOpen] = useState<boolean>(false);
   const [userID, setUserID] = useState<string>("");
   const [modalInfo, setModalInfo] = useState<string | any>(null);
-  const [singlePermissionId, setSinglePermissionId] = useState<string>("");
+  const [roleData, setRoleData] = useState<{
+    id: string;
+    role: string;
+    active: boolean;
+    permissionIds: string[];
+    permissions: {
+      id: string;
+      action: string;
+      subject: string;
+    }[];
+  }>({
+    id: "",
+    role: "",
+    active: true,
+    permissionIds: [""],
+    permissions: [
+      {
+        id: "",
+        action: "",
+        subject: "",
+      },
+    ],
+  });
 
   return (
     <>
@@ -113,7 +135,13 @@ const RoleAndPermissions = ({
                     <span
                       className="flex items-center justify-center px-2 pt-[1px] text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-[32px] shadow-innerCustom cursor-pointer hover:bg-gold"
                       onClick={async () => {
-                        setSinglePermissionId(role.id);
+                        setRoleData({
+                          id: role.id,
+                          role: role.role,
+                          active: role.active,
+                          permissionIds: role.permissionIds,
+                          permissions: role.permissions,
+                        });
                         setIsOpen(true);
                         setModalInfo("view-permissions");
                       }}
@@ -136,9 +164,10 @@ const RoleAndPermissions = ({
         {modalInfo === "edit-permissions" ? (
           <EditPermissions setIsOpen={setIsOpen} />
         ) : (
-          singlePermissionId && (
+          roleData.id && (
             <ViewRolePermissions
-              singlePermissionId={singlePermissionId}
+              roleData={roleData}
+              refreshTable={allRolesRefresh}
               setUserID={setUserID}
               setIsOpen={setIsOpen}
               setIsUserOpen={setIsUserOpen}

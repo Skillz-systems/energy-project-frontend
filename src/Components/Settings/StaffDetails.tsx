@@ -274,9 +274,10 @@ const DetailComponent = ({
       <span className="flex items-center justify-center bg-[#F6F8FA] text-textBlack text-xs p-2 h-[24px] rounded-full">
         {label}
       </span>
-      <span className={`${valueClass} text-xs font-bold text-textDarkGrey`}>
-        {value}
-      </span>
+     
+        <span className={`${valueClass} text-xs font-bold text-textDarkGrey`}>
+          {value}
+        </span>
     </div>
   );
 };

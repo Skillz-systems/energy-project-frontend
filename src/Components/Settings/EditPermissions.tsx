@@ -3,6 +3,18 @@ import { Input, ToggleInput } from "../InputComponent/Input";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { useApiCall, useGetRequest } from "@/utils/useApiCall";
+import GroupDisplay from "../GroupComponent/GroupDisplay";
+import { GoDotFill } from "react-icons/go";
+
+export interface Permission {
+  id: string;
+  action: string;
+  subject: string;
+  roleIds: string[];
+  created_at: string;
+  updated_at: string;
+  deleted_at: null | string;
+}
 
 const EditPermissions = ({
   setIsOpen,
@@ -13,7 +25,7 @@ const EditPermissions = ({
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [permissionIds, setPermissionIds] = useState<string[]>([]);
-  const isFormFilled = selectedRole;
+  const isFormFilled = selectedRole && permissionIds.length > 0;
 
   const {
     data: allPermissions,
@@ -22,6 +34,11 @@ const EditPermissions = ({
     errorStates: allPermissionsErrorStates,
     mutate: allPermissionsRefresh,
   } = useGetRequest("/v1/permissions", true);
+
+  const fetchPermissionSubjects = useGetRequest(
+    "/v1/permissions/subjects",
+    true
+  );
 
   const handleSubmitRoleCreation = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -49,6 +66,46 @@ const EditPermissions = ({
     }
   };
 
+  const GroupWrapper = () => {
+    const groupItems = fetchPermissionSubjects?.data?.subjects?.map(
+      (subject: string) => {
+        // Filter permissions for this subject
+        const subjectPermissions = allPermissions?.filter(
+          (permission: Permission) => permission.subject === subject
+        );
+
+        const hasToggled = subjectPermissions.some((permission: Permission) =>
+          permissionIds.includes(permission.id)
+        );
+
+        return {
+          title: subject,
+          hasToggled,
+          content: (
+            <DataStateWrapper
+              isLoading={allPermissionsLoading}
+              error={allPermissionsError}
+              errorStates={allPermissionsErrorStates}
+              refreshData={allPermissionsRefresh}
+              errorMessage="Failed to fetch permission action"
+            >
+              {subjectPermissions?.map((permission: Permission) => (
+                <PermissionComponent
+                  key={permission.id}
+                  permission={permission}
+                  permissionIds={permissionIds}
+                  setPermissionIds={setPermissionIds}
+                />
+              ))}
+            </DataStateWrapper>
+          ),
+        };
+      }
+    );
+
+    return <GroupDisplay items={groupItems} />;
+  };
+
   return (
     <DataStateWrapper
       isLoading={allPermissionsLoading}
@@ -63,7 +120,7 @@ const EditPermissions = ({
         noValidate
       >
         <div
-          className={`flex items-center justify-center px-4 min-h-[64px] bg-paleGrayGradientLeft border-b-[0.6px] border-strokeGreyThree ${
+          className={`flex items-center justify-center px-4 min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${
             isFormFilled
               ? "bg-paleCreamGradientLeft"
               : "bg-paleGrayGradientLeft"
@@ -86,28 +143,19 @@ const EditPermissions = ({
             placeholder="Role Name"
             required={true}
           />
-          <div className="relative flex flex-col w-full gap-0.5 p-5 border-[0.6px] border-strokeGreyTwo rounded-[20px]">
+          <div
+            className={`relative flex flex-col w-full gap-0.5 border-[0.6px] ${
+              permissionIds.length > 0
+                ? "border-strokeCream"
+                : "border-strokeGrey"
+            } rounded-[20px]`}
+          >
             <span
-              className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeGreyTwo rounded-[200px] transition-opacity duration-500 ease-in-out opacity-100`}
+              className={`absolute z-10 flex -top-2 ml-5 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeGreyTwo rounded-[200px] transition-opacity duration-500 ease-in-out opacity-100`}
             >
               PERMISSIONS
             </span>
-            <DataStateWrapper
-              isLoading={allPermissionsLoading}
-              error={allPermissionsError}
-              errorStates={allPermissionsErrorStates}
-              refreshData={allPermissionsRefresh}
-              errorMessage="Failed to fetch permissions list"
-            >
-              {allPermissions?.map((permission: any) => (
-                <PermissionComponent
-                  key={permission.id}
-                  permission={permission}
-                  permissionIds={permissionIds}
-                  setPermissionIds={setPermissionIds}
-                />
-              ))}
-            </DataStateWrapper>
+            <GroupWrapper />
           </div>
           {isFormFilled && (
             <div className="flex items-center justify-center w-full pt-6 pb-5">
@@ -127,7 +175,7 @@ const EditPermissions = ({
 
 export default EditPermissions;
 
-const PermissionComponent = ({
+export const PermissionComponent = ({
   permission,
   permissionIds,
   setPermissionIds,
@@ -152,14 +200,16 @@ const PermissionComponent = ({
 
   return (
     <div className="flex items-center justify-between w-full">
-      <p className="flex items-center justify-center bg-[#F6F8FA] p-2 h-6 text-xs rounded-full capitalize">
-        {permission.subject}
+      <p className="flex items-center justify-center gap-0.5 bg-[#F6F8FA] px-2 h-6 rounded-full text-xs font-medium capitalize border-[0.6px] border-strokeGreyTwo">
+        <GoDotFill color="#050505" />
+        {permission.action}
       </p>
+
       <ToggleInput
         defaultChecked={isChecked}
-        onChange={(checked: boolean) =>
-          handlePermissionChange(checked, permission.id)
-        }
+        onChange={(checked: boolean) => {
+          handlePermissionChange(checked, permission.id);
+        }}
       />
     </div>
   );
