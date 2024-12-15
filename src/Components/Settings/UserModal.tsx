@@ -59,7 +59,6 @@ const UserModal = ({
       setIsOpen(false);
     }
   };
-  console.log(data);
 
   const dropDownList = {
     items: [

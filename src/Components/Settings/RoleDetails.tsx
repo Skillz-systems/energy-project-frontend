@@ -167,12 +167,16 @@ const RoleDetails = ({
   };
 
   const GroupWrapper = () => {
+    const actionOrder = ["manage", "read", "write", "delete"];
     const groupItems = fetchPermissionSubjects?.data?.subjects?.map(
       (subject: string) => {
         // Filter permissions for this subject
-        const subjectPermissions = allPermissions?.filter(
-          (permission: Permission) => permission.subject === subject
-        );
+        const subjectPermissions = allPermissions
+          ?.filter((permission: Permission) => permission.subject === subject)
+          .sort(
+            (a: { action: string }, b: { action: string }) =>
+              actionOrder.indexOf(a.action) - actionOrder.indexOf(b.action)
+          );
 
         const hasToggled = subjectPermissions.some((permission: Permission) =>
           permissionIds.includes(permission.id)

@@ -601,7 +601,7 @@ export const RadioInput = ({
             className={`flex items-center justify-center bg-white w-max max-w-[400px]  
             gap-3 rounded-3xl text-base text-center text-textGrey font-semibold transition-all
             border border-strokeGreyTwo cursor-pointer ${
-              className ? className : "h-[40px] px-[1em] py-[0.2em]"
+              className ? className : "h-[35px] px-[1em] py-[0.2em]"
             }
             ${
               selectedValues.includes(option.value)

@@ -167,10 +167,14 @@ const RoleAndPermissions = ({
       <Modal
         bodyStyle="pb-44"
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={() => {
+          setIsOpen(false);
+          setDisplayInput(false);
+        }}
         layout="right"
         rightHeaderComponents={
-          !roleData.id ? null : displayInput ? (
+          modalInfo ===
+          "edit-permissions" ? null : !roleData.id ? null : displayInput ? (
             <p
               className="text-xs text-textDarkGrey font-semibold cursor-pointer"
               onClick={() => setDisplayInput(false)}
@@ -191,7 +195,10 @@ const RoleAndPermissions = ({
         }
       >
         {modalInfo === "edit-permissions" ? (
-          <EditPermissions setIsOpen={setIsOpen} allRolesRefresh={allRolesRefresh} />
+          <EditPermissions
+            setIsOpen={setIsOpen}
+            allRolesRefresh={allRolesRefresh}
+          />
         ) : (
           roleData.id && (
             <ViewRolePermissions
