@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { Input, ToggleInput } from "../InputComponent/Input";
+import { Input, RadioInput, ToggleInput } from "../InputComponent/Input";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { useApiCall, useGetRequest } from "@/utils/useApiCall";
 import GroupDisplay from "../GroupComponent/GroupDisplay";
 import { GoDotFill } from "react-icons/go";
+import { KeyedMutator } from "swr";
+import { z } from "zod";
 
 export interface Permission {
   id: string;
@@ -16,16 +18,34 @@ export interface Permission {
   deleted_at: null | string;
 }
 
+const roleSchema = z.object({
+  role: z.string().min(1, { message: "Role name is required." }),
+  active: z
+    .boolean()
+    .nullable()
+    .transform((val) => val ?? true),
+  permissionIds: z
+    .array(z.string())
+    .optional()
+    .refine((arr) => Array.isArray(arr) && arr.length >= 0, {
+      message: "Permission IDs must be an array.",
+    }),
+});
+
 const EditPermissions = ({
   setIsOpen,
+  allRolesRefresh,
 }: {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  allRolesRefresh: KeyedMutator<any>;
 }) => {
   const { apiCall } = useApiCall();
   const [selectedRole, setSelectedRole] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [roleActive, setRoleActive] = useState<boolean | null>(null);
   const [permissionIds, setPermissionIds] = useState<string[]>([]);
-  const isFormFilled = selectedRole && permissionIds.length > 0;
+  const [loading, setLoading] = useState<boolean>(false);
+  const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const {
     data: allPermissions,
@@ -40,29 +60,48 @@ const EditPermissions = ({
     true
   );
 
+  const resetErrors = (name: string) => {
+    // Clear the error for this field when the user selects a value
+    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+    setApiError(null);
+  };
+
   const handleSubmitRoleCreation = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
-    if (!selectedRole) return;
 
     try {
+      const validatedData = roleSchema.parse({
+        role: selectedRole,
+        active: roleActive,
+        permissionIds,
+      });
+
       await apiCall({
         endpoint: "/v1/roles",
         method: "post",
         data: {
-          role: selectedRole,
-          active: true,
-          permissionIds,
+          role: validatedData.role,
+          active: validatedData.active,
+          permissionIds: validatedData.permissionIds,
         },
         successMessage: "Role created successfully!",
       });
-      setIsOpen(false);
+      await allRolesRefresh();
+      setLoading(false);
       setSelectedRole("");
       setPermissionIds([]);
-    } catch (error) {
-      console.error("Role creation failed:", error);
-    } finally {
+      setRoleActive(null);
+      setIsOpen(false);
+    } catch (error: any) {
       setLoading(false);
+      if (error instanceof z.ZodError) {
+        setFormErrors(error.issues);
+      } else {
+        const message =
+          error?.response?.data?.message || "Internal Server Error";
+        setApiError(`Role creation failed: ${message}.`);
+      }
     }
   };
 
@@ -87,7 +126,7 @@ const EditPermissions = ({
               error={allPermissionsError}
               errorStates={allPermissionsErrorStates}
               refreshData={allPermissionsRefresh}
-              errorMessage="Failed to fetch permission action"
+              errorMessage="Failed to fetch permission actions"
             >
               {subjectPermissions?.map((permission: Permission) => (
                 <PermissionComponent
@@ -95,6 +134,7 @@ const EditPermissions = ({
                   permission={permission}
                   permissionIds={permissionIds}
                   setPermissionIds={setPermissionIds}
+                  resetErrors={() => resetErrors("permissionIds")}
                 />
               ))}
             </DataStateWrapper>
@@ -104,6 +144,16 @@ const EditPermissions = ({
     );
 
     return <GroupDisplay items={groupItems} />;
+  };
+
+  const isFormFilled = roleSchema.safeParse({
+    role: selectedRole,
+    active: roleActive,
+    permissionIds,
+  }).success;
+
+  const getFieldError = (fieldName: string) => {
+    return formErrors.find((error) => error.path[0] === fieldName)?.message;
   };
 
   return (
@@ -139,33 +189,98 @@ const EditPermissions = ({
             name="role"
             label="ROLE NAME"
             value={selectedRole}
-            onChange={(e) => setSelectedRole(e.target.value)}
+            onChange={(e) => {
+              setSelectedRole(e.target.value);
+              resetErrors(e.target.name);
+            }}
             placeholder="Role Name"
             required={true}
+            errorMessage={getFieldError("role")}
           />
-          <div
-            className={`relative flex flex-col w-full gap-0.5 border-[0.6px] ${
-              permissionIds.length > 0
-                ? "border-strokeCream"
-                : "border-strokeGrey"
-            } rounded-[20px]`}
-          >
-            <span
-              className={`absolute z-10 flex -top-2 ml-5 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeGreyTwo rounded-[200px] transition-opacity duration-500 ease-in-out opacity-100`}
+          <div className="flex flex-col w-full gap-2">
+            <div
+              className={`relative flex items-center justify-between bg-white px-[1.1em] py-[1em] border-[0.6px] ${
+                roleActive !== null ? "border-strokeCream" : "border-strokeGrey"
+              } w-full transition-all rounded-[20px]`}
             >
-              PERMISSIONS
-            </span>
-            <GroupWrapper />
-          </div>
-          {isFormFilled && (
-            <div className="flex items-center justify-center w-full pt-6 pb-5">
-              <ProceedButton
-                type="submit"
-                variant={isFormFilled ? "gradient" : "gray"}
-                loading={loading}
-                disabled={!isFormFilled}
+              <span
+                className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out
+            ${roleActive !== null ? "opacity-100" : "opacity-0"}`}
+              >
+                Role Active Status
+              </span>
+              <p
+                className={`w-full text-sm ${
+                  roleActive !== null
+                    ? "text-textBlack font-semibold"
+                    : "text-textGrey italic"
+                }`}
+              >
+                Role Active Status
+              </p>
+              <RadioInput
+                name="active"
+                value={
+                  roleActive === null || roleActive === true ? "true" : "false"
+                }
+                onChange={(e) => {
+                  setRoleActive(e.target.value === "true" ? true : false);
+                  resetErrors(e.target.name);
+                }}
+                required={false}
+                radioOptions={[
+                  {
+                    label: "True",
+                    value: "true",
+                  },
+                  {
+                    label: "False",
+                    value: "false",
+                  },
+                ]}
               />
             </div>
+            {getFieldError("active") && (
+              <p className="px-2 text-[11px] text-errorTwo font-semibold w-full">
+                {getFieldError("active")}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col w-full gap-2">
+            <div
+              className={`relative flex flex-col w-full gap-0.5 border-[0.6px] ${
+                permissionIds.length > 0
+                  ? "border-strokeCream"
+                  : "border-strokeGrey"
+              } rounded-[20px] transition-all`}
+            >
+              <span
+                className={`absolute z-10 flex -top-2 ml-5 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeGreyTwo rounded-[200px] transition-opacity duration-500 ease-in-out ${
+                  permissionIds.length > 0 ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                PERMISSIONS
+              </span>
+              <GroupWrapper />
+            </div>
+            {getFieldError("permissionIds") && (
+              <p className="px-2 text-[11px] text-errorTwo font-semibold w-full">
+                {getFieldError("permissionIds")}
+              </p>
+            )}
+          </div>
+          {apiError && (
+            <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
+              {apiError}
+            </div>
+          )}
+          {isFormFilled && (
+            <ProceedButton
+              type="submit"
+              variant={isFormFilled ? "gradient" : "gray"}
+              loading={loading}
+              disabled={!isFormFilled}
+            />
           )}
         </div>
       </form>
@@ -179,10 +294,12 @@ export const PermissionComponent = ({
   permission,
   permissionIds,
   setPermissionIds,
+  resetErrors,
 }: {
   permission: any;
   permissionIds: string[];
   setPermissionIds: React.Dispatch<React.SetStateAction<string[]>>;
+  resetErrors?: () => void;
 }) => {
   // Check if the permission ID is in the array
   const isChecked = permissionIds.includes(permission.id);
@@ -196,6 +313,7 @@ export const PermissionComponent = ({
         prev.filter((permissionId) => permissionId !== id)
       );
     }
+    resetErrors!();
   };
 
   return (

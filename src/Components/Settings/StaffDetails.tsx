@@ -85,11 +85,11 @@ const StaffDetails = ({
 
   const resetForm = () => {
     setLoading(false);
-    setFormData(defaultData);
     setFormErrors([]);
     setApiError(null);
     setUnsavedChanges(false);
     setDisplayInput(false);
+    setFormData(defaultData);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -98,6 +98,7 @@ const StaffDetails = ({
     setApiError(null);
 
     if (designationChanged) {
+      setLoading(true);
       apiCall({
         endpoint: `/v1/roles/${data.id}/assign`,
         method: "post",
@@ -106,8 +107,24 @@ const StaffDetails = ({
         },
         successMessage: "Designation updated successfully!",
       })
-        .then()
-        .catch((error) => console.error(error));
+        .then(async () => {
+          setDesignation(data.role.id);
+          if (!unsavedChanges) {
+            await refreshUserData();
+            resetForm();
+            await refreshUserTable();
+          }
+        })
+        .catch((error: any) => {
+          setLoading(false);
+          if (error instanceof z.ZodError) {
+            setFormErrors(error.issues);
+          } else {
+            const message =
+              error?.response?.data?.message || "Internal Server Error";
+            setApiError(`Failed to update user designation: ${message}.`);
+          }
+        });
     }
 
     if (unsavedChanges) {
@@ -133,7 +150,6 @@ const StaffDetails = ({
         }
       }
     }
-    setLoading(false);
   };
 
   const designationChanged = designation !== data.role.id;
@@ -274,10 +290,10 @@ const DetailComponent = ({
       <span className="flex items-center justify-center bg-[#F6F8FA] text-textBlack text-xs p-2 h-[24px] rounded-full">
         {label}
       </span>
-     
-        <span className={`${valueClass} text-xs font-bold text-textDarkGrey`}>
-          {value}
-        </span>
+
+      <span className={`${valueClass} text-xs font-bold text-textDarkGrey`}>
+        {value}
+      </span>
     </div>
   );
 };

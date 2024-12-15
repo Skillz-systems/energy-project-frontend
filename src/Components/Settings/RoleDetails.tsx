@@ -59,6 +59,11 @@ const RoleDetails = ({
     true
   );
 
+  const fetchSingleUser = useGetRequest(
+    `/v1/users/single/${fetchSingleRoleData?.data?.created_by}`,
+    true
+  );
+
   const defaultFormData = useMemo(() => {
     return {
       role: roleData.role,
@@ -195,6 +200,7 @@ const RoleDetails = ({
     );
   };
 
+  console.log(fetchSingleUser?.data);
   return (
     <form
       className="flex flex-col items-center gap-4 w-full bg-white"
@@ -266,18 +272,26 @@ const RoleDetails = ({
               <img src={role} alt="Role Icon" width="16px" />
               ROLE DETAILS
             </p>
-            <DetailComponent
-              label="Created By"
-              value="Moses Bliss"
-              parentClass="border-none p-0"
-              valueClass="bg-[#EFF2FF] px-2 py-1 rounded-full"
-              icon={roletwo}
-            />
-            <DetailComponent
-              label="Designation"
-              value="Super Admin"
-              parentClass="border-none p-0"
-            />
+            {fetchSingleUser?.data?.firstname && (
+              <DetailComponent
+                label="Created By"
+                value={
+                  fetchSingleUser?.data?.firstname
+                    ? `${fetchSingleUser?.data?.firstname} ${fetchSingleUser?.data?.lastname}`
+                    : "N/A"
+                }
+                parentClass="border-none p-0"
+                valueClass="bg-[#EFF2FF] px-2 py-1 rounded-full"
+                icon={roletwo}
+              />
+            )}
+            {fetchSingleUser?.data?.firstname && (
+              <DetailComponent
+                label="Designation"
+                value={fetchSingleUser?.data?.role?.role || ""}
+                parentClass="border-none p-0"
+              />
+            )}
             <DetailComponent
               label="Date Created"
               value={formatDateTime(

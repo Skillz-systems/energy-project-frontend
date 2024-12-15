@@ -100,7 +100,7 @@ const CustomerModal = ({
           <p
             className="text-xs text-textDarkGrey font-semibold cursor-pointer over"
             onClick={handleCancelClick}
-            title="Cancel editing user details"
+            title="Cancel editing customer details"
           >
             Cancel Edit
           </p>

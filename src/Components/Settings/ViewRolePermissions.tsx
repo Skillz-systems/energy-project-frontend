@@ -15,6 +15,8 @@ const ViewRolePermissions = ({
   setUserID,
   setIsOpen,
   setIsUserOpen,
+  displayInput,
+  setDisplayInput,
 }: {
   roleData: {
     id: string;
@@ -31,11 +33,12 @@ const ViewRolePermissions = ({
   setUserID: React.Dispatch<React.SetStateAction<string>>;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setIsUserOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  displayInput: boolean;
+  setDisplayInput: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const { apiCall } = useApiCall();
   const [activeTabName, setActiveTabName] = useState<string>("");
   const [tabContent, setTabContent] = useState<string>("roleDetails");
-  const [editInput, setEditInput] = useState<boolean>(false);
 
   const fetchSingleRoleData = useGetRequest(
     `/v1/roles/more_details/${roleData.id}`,
@@ -70,7 +73,7 @@ const ViewRolePermissions = ({
         case 0:
           setActiveTabName(tabNames[0].name);
           setTabContent(tabNames[0].key);
-          setEditInput(true);
+          setDisplayInput(true);
           break;
         case 1:
           deleteUserById();
@@ -99,11 +102,11 @@ const ViewRolePermissions = ({
 
   useEffect(() => {
     if (fetchSingleRoleData?.error) {
-      setEditInput(false);
+      setDisplayInput(false);
       setActiveTabName(tabNames[0].name);
       setTabContent(tabNames[0].key);
     }
-  }, [fetchSingleRoleData?.error, tabNames]);
+  }, [fetchSingleRoleData?.error, setDisplayInput, tabNames]);
 
   return (
     <DataStateWrapper
@@ -138,11 +141,11 @@ const ViewRolePermissions = ({
           <RoleDetails
             fetchSingleRoleData={fetchSingleRoleData}
             userCount={userCount}
-            editInput={editInput}
+            editInput={displayInput}
             roleData={roleData}
             refreshTable={refreshTable}
             refreshRoleDetails={fetchSingleRoleData?.mutate}
-            setEditInput={setEditInput}
+            setEditInput={setDisplayInput}
           />
         ) : tabContent === "permissions" ? (
           <PermissionDetails fetchSingleRoleData={fetchSingleRoleData} />

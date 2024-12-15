@@ -164,7 +164,7 @@ const InventoryDetailModal = ({
           <p
             className="text-xs text-textDarkGrey font-semibold cursor-pointer over"
             onClick={handleCancelClick}
-            title="Cancel editing user details"
+            title="Cancel editing inventory details"
           >
             Cancel Edit
           </p>

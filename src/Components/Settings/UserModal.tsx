@@ -59,16 +59,29 @@ const UserModal = ({
       setIsOpen(false);
     }
   };
+  console.log(data);
 
   const dropDownList = {
-    items: ["Edit Staff Details", "Block Staff", "Delete Staff"],
+    items: [
+      "Edit Staff Details",
+      `${data?.isBlocked ? "Unblock" : "Block"} Staff`,
+      "Delete Staff",
+    ],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
           setDisplayInput(true);
           break;
         case 1:
-          console.log(index);
+          apiCall({
+            endpoint: `/v1/users/${data.id}`,
+            method: "patch",
+            data: {
+              email: data?.email,
+              isBlocked: !data?.isBlocked,
+            },
+            successMessage: "User blocked successfully!",
+          });
           break;
         case 2:
           deleteUserById();
@@ -77,6 +90,8 @@ const UserModal = ({
           break;
       }
     },
+    // disabled: [false, !data ? true : false, false],
+    disabled: [false, true, false],
     defaultStyle: true,
     showCustomButton: true,
   };
