@@ -1,4 +1,4 @@
-import { lazy, useState } from "react";
+import { useState } from "react";
 import lightCheckeredBg from "../../assets/lightCheckeredBg.png";
 import addCircleGold from "../../assets/settings/addCircleGold.svg";
 import { GoDotFill } from "react-icons/go";
@@ -8,8 +8,8 @@ import { Modal } from "../ModalComponent/Modal";
 import { KeyedMutator } from "swr";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import EditPermissions from "./EditPermissions";
-
-const ViewRolePermissions = lazy(() => import("./ViewRolePermissions"));
+import ViewRolePermissions from "./ViewRolePermissions";
+import editInput from "../../assets/settings/editInput.svg";
 
 const columnList = ["TITLE", "ASSIGNED USERS", "PERMISSIONS", "ACTIONS"];
 const columnWidth = ["w-[15%]", "w-[22.5%]", "w-[50%]", "w-[12.5%]"];
@@ -33,7 +33,31 @@ const RoleAndPermissions = ({
   const [isUserOpen, setIsUserOpen] = useState<boolean>(false);
   const [userID, setUserID] = useState<string>("");
   const [modalInfo, setModalInfo] = useState<string | any>(null);
-  const [singlePermissionId, setSinglePermissionId] = useState<string>("");
+  const [displayInput, setDisplayInput] = useState<boolean>(false);
+
+  const [roleData, setRoleData] = useState<{
+    id: string;
+    role: string;
+    active: boolean;
+    permissionIds: string[];
+    permissions: {
+      id: string;
+      action: string;
+      subject: string;
+    }[];
+  }>({
+    id: "",
+    role: "",
+    active: true,
+    permissionIds: [""],
+    permissions: [
+      {
+        id: "",
+        action: "",
+        subject: "",
+      },
+    ],
+  });
 
   return (
     <>
@@ -97,7 +121,14 @@ const RoleAndPermissions = ({
                   <div
                     className={`flex items-center flex-wrap gap-2.5 py-2 ${columnWidth[2]}`}
                   >
-                    {role.permissions.map((permission: any) => (
+                    {Array.from(
+                      new Map(
+                        role.permissions.map((permission: any) => [
+                          permission.subject,
+                          permission,
+                        ])
+                      ).values()
+                    ).map((permission: any) => (
                       <span
                         key={permission.id}
                         className="flex items-center justify-center gap-1 bg-[#F6F8FA] px-2 py-1 text-xs uppercase text-textDarkGrey border-[0.4px] border-strokeGreyThree rounded-full"
@@ -113,7 +144,13 @@ const RoleAndPermissions = ({
                     <span
                       className="flex items-center justify-center px-2 pt-[1px] text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-[32px] shadow-innerCustom cursor-pointer hover:bg-gold"
                       onClick={async () => {
-                        setSinglePermissionId(role.id);
+                        setRoleData({
+                          id: role.id,
+                          role: role.role,
+                          active: role.active,
+                          permissionIds: role.permissionIds,
+                          permissions: role.permissions,
+                        });
                         setIsOpen(true);
                         setModalInfo("view-permissions");
                       }}
@@ -130,18 +167,48 @@ const RoleAndPermissions = ({
       <Modal
         bodyStyle="pb-44"
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={() => {
+          setIsOpen(false);
+          setDisplayInput(false);
+        }}
         layout="right"
+        rightHeaderComponents={
+          modalInfo ===
+          "edit-permissions" ? null : !roleData.id ? null : displayInput ? (
+            <p
+              className="text-xs text-textDarkGrey font-semibold cursor-pointer"
+              onClick={() => setDisplayInput(false)}
+              title="Cancel editing role & permission details"
+            >
+              Cancel Edit
+            </p>
+          ) : (
+            <button className="flex items-center justify-center w-[24px] h-[24px] bg-white border border-strokeGreyTwo rounded-full hover:bg-slate-100">
+              <img
+                src={editInput}
+                alt="Edit Button"
+                width="15px"
+                onClick={() => setDisplayInput(true)}
+              />
+            </button>
+          )
+        }
       >
         {modalInfo === "edit-permissions" ? (
-          <EditPermissions setIsOpen={setIsOpen} />
+          <EditPermissions
+            setIsOpen={setIsOpen}
+            allRolesRefresh={allRolesRefresh}
+          />
         ) : (
-          singlePermissionId && (
+          roleData.id && (
             <ViewRolePermissions
-              singlePermissionId={singlePermissionId}
+              roleData={roleData}
+              refreshTable={allRolesRefresh}
               setUserID={setUserID}
               setIsOpen={setIsOpen}
               setIsUserOpen={setIsUserOpen}
+              displayInput={displayInput}
+              setDisplayInput={setDisplayInput}
             />
           )
         )}

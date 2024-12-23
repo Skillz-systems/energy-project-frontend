@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import Home from "./Pages/Home";
 import Dashboard from "./Pages/Dashboard";
+import Transactions from "./Pages/Transactions";
 import Customers from "./Pages/Customers";
 import Agent from "./Pages/Agent";
 import Products from "./Pages/Products";
@@ -29,6 +30,7 @@ function App() {
           {/* Protected Routes */}
           <Route element={<ProtectedRouteWrapper />}>
             <Route path="/home" element={<Home />} />
+            <Route path="/transactions/*" element={<Transactions />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/customers/*" element={<Customers />} />
             <Route path="/agents/*" element={<Agent />} />

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
 
 export interface Tab {
@@ -11,14 +11,26 @@ export interface TabComponentProps {
   tabs: Tab[];
   onTabSelect: (key: string) => void;
   tabsContainerClass?: string;
+  activeTabName?: string;
 }
 
 const TabComponent: React.FC<TabComponentProps> = ({
   tabs,
   onTabSelect,
   tabsContainerClass,
+  activeTabName,
 }) => {
   const [activeTab, setActiveTab] = useState<Tab | null>(tabs[0] || null);
+
+  // Sync internal active tab state with the `activeTabName` prop
+  useEffect(() => {
+    if (activeTabName) {
+      const matchingTab = tabs.find((tab) => tab.name === activeTabName);
+      if (matchingTab) {
+        setActiveTab(matchingTab);
+      }
+    }
+  }, [activeTabName, tabs]);
 
   const handleTabClick = (tab: Tab) => {
     setActiveTab(tab);

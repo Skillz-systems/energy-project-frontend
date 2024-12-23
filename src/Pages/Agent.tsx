@@ -169,13 +169,11 @@ const Agent = () => {
           </section>
         </div>
       </PageLayout>
-      {isOpen && (
-        <CreateNewAgents
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-          refreshTable={allAgentRefresh}
-        />
-      )}
+      <CreateNewAgents
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        refreshTable={allAgentRefresh}
+      />
     </>
   );
 };

@@ -1,102 +1,53 @@
 import { useState } from "react";
 import { KeyedMutator } from "swr";
-import { Table } from "../TableComponent/Table";
-import { GoDotFill } from "react-icons/go";
-import clock from "../../assets/table/clock.svg";
-import CustomerModal from "./CustomerModal";
 import { ApiErrorStatesType, useApiCall } from "@/utils/useApiCall";
 import { ErrorComponent } from "@/Pages/ErrorPage";
+import { Table } from "../TableComponent/Table";
+import TransactionModal from "./TransactionModal";
+import {
+  DateTimeTag,
+  NairaSymbol,
+  NameTag,
+} from "../CardComponents/CardComponent";
+import { GoDotFill } from "react-icons/go";
+import { formatNumberWithCommas } from "@/utils/helpers";
+import creditcardicon from "../../assets/creditcardgrey.svg";
 
-interface CustomerEntries {
-  id: string;
-  no: number;
-  name: string;
-  email: string;
-  location: string;
-  product: string;
+type TransactionEntries = {
+  transactionId: string;
+  customer: string;
+  datetime: string;
+  productType: string;
+  amount: number;
   status: string;
-}
-
-type Permission = {
-  id: string;
-  action: string;
-  subject: string;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null;
-};
-
-type Role = {
-  id: string;
-  role: string;
-  active: boolean;
-  permissionIds: string[];
-  created_by: string | null;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null;
-  permissions: Permission[];
-};
-
-type CustomerDetails = {
-  id: string;
-  type: string;
-  createdBy: string;
-  creatorId: string;
-  agentId: string;
-  userId: string;
-};
-
-export type CustomerType = {
-  id: string;
-  firstname: string;
-  lastname: string;
-  username: string | null;
-  email: string;
-  phone: string;
-  location: string;
-  addressType: string | null;
-  staffId: string | null;
-  longitude: string | null;
-  latitude: string | null;
-  emailVerified: boolean;
-  isBlocked: boolean;
-  status: string;
-  roleId: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-  lastLogin: string | null;
-  customerDetails: CustomerDetails;
-  role: Role;
 };
 
 // Helper function to map the API data to the desired format
-const generateCustomerEntries = (data: any): CustomerEntries[] => {
-  const entries: CustomerEntries[] = data?.customers.map(
-    (item: CustomerType, index: number) => {
+const generateTransactionEntries = (data: any): TransactionEntries[] => {
+  const entries: TransactionEntries[] = data?.map(
+    (item: any, index: number) => {
       return {
-        id: item?.id,
         no: index + 1,
-        name: `${item?.firstname} ${item?.lastname}`,
-        email: item?.email,
-        location: item?.location,
-        product: 1,
-        status: item?.status,
+        transactionId: item?.transactionId,
+        customer: item?.customer,
+        datetime: item?.datetime,
+        productType: item?.productType,
+        amount: item?.amount,
+        status: item?.status?.toLowerCase(),
       };
     }
   );
   return entries;
 };
 
-const CustomerTable = ({
-  customerData,
+const TransactionTable = ({
+  transactionData,
   isLoading,
   refreshTable,
   error,
   errorData,
 }: {
-  customerData: any;
+  transactionData: any;
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
   error: any;
@@ -104,7 +55,7 @@ const CustomerTable = ({
 }) => {
   const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [customerID, setCustomerID] = useState<string>("");
+  const [transactionID, setTransactionID] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
   const [queryData, setQueryData] = useState<any>(null);
   const [queryLoading, setQueryLoading] = useState<boolean>(false);
@@ -112,43 +63,10 @@ const CustomerTable = ({
 
   const filterList = [
     {
-      name: "Location",
-      onSearch: async (query: string) => {
-        setQueryValue(query);
-        setIsSearchQuery(true);
-        if (queryData) setQueryData(null);
-        setQueryLoading(true);
-        setQueryValue(query);
-        try {
-          const response = await apiCall({
-            endpoint: `/v1/customers?location=${encodeURIComponent(query)}`,
-            method: "get",
-            successMessage: "",
-            showToast: false,
-          });
-          setQueryData(response.data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setQueryLoading(false);
-        }
-      },
-      isSearch: true,
-    },
-    // {
-    //   name: "Product",
-    //   items: ["Product One", "Product Two"],
-    //   onClickLink: (index: number) => {
-    //     console.log("INDEX:", index);
-    //   },
-    // },
-    {
       name: "Status",
-      items: ["New", "Active", "Defaulted", "Barred"],
+      items: ["Reversed"],
       onClickLink: async (index: number) => {
-        const data = ["New", "Active", "Defaulted", "Barred"].map((item) =>
-          item.toLocaleLowerCase()
-        );
+        const data = ["Reversed"].map((item) => item.toLocaleLowerCase());
         const query = data[index];
         setQueryValue(query);
         if (queryData) setQueryData(null);
@@ -156,7 +74,7 @@ const CustomerTable = ({
         setQueryValue(query);
         try {
           const response = await apiCall({
-            endpoint: `/v1/customers?status=${encodeURIComponent(query)}`,
+            endpoint: `/v1/transactions?status=${encodeURIComponent(query)}`,
             method: "get",
             successMessage: "",
             showToast: false,
@@ -179,7 +97,7 @@ const CustomerTable = ({
         setQueryValue(query);
         try {
           const response = await apiCall({
-            endpoint: `/v1/customers?search=${encodeURIComponent(query)}`,
+            endpoint: `/v1/transactions?search=${encodeURIComponent(query)}`,
             method: "get",
             successMessage: "",
             showToast: false,
@@ -203,12 +121,26 @@ const CustomerTable = ({
 
   const columnList = [
     { title: "S/N", key: "no" },
-    { title: "NAME", key: "name" },
-    { title: "EMAIL", key: "email" },
-    { title: "LOCATION", key: "location" },
+    { title: "TRANSACTION ID", key: "transactionId" },
     {
-      title: "PRODUCT",
-      key: "product",
+      title: "CUSTOMER",
+      key: "customer",
+      valueIsAComponent: true,
+      customValue: (value: string) => {
+        return <NameTag name={value} />;
+      },
+    },
+    {
+      title: "DATE & TIME",
+      key: "datetime",
+      valueIsAComponent: true,
+      customValue: (value: string) => {
+        return <DateTimeTag datetime={value} />;
+      },
+    },
+    {
+      title: "PRODUCT TYPE",
+      key: "productType",
       rightIcon: (
         <svg
           width="16"
@@ -227,16 +159,30 @@ const CustomerTable = ({
       ),
     },
     {
+      title: "AMOUNT",
+      key: "amount",
+      valueIsAComponent: true,
+      customValue: (value: number) => {
+        return (
+          <div className="flex items-center gap-1">
+            <NairaSymbol />
+            <span className="text-textBlack">
+              {value && formatNumberWithCommas(value)}
+            </span>
+          </div>
+        );
+      },
+      rightIcon: <NairaSymbol color="#828DA9" />,
+    },
+    {
       title: "STATUS",
       key: "status",
       valueIsAComponent: true,
       customValue: (value: any) => {
         let style: string = "";
 
-        if (value === "active") {
+        if (value === "successful") {
           style = "text-success";
-        } else if (value === "inactive") {
-          style = "text-strokeCream";
         } else {
           style = "text-errorTwo";
         }
@@ -250,18 +196,18 @@ const CustomerTable = ({
           </span>
         );
       },
-      rightIcon: <img src={clock} alt="clock icon" className="ml-auto" />,
+      rightIcon: <img src={creditcardicon} />,
     },
     {
       title: "ACTIONS",
       key: "actions",
       valueIsAComponent: true,
-      customValue: (_value: any, rowData: { id: string }) => {
+      customValue: (_value: any, rowData: { transactionId: string }) => {
         return (
           <span
             className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold"
             onClick={() => {
-              setCustomerID(rowData.id);
+              setTransactionID(rowData.transactionId);
               setIsOpen(true);
             }}
           >
@@ -274,8 +220,8 @@ const CustomerTable = ({
 
   const getTableData = () => {
     if (queryValue && queryData) {
-      return generateCustomerEntries(queryData);
-    } else return generateCustomerEntries(customerData);
+      return generateTransactionEntries(queryData);
+    } else return generateTransactionEntries(transactionData);
   };
 
   return (
@@ -283,7 +229,7 @@ const CustomerTable = ({
       {!error ? (
         <div className="w-full">
           <Table
-            tableTitle="CUSTOMERS"
+            tableTitle="TRANSACTIONS"
             filterList={filterList}
             columnList={columnList}
             loading={queryLoading || isLoading}
@@ -294,18 +240,18 @@ const CustomerTable = ({
             }}
             queryValue={isSearchQuery ? queryValue : ""}
           />
-          {customerID && (
-            <CustomerModal
+          {transactionID && (
+            <TransactionModal
               isOpen={isOpen}
               setIsOpen={setIsOpen}
-              customerID={customerID}
+              transactionID={transactionID}
               refreshTable={refreshTable}
             />
           )}
         </div>
       ) : (
         <ErrorComponent
-          message="Failed to fetch customer list."
+          message="Failed to fetch transaction list."
           className="rounded-[20px]"
           refreshData={refreshTable}
           errorData={errorData}
@@ -315,4 +261,4 @@ const CustomerTable = ({
   );
 };
 
-export default CustomerTable;
+export default TransactionTable;
