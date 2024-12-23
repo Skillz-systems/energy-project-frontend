@@ -152,7 +152,7 @@ export const SimpleTag = ({
   );
 };
 
-const DateTimeTag = ({ datetime }: { datetime?: string }) => {
+export const DateTimeTag = ({ datetime }: { datetime?: string }) => {
   return (
     <div className="flex items-center justify-center gap-1 bg-[#F6F8FA] px-2 py-1 w-max border-[0.4px] border-strokeGreyTwo rounded-full">
       <p className="text-xs text-textDarkGrey font-semibold">
