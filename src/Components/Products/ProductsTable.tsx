@@ -3,7 +3,8 @@ import { Table } from "../TableComponent/Table";
 import { CardComponent } from "../CardComponents/CardComponent";
 import ProductModal from "./ProductModal";
 import { KeyedMutator } from "swr";
-// import { useApiCall } from "../../utils/useApiCall";
+import { ApiErrorStatesType, useApiCall } from "../../utils/useApiCall";
+import { ErrorComponent } from "@/Pages/ErrorPage";
 
 interface AllProductEntries {
   productId: string;
@@ -32,32 +33,51 @@ const ProductsTable = ({
   productData,
   isLoading,
   refreshTable,
+  error,
+  errorData,
 }: {
   productData: any;
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
+  error: any;
+  errorData: ApiErrorStatesType;
 }) => {
-  // const { apiCall } = useApiCall();
+  const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [productId, setProductId] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
   const [queryData, setQueryData] = useState<any>(null);
-  // const [queryLoading, setQueryLoading] = useState<boolean>(false);
-  // const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
+  const [queryLoading, setQueryLoading] = useState<boolean>(false);
+  const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
 
   const filterList = [
-    {
-      name: "All Products",
-      items: ["SHS", "EAAS", "Rootop"],
-      onClickLink: (index: number) => {
-        console.log("INDEX:", index);
-      },
-    },
+    // {
+    //   name: "All Products",
+    //   items: ["SHS", "EAAS", "Rootop"],
+    //   onClickLink: (index: number) => {
+    //     console.log("INDEX:", index);
+    //   },
+    // },
     {
       name: "Search",
-      onSearch: (query: string) => {
-        console.log("Query:", query);
+      onSearch: async (query: string) => {
+        setIsSearchQuery(true);
+        if (queryData) setQueryData(null);
+        setQueryLoading(true);
         setQueryValue(query);
+        try {
+          const response = await apiCall({
+            endpoint: `/v1/products?search=${encodeURIComponent(query)}`,
+            method: "get",
+            successMessage: "",
+            showToast: false,
+          });
+          setQueryData(response.data);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setQueryLoading(false);
+        }
       },
       isSearch: true,
     },
@@ -96,39 +116,52 @@ const ProductsTable = ({
 
   return (
     <>
-      <Table
-        tableType="card"
-        tableTitle="ALL PRODUCTS"
-        tableClassname="flex flex-wrap items-center gap-4"
-        tableData={getTableData()}
-        loading={isLoading}
-        filterList={filterList}
-        cardComponent={(data) => {
-          return data?.map((item: AllProductEntries, index) => (
-            <CardComponent
-              key={index}
-              variant="product-no-image"
-              productId={item.productId}
-              productImage={item.productImage}
-              productName={item.productName}
-              productTag={item.productTag}
-              productPrice={item.productPrice}
-              dropDownList={dropDownList}
+      {!error ? (
+        <div className="w-full">
+          <Table
+            tableType="card"
+            tableTitle="ALL PRODUCTS"
+            tableClassname="flex flex-wrap items-center gap-4"
+            tableData={getTableData()}
+            loading={queryLoading || isLoading}
+            filterList={filterList}
+            cardComponent={(data) => {
+              return data?.map((item: AllProductEntries, index) => (
+                <CardComponent
+                  key={index}
+                  variant="product-no-image"
+                  productId={item.productId}
+                  productImage={item.productImage}
+                  productName={item.productName}
+                  productTag={item.productTag}
+                  productPrice={item.productPrice}
+                  dropDownList={dropDownList}
+                />
+              ));
+            }}
+            refreshTable={async () => {
+              await refreshTable();
+              setQueryData(null);
+            }}
+            queryValue={isSearchQuery ? queryValue : ""}
+          />
+          {productId && isOpen ? (
+            <ProductModal
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              productID={productId}
+              refreshTable={refreshTable}
             />
-          ));
-        }}
-        refreshTable={async () => {
-          await refreshTable();
-          setQueryData(null);
-        }}
-        queryValue={queryValue}
-      />
-      <ProductModal
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        productID={productId}
-        refreshTable={refreshTable}
-      />
+          ) : null}
+        </div>
+      ) : (
+        <ErrorComponent
+          message="Failed to fetch product list."
+          className="rounded-[20px]"
+          refreshData={refreshTable}
+          errorData={errorData}
+        />
+      )}
     </>
   );
 };

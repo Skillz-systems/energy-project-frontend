@@ -2,10 +2,11 @@ import React, { useState } from "react";
 
 interface ButtonProps {
   type?: "reset" | "submit" | "button";
-  onClick?: () => void;
+  onClick?: (event?: any) => void;
   className?: string;
   variant?: "yellow" | "gray" | "gradient" | "red";
   loading?: boolean;
+  disabled?: boolean;
 }
 
 const ProceedButton: React.FC<ButtonProps> = ({
@@ -14,6 +15,7 @@ const ProceedButton: React.FC<ButtonProps> = ({
   className,
   variant = "yellow",
   loading,
+  disabled = true,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -36,8 +38,8 @@ const ProceedButton: React.FC<ButtonProps> = ({
       type={type}
       className={`flex items-center justify-center w-16 h-16 rounded-full transition-all ${
         isHovered ? variantClasses.red : variantClasses[variant]
-      } ${className} ${loading ? "cursor-not-allowed opacity-50" : ""}`}
-      disabled={loading}
+      } ${className} ${disabled ? "cursor-not-allowed opacity-75" : ""}`}
+      disabled={disabled}
       onMouseOver={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

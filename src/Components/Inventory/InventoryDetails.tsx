@@ -91,22 +91,22 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col w-full gap-4">
       <div className="flex items-center justify-between h-[44px] p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-full">
-        <Tag name="Product ID" />
+        <Tag name="Inventory ID" />
         <p className="text-textDarkGrey text-xs font-bold">{inventoryId}</p>
       </div>
 
       <div className="flex items-center justify-between p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
-        <Tag name="Product Picture" variant="ink" />
+        <Tag name="Inventory Picture" variant="ink" />
         {displayInput ? (
           <SmallFileInput
-            name="productImage"
+            name="inventoryImage"
             onChange={handleChange}
             placeholder="Upload Image"
             required={false}
             iconRight={<LuImagePlus />}
           />
         ) : (
-          <div className="flex items-center justify-center w-full p-2 max-w-[100px] h-[100px] gap-2 border-[0.6px] border-strokeCream rounded-full">
+          <div className="flex items-center justify-center w-full p-2 max-w-[100px] h-[100px] gap-2 border-[0.6px] border-strokeCream rounded-full overflow-clip">
             <img
               src={inventoryImage}
               alt="Inventory Image"
@@ -313,7 +313,12 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
 
       {displayInput && (
         <div className="flex items-center justify-center w-full pt-5 pb-5">
-          <ProceedButton type="submit" loading={loading} variant={"gray"} />
+          <ProceedButton
+            type="submit"
+            loading={loading}
+            variant={"gray"}
+            disabled={false}
+          />
         </div>
       )}
     </form>

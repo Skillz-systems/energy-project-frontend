@@ -116,6 +116,7 @@ const Home = () => {
                 type="button"
                 onClick={() => navigate(section.location)}
                 className="w-14 h-14"
+                disabled={false}
               />
             )}
           </div>

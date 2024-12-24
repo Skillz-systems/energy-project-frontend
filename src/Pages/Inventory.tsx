@@ -31,6 +31,7 @@ const Inventory = () => {
     data: inventoryData,
     isLoading: inventoryLoading,
     mutate: allInventoryRefresh,
+    errorStates: allInventoryErrorStates,
   } = useGetRequest(
     `/v1/inventory${inventoryFilter && `?class=${inventoryFilter}`}`,
     true,
@@ -42,7 +43,7 @@ const Inventory = () => {
   function getFilteredClassCount(classList: InventoryClass) {
     const filteredClass =
       fetchInventoryStats?.data?.inventoryClassCounts.find(
-        (item: { inventoryClass: string; }) => item.inventoryClass === classList
+        (item: { inventoryClass: string }) => item.inventoryClass === classList
       )?.count || 0;
     return filteredClass;
   }
@@ -51,7 +52,7 @@ const Inventory = () => {
     {
       title: "All Inventory",
       link: "/inventory/all",
-      count: fetchInventoryStats?.data?.totalInventoryCount,
+      count: fetchInventoryStats?.data?.totalInventoryCount || 0,
     },
     {
       title: "Regular",
@@ -186,6 +187,7 @@ const Inventory = () => {
                         inventoryData={_inventoryData}
                         isLoading={inventoryLoading}
                         refreshTable={allInventoryRefresh}
+                        errorData={allInventoryErrorStates}
                       />
                     }
                   />
@@ -195,14 +197,14 @@ const Inventory = () => {
           </section>
         </div>
       </PageLayout>
-      {isOpen ? (
+      {isOpen && (
         <CreateNewInventory
           isOpen={isOpen}
           setIsOpen={setIsOpen}
-          formType={formType} 
-          allInventoryRefresh={ allInventoryRefresh}        
-          />
-      ) : null}
+          formType={formType}
+          allInventoryRefresh={allInventoryRefresh}
+        />
+      )}
     </>
   );
 };

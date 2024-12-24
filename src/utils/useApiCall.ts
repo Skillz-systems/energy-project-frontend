@@ -142,9 +142,18 @@ export const useGetRequest = (
     error,
     isLoading,
     mutate,
-    isNetworkError,
-    errorStates,
+    errorStates: { errorStates, isNetworkError },
   };
+};
+
+export type ApiErrorStatesType = {
+  errorStates: {
+    endpoint: string;
+    errorExists: boolean;
+    errorCount: number;
+    toastShown: boolean;
+  }[];
+  isNetworkError: boolean;
 };
 
 // Hook to manage error states for endpoints

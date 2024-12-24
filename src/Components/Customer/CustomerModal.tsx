@@ -1,54 +1,62 @@
-import { useState } from "react";
-import { Modal } from "../ModalComponent/Modal";
-import { DropDown } from "../DropDownComponent/DropDown";
-import TabComponent from "../TabComponent/TabComponent";
-import { useGetRequest } from "../../utils/useApiCall";
+import React, { useState } from "react";
 import { KeyedMutator } from "swr";
+import { Modal } from "@/Components/ModalComponent/Modal";
 import editInput from "../../assets/settings/editInput.svg";
-import AgentDetails, { AgentUserType } from "./AgentDetails";
+import { DropDown } from "../DropDownComponent/DropDown";
+import { useGetRequest } from "@/utils/useApiCall";
+import { CustomerType } from "./CustomerTable";
+import TabComponent from "../TabComponent/TabComponent";
+import { Icon } from "../Settings/UserModal";
+import call from "../../assets/settings/call.svg";
+import message from "../../assets/settings/message.svg";
+import CustomerDetails, { DetailsType } from "./CustomerDetails";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 
-const AgentModal = ({
+const CustomerModal = ({
   isOpen,
   setIsOpen,
-  agentID,
+  customerID,
   refreshTable,
 }: {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  agentID: string;
+  customerID: string;
   refreshTable: KeyedMutator<any>;
 }) => {
   const [displayInput, setDisplayInput] = useState<boolean>(false);
-  const [tabContent, setTabContent] = useState<string>("agentDetails");
+  const [tabContent, setTabContent] = useState<string>("customerDetails");
 
-  const fetchSingleAgent = useGetRequest(`/v1/agents/${agentID}`, false);
+  const fetchSingleCustomer = useGetRequest(
+    `/v1/customers/single/${customerID}`,
+    false
+  );
 
-  const generateAgentEntries = (data: any): AgentUserType => {
+  const generateCustomerEntries = (data: CustomerType): DetailsType => {
     return {
-      id: data?.id,
-      firstname: data?.user?.firstname,
-      lastname: data?.user?.lastname,
-      email: data?.user?.email,
-      phone: data?.user?.phone,
-      location: data?.user?.location,
-      addressType: data?.user?.addressType,
-      status: data?.user?.status,
-      emailVerified: data?.user?.emailVerified,
+      customerId: data?.id,
+      firstName: data?.firstname,
+      lastName: data?.lastname,
+      email: data?.email,
+      phoneNumber: data?.phone,
+      addressType: data?.addressType ?? "",
+      location: data?.location,
     };
   };
 
   const handleCancelClick = () => setDisplayInput(false);
 
   const dropDownList = {
-    items: ["Edit Agent", "Cancel Agent"],
+    items: ["Call Customer", "Message Customer", "Delete Customer"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
-          setDisplayInput(true);
+          console.log("Call Customer");
           break;
         case 1:
-          console.log("Cancel Agent");
+          console.log("Message Customer");
+          break;
+        case 2:
+          console.log("Delete Customer");
           break;
         default:
           break;
@@ -59,31 +67,40 @@ const AgentModal = ({
   };
 
   const tabNames = [
-    { name: "Agent Details", key: "agentDetails", count: null },
-    { name: "Customer", key: "customer", count: 0 },
-    { name: "Inventory", key: "inventory", count: 0 },
+    { name: "Customer Details", key: "customerDetails", count: null },
+    { name: "Product Details", key: "stats", count: null },
+    { name: "Registration History", key: "registrationHistory", count: null },
+    { name: "Contracts", key: "contracts", count: null },
     { name: "Transactions", key: "transactions", count: 0 },
-    { name: "Stats", key: "stats", count: 0 },
-    { name: "Sales", key: "sales", count: 0 },
     { name: "Tickets", key: "tickets", count: 0 },
   ];
+
+  const handleCallClick = () => {
+    const callURL = `tel:${fetchSingleCustomer?.data?.phone}`;
+    window.open(callURL, "_self");
+  };
+
+  const handleWhatsAppClick = () => {
+    const whatsappURL = `https://wa.me/${fetchSingleCustomer?.data?.phone}`;
+    window.open(whatsappURL, "_blank");
+  };
 
   return (
     <Modal
       layout="right"
-      size="large"
       bodyStyle="pb-44 overflow-auto"
       isOpen={isOpen}
       onClose={() => {
+        setTabContent("details");
         setIsOpen(false);
-        setTabContent("agentDetails");
       }}
+      leftHeaderContainerClass="pl-2"
       rightHeaderComponents={
         displayInput ? (
           <p
             className="text-xs text-textDarkGrey font-semibold cursor-pointer over"
             onClick={handleCancelClick}
-            title="Cancel editing agent details"
+            title="Cancel editing user details"
           >
             Cancel Edit
           </p>
@@ -100,18 +117,24 @@ const AgentModal = ({
       <div className="bg-white">
         <header
           className={`flex items-center ${
-            fetchSingleAgent?.data?.user?.firstname
+            fetchSingleCustomer?.data?.firstname
               ? "justify-between"
               : "justify-end"
           } bg-paleGrayGradientLeft p-4 min-h-[64px] border-b-[0.6px] border-b-strokeGreyThree`}
         >
-          {fetchSingleAgent?.data?.user?.firstname ? (
+          {fetchSingleCustomer?.data?.firstname && (
             <p className="flex items-center justify-center bg-paleLightBlue w-max p-2 h-[24px] text-textBlack text-xs font-semibold rounded-full">
-              {fetchSingleAgent?.data?.user?.firstname}{" "}
-              {fetchSingleAgent?.data?.user?.lastname}
+              {fetchSingleCustomer?.data?.firstname}{" "}
+              {fetchSingleCustomer?.data?.lastname}
             </p>
-          ) : null}
+          )}
           <div className="flex items-center justify-end gap-2">
+            <Icon icon={call} iconText="Call" handleClick={handleCallClick} />
+            <Icon
+              icon={message}
+              iconText="Message"
+              handleClick={handleWhatsAppClick}
+            />
             <DropDown {...dropDownList} />
           </div>
         </header>
@@ -125,16 +148,16 @@ const AgentModal = ({
             onTabSelect={(key) => setTabContent(key)}
             tabsContainerClass="p-2 rounded-[20px]"
           />
-          {tabContent === "agentDetails" ? (
+          {tabContent === "customerDetails" ? (
             <DataStateWrapper
-              isLoading={fetchSingleAgent?.isLoading}
-              error={fetchSingleAgent?.error}
-              errorStates={fetchSingleAgent?.errorStates}
-              refreshData={fetchSingleAgent?.mutate}
-              errorMessage="Failed to fetch agent details"
+              isLoading={fetchSingleCustomer?.isLoading}
+              error={fetchSingleCustomer?.error}
+              errorStates={fetchSingleCustomer?.errorStates}
+              refreshData={fetchSingleCustomer?.mutate}
+              errorMessage="Failed to fetch customer details"
             >
-              <AgentDetails
-                {...generateAgentEntries(fetchSingleAgent.data)}
+              <CustomerDetails
+                {...generateCustomerEntries(fetchSingleCustomer?.data)}
                 refreshTable={refreshTable}
                 displayInput={displayInput}
               />
@@ -151,4 +174,4 @@ const AgentModal = ({
   );
 };
 
-export default AgentModal;
+export default CustomerModal;

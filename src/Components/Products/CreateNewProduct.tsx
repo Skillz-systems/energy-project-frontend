@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-// import { Modal } from "../ModalComponent/Modal";
 import { useApiCall, useGetRequest } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
 import {
@@ -14,8 +13,9 @@ import SelectInventoryModal from "./SelectInventoryModal";
 import { observer } from "mobx-react-lite";
 import rootStore from "../../stores/rootStore";
 import { CardComponent } from "../CardComponents/CardComponent";
-// import { Modal } from "../LogoComponent/ModalComponent/Modal";
-import { Modal } from '@/Components/ModalComponent/Modal';
+import { Modal } from "@/Components/ModalComponent/Modal";
+import { z } from "zod";
+import { ProductStore } from "@/stores/ProductStore";
 
 export type ProductFormType = "newProduct" | "newCategory";
 
@@ -37,39 +37,89 @@ export type Category = {
   children: Category[];
 };
 
-interface OtherSubmissonData {
-  name: string;
-  parentId?: string;
-  type: string;
-}
+const formSchema = z.object({
+  categoryId: z
+    .string()
+    .trim()
+    .min(1, "Inventory Category is required")
+    .default(""),
+  name: z
+    .string()
+    .trim()
+    .min(1, "Product Name is required")
+    .max(50, "Product Name cannot exceed 50 characters"),
+  price: z
+    .string()
+    .trim()
+    .regex(
+      /^\d+(\.\d{1,2})?$/,
+      "Price must be a valid number with up to 2 decimal places"
+    )
+    .transform(Number)
+    .refine((num) => num > 0, "Price must be greater than 0")
+    .transform((value) => value.toString()),
+  productImage: z
+    .instanceof(File)
+    .refine(
+      (file) =>
+        ["image/png", "image/jpeg", "image/jpg", "image/svg+xml"].includes(
+          file.type
+        ),
+      {
+        message: "Only PNG, JPEG, JPG, or SVG files are allowed.",
+      }
+    )
+    .nullable()
+    .default(null),
+});
 
-interface FormData {
-  category: string;
-  productName: string;
-  inventory: string[];
-  paymentModes: string[];
-  sellingPrice: string;
-  productImage: File | null;
-}
+const paymentModesSchema = z
+  .array(z.string())
+  .min(1, "Please select at least 1 payment mode")
+  .transform((arr) => arr.join(", "));
 
-const defaultFormData: FormData = {
-  category: "",
-  productName: "",
-  inventory: [],
+const otherFormSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Product Category is required")
+    .max(50, "Product Category cannot exceed 50 characters"),
+});
+
+const mainSchema = formSchema.extend({
+  paymentModes: paymentModesSchema,
+  inventoryBatchId: z
+    .array(z.string())
+    .nonempty("Select at least 1 inventory item"),
+});
+
+const defaultFormData = {
+  categoryId: "",
+  name: "",
+  inventoryBatchId: [],
   paymentModes: [],
-  sellingPrice: "",
+  price: "",
   productImage: null,
 };
+
+const OtherSubmissonData = {
+  name: "",
+};
+
+type FormData = z.infer<typeof formSchema>;
+type OtherFormData = z.infer<typeof otherFormSchema>;
 
 const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
   ({ isOpen, setIsOpen, refreshTable, formType }) => {
     const { apiCall } = useApiCall();
     const [formData, setFormData] = useState<FormData>(defaultFormData);
+    const [paymentModes, setPaymentModes] = useState<any>([]);
     const [loading, setLoading] = useState(false);
     const [isInventoryOpen, setIsInventoryOpen] = useState<boolean>(false);
-    const [otherFormData, setOtherFormData] = useState({
-      categoryName: "",
-    });
+    const [otherFormData, setOtherFormData] =
+      useState<OtherFormData>(OtherSubmissonData);
+    const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
+    const [apiError, setApiError] = useState<string | null>(null);
 
     const fetchAllProductCategories = useGetRequest(
       "/v1/products/categories/all",
@@ -77,13 +127,9 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
       60000
     );
 
-    // const { data: inventoryData, isLoading: inventoryLoading } = useGetRequest(
-    //   "/v1/inventory",
-    //   true,
-    //   60000
-    // );
-
-    const handleInputChange = (e: { target: { name: any; value: any; files: any; }; }) => {
+    const handleInputChange = (e: {
+      target: { name: any; value: any; files: any };
+    }) => {
       const { name, value, files } = e.target;
       if (name === "productImage" && files && files.length > 0) {
         setFormData((prev) => ({
@@ -96,6 +142,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
           [name]: value,
         }));
       }
+      resetFormErrors(name);
     };
 
     const handleSelectChange = (name: string, values: string | string[]) => {
@@ -103,6 +150,13 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
         ...prev,
         [name]: values,
       }));
+      resetFormErrors(name);
+    };
+
+    const resetFormErrors = (name: string) => {
+      // Clear the error for this field when the user starts typing
+      setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+      setApiError(null);
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -111,43 +165,45 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
 
       try {
         if (formType === "newProduct") {
-          if (!formData) return;
+          const formSubmissionData = new FormData(e.currentTarget);
 
-          // Create FormData instance for multipart/form-data
-          const formSubmissionData = new FormData();
-
-          // Append fields to FormData
-          formSubmissionData.append("name", formData.productName);
-          formSubmissionData.append("price", formData.sellingPrice);
-          formSubmissionData.append(
-            "paymentModes",
-            formData.paymentModes.join(",")
+          // Convert form data to an object
+          const formFields = Object.fromEntries(formSubmissionData.entries());
+          const inventoryBatchIds = rootStore.productStore.products.map(
+            (product) => product.productId
           );
-          formSubmissionData.append("categoryId", formData.category);
-          rootStore.productStore.products.forEach((product) => {
-            formSubmissionData.append("inventoryBatchId", product.productId);
+
+          // Parse the data using the main schema
+          const validatedData = mainSchema.parse({
+            ...formFields,
+            categoryId: formData.categoryId,
+            paymentModes: paymentModes,
+            inventoryBatchId: inventoryBatchIds,
           });
 
-          if (formData.productImage instanceof File) {
-            formSubmissionData.append("productImage", formData.productImage);
-          } else {
-            alert("No Image");
-            return;
-          }
+          const submissionData = new FormData();
+
+          // Iterate and append validated data to FormData
+          Object.entries(validatedData).forEach(([key, value]) => {
+            if (value instanceof File) {
+              submissionData.append(key, value);
+            } else if (value !== null && value !== undefined) {
+              submissionData.append(key, String(value));
+            }
+          });
 
           // Make the API call
           await apiCall({
             endpoint: "/v1/products",
             method: "post",
-            data: formSubmissionData,
+            data: submissionData,
             headers: { "Content-Type": "multipart/form-data" },
             successMessage: "Product created successfully!",
           });
         } else {
-          if (!otherFormData.categoryName) return;
-
-          const submissionData: OtherSubmissonData = {
-            name: otherFormData.categoryName,
+          const validatedData = otherFormSchema.parse(otherFormData);
+          const submissionData = {
+            name: validatedData.name,
             type: "PRODUCT",
           };
 
@@ -159,31 +215,38 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
           });
         }
 
-        setLoading(false);
         await refreshTable!();
-      } catch (error) {
-        console.error("Product creation failed:", error);
+        setIsOpen(false);
+        setFormData(defaultFormData);
+        setPaymentModes([]);
+        rootStore.productStore.emptyProducts();
+        setOtherFormData(OtherSubmissonData);
+      } catch (error: any) {
+        if (error instanceof z.ZodError) {
+          setFormErrors(error.issues);
+        } else {
+          const message =
+            error?.response?.data?.message || "Internal Server Error";
+          setApiError(`Product creation failed: ${message}.`);
+        }
       } finally {
         setLoading(false);
-        setIsOpen(false);
-
-        if (formType === "newProduct") {
-          setFormData(defaultFormData);
-          rootStore.productStore.emptyProducts();
-        } else {
-          setOtherFormData({
-            categoryName: "",
-          });
-        }
       }
     };
 
     const selectedProducts = rootStore.productStore.products;
-    const { category, productName, paymentModes, sellingPrice } = formData;
+    const { categoryId, name, price, productImage } = formData;
     const isFormFilled =
-      Object.values(formData).some((value) =>
-        Array.isArray(value) ? value.length > 0 : Boolean(value)
-      ) || selectedProducts.length > 0;
+      formType === "newProduct"
+        ? productImage &&
+          selectedProducts.length > 0 &&
+          formSchema.safeParse(formData).success &&
+          paymentModesSchema.safeParse(paymentModes).success
+        : otherFormSchema.safeParse(otherFormData).success;
+
+    const getFieldError = (fieldName: string) => {
+      return formErrors.find((error) => error.path[0] === fieldName)?.message;
+    };
 
     return (
       <>
@@ -196,6 +259,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
           <form
             className="flex flex-col items-center bg-white"
             onSubmit={handleSubmit}
+            noValidate
           >
             <div
               className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${
@@ -208,7 +272,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                 style={{ textShadow: "1px 1px grey" }}
                 className="text-xl text-textBlack font-semibold font-secondary"
               >
-                New Product {formType === "newCategory" && "Category"}
+                New Product{formType === "newCategory" && "Category"}
               </h2>
             </div>
             <div className="flex flex-col items-center justify-center w-full px-[2.5em] gap-4 py-8">
@@ -216,50 +280,37 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                 <>
                   <SelectInput
                     label="Product Category"
-                    options={
-                      fetchAllProductCategories.data?.map(
-                        (category: Category) => ({
-                          label: category.name,
-                          value: category.id,
-                        })
-                      ) || [{ label: "", value: "" }]
-                    }
-                    value={category}
+                    options={fetchAllProductCategories?.data?.map(
+                      (category: Category) => ({
+                        label: category.name,
+                        value: category.id,
+                      })
+                    )}
+                    value={categoryId}
                     onChange={(selectedValue) =>
-                      handleSelectChange("category", selectedValue)
+                      handleSelectChange("categoryId", selectedValue)
                     }
                     required={true}
                     placeholder="Select Product Category"
-                    style={
-                      isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                    }
+                    errorMessage={getFieldError("categoryId")}
                   />
-
                   <Input
                     type="text"
-                    name="productName"
+                    name="name"
                     label="PRODUCT NAME"
-                    value={productName}
+                    value={name}
                     onChange={handleInputChange}
                     placeholder="Product Name"
                     required={true}
-                    style={
-                      isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                    }
+                    errorMessage={getFieldError("name")}
                   />
-
                   <ModalInput
                     type="button"
-                    name="inventory"
+                    name="inventoryBatchId"
                     label="INVENTORY"
                     onClick={() => setIsInventoryOpen(true)}
                     placeholder="Select Inventory"
                     required={true}
-                    style={
-                      isFormFilled || selectedProducts.length > 0
-                        ? "border-strokeCream"
-                        : "border-strokeGrey"
-                    }
                     isItemsSelected={selectedProducts.length > 0}
                     itemsSelected={
                       <div className="flex flex-wrap items-center w-full gap-4">
@@ -276,15 +327,19 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                               productUnits={data.productUnits}
                               readOnly={true}
                               onRemoveProduct={(productId) =>
-                                rootStore.productStore.removeProduct(productId as string)
+                                rootStore.productStore.removeProduct(productId)
                               }
                             />
                           );
                         })}
                       </div>
                     }
+                    errorMessage={
+                      !ProductStore.doesProductCategoriesExist
+                        ? "Failed to fetch inventory categories"
+                        : getFieldError("inventoryBatchId")
+                    }
                   />
-
                   <SelectMultipleInput
                     label="Payment Modes"
                     options={[
@@ -292,64 +347,61 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                       { label: "Instalmental", value: "Instalmental" },
                     ]}
                     value={paymentModes}
-                    onChange={(values) =>
-                      handleSelectChange("paymentModes", values)
-                    }
+                    onChange={(values) => setPaymentModes(values)}
                     placeholder="Select Payment Modes"
                     required={true}
-                    style={
-                      isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                    }
+                    errorMessage={getFieldError("paymentModes")}
                   />
-
                   <Input
                     type="number"
-                    name="sellingPrice"
+                    name="price"
                     label="SELLING PRICE"
-                    value={sellingPrice}
+                    value={price}
                     onChange={handleInputChange}
                     placeholder="Selling Price"
                     required={true}
-                    style={
-                      isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                    }
+                    errorMessage={getFieldError("price")}
                   />
-
                   <FileInput
                     name="productImage"
                     label="PRODUCT IMAGE"
                     onChange={handleInputChange}
-                    required={false}
+                    required={true}
+                    accept=".jpg,.jpeg,.png,.svg"
                     placeholder="Upload Product Image"
-                    style={
-                      isFormFilled ? "border-strokeCream" : "border-strokeGrey"
-                    }
+                    errorMessage={getFieldError("productImage")}
                   />
                 </>
               ) : (
                 <Input
                   type="text"
-                  name="categoryName"
+                  name="name"
                   label="Product Category Name"
-                  value={otherFormData.categoryName}
-                  onChange={(e) =>
-                    setOtherFormData({ categoryName: e.target.value })
-                  }
+                  value={otherFormData.name}
+                  onChange={(e) => {
+                    setOtherFormData((prev) => ({
+                      ...prev,
+                      name: e.target.value,
+                    }));
+                    resetFormErrors("name");
+                  }}
                   placeholder="Product Category Name"
                   required={true}
-                  style={
-                    otherFormData.categoryName
-                      ? "border-strokeCream"
-                      : "border-strokeGrey"
-                  }
+                  errorMessage={getFieldError("name")}
                 />
               )}
+              {apiError && (
+                <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
+                  {apiError}
+                </div>
+              )}
+              <ProceedButton
+                type="submit"
+                loading={loading}
+                variant={isFormFilled ? "gradient" : "gray"}
+                disabled={!isFormFilled}
+              />
             </div>
-            <ProceedButton
-              type="submit"
-              loading={loading}
-              variant={isFormFilled ? "gradient" : "gray"}
-            />
           </form>
         </Modal>
         <SelectInventoryModal

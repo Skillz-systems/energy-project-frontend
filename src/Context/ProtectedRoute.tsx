@@ -13,7 +13,11 @@ const ProtectedRouteWrapper: React.FC = () => {
   ];
 
   useEffect(() => {
-    if (!token) toast.warning("You are not logged in!");
+    if (!token) {
+      const toastId = toast.warning("You are not logged in!");
+      // Cleanup function to dismiss the toast if needed
+      return () => toast.dismiss(toastId);
+    }
   }, [token]);
 
   if (token && !unprotectedRoutes.includes(location.pathname)) {
@@ -26,13 +30,14 @@ const ProtectedRouteWrapper: React.FC = () => {
 
   if (!token) {
     // If the user is not authenticated, redirect to login with the current path as a redirect query param
-    const loginRoute = `/login?redirect=${encodeURIComponent(location.pathname)}`;
+    const loginRoute = `/login?redirect=${encodeURIComponent(
+      location.pathname
+    )}`;
     return <Navigate to={loginRoute} replace />;
   } else {
     // If authenticated and not on an unprotected route, render the nested routes
     return <Outlet />;
   }
-  // return <Outlet />;
 };
 
 export default ProtectedRouteWrapper;

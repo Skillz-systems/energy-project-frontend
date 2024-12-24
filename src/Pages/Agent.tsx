@@ -11,84 +11,76 @@ import circleAction from "../assets/settings/addCircle.svg";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
-import CreateNewAgents, { AgentsFormType,} from "@/Components/Agents/CreateNewAgents";
-import { generateAgentEntries} from "@/Components/TableComponent/sampleData";
+import CreateNewAgents from "@/Components/Agents/CreateNewAgents";
+import { useGetRequest } from "@/utils/useApiCall";
+import { NairaSymbol } from "@/Components/CardComponents/CardComponent";
 
-const AgentsTable = lazy(
-  () => import("@/Components/Agents/AgentsTable")
-);
+const AgentsTable = lazy(() => import("@/Components/Agents/AgentsTable"));
 
 const Agent = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [agentsData, setAgentsData] = useState<any>(null); // Temporary
-  const [formType, setFormType] = useState<AgentsFormType>("newAgents");
-  
-  const navigationList = [
-    {
-      title: "All Agents",
-      link: "/agents/all",
-      count: 100,
-      onclick: () => {},
-    },
-    {
-      title: "Active Agents",
-      link: "/agents/active",
-      count: 70,
-      onclick: () => {},
-    },
-    {
-      title: "Barred Agents",
-      link: "/agents/barred",
-      count: 20,
-      onclick: () => {},
-    },
-  ];
+  const [agentsData, setAgentsData] = useState<any>(null);
+  const [agentFilter, setAgentFilter] = useState<string>("");
+  const {
+    data: agentData,
+    isLoading: agentLoading,
+    mutate: allAgentRefresh,
+    error: allAgentError,
+    errorStates: allAgentErrorStates,
+  } = useGetRequest(
+    `/v1/agents${agentFilter && `?status=${agentFilter}`}`,
+    true,
+    60000
+  );
+  const fetchAgentStats = useGetRequest("/v1/agents/statistics/view", true);
 
   useEffect(() => {
     switch (location.pathname) {
       case "/agents/all":
-        setAgentsData(
-          generateAgentEntries(100, {
-            classTags: ["all"]
-          })
-        );
+        setAgentFilter("");
+        setAgentsData(agentData);
         break;
       case "/agents/active":
-        setAgentsData(
-          generateAgentEntries(70, {
-            classTags: ["active"]
-          })
-        );
+        setAgentFilter("active");
+        setAgentsData(agentData);
         break;
       case "/agents/barred":
-        setAgentsData(
-          generateAgentEntries(20, {
-            classTags: ["barred"]
-          })
-        );
+        setAgentFilter("barred");
+        setAgentsData(agentData);
         break;
       default:
-        setAgentsData(generateAgentEntries(100, { classTags: ["all"] }));
+        setAgentFilter("");
+        setAgentsData(agentData);
     }
-  }, [location.pathname]);
+  }, [location.pathname, agentData, allAgentErrorStates]);
+
+  const navigationList = [
+    {
+      title: "All Agents",
+      link: "/agents/all",
+      count: fetchAgentStats?.data?.total || 0,
+    },
+    {
+      title: "Active Agents",
+      link: "/agents/active",
+      count: fetchAgentStats?.data?.active || 0,
+    },
+    {
+      title: "Barred Agents",
+      link: "/agents/barred",
+      count: fetchAgentStats?.data?.barred || 0,
+    },
+  ];
 
   const dropDownList = {
-    items: [
-      "Add Existing Agent",
-      "Export List",
-    ],
+    items: ["Add New Agent", "Export List"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
-          setFormType("newAgents");
           setIsOpen(true);
           break;
         case 1:
-          setFormType("existingAgents");
-          setIsOpen(true);
-          break;
-        case 4:
           console.log("Exporting list...");
           break;
         default:
@@ -110,28 +102,29 @@ const Agent = () => {
               iconBgColor="bg-[#E3FAD6]"
               topText="Revenue From"
               bottomText="Agents"
-              value={12558668.00}
+              leftIcon={<NairaSymbol />}
+              value={0}
             />
             <TitlePill
               icon={avatar}
               iconBgColor="bg-[#FDEEC2]"
               topText="Total"
               bottomText="Agents"
-              value={2552}
+              value={fetchAgentStats?.data?.total || 0}
             />
-             <TitlePill
+            <TitlePill
               icon={avatar}
               iconBgColor="bg-[#FDEEC2]"
               topText="Sales Done by"
               bottomText="Agents"
-              value={5808}
+              value={0}
             />
             <TitlePill
               icon={cancelled}
               iconBgColor="bg-[#FFDBDE]"
               topText="Barred"
               bottomText="Agents"
-              value={58}
+              value={fetchAgentStats?.data?.barred || 0}
             />
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
@@ -163,7 +156,10 @@ const Agent = () => {
                     element={
                       <AgentsTable
                         agentData={agentsData}
-                        // isLoading={!agentsData?.length}
+                        isLoading={agentLoading}
+                        refreshTable={allAgentRefresh}
+                        error={allAgentError}
+                        errorData={allAgentErrorStates}
                       />
                     }
                   />
@@ -173,13 +169,13 @@ const Agent = () => {
           </section>
         </div>
       </PageLayout>
-      {isOpen ? (
+      {isOpen && (
         <CreateNewAgents
           isOpen={isOpen}
           setIsOpen={setIsOpen}
-          formType={formType}
+          refreshTable={allAgentRefresh}
         />
-      ) : null}
+      )}
     </>
   );
 };

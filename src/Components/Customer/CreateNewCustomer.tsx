@@ -1,62 +1,54 @@
-import { useState } from "react";
-import { Modal } from "../ModalComponent/Modal";
+import { useApiCall } from "@/utils/useApiCall";
+import React, { useState } from "react";
 import { KeyedMutator } from "swr";
-import { Input, SelectInput } from "../InputComponent/Input";
+import { Modal } from "../ModalComponent/Modal";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
-import { useApiCall } from "../../utils/useApiCall";
+import { Input, SelectInput } from "../InputComponent/Input";
 import { z } from "zod";
 
-interface CreateNewAgentsProps {
+interface CreatNewCustomerProps {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  refreshTable: KeyedMutator<any>;
+  allCustomerRefresh: KeyedMutator<any>;
 }
 
-const agentSchema = z.object({
+const customerSchema = z.object({
   firstname: z.string().min(1, "First name is required"),
   lastname: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
-  phoneNumber: z
+  phone: z
     .string()
     .trim()
+    .min(1, "Phone number is required")
     .max(20, "Phone number cannot be more than 20 digits")
-    .transform((val) => val.replace(/\s+/g, ""))
-    .optional(),
+    .transform((val) => val.replace(/\s+/g, "")),
+  location: z.string().trim().min(1, "Address is required"),
   addressType: z
     .enum(["HOME", "WORK"], {
       errorMap: () => ({ message: "Please select an address type" }),
     })
     .default("HOME"),
-  location: z.string().min(1, "Location is required"),
-  longitude: z.string().optional(),
-  latitude: z.string().optional(),
-  emailVerified: z.boolean(),
 });
 
-type AgentFormData = z.infer<typeof agentSchema>;
+type CustomerFormData = z.infer<typeof customerSchema>;
 
-const defaultAgentsFormData = {
+const defaultFormData = {
   firstname: "",
   lastname: "",
   email: "",
-  phoneNumber: "",
+  phone: "",
   addressType: "HOME" as "HOME" | "WORK",
   location: "",
-  longitude: "",
-  latitude: "",
-  emailVerified: true,
 };
 
-const CreateNewAgents = ({
+const CreateNewCustomer = ({
   isOpen,
   setIsOpen,
-  refreshTable,
-}: CreateNewAgentsProps) => {
+  allCustomerRefresh,
+}: CreatNewCustomerProps) => {
   const { apiCall } = useApiCall();
-  const [formData, setFormData] = useState<AgentFormData>(
-    defaultAgentsFormData
-  );
   const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState<CustomerFormData>(defaultFormData);
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
 
@@ -71,10 +63,10 @@ const CreateNewAgents = ({
     resetFormErrors(name);
   };
 
-  const handleSelectChange = (name: string, value: string) => {
+  const handleSelectChange = (name: string, values: string) => {
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: values,
     }));
     resetFormErrors(name);
   };
@@ -90,97 +82,34 @@ const CreateNewAgents = ({
     setLoading(true);
 
     try {
-      const validatedData = agentSchema.parse(formData);
+      const validatedData = customerSchema.parse(formData);
       await apiCall({
-        endpoint: "/v1/agents/create",
+        endpoint: "/v1/customers/create",
         method: "post",
         data: validatedData,
-        successMessage: "Agent created successfully!",
+        successMessage: "Customer created successfully!",
       });
 
-      await refreshTable();
+      await allCustomerRefresh();
       setIsOpen(false);
-      setFormData(defaultAgentsFormData);
+      setFormData(defaultFormData);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         setFormErrors(error.issues);
       } else {
         const message =
           error?.response?.data?.message || "Internal Server Error";
-        setApiError(`Agent creation failed: ${message}.`);
+        setApiError(`Customer creation failed: ${message}.`);
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const isFormFilled = agentSchema.safeParse(formData).success;
+  const isFormFilled = customerSchema.safeParse(formData).success;
 
   const getFieldError = (fieldName: string) => {
     return formErrors.find((error) => error.path[0] === fieldName)?.message;
-  };
-
-  const renderForm = () => {
-    const formFields = (
-      <>
-        <Input
-          type="text"
-          name="firstname"
-          label="First Name"
-          value={formData.firstname}
-          onChange={handleInputChange}
-          placeholder="First Name"
-          required={true}
-          errorMessage={getFieldError("firstname")}
-        />
-        <Input
-          type="text"
-          name="lastname"
-          label="Last Name"
-          value={formData.lastname}
-          onChange={handleInputChange}
-          placeholder="Last Name"
-          required={true}
-          errorMessage={getFieldError("lastname")}
-        />
-        <Input
-          type="email"
-          name="email"
-          label="Email"
-          value={formData.email}
-          onChange={handleInputChange}
-          placeholder="Email"
-          required={true}
-          errorMessage={getFieldError("email")}
-        />
-        <SelectInput
-          label="Address Type (Home/Work)"
-          options={[
-            { label: "Home", value: "HOME" },
-            { label: "Work", value: "WORK" },
-          ]}
-          value={formData.addressType}
-          onChange={(selectedValue) =>
-            handleSelectChange("addressType", selectedValue)
-          }
-          required={true}
-          placeholder="Address type (Home/Work)"
-          errorMessage={getFieldError("addressType")}
-        />
-        <Input
-          type="text"
-          name="location"
-          label="Location"
-          value={formData.location}
-          onChange={handleInputChange}
-          placeholder="Location"
-          required={true}
-          errorMessage={getFieldError("location")}
-        />
-      </>
-    );
-
-    return formFields;
   };
 
   return (
@@ -188,7 +117,7 @@ const CreateNewAgents = ({
       isOpen={isOpen}
       onClose={() => setIsOpen(false)}
       layout="right"
-      bodyStyle="pb-44"
+      bodyStyle="pb-[100px]"
     >
       <form
         className="flex flex-col items-center bg-white"
@@ -206,11 +135,74 @@ const CreateNewAgents = ({
             style={{ textShadow: "1px 1px grey" }}
             className="text-xl text-textBlack font-semibold font-secondary"
           >
-            New Agents
+            New Customer
           </h2>
         </div>
         <div className="flex flex-col items-center justify-center w-full px-4 gap-4 py-8">
-          {renderForm()}
+          <Input
+            type="text"
+            name="firstname"
+            label="FIRST NAME"
+            value={formData.firstname}
+            onChange={handleInputChange}
+            placeholder="First Name"
+            required={true}
+            errorMessage={getFieldError("firstname")}
+          />
+          <Input
+            type="text"
+            name="lastname"
+            label="LAST NAME"
+            value={formData.lastname}
+            onChange={handleInputChange}
+            placeholder="Last Name"
+            required={true}
+            errorMessage={getFieldError("lastname")}
+          />
+          <Input
+            type="email"
+            name="email"
+            label="EMAIL"
+            value={formData.email}
+            onChange={handleInputChange}
+            placeholder="Email"
+            required={true}
+            errorMessage={getFieldError("email")}
+          />
+          <Input
+            type="text"
+            name="phone"
+            label="PHONE"
+            value={formData.phone}
+            onChange={handleInputChange}
+            placeholder="Phone Number"
+            required={true}
+            errorMessage={getFieldError("phone")}
+          />
+          <SelectInput
+            label="Address Type"
+            options={[
+              { label: "Home", value: "HOME" },
+              { label: "Work", value: "WORK" },
+            ]}
+            value={formData.addressType}
+            onChange={(selectedValue) =>
+              handleSelectChange("addressType", selectedValue)
+            }
+            required={false}
+            placeholder="Choose Address Type"
+            errorMessage={getFieldError("addressType")}
+          />
+          <Input
+            type="text"
+            name="location"
+            label="Address"
+            value={formData.location}
+            onChange={handleInputChange}
+            placeholder="Address"
+            required={false}
+            errorMessage={getFieldError("location")}
+          />
           {apiError && (
             <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
               {apiError}
@@ -228,4 +220,4 @@ const CreateNewAgents = ({
   );
 };
 
-export default CreateNewAgents;
+export default CreateNewCustomer;

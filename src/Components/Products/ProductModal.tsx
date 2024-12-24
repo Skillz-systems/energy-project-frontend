@@ -1,7 +1,5 @@
 import { useMemo, useState } from "react";
-// import { Modal } from "../ModalComponent/Modal";
 import editInput from "../../assets/settings/editInput.svg";
-import LoadingSpinner from "../Loaders/LoadingSpinner";
 import { DropDown } from "../DropDownComponent/DropDown";
 import TabComponent from "../TabComponent/TabComponent";
 import ProductDetails from "./ProductDetails";
@@ -11,6 +9,7 @@ import CustomerDetails from "./CustomerDetails";
 import { useGetRequest } from "../../utils/useApiCall";
 import { Modal } from "@/Components/ModalComponent/Modal";
 import { KeyedMutator } from "swr";
+import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 
 type ProductDetails = {
   id: string;
@@ -38,12 +37,6 @@ type ProductDetails = {
   };
 };
 
-type DataStateWrapperProps = {
-  isLoading: boolean;
-  error: string | null;
-  children: React.ReactNode;
-};
-
 const ProductModal = ({
   isOpen,
   setIsOpen,
@@ -57,7 +50,7 @@ const ProductModal = ({
 }) => {
   const fetchSingleProduct = useGetRequest(`/v1/products/${productID}`, false);
   const fetchProductInventories = useGetRequest(
-    productID ? `/v1/products/${productID}/inventory` : "/v1",
+    `/v1/products/${productID}/inventory`,
     false
   );
 
@@ -130,22 +123,11 @@ const ProductModal = ({
     { name: "Customers", key: "customers", count: 0 },
   ];
 
-  const DataStateWrapper: React.FC<DataStateWrapperProps> = ({
-    isLoading,
-    error,
-    children,
-  }) => {
-    if (isLoading)
-      return <LoadingSpinner parentClass="absolute top-[50%] w-full" />;
-    if (error) return <div>Oops, an error occurred: {error}</div>;
-    return <>{children}</>;
-  };
-
   return (
     <Modal
       layout="right"
       size="large"
-      bodyStyle="pb-44 overflow-auto"
+      bodyStyle="pb-44"
       isOpen={isOpen}
       onClose={() => {
         setIsOpen(false);
@@ -171,7 +153,11 @@ const ProductModal = ({
       }
     >
       <div className="bg-white">
-        <header className="flex items-center justify-between bg-paleGrayGradientLeft p-4 min-h-[64px] border-b-[0.6px] border-b-strokeGreyThree">
+        <header
+          className={`flex items-center ${
+            productData?.productName ? "justify-between" : "justify-end"
+          } bg-paleGrayGradientLeft p-4 min-h-[64px] border-b-[0.6px] border-b-strokeGreyThree`}
+        >
           {productData?.productName && (
             <p className="flex items-center justify-center bg-paleLightBlue w-max p-2 h-[24px] text-textBlack text-xs font-semibold rounded-full">
               {productData?.productName}
@@ -192,8 +178,11 @@ const ProductModal = ({
           />
           {tabContent === "productDetails" ? (
             <DataStateWrapper
-              isLoading={fetchSingleProduct.isLoading}
-              error={fetchSingleProduct.error}
+              isLoading={fetchSingleProduct?.isLoading}
+              error={fetchSingleProduct?.error}
+              errorStates={fetchSingleProduct?.errorStates}
+              refreshData={fetchSingleProduct?.mutate}
+              errorMessage="Failed to fetch product details"
             >
               <ProductDetails
                 {...productData}
@@ -205,8 +194,11 @@ const ProductModal = ({
             <StatsDetails />
           ) : tabContent === "inventoryDetails" ? (
             <DataStateWrapper
-              isLoading={fetchProductInventories.isLoading}
-              error={fetchProductInventories.error}
+              isLoading={fetchProductInventories?.isLoading}
+              error={fetchProductInventories?.error}
+              errorStates={fetchProductInventories?.errorStates}
+              refreshData={fetchProductInventories?.mutate}
+              errorMessage="Failed to fetch product inventories"
             >
               <InventoryDetails inventoryData={inventoryData} />
             </DataStateWrapper>

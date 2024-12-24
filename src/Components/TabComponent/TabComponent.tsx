@@ -27,7 +27,9 @@ const TabComponent: React.FC<TabComponentProps> = ({
 
   return (
     <div
-      className={`flex flex-wrap flex-row items-start sm:items-center justify-between sm:justify-start max-w-full gap-1 bg-white sm:w-max p-1 rounded-md sm:rounded-full border-[0.6px] border-strokeGreyThree ${tabsContainerClass}`}
+      className={`flex flex-wrap flex-row items-start sm:items-center justify-between sm:justify-start max-w-full gap-1 bg-white sm:w-max p-1 border-[0.6px] border-strokeGreyThree ${
+        tabsContainerClass ? tabsContainerClass : "rounded-md sm:rounded-full"
+      }`}
     >
       {tabs.map((tab) => (
         <div

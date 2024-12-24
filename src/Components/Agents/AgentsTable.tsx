@@ -1,110 +1,190 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Table } from "../TableComponent/Table";
 import { CardComponent } from "../CardComponents/CardComponent";
 import AgentsModal from "./AgentsModal";
-import { useApiCall } from "../../utils/useApiCall";
+import { ApiErrorStatesType, useApiCall } from "../../utils/useApiCall";
+import { KeyedMutator } from "swr";
+import { ErrorComponent } from "@/Pages/ErrorPage";
 
-interface AgentUser {
+type UserType = {
   id: string;
   firstname: string;
   lastname: string;
+  username: string | null;
+  password: string;
   email: string;
+  phone: string | null;
   location: string;
-  addressType: string;
-  status: string;
+  addressType: "HOME" | "WORK";
+  staffId: string | null;
+  longitude: string;
+  latitude: string;
   emailVerified: boolean;
-  agentId: number;
-}
-
-interface Agent {
-  id: string;
-  agentId: number;
+  isBlocked: boolean;
+  status: string;
+  roleId: string;
   createdAt: string;
   updatedAt: string;
-  user: AgentUser;
-}
+  deletedAt: string | null;
+  lastLogin: string | null;
+};
+
+type AgentType = {
+  id: string;
+  agentId: number;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  user: UserType;
+};
 
 interface AgentEntries {
+  id: string;
   datetime: string;
-  agentId: string;
   name: string;
-  status: string; 
+  status: string;
   onGoingSales: number;
   inventoryInPossession: number;
   sales: number;
   registeredCustomers: number;
+  email: string;
+  phone: string;
 }
 
-
+const generateAgentEntries = (data: any): AgentEntries[] => {
+  const entries: AgentEntries[] = data?.data?.map((agent: AgentType) => {
+    return {
+      id: agent?.id,
+      datetime: agent?.createdAt,
+      name: `${agent?.user?.firstname} ${agent?.user?.lastname}`,
+      status: agent?.user?.status,
+      onGoingSales: 0,
+      inventoryInPossession: 0,
+      sales: 0,
+      registeredCustomers: 0,
+      email: agent?.user?.email,
+      phone: agent?.user?.phone,
+    };
+  });
+  return entries;
+};
 
 const AgentsTable = ({
   agentData,
+  isLoading,
+  refreshTable,
+  error,
+  errorData,
 }: {
   agentData: any;
- 
+  isLoading: boolean;
+  refreshTable: KeyedMutator<any>;
+  error: any;
+  errorData: ApiErrorStatesType;
 }) => {
-  // const [agentData, setAgentData] = useState<AgentEntries[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isAgentDetailsModalOpen, setIsAgentDetailsModalOpen] = useState<boolean>(false);
-  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
-  const [, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    lastPage: 1
-  });
   const { apiCall } = useApiCall();
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [agentId, setAgentId] = useState<string>("");
+  const [queryValue, setQueryValue] = useState<string>("");
+  const [queryData, setQueryData] = useState<any>(null);
+  const [queryLoading, setQueryLoading] = useState<boolean>(false);
+  const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
+  // const [, setPagination] = useState({
+  //   page: 1,
+  //   limit: 10,
+  //   total: 0,
+  //   lastPage: 1,
+  // });
 
-  const fetchAgents = async (page = 1, limit = 10, status = '') => {
-    try {
-      setIsLoading(true);
-      const response = await apiCall({
-        endpoint: `/v1/agents?page=${page}&limit=${limit}${status ? `&status=${status}` : ''}`,
-        method: 'get'
-      });
+  // const fetchAgents = async (page = 1, limit = 10, status = "") => {
+  //   try {
+  //     // setIsLoading(true);
+  //     const response = await apiCall({
+  //       endpoint: `/v1/agents?page=${page}&limit=${limit}${
+  //         status ? `&status=${status}` : ""
+  //       }`,
+  //       method: "get",
+  //     });
 
-      const transformedAgents: AgentEntries[] = response.data.map((agent: Agent) => ({
-        datetime: agent.createdAt,
-        name: `${agent.user.firstname} ${agent.user.lastname}`,
-        status: agent.user.status,
-        onGoingSales: 0, 
-        inventoryInPossession: 0,
-        sales: 0,
-        registeredCustomers: 0
-      }));
+  //     const transformedAgents: AgentEntries[] = response.data.map(
+  //       (agent: Agent) => ({
+  //         datetime: agent.createdAt,
+  //         name: `${agent.user.firstname} ${agent.user.lastname}`,
+  //         status: agent.user.status,
+  //         onGoingSales: 0,
+  //         inventoryInPossession: 0,
+  //         sales: 0,
+  //         registeredCustomers: 0,
+  //       })
+  //     );
 
-      agentData(transformedAgents);
-      setPagination({
-        page: response.meta.page,
-        limit: response.meta.limit,
-        total: response.meta.total,
-        lastPage: response.meta.lastPage
-      });
-    } catch (error) {
-      console.error('Failed to fetch agents:', error);
-      agentData([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAgents();
-  }, []);
+  //     agentData(transformedAgents);
+  //     setPagination({
+  //       page: response.meta.page,
+  //       limit: response.meta.limit,
+  //       total: response.meta.total,
+  //       lastPage: response.meta.lastPage,
+  //     });
+  //   } catch (error) {
+  //     console.error("Failed to fetch agents:", error);
+  //     agentData([]);
+  //   }
+  // };
 
   const filterList = [
     {
-      name: "All Agents",
-      items: ["All Agents", "Active Agents", "Reported Agents", "Barred Agents"],
-      onClickLink: (index: number) => {
-        const statusMap = ['', 'active', 'reported', 'barred'];
-        fetchAgents(1, 10, statusMap[index]);
+      name: "Status",
+      items: [
+        "All Agents",
+        "Active Agents",
+        "Inactive Agents",
+        "Barred Agents",
+      ],
+      onClickLink: async (index: number) => {
+        const data = ["", "active", "inactive", "barred"];
+        const query = data[index];
+        setQueryValue(query);
+        if (queryData) setQueryData(null);
+        setQueryLoading(true);
+        setQueryValue(query);
+        try {
+          const response = await apiCall({
+            endpoint: `/v1/agents${
+              index !== 0 ? `?status=${encodeURIComponent(query)}` : ""
+            }`,
+            method: "get",
+            successMessage: "",
+            showToast: false,
+          });
+          setQueryData(response.data);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setQueryLoading(false);
+        }
       },
     },
     {
       name: "Search",
-      onSearch: (query: string) => {
-        console.log("Query:", query);  
+      onSearch: async (query: string) => {
+        setIsSearchQuery(true);
+        if (queryData) setQueryData(null);
+        setQueryLoading(true);
+        setQueryValue(query);
+        try {
+          const response = await apiCall({
+            endpoint: `/v1/agents?search=${encodeURIComponent(query)}`,
+            method: "get",
+            successMessage: "",
+            showToast: false,
+          });
+          setQueryData(response.data);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setQueryLoading(false);
+        }
       },
       isSearch: true,
     },
@@ -116,17 +196,13 @@ const AgentsTable = ({
     },
   ];
 
-  const handleViewAgentProfile = (agentId: string) => {
-    setSelectedAgentId(agentId);
-    setIsAgentDetailsModalOpen(true);
-  };
-
   const dropDownList = {
     items: ["View Agent profile", "Barr Agent"],
-    onClickLink: (index: number, agentId: string) => {
+    onClickLink: (index: number, cardData: any) => {
       switch (index) {
         case 0:
-          handleViewAgentProfile(agentId);
+          setAgentId(cardData?.productId);
+          setIsOpen(true);
           break;
         case 1:
           console.log("Agent Barred");
@@ -139,43 +215,79 @@ const AgentsTable = ({
     showCustomButton: true,
   };
 
+  const getTableData = () => {
+    if (queryValue && queryData) {
+      return generateAgentEntries(queryData);
+    } else return generateAgentEntries(agentData);
+  };
+
   return (
     <>
-      <Table
-        tableType="card"
-        tableTitle="ALL AGENTS"
-        tableClassname="flex flex-wrap items-center gap-4"
-        tableData={agentData}
-        loading={isLoading}
-        filterList={filterList}
-        cardComponent={(data) => {
-          return data?.map((item: AgentEntries, index) => (
-            <CardComponent
-              key={index}
-              variant="agent"
-              name={item.name}
-              status={item.status}
-              onGoingSales={item.onGoingSales}
-              inventoryInPossession={item.inventoryInPossession}
-              sales={item.sales}
-              registeredCustomers={item.registeredCustomers}
-              dropDownList={{ ...dropDownList, onClickLink: (index) => dropDownList.onClickLink(index, item.agentId) }}
+      {!error ? (
+        <div className="w-full">
+          <Table
+            tableType="card"
+            tableTitle="ALL AGENTS"
+            tableClassname="flex flex-wrap items-center gap-4"
+            tableData={getTableData()}
+            loading={queryLoading || isLoading}
+            filterList={filterList}
+            cardComponent={(data) => {
+              return data?.map((item: AgentEntries, index) => (
+                <CardComponent
+                  key={index}
+                  variant="agent"
+                  productId={item.id}
+                  name={item.name}
+                  status={item.status}
+                  onGoingSales={item.onGoingSales}
+                  inventoryInPossession={item.inventoryInPossession}
+                  sales={item.sales}
+                  registeredCustomers={item.registeredCustomers}
+                  handleCallClick={() => {
+                    if (item.email) {
+                      const callURL = `tel:${item.email}`;
+                      window.open(callURL, "_self");
+                    }
+                  }}
+                  handleWhatsAppClick={() => {
+                    if (item.phone) {
+                      const whatsappURL = `https://wa.me/${item.phone}`;
+                      window.open(whatsappURL, "_blank");
+                    }
+                  }}
+                  dropDownList={dropDownList}
+                />
+              ));
+            }}
+            refreshTable={async () => {
+              await refreshTable();
+              setQueryData(null);
+            }}
+            queryValue={isSearchQuery ? queryValue : ""}
+            // pagination={{
+            //   page: pagination.page,
+            //   limit: pagination.limit,
+            //   total: pagination.total,
+            //   lastPage: pagination.lastPage,
+            //   onPageChange: (page) => fetchAgents(page)
+            // }}
+          />
+          {isOpen && agentId && (
+            <AgentsModal
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              agentID={agentId}
+              refreshTable={refreshTable}
             />
-          ));
-        }}
-        // pagination={{
-        //   page: pagination.page,
-        //   limit: pagination.limit,
-        //   total: pagination.total,
-        //   lastPage: pagination.lastPage,
-        //   onPageChange: (page) => fetchAgents(page)
-        // }}
-      />
-      {isAgentDetailsModalOpen && selectedAgentId && (
-        <AgentsModal
-          isOpen={isAgentDetailsModalOpen}
-          setIsOpen={setIsAgentDetailsModalOpen}
-          agentId={selectedAgentId}
+          )}
+        </div>
+      ) : (
+        <ErrorComponent
+          message="Failed to fetch agent list."
+          className="rounded-[20px]"
+          refreshData={refreshTable}
+          errorData={errorData}
         />
       )}
     </>

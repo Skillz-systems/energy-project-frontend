@@ -5,20 +5,14 @@ import { toast } from "react-toastify";
 
 export function copyToClipboard(value: any) {
   if (!navigator.clipboard) {
-    console.error("Clipboard API not supported");
     return;
   }
 
   const textToCopy = String(value);
 
-  navigator.clipboard
-    .writeText(textToCopy)
-    .then(() => {
-      alert(`Text copied to clipboard: ${textToCopy}`);
-    })
-    .catch((err) => {
-      console.error("Failed to copy text: ", err);
-    });
+  navigator.clipboard.writeText(textToCopy).then(() => {
+    toast.info(`Copied to "${textToCopy}" clipboard.`);
+  });
 }
 
 export const formatDateTime = (
@@ -66,8 +60,7 @@ export function useIsLoggedIn(route: string) {
 
   useEffect(() => {
     if (token) {
-      navigate(sessionRedirect || route || "");
-      toast.info("You are already logged in!");
+      navigate(sessionRedirect || route);
     }
   }, [token, navigate, route, sessionRedirect]);
 }
