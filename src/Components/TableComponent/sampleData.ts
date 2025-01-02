@@ -419,3 +419,13 @@ export const generateRandomTransactionEntries = (count: number) => {
   }));
   return entries;
 };
+
+export const generateRandomContracts = (count: number) => {
+  const entries = Array.from({ length: count }, () => ({
+    productCategory: getRandomItem(["SHS", "EAAS", "Rooftop"]),
+    paymentMode: getRandomItem(["Single Deposit", "Recharge", "Instalmental"]),
+    customer: getRandomItem(["John Bull", "Jane Doe"]),
+    contractSigned: getRandomItem([true, false]),
+  }));
+  return entries;
+};

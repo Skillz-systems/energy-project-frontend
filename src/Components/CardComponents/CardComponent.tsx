@@ -332,7 +332,7 @@ export const CardComponent = ({
   const [_selected, setSelected] = useState<boolean>(
     isProductSelected || false
   );
-  const [isHovered, setIsHovered] = useState(false);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
 
   const productInfo = {
     productId,

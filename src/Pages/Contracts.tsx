@@ -11,6 +11,7 @@ import contractsbadge from "../assets/contracts/contractsbadge.png";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import CreateNewContract from "@/Components/Contracts/CreateNewContract";
+import { generateRandomContracts } from "@/Components/TableComponent/sampleData";
 // import { useGetRequest } from "@/utils/useApiCall";
 
 const ContractsTable = lazy(
@@ -39,29 +40,29 @@ const Contracts = () => {
     switch (location.pathname) {
       case "/contracts/all":
         setContractsFilter("");
-        setContractsData(_contractsData);
+        setContractsData(generateRandomContracts(100));
         break;
       case "/contracts/signed":
         setContractsFilter("signed");
-        setContractsData(_contractsData);
+        setContractsData(generateRandomContracts(75));
         break;
       case "/contracts/unsigned":
         setContractsFilter("unsigned");
-        setContractsData(_contractsData);
+        setContractsData(generateRandomContracts(50));
         break;
       case "/contracts/cancelled":
         setContractsFilter("cancelled");
-        setContractsData(_contractsData);
+        setContractsData(generateRandomContracts(25));
         break;
       case "/contracts/templates":
         setContractsFilter("templates");
-        setContractsData(_contractsData);
+        setContractsData(generateRandomContracts(5));
         break;
       default:
         setContractsFilter("");
-        setContractsData(_contractsData);
+        setContractsData(generateRandomContracts(100));
     }
-  }, [location.pathname, _contractsData]);
+  }, [location.pathname]);
 
   const navigationList = [
     {
@@ -81,7 +82,7 @@ const Contracts = () => {
     },
     {
       title: "Cancelled Contracts",
-      link: "/contracts/barred",
+      link: "/contracts/cancelled",
       count: 25,
     },
     {
@@ -168,7 +169,29 @@ const Contracts = () => {
                   element={<Navigate to="/contracts/all" replace />}
                 />
                 {contractsPaths.map((path) => (
-                  <Route key={path} path={path} element={<ContractsTable />} />
+                  <Route
+                    key={path}
+                    path={path}
+                    element={
+                      <ContractsTable
+                        contractsData={_contractsData}
+                        isLoading={false}
+                        refreshTable={() => Promise.resolve()}
+                        error={""}
+                        errorData={{
+                          errorStates: [
+                            {
+                              endpoint: "",
+                              errorExists: false,
+                              errorCount: 0,
+                              toastShown: false,
+                            },
+                          ],
+                          isNetworkError: false,
+                        }}
+                      />
+                    }
+                  />
                 ))}
               </Routes>
             </Suspense>
