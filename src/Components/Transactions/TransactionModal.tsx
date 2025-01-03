@@ -8,7 +8,7 @@ import { Tag } from "../Products/ProductDetails";
 import { NairaSymbol, ProductTag } from "../CardComponents/CardComponent";
 import customericon from "../../assets/customers/customericon.svg";
 import creditcardicon from "../../assets/creditcardgrey.svg";
-import { formatDateTime } from "@/utils/helpers";
+import { formatDateTime, formatNumberWithCommas } from "@/utils/helpers";
 import producticon from "../../assets/product-grey.svg";
 import { useApiCall, useGetRequest } from "@/utils/useApiCall";
 import { toast } from "react-toastify";
@@ -52,7 +52,7 @@ const TransactionModal = ({
       amount: 24000,
       productCategory: "SHS",
       productType: "INSTALMENT",
-      productName: "Product Name",
+      productName: "Product One",
       productId: "12DFFBJHWRRJ23",
       datetime: "2024-12-23T12:34:56",
       customerName: "John Bull",
@@ -165,7 +165,7 @@ const TransactionModal = ({
                 <div className="flex items-center justify-end w-max gap-1">
                   <NairaSymbol />
                   <p className="text-textDarkGrey text-xs font-bold">
-                    {data.amount}
+                    {formatNumberWithCommas(data.amount)}
                   </p>
                 </div>
               </div>
