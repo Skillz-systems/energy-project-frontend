@@ -429,3 +429,24 @@ export const generateRandomContracts = (count: number) => {
   }));
   return entries;
 };
+
+export const generateRandomSalesEntries = (count: number) => {
+  const entries = Array.from({ length: count }, (_, index) => ({
+    no: index + 1,
+    salesId: `5bsdb3b2b2${Math.floor(Math.random() * 90000) + 10000}`,
+    dateCreated: new Date().toISOString(),
+    customer: getRandomItem(["John Bull", "Jane Doe"]),
+    status: getRandomItem([
+      "NEW",
+      "IN CONTRACT",
+      "IN PAYMENT",
+      "IN INVENTORY",
+      "IN INSTALLATION",
+      "CLOSED",
+    ]),
+    productCategory: getRandomItem(["SHS", "EAAS", "Rooftop"]),
+    paymentMode: getRandomItem(["Single Deposit", "Recharge", "Instalmental"]),
+    amount: (Math.random() * (10000000 - 10) + 10).toFixed(2),
+  }));
+  return entries;
+};
