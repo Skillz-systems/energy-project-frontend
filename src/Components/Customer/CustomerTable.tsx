@@ -294,7 +294,7 @@ const CustomerTable = ({
             }}
             queryValue={isSearchQuery ? queryValue : ""}
           />
-          {isOpen && customerID && (
+          {customerID && (
             <CustomerModal
               isOpen={isOpen}
               setIsOpen={setIsOpen}

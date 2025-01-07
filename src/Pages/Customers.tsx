@@ -41,7 +41,7 @@ const Customers = () => {
         setCustomerData(customerData);
         break;
       case "/customers/new":
-        setCustomerFilter("");
+        setCustomerFilter("new");
         setCustomerData(customerData);
         break;
       case "/customers/active":
@@ -178,13 +178,11 @@ const Customers = () => {
           </section>
         </div>
       </PageLayout>
-      {isOpen && (
-        <CreateNewCustomer
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-          allCustomerRefresh={allCustomerRefresh}
-        />
-      )}
+      <CreateNewCustomer
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        allCustomerRefresh={allCustomerRefresh}
+      />
     </>
   );
 };
