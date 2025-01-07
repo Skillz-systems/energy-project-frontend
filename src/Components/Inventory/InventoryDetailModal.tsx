@@ -44,7 +44,7 @@ type InventoryData = {
 export type TabNamesType = {
   name: string;
   key: string;
-  count: null;
+  count: number | null;
   id?: any;
 };
 

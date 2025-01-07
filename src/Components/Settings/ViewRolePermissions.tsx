@@ -58,8 +58,8 @@ const ViewRolePermissions = ({
         method: "delete",
         successMessage: "Role deleted successfully!",
       })
-        .then(() => {
-          refreshTable();
+        .then(async () => {
+          await refreshTable();
           setIsOpen(false);
         })
         .catch(() => toast.error(`Failed to delete ${roleData.role} role`));
