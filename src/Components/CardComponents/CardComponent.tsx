@@ -21,7 +21,8 @@ export type CardComponentProps = {
     | "sales"
     | "product-no-image"
     | "inventoryOne"
-    | "inventoryTwo";
+    | "inventoryTwo"
+    | "salesTransactions";
   handleCallClick?: () => void;
   handleWhatsAppClick?: () => void;
   dropDownList?: {
@@ -385,7 +386,9 @@ export const CardComponent = ({
   return (
     <div
       className={`relative flex flex-col ${
-        variant === "inventoryOne" || variant === "inventoryTwo"
+        variant === "inventoryOne" ||
+        variant === "inventoryTwo" ||
+        variant === "salesTransactions"
           ? `${inventoryMobile ? "w-full" : "w-[47%] md:w-[48%]"} ${
               readOnly ? "md:w-[47%]" : "md:w-[31%]"
             }`
@@ -467,6 +470,58 @@ export const CardComponent = ({
               />
             </div>
           </div>
+        ) : variant === "salesTransactions" ? (
+          <div className="flex flex-col gap-2 w-full">
+            <div className="flex items-center justify-between w-full gap-1">
+              <p className="flex items-center justify-center bg-paleLightBlue w-max p-2 h-[24px] text-xs font-bold rounded-full">
+                {transactionId}
+              </p>
+              <SimpleTag
+                text={transactionStatus}
+                dotColour={
+                  transactionStatus?.toLocaleLowerCase() === "successful"
+                    ? "#00AF50"
+                    : "#FC4C5D"
+                }
+                containerClass={`bg-[#F6F8FA]  px-2 py-1 border-[0.4px] border-strokeGreyTwo rounded-full
+                  ${
+                    transactionStatus?.toLocaleLowerCase() === "successful"
+                      ? "text-success"
+                      : "text-errorTwo"
+                  }`}
+              />
+            </div>
+            <div className="flex items-center justify-between w-full gap-1">
+              <SimpleTag
+                text="DATE & TIME"
+                containerClass="text-[#49526A] font-light"
+              />
+              <DateTimeTag datetime={datetime} />
+            </div>
+            <div className="flex items-center justify-between w-full gap-1">
+              <SimpleTag
+                text="PRODUCT TYPE"
+                containerClass="text-[#49526A] font-light"
+              />
+              <div className="flex items-center gap-1 pl-1 pr-2 py-1 w-max bg-[#F6F8FA] border-[0.4px] border-strokeGreyTwo rounded-full">
+                <ProductTag productTag={productType} />
+                <p className="text-textBlack text-xs">{productTag}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between w-full gap-1">
+              <SimpleTag
+                text="AMOUNT"
+                containerClass="text-[#49526A] font-light"
+              />
+              <div className="flex items-center justify-end w-max gap-1">
+                <NairaSymbol />
+                <p className="text-textDarkGrey text-xs font-bold">
+                  {transactionAmount &&
+                    formatNumberWithCommas(transactionAmount)}
+                </p>
+              </div>
+            </div>
+          </div>
         ) : (
           <NameTag name={name} />
         )}
@@ -496,132 +551,136 @@ export const CardComponent = ({
         ) : null}
       </div>
       {/* MIDDLE */}
-      <div className="flex flex-col gap-2 p-2">
-        {variant === "agent" ? (
-          <>
-            <div className="flex items-center justify-between">
-              <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-successTwo rounded-full h-[24px]">
-                <img src={ongoing} />
-                On-Going Sales
-              </p>
-              <span className="text-xs font-bold text-textDarkGrey">
-                {onGoingSales}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-successTwo rounded-full h-[24px]">
-                <img src={inventory} />
-                Inventory in Possession
-              </p>
-              <span className="text-xs font-bold text-textDarkGrey">
-                {inventoryInPossession}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
-                <img src={inventory} />
-                Total Sales
-              </p>
-              <span className="text-xs font-bold text-textDarkGrey">
-                {sales}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
-                <img src={customer} />
-                Registered Customers
-              </p>
-              <span className="text-xs font-bold text-textDarkGrey">
-                {registeredCustomers}
-              </span>
-            </div>
-          </>
-        ) : variant === "customer" ? (
-          <div className="flex items-center gap-2">
-            <ProductTypeWithTag
-              productTag={productTag}
-              productType={productType}
-            />
-            <ProductTypeWithTag
-              paymentStatus={paymentStatus}
-              daysDue={daysDue}
-            />
-          </div>
-        ) : variant === "transactions" ? (
-          <>
-            <div className="flex items-center justify-between gap-1">
-              <SimpleTag
-                text="DATE & TIME"
-                containerClass="font-light text-textDarkGrey"
-              />
-              <DateTimeTag datetime={datetime} />
-            </div>
-            <div className="flex items-center justify-between gap-1">
-              <SimpleTag
-                text="Product Type"
-                containerClass="font-light text-textDarkGrey"
-              />
+      {variant === "salesTransactions" ? null : (
+        <div className="flex flex-col gap-2 p-2 test">
+          {variant === "agent" ? (
+            <>
+              <div className="flex items-center justify-between">
+                <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-successTwo rounded-full h-[24px]">
+                  <img src={ongoing} />
+                  On-Going Sales
+                </p>
+                <span className="text-xs font-bold text-textDarkGrey">
+                  {onGoingSales}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-successTwo rounded-full h-[24px]">
+                  <img src={inventory} />
+                  Inventory in Possession
+                </p>
+                <span className="text-xs font-bold text-textDarkGrey">
+                  {inventoryInPossession}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
+                  <img src={inventory} />
+                  Total Sales
+                </p>
+                <span className="text-xs font-bold text-textDarkGrey">
+                  {sales}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
+                  <img src={customer} />
+                  Registered Customers
+                </p>
+                <span className="text-xs font-bold text-textDarkGrey">
+                  {registeredCustomers}
+                </span>
+              </div>
+            </>
+          ) : variant === "customer" ? (
+            <div className="flex items-center gap-2">
               <ProductTypeWithTag
                 productTag={productTag}
                 productType={productType}
               />
-            </div>
-            <div className="flex items-center justify-between gap-1">
-              <SimpleTag
-                text="AMOUNT"
-                containerClass="font-light text-textDarkGrey"
-              />
-              <div className="flex items-center gap-[1px]">
-                <NairaSymbol />
-                <p className="text-textBlack text-xs">
-                  {transactionAmount &&
-                    formatNumberWithCommas(transactionAmount)}
-                </p>
-              </div>
-            </div>
-          </>
-        ) : variant === "sales" ? (
-          <>
-            <div className="flex items-center justify-between">
-              <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
-                <img src={product} />
-                Product
-              </p>
               <ProductTypeWithTag
-                productTag={productTag}
-                productType={productId}
+                paymentStatus={paymentStatus}
+                daysDue={daysDue}
               />
             </div>
+          ) : variant === "transactions" ? (
+            <>
+              <div className="flex items-center justify-between gap-1">
+                <SimpleTag
+                  text="DATE & TIME"
+                  containerClass="font-light text-textDarkGrey"
+                />
+                <DateTimeTag datetime={datetime} />
+              </div>
+              <div className="flex items-center justify-between gap-1">
+                <SimpleTag
+                  text="Product Type"
+                  containerClass="font-light text-textDarkGrey"
+                />
+                <ProductTypeWithTag
+                  productTag={productTag}
+                  productType={productType}
+                />
+              </div>
+              <div className="flex items-center justify-between gap-1">
+                <SimpleTag
+                  text="AMOUNT"
+                  containerClass="font-light text-textDarkGrey"
+                />
+                <div className="flex items-center gap-[1px]">
+                  <NairaSymbol />
+                  <p className="text-textBlack text-xs">
+                    {transactionAmount &&
+                      formatNumberWithCommas(transactionAmount)}
+                  </p>
+                </div>
+              </div>
+            </>
+          ) : variant === "sales" ? (
+            <>
+              <div className="flex items-center justify-between">
+                <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
+                  <img src={product} />
+                  Product
+                </p>
+                <ProductTypeWithTag
+                  productTag={productTag}
+                  productType={productId}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
+                  <img src={customer} />
+                  Customers
+                </p>
+                <NameTag name={name} />
+              </div>
+            </>
+          ) : variant === "product-no-image" ? (
             <div className="flex items-center justify-between">
-              <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
-                <img src={customer} />
-                Customers
+              <p className="flex items-center justify-center bg-paleLightBlue w-max p-2 h-[20px] text-xs font-bold rounded-full">
+                {productName}
               </p>
-              <NameTag name={name} />
+              <ProductTag productTag={productTag} />
             </div>
-          </>
-        ) : variant === "product-no-image" ? (
-          <div className="flex items-center justify-between">
-            <p className="flex items-center justify-center bg-paleLightBlue w-max p-2 h-[20px] text-xs font-bold rounded-full">
-              {productName}
-            </p>
-            <ProductTag productTag={productTag} />
-          </div>
-        ) : variant === "inventoryOne" || variant === "inventoryTwo" ? (
-          <div className="flex flex-col gap-2">
-            {variant === "inventoryTwo" && (
-              <p className="flex items-center justify-center bg-paleLightBlue text-inkBlueTwo w-max p-1 h-[14px] text-[8px] font-medium rounded-full uppercase">
-                {productTag}
-              </p>
-            )}
-            <p className="text-textDarkGrey text-xs">{productName}</p>
-          </div>
-        ) : null}
-      </div>
+          ) : variant === "inventoryOne" || variant === "inventoryTwo" ? (
+            <div className="flex flex-col gap-2">
+              {variant === "inventoryTwo" && (
+                <p className="flex items-center justify-center bg-paleLightBlue text-inkBlueTwo w-max p-1 h-[14px] text-[8px] font-medium rounded-full uppercase">
+                  {productTag}
+                </p>
+              )}
+              <p className="text-textDarkGrey text-xs">{productName}</p>
+            </div>
+          ) : null}
+        </div>
+      )}
       {/* BOTTOM */}
       <div
         className={`flex items-center ${
-          variant === "transactions" ? "justify-end" : "justify-between"
+          variant === "transactions" || variant === "salesTransactions"
+            ? "justify-end"
+            : "justify-between"
         } ${
           variant === "sales"
             ? "bg-white"
@@ -664,7 +723,7 @@ export const CardComponent = ({
             }
             containerClass="text-textBlack font-medium"
           />
-        ) : (
+        ) : variant === "salesTransactions" ? null : (
           <div className="flex items-center gap-2">
             <Icon icon={call} iconText="Call" handleClick={handleCallClick} />
             <Icon

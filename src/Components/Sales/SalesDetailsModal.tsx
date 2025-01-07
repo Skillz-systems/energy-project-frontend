@@ -26,6 +26,15 @@ export type SaleDetailsType = {
   agent: string;
 };
 
+export type SaleTransactionsType = {
+  transactionId: string;
+  paymentStatus: string;
+  datetime: string;
+  productCategory: string;
+  paymentMode: string;
+  amount: number;
+};
+
 const SalesDetailsModal = ({
   isOpen,
   setIsOpen,
@@ -59,6 +68,27 @@ const SalesDetailsModal = ({
       datetime: "2024-12-23T12:34:56",
       agent: "Jane Doe",
     };
+  };
+
+  const generateSaleTransactionEntries = (): SaleTransactionsType[] => {
+    return [
+      {
+        transactionId: "362328hsdda",
+        paymentStatus: "Successful",
+        datetime: "2024-12-23T12:34:56",
+        productCategory: "EAAS",
+        paymentMode: "RECHARGE",
+        amount: 60500,
+      },
+      {
+        transactionId: "562328hsdda",
+        paymentStatus: "Failed",
+        datetime: "2024-12-23T12:34:56",
+        productCategory: "SHS",
+        paymentMode: "RECHARGE",
+        amount: 50500,
+      },
+    ];
   };
 
   const data = generateSaleEntries();
@@ -118,6 +148,7 @@ const SalesDetailsModal = ({
     <Modal
       layout="right"
       bodyStyle="pb-44 overflow-auto"
+      size="large"
       isOpen={isOpen}
       onClose={() => {
         setTabContent("details");
@@ -184,7 +215,7 @@ const SalesDetailsModal = ({
             ) : tabContent === "history" ? (
               <SaleHistory />
             ) : (
-              <SaleTransactions />
+              <SaleTransactions data={generateSaleTransactionEntries()} />
             )}
           </DataStateWrapper>
         </div>
