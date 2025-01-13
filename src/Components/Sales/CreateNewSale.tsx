@@ -1,17 +1,17 @@
 import React from "react";
-import { KeyedMutator } from "swr";
+//import { KeyedMutator } from "swr";
 import { Modal } from "../ModalComponent/Modal";
 
 type CreateSalesType = {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  allSalesRefresh: KeyedMutator<any>;
+
 };
 
 const CreateNewSale = ({
   isOpen,
   setIsOpen,
-  allSalesRefresh,
+
 }: CreateSalesType) => {
   return (
     <>
