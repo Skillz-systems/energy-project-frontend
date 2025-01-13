@@ -1,8 +1,10 @@
-import { SettingsStore } from "./SettingsStore";
+import { ProductStore } from "./ProductStore";
+import { ContractStore } from "./ContractStore";
 
 function createRootStore() {
   const rootStore = {
-    settingsStore: SettingsStore,
+    productStore: ProductStore,
+    contractStore: ContractStore,
   };
 
   return rootStore;

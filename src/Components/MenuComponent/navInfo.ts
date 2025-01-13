@@ -57,7 +57,7 @@ export const navData = [
   {
     title: "Contracts",
     icon: ContractsIcon,
-    link: "/contract",
+    link: "/contracts",
   },
   {
     title: "Support",

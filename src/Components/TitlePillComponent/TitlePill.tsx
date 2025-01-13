@@ -1,18 +1,30 @@
+import { formatNumberWithCommas } from "@/utils/helpers";
+import { ReactNode } from "react";
+
 export type TitlePillType = {
-  parentClass: string;
+  parentClass?: string;
   icon: string;
   iconBgColor: string;
   topText: string;
   bottomText: string;
-  value: string | number;
+  leftIcon?: ReactNode;
+  value: number | string;
 };
 
 export const TitlePill = (props: TitlePillType) => {
-  const { parentClass, icon, iconBgColor, topText, bottomText, value } = props;
+  const {
+    parentClass,
+    icon,
+    iconBgColor,
+    topText,
+    bottomText,
+    leftIcon,
+    value,
+  } = props;
 
   return (
     <div
-      className={`${parentClass} flex items-center justify-between gap-1 bg-white max-w-[189px] h-[40px] pl-1 pr-[20px] py-1 border-[0.6px] border-[#A5873033] rounded-full shadow-titlePillCustom`}
+      className={`${parentClass} flex items-center justify-between gap-6 bg-white h-[40px] pl-1 pr-[20px] py-1 border-[0.6px] border-[#A5873033] rounded-full shadow-titlePillCustom`}
     >
       <div className="flex items-center gap-2">
         <div
@@ -27,7 +39,14 @@ export const TitlePill = (props: TitlePillType) => {
           <p className="text-sm leading-3 text-textGrey">{bottomText}</p>
         </div>
       </div>
-      <p className="text-xl font-medium text-textBlack">{value}</p>
+      <div className="flex items-center justify-end w-max gap-1">
+        {leftIcon && leftIcon}
+        <p className="text-xl font-medium text-textBlack">
+          {typeof value === "number" && !isNaN(value)
+            ? formatNumberWithCommas(value)
+            : value}
+        </p>
+      </div>
     </div>
   );
 };

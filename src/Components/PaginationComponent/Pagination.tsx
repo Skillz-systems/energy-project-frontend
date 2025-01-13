@@ -1,4 +1,5 @@
-import React from 'react';
+import useBreakpoint from "../../hooks/useBreakpoint";
+
 type PaginationProps = {
   totalEntries: number;
   entriesPerPage: number;
@@ -14,6 +15,7 @@ export const Pagination = ({
   onPageChange,
   onEntriesPerPageChange,
 }: PaginationProps) => {
+  const paginationMobileStyle = useBreakpoint("max", 390);
   const totalPages = Math.ceil(totalEntries / entriesPerPage);
 
   const handlePageChange = (newPage: number) => {
@@ -62,17 +64,26 @@ export const Pagination = ({
   }
 
   return (
-    <div className="flex items-center justify-between w-full h-[45px]">
-      <div className="flex items-center gap-2 h-[24px]">
+    <div className="flex flex-wrap items-center justify-between gap-1 w-full h-[45px]">
+      <div
+        className={`flex items-center sm:w-auto h-[24px]
+        ${
+          paginationMobileStyle
+            ? "w-full justify-center mb-2 gap-4"
+            : "w-[48%] justify-start gap-2"
+        }
+        `}
+      >
         {/* Previous Button */}
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
           aria-disabled={currentPage === 1}
-          className={`${currentPage === 1
+          className={`${
+            currentPage === 1
               ? " bg-disabled hover:cursor-not-allowed"
               : "bg-transparent hover:cursor-pointer"
-            } text-sm text-textLightGrey px-2.5 border border-strokeGreyThree rounded-full`}
+          } text-sm text-textLightGrey px-2.5 border border-strokeGreyThree rounded-full`}
         >
           Prev
         </button>
@@ -85,10 +96,11 @@ export const Pagination = ({
                 key={index}
                 onClick={() => handlePageChange(page)}
                 aria-current={currentPage === page ? "page" : undefined}
-                className={`${currentPage === page
+                className={`${
+                  currentPage === page
                     ? "bg-disabled text-blackBrown font-bold border border-blackBrown"
                     : "text-textLightGrey border border-strokeGreyThree"
-                  } text-sm px-2.5 rounded-full`}
+                } text-sm px-2.5 rounded-full`}
               >
                 {page}
               </button>
@@ -105,17 +117,26 @@ export const Pagination = ({
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
           aria-disabled={currentPage === totalPages}
-          className={`${currentPage === totalPages
+          className={`${
+            currentPage === totalPages
               ? "bg-disabled hover:cursor-not-allowed"
               : "bg-transparent hover:cursor-pointer"
-            } text-sm text-textLightGrey px-2.5 border border-strokeGreyThree rounded-full`}
+          } text-sm text-textLightGrey px-2.5 border border-strokeGreyThree rounded-full`}
         >
           Next
         </button>
       </div>
 
       {/* Page Size Selector */}
-      <div className="flex items-center gap-2.5">
+      <div
+        className={`flex items-center justify-end sm:w-auto h-[24px]
+          ${
+            paginationMobileStyle
+              ? "w-full justify-center gap-4"
+              : "w-[48%] justify-start gap-2.5"
+          }
+        `}
+      >
         <span className="text-xs text-textLightGrey">Showing</span>
         <select
           value={entriesPerPage}

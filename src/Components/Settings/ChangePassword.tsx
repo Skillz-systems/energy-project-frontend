@@ -6,13 +6,13 @@ import eyeopen from "../../assets/eyeopen.svg";
 import { Input } from "../InputComponent/Input";
 import { useApiCall } from "../../utils/useApiCall";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
-import useTokens from "../../hooks/useTokens";
 
 const changePasswordSchema = z
   .object({
-    oldPassword: z.string(),
+    oldPassword: z.string().trim().min(1, "Old password is required"),
     newPassword: z
       .string()
+      .trim()
       .min(8, { message: "New password must be at least 8 characters long" })
       .regex(/[a-z]/, {
         message: "New password must contain at least one lowercase letter",
@@ -23,71 +23,96 @@ const changePasswordSchema = z
       .regex(/[0-9]/, {
         message: "New password must contain at least one number",
       }),
-    confirmPassword: z.string().min(8, {
-      message: "Confirmation password must be at least 8 characters long",
-    }),
+    confirmPassword: z
+      .string()
+      .trim()
+      .min(1, "Please confirm your new password"),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: "New password and confirmation password must match",
     path: ["confirmPassword"],
   });
 
-const ChangePassword = () => {
-  const { token, id } = useTokens();
-  const { apiCall } = useApiCall();
-  const [formData, setFormData] = useState({
-    oldPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
-  const [loading, setLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [showPassword, setShowPassword] = useState(false);
+type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+const defaultFormData: ChangePasswordFormData = {
+  oldPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+};
+
+const ChangePassword: React.FC = () => {
+  const { apiCall } = useApiCall();
+  const [formData, setFormData] =
+    useState<ChangePasswordFormData>(defaultFormData);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [passwordVisibility, setPasswordVisibility] = useState({
+    oldPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    resetFormErrors(name);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const resetFormErrors = (name: string) => {
+    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+    setApiError(null);
+  };
+
+  const togglePasswordVisibility = (field: keyof typeof passwordVisibility) => {
+    setPasswordVisibility((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setErrors({});
-
     setLoading(true);
-    try {
-      // Validate form data using Zod schema
-      changePasswordSchema.parse(formData);
 
-      // Use apiCall to handle the password change
+    try {
+      const validatedData = changePasswordSchema.parse(formData);
       await apiCall({
-        endpoint: `/v1/auth/create-user-password/${id}/${token}`,
+        endpoint: `/v1/auth/change-password`,
         method: "post",
         data: {
-          password: formData.newPassword,
-          confirmPassword: formData.confirmPassword,
+          oldPassword: validatedData.oldPassword,
+          password: validatedData.newPassword,
+          confirmPassword: validatedData.confirmPassword,
         },
         successMessage: "Password changed successfully!",
       });
-    } catch (error) {
+      setFormData(defaultFormData);
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
-        // Collect validation errors
-        const validationErrors: { [key: string]: string } = {};
-        error.errors.forEach((err) => {
-          validationErrors[err.path[0]] = err.message;
-        });
-        setErrors(validationErrors);
+        setFormErrors(error.issues);
+      } else {
+        const message =
+          error?.response?.data?.message || "Failed to change password";
+        setApiError(`Password change failed: ${message}.`);
       }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  const isFormFilled =
-    formData.oldPassword || formData.newPassword || formData.confirmPassword;
+  const isFormFilled = changePasswordSchema.safeParse(formData).success;
+
+  const getFieldError = (fieldName: string) => {
+    return formErrors.find((error) => error.path[0] === fieldName)?.message;
+  };
 
   return (
     <form
       className="relative flex flex-col justify-end bg-white p-4 w-full lg:max-w-[700px] min-h-[414px] border-[0.6px] border-strokeGreyThree rounded-[20px]"
       onSubmit={handleSubmit}
+      noValidate
     >
       <img
         src={lightCheckeredBg}
@@ -99,70 +124,71 @@ const ChangePassword = () => {
           Click any field below to make changes
         </p>
         <Input
-          type={showPassword ? "text" : "password"}
+          type={passwordVisibility.oldPassword ? "text" : "password"}
           name="oldPassword"
           label="Old Password"
           value={formData.oldPassword}
-          onChange={handleChange}
+          onChange={handleInputChange}
           required={true}
           placeholder="OLD PASSWORD"
-          style={`${
-            isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-          } max-w-none`}
-          errorMessage={errors.oldPassword || ""}
+          errorMessage={getFieldError("oldPassword")}
           iconRight={
             <img
-              src={showPassword ? eyeopen : eyeclosed}
+              src={passwordVisibility.oldPassword ? eyeopen : eyeclosed}
               className="w-[16px] cursor-pointer"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => togglePasswordVisibility("oldPassword")}
+              alt="Toggle password visibility"
             />
           }
         />
         <Input
-          type={showPassword ? "text" : "password"}
+          type={passwordVisibility.newPassword ? "text" : "password"}
           name="newPassword"
           label="New Password"
           value={formData.newPassword}
-          onChange={handleChange}
+          onChange={handleInputChange}
           required={true}
           placeholder="ENTER NEW PASSWORD"
-          style={`${
-            isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-          } max-w-none`}
-          errorMessage={errors.newPassword || ""}
+          errorMessage={getFieldError("newPassword")}
           iconRight={
             <img
-              src={showPassword ? eyeopen : eyeclosed}
+              src={passwordVisibility.newPassword ? eyeopen : eyeclosed}
               className="w-[16px] cursor-pointer"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => togglePasswordVisibility("newPassword")}
+              alt="Toggle password visibility"
             />
           }
         />
         <Input
-          type={showPassword ? "text" : "password"}
+          type={passwordVisibility.confirmPassword ? "text" : "password"}
           name="confirmPassword"
           label="Confirm New Password"
           value={formData.confirmPassword}
-          onChange={handleChange}
+          onChange={handleInputChange}
           required={true}
           placeholder="CONFIRM NEW PASSWORD"
-          style={`${
-            isFormFilled ? "border-[#D3C6A1]" : "border-strokeGrey"
-          } max-w-none`}
-          errorMessage={errors.confirmPassword || ""}
+          errorMessage={getFieldError("confirmPassword")}
           iconRight={
             <img
-              src={showPassword ? eyeopen : eyeclosed}
+              src={passwordVisibility.confirmPassword ? eyeopen : eyeclosed}
               className="w-[16px] cursor-pointer"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => togglePasswordVisibility("confirmPassword")}
+              alt="Toggle password visibility"
             />
           }
         />
+        {apiError && (
+          <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
+            {apiError}
+          </div>
+        )}
         <div className="flex items-center justify-center w-full pt-5 pb-5">
           <ProceedButton
             type="submit"
-            loading={loading}
             variant={isFormFilled ? "gradient" : "gray"}
+            loading={loading}
+            // disabled={!isFormFilled}
+            disabled={false}
           />
         </div>
       </div>

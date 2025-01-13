@@ -6,7 +6,7 @@ export type SideMenuType = {
   navigationList: {
     title: string;
     link: string;
-    count?: number | string;
+    count: number | null;
   }[];
   parentClass?: string;
 };
@@ -40,7 +40,7 @@ export const SideMenu = (props: SideMenuType) => {
           >
             {item.title}
           </p>
-          {item.count ? (
+          {item?.count !== null ? (
             <span
               className={`flex items-center justify-center max-w-max px-1 border-[0.2px] text-xs rounded-full transition-all
               ${
@@ -49,7 +49,7 @@ export const SideMenu = (props: SideMenuType) => {
                   : "bg-[#EAEEF2] text-textDarkGrey border-strokeGrey group-hover:bg-[#FEF5DA] group-hover:text-textDarkBrown group-hover:border-textDarkBrown"
               }`}
             >
-              {formatNumberWithSuffix(item.count)}
+              {formatNumberWithSuffix(item?.count)}
             </span>
           ) : null}
         </Link>

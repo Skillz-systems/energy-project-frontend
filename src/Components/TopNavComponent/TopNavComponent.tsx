@@ -6,14 +6,13 @@ import UserProfile from "../UserPill";
 import { useFormattedCurrentDate } from "../../hooks/useFormattedCurrentDate";
 import notification from "../../assets/notification.svg";
 import search from "../../assets/search.svg";
-import edit from "../../assets/edit.svg";
 import close from "../../assets/close.svg";
 import support from "../../assets/support.svg";
 import { DropDown } from "../DropDownComponent/DropDown";
 import Cookies from "js-cookie";
 import useTokens from "../../hooks/useTokens";
-import { Modal } from "../ModalComponent/Modal";
 import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
+import { Modal } from '@/Components/ModalComponent/Modal';
 
 const TopNavComponent = () => {
   const { role } = useTokens();
@@ -58,17 +57,14 @@ const TopNavComponent = () => {
           break;
         case 1:
           Cookies.remove("userData");
-          navigate("/login");
+          sessionStorage.clear();
+          window.location.replace("/login");
           break;
         default:
           break;
       }
     },
-    customButton: (
-      <div className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom transition-all hover:bg-[#E2E4EB]">
-        <img src={edit} alt="Edit" className="w-[16px] cursor-pointer" />
-      </div>
-    ),
+    showCustomButton: true,
   };
 
   return (
@@ -84,7 +80,7 @@ const TopNavComponent = () => {
             alt="Logo"
             width="51px"
             className="w-[25px] sm:w-[51px] cursor-pointer"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/home")}
           />
           <MenuButton />
           <UserProfile role={role.role} />
@@ -171,7 +167,7 @@ const TopNavComponent = () => {
         <div className="flex flex-col gap-2 p-4">
           <div className="flex items-start justify-between gap-4 py-4 border-b-[0.4px] border-strokeGreyThree">
             <div className="w-[5%]">
-              <img src={support} width="24px"/>
+              <img src={support} width="24px" />
             </div>
             <div className="flex flex-col gap-2 w-[77.5%]">
               <p className="text-xs text-textGrey font-bold uppercase">

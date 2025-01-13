@@ -20,7 +20,6 @@
   outline: 0;
   box-sizing: border-box;
   min-height: 100vh;
-  position: relative;
 }
 
 html,
@@ -132,6 +131,64 @@ table {
   }
 }
 
+.loaderTwo {
+  width: 50px;
+  aspect-ratio: 1;
+  border: 10px solid #fef5da;
+  /* border: 10px solid #f8cc48f1; */
+  border-radius: 50%;
+  position: relative;
+  transform: rotate(45deg);
+}
+.loaderTwo::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 10px solid #982214;
+  animation: l18 1s infinite linear;
+}
+@keyframes l18 {
+  0% {
+    clip-path: polygon(50% 50%, 0 0, 0 0, 0 0, 0 0, 0 0);
+  }
+  25% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 0, 100% 0, 100% 0);
+  }
+  50% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 100% 100%, 100% 100%);
+  }
+  75% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 100%);
+  }
+  100% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 0);
+  }
+}
+
+@keyframes l23 {
+  100% {
+    transform: rotate(1turn);
+  }
+}
+
 .test {
   border: 1px solid red;
 }
+
+/* Global scrollbar styles (for all browsers) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3f4f6; /* Tailwind Gray 100 */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9ca3af; /* Tailwind Gray 400 */
+  border-radius: 9999px;
+}
+
+/* https://css-loaders.com/colorful/ */

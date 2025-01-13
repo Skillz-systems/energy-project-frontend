@@ -1,27 +1,31 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import drop from "../../assets/table/dropdown.svg";
 import dateIcon from "../../assets/table/date.svg";
-import { Modal } from "../ModalComponent/Modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { Icon } from "../Settings/UserModal";
+import edit from "../../assets/edit.svg";
+import { Modal } from "@/Components/ModalComponent/Modal";
 
 export type DropDownType = {
   name?: string;
   items?: string[];
-  onClickLink?: (index: number) => void;
+  onClickLink?: (index: number, cardData?: any) => void;
   buttonImgStyle?: string;
   dropDownContainerStyle?: string;
   isSearch?: boolean;
   isDate?: boolean;
   onDateClick?: (date: string) => void;
-  customButton?: React.ReactNode;
+  showCustomButton?: boolean;
+  disabled?: boolean[];
   defaultStyle?: boolean;
+  cardData?: any;
 };
 
 export const DropDown = (props: DropDownType) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [showIcon, setShowIcon] = useState<boolean>(false);
+  const [showIcon, setShowIcon] = useState<number | null>();
 
   const {
     name,
@@ -31,10 +35,11 @@ export const DropDown = (props: DropDownType) => {
     dropDownContainerStyle,
     isDate,
     onDateClick,
-    customButton,
+    showCustomButton = false,
+    disabled = items?.map(() => false) || [],
     defaultStyle,
+    cardData,
   } = props;
-  const [linkIndex, setLinkIndex] = useState<number>(0);
 
   const handleClick = () => {
     if (isDate) {
@@ -44,13 +49,13 @@ export const DropDown = (props: DropDownType) => {
     }
   };
 
-  const handleOptionClick = (index: number) => {
-    setLinkIndex(index);
-    if (onClickLink) onClickLink(index);
+  const handleOptionClick = (index: number, cardData?: any) => {
+    // Prevent clicks if the item is disabled
+    if (disabled[index]) return;
+    if (onClickLink) onClickLink(index, cardData);
     setIsOpen(false);
   };
 
-  // Handler for date selection
   const handleDateChange = (date: Date | null) => {
     if (date && onDateClick) {
       setSelectedDate(date);
@@ -61,9 +66,9 @@ export const DropDown = (props: DropDownType) => {
 
   return (
     <div className="relative flex w-max">
-      {customButton ? (
+      {showCustomButton ? (
         <div onClick={handleClick} className="w-max">
-          {customButton}
+          <Icon icon={edit} />
         </div>
       ) : (
         <button
@@ -90,7 +95,7 @@ export const DropDown = (props: DropDownType) => {
         isOpen={isOpen}
         onClose={() => {
           setIsOpen(false);
-          setShowIcon(false);
+          setShowIcon(null);
         }}
       >
         {isDate ? (
@@ -104,24 +109,25 @@ export const DropDown = (props: DropDownType) => {
           </div>
         ) : (
           <ul
-            className={`${dropDownContainerStyle} absolute top-[35px] right-0 z-50 flex flex-col gap-1 p-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] shadow-lg w-[168px]`}
+            className={`${dropDownContainerStyle} absolute top-[35px] right-0 z-[1000] flex flex-col gap-0.5 p-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] shadow-lg w-[200px]`}
           >
             {items?.map((item, index) => (
               <li
                 key={index}
-                className={`flex items-center justify-between h-[24px] px-2 py-2.5 text-xs rounded-full cursor-pointer 
+                className={`flex items-center justify-between h-max px-2 py-1 text-xs rounded-full border-[0.4px] border-transparent
                 ${
-                  linkIndex === index && showIcon && !defaultStyle
-                    ? "bg-paleLightBlue text-textBlack"
-                    : "hover:bg-gray-100 text-textDarkGrey"
+                  disabled[index]
+                    ? "cursor-not-allowed text-gray-400 bg-gray-100"
+                    : index === showIcon && !defaultStyle
+                    ? "cursor-pointer bg-paleLightBlue text-textBlack"
+                    : "cursor-pointer hover:bg-gray-100 text-textDarkGrey hover:border-strokeGreyTwo"
                 }`}
-                onClick={() => {
-                  setShowIcon(true);
-                  handleOptionClick(index);
-                }}
+                onClick={() => handleOptionClick(index, cardData)}
+                onMouseEnter={() => !disabled[index] && setShowIcon(index)}
+                onMouseLeave={() => setShowIcon(null)}
               >
                 {item}
-                {linkIndex === index && showIcon && !defaultStyle ? (
+                {index === showIcon && !defaultStyle && !disabled[index] ? (
                   <svg
                     width="16"
                     height="16"

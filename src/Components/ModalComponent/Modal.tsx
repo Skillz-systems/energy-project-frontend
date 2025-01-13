@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { MdCancel } from "react-icons/md";
 import clsx from "clsx";
 
@@ -9,7 +9,10 @@ export type ModalType = {
   size?: "small" | "medium" | "large";
   layout?: "right" | "default";
   bodyStyle?: string;
+  headerClass?: string;
+  leftHeaderContainerClass?: string;
   leftHeaderComponents?: React.ReactNode;
+  rightHeaderContainerClass?: string;
   rightHeaderComponents?: React.ReactNode;
 };
 
@@ -20,33 +23,15 @@ export const Modal = ({
   size = "medium",
   layout = "default",
   bodyStyle,
+  headerClass,
+  leftHeaderContainerClass,
   leftHeaderComponents,
+  rightHeaderContainerClass,
   rightHeaderComponents,
 }: ModalType) => {
   const [isClosing, setIsClosing] = useState<boolean>(false);
 
-  // Close modal on ESC key
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") handleClose();
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  });
-
-  // Prevent background scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-  }, [isOpen]);
-
-  // Slide out animation trigger before closing
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (isOpen) {
       setIsClosing(true);
       setTimeout(
@@ -57,7 +42,29 @@ export const Modal = ({
         layout === "right" ? 250 : 0
       );
     }
-  };
+  }, [isOpen, layout, onClose]);
+
+  // Close modal on ESC key
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") handleClose();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleClose]);
+
+  // Prevent background scroll when modal is open
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, [isOpen]);
 
   if (!isOpen && !isClosing) return null;
 
@@ -91,7 +98,7 @@ export const Modal = ({
     <div className={wrapperClasses}>
       <div
         className={`fixed inset-0 ${
-          layout === "default" ? "z-40" : ""
+          layout === "default" ? "z-40 rounded-md" : ""
         } transition-opacity bg-black opacity-50`}
         onClick={handleClose}
         aria-hidden="true"
@@ -102,12 +109,24 @@ export const Modal = ({
           <header
             className={`flex items-center p-2 h-[40px] border-b-[0.6px] border-b-strokeGreyThree ${
               leftHeaderComponents ? "justify-between" : "justify-end"
-            }`}
+            } ${headerClass}`}
           >
-            <div className="flex items-center gap-1">
+            <div
+              className={`flex ${
+                leftHeaderContainerClass
+                  ? leftHeaderContainerClass
+                  : "items-center gap-1"
+              }`}
+            >
               {leftHeaderComponents}
             </div>
-            <div className="flex items-center gap-1">
+            <div
+              className={`flex ${
+                rightHeaderContainerClass
+                  ? rightHeaderContainerClass
+                  : "items-center gap-1 "
+              }`}
+            >
               {rightHeaderComponents}
               <button
                 onClick={handleClose}
