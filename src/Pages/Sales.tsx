@@ -21,7 +21,7 @@ const Sales = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [_salesData, setSalesData] = useState<any>(null);
-  const [salesFilter, setSalesFilter] = useState<string>("");
+  const [, setSalesFilter] = useState<string>("");
   //   const {
   //     data: salesData,
   //     isLoading: salesLoading,
@@ -176,7 +176,7 @@ const Sales = () => {
       <CreateNewSale
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        allSalesRefresh={() => Promise.resolve()}
+      //allSalesRefresh={() => Promise.resolve()}
       />
     </>
   );

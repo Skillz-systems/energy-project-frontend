@@ -10,7 +10,7 @@ import customericon from "../../assets/customers/customericon.svg";
 import creditcardicon from "../../assets/creditcardgrey.svg";
 import { formatDateTime, formatNumberWithCommas } from "@/utils/helpers";
 import producticon from "../../assets/product-grey.svg";
-import { useApiCall, useGetRequest } from "@/utils/useApiCall";
+import { useApiCall } from "@/utils/useApiCall";
 import { toast } from "react-toastify";
 
 type TransactionDetailType = {
@@ -45,7 +45,7 @@ const TransactionModal = ({
   //   false
   // );
 
-  const generateTransactionEntries = (data?: any): TransactionDetailType => {
+  const generateTransactionEntries = (): TransactionDetailType => {
     return {
       status: "completed",
       transactionId: transactionID,
@@ -109,11 +109,10 @@ const TransactionModal = ({
       }}
       leftHeaderComponents={
         <p
-          className={`flex items-center justify-center gap-1 bg-[#F6F8FA] w-max px-2 py-1 text-xs ${
-            data?.status.toLowerCase() === "completed"
-              ? "text-success"
-              : "text-errorTwo"
-          } border-[0.4px] border-strokeGreyTwo rounded-full uppercase`}
+          className={`flex items-center justify-center gap-1 bg-[#F6F8FA] w-max px-2 py-1 text-xs ${data?.status.toLowerCase() === "completed"
+            ? "text-success"
+            : "text-errorTwo"
+            } border-[0.4px] border-strokeGreyTwo rounded-full uppercase`}
         >
           <GoDotFill />
           {data?.status}
@@ -123,9 +122,8 @@ const TransactionModal = ({
     >
       <div className="bg-white">
         <header
-          className={`flex items-center ${
-            transactionID ? "justify-between" : "justify-end"
-          } bg-paleGrayGradientLeft p-4 min-h-[64px] border-b-[0.6px] border-b-strokeGreyThree`}
+          className={`flex items-center ${transactionID ? "justify-between" : "justify-end"
+            } bg-paleGrayGradientLeft p-4 min-h-[64px] border-b-[0.6px] border-b-strokeGreyThree`}
         >
           {!transactionID ? null : (
             <p className="flex items-center justify-center bg-paleLightBlue w-max p-2 h-[24px] text-textBlack text-xs font-semibold rounded-full">

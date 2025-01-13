@@ -22,7 +22,7 @@ const Contracts = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [_contractsData, setContractsData] = useState<any>(null);
-  const [contractsFilter, setContractsFilter] = useState<string>("");
+  const [, setContractsFilter] = useState<string>("");
   //   const {
   //     data: transactionsData,
   //     isLoading: transactionsLoading,
