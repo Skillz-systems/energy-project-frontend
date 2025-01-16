@@ -3,7 +3,7 @@ import { Table, TableType } from "./Table";
 import { GoDotFill } from "react-icons/go";
 import moneyBag from "../../assets/table/moneybag.svg";
 import statusIcon from "../../assets/table/status.svg";
-import { generateCustomerEntries, generateAgentEntries } from "./sampleData";
+import { generateCustomerEntries } from "./sampleData";
 import smile from "../../assets/table/smile.svg";
 import ongoing from "../../assets/table/ongoing.svg";
 import inventory from "../../assets/table/inventory.svg";
@@ -163,7 +163,7 @@ cardStyle.args = {
     },
   ],
   tableClassname: "flex flex-wrap items-center gap-4",
-  tableData: generateAgentEntries(50, { classTags: [] }),
+  tableData: [],
   tableType: "card",
   cardComponent: (
     data: {
@@ -204,12 +204,13 @@ const AgentsCard = ({
           </p>
         </span>
         <span
-          className={`flex items-center text-xs justify-center gap-0.5 bg-[#F6F8FA] px-2 py-1 border-[0.4px] border-strokeGreyTwo h-[24px] rounded-full ${status === "active"
+          className={`flex items-center text-xs justify-center gap-0.5 bg-[#F6F8FA] px-2 py-1 border-[0.4px] border-strokeGreyTwo h-[24px] rounded-full ${
+            status === "active"
               ? "text-success"
               : status === "barred"
-                ? "text-errorTwo"
-                : "text-brightBlue"
-            }`}
+              ? "text-errorTwo"
+              : "text-brightBlue"
+          }`}
         >
           <GoDotFill /> {status.toUpperCase()}
         </span>

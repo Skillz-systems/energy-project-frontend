@@ -115,7 +115,28 @@ const ContractsTable = ({
     } else return generateContractEntries(contractsData);
   };
 
-  console.log(contractID);
+  const contractProducts = [
+    {
+      name: "Lemi 10W",
+      components: [
+        "(1) Solar Unit",
+        "(1) Solar Panel",
+        "(2) LED Bulbs",
+        "Phone Charging Cables",
+      ],
+    },
+    {
+      name: "Lemi 30W",
+      components: [
+        "(1) Solar Unit",
+        "(1) Solar Panel",
+        "(1) Fan",
+        "(3) LED Bulbs",
+        "Phone Charging Cables",
+      ],
+    },
+  ];
+
   return (
     <>
       {!error ? (
@@ -150,7 +171,7 @@ const ContractsTable = ({
           {isOpen && contractID && (
             <ContractModal
               setIsOpen={setIsOpen}
-              contractDocData={{ contractID }}
+              contractDocData={{ contractProducts }}
             />
           )}
         </div>
