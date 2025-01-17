@@ -28,7 +28,7 @@ const Customers = () => {
     error: allCustomerError,
     errorStates: allCustomerErrorStates,
   } = useGetRequest(
-    `/v1/customers${customerFilter && `?status=${customerFilter}`}`,
+    `/v1/customers${customerFilter && `?${customerFilter}`}`,
     true,
     60000
   );
@@ -41,15 +41,15 @@ const Customers = () => {
         setCustomerData(customerData);
         break;
       case "/customers/new":
-        setCustomerFilter("new");
+        setCustomerFilter(`isNew=true`);
         setCustomerData(customerData);
         break;
       case "/customers/active":
-        setCustomerFilter("active");
+        setCustomerFilter(`status=active`);
         setCustomerData(customerData);
         break;
       case "/customers/barred":
-        setCustomerFilter("barred");
+        setCustomerFilter(`status=barred`);
         setCustomerData(customerData);
         break;
       default:

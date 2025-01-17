@@ -552,7 +552,7 @@ export const CardComponent = ({
       </div>
       {/* MIDDLE */}
       {variant === "salesTransactions" ? null : (
-        <div className="flex flex-col gap-2 p-2 test">
+        <div className="flex flex-col gap-2 p-2">
           {variant === "agent" ? (
             <>
               <div className="flex items-center justify-between">

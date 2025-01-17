@@ -175,7 +175,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
   const [apiError, setApiError] = useState<string | null>(null);
 
   const fetchInventoryCategories = useGetRequest(
-    "/v1/inventory/categories",
+    "/v1/inventory/categories/all",
     false
   );
 

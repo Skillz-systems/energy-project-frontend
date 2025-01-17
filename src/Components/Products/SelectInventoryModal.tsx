@@ -86,7 +86,7 @@ const SelectInventoryModal = observer(
     const [_categoryId, setCategoryId] = useState<string>("");
 
     const fetchAllInventoryCategories = useGetRequest(
-      "/v1/inventory/categories",
+      "/v1/inventory/categories/all",
       false
     );
 

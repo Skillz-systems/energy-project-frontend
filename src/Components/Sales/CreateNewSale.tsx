@@ -13,6 +13,7 @@ const CreateNewSale = ({
   setIsOpen,
   allSalesRefresh,
 }: CreateSalesType) => {
+  // const handleSubmit
   return (
     <>
       <Modal
@@ -21,7 +22,12 @@ const CreateNewSale = ({
         layout="right"
         bodyStyle="pb-[100px]"
       >
-        Create New Sale
+        {/* <form
+          className="flex flex-col items-center bg-white"
+          onSubmit={handleSubmit}
+          noValidate
+        ></form> */}
+        SALE
       </Modal>
     </>
   );

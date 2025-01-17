@@ -38,7 +38,7 @@ const Inventory = () => {
     60000
   );
 
-  const fetchInventoryStats = useGetRequest("/v1/inventory/stats", true);
+  const fetchInventoryStats = useGetRequest("/v1/inventory/stats/all", true);
 
   function getFilteredClassCount(classList: InventoryClass) {
     const filteredClass =
