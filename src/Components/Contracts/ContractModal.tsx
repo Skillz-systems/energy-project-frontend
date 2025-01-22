@@ -266,8 +266,6 @@ const ContractModal = ({
             </p>
           </section>
           <TableOne />
-          <br />
-          <TableTwo />
         </div>
       </section>
     </div>
@@ -289,7 +287,6 @@ const ProductSelector = ({
           <th style={{ border: "1px solid black", padding: "8px" }}>
             Components
           </th>
-          <th style={{ border: "1px solid black", padding: "8px" }}>Select</th>
         </tr>
       </thead>
       <tbody>
@@ -302,9 +299,6 @@ const ProductSelector = ({
                   <li key={idx}>{component}</li>
                 ))}
               </ul>
-            </td>
-            <td className="p-2 text-center border border-black">
-              <input type="checkbox" className="w-[24px] h-[24px]" />
             </td>
           </tr>
         ))}
@@ -361,19 +355,7 @@ const TableOne = () => {
         </tr>
         <tr>
           <td className="border border-black p-2 font-bold">
-            INSTALLATION LOCATION
-          </td>
-          <td className="border border-black p-2"></td>
-        </tr>
-        <tr>
-          <td className="border border-black p-2 font-bold">
-            RESIDENTIAL ADDRESS
-            <br />
-            <span className="italic text-sm">
-              (if different from Installation Location)
-            </span>
-            <br />
-            <span className="italic text-sm">NOT PO Box or PMB</span>
+            INSTALLATION ADDRESS
           </td>
           <td className="border border-black p-2"></td>
         </tr>
@@ -444,41 +426,6 @@ const TableOne = () => {
             <div className="p-2 w-1/2">SIGN:</div>
           </td>
         </tr>
-      </tbody>
-    </table>
-  );
-};
-
-const TableTwo = () => {
-  return (
-    <table className="w-full border-collapse border border-black">
-      <thead>
-        <tr>
-          <th
-            colSpan={2}
-            className="border border-black bg-gray-200 p-2 text-left italic text-[1.15rem] font-bold"
-          >
-            FOR OFFICIAL USE
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {[
-          "Products Purchased",
-          "Purchase Price per Product",
-          "Payment Option",
-          "Initial Deposit Paid",
-          "Location of Sale",
-          "Customer Category",
-          "Sales Rep",
-          "Signature",
-          "Date of Sale",
-        ].map((label, index) => (
-          <tr key={index}>
-            <td className="border border-black p-2 font-bold w-2/5">{label}</td>
-            <td className="border border-black p-2 w-3/5"></td>
-          </tr>
-        ))}
       </tbody>
     </table>
   );

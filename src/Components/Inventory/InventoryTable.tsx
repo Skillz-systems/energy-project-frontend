@@ -19,68 +19,65 @@ interface InventoryEntries {
   deleted: boolean;
 }
 
-type InventoryType = {
+type InventoryCategory = {
+  id: string;
+  name: string;
+  parentId: string | null;
+  type: string;
+};
+
+type InventorySubCategory = {
+  id: string;
+  name: string;
+  parentId: string;
+  type: string;
+};
+
+type Batch = {
+  id: string;
+  costOfItem: number;
+  price: number;
+  batchNumber: number;
+  numberOfStock: number;
+  remainingQuantity: number;
+  inventoryId: string;
+};
+
+type InventoryRecord = {
   id: string;
   name: string;
   manufacturerName: string;
+  sku: string;
+  image: string;
+  dateOfManufacture: string;
+  status: string;
+  class: string;
   inventoryCategoryId: string;
   inventorySubCategoryId: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-  batches: {
-    id: string;
-    name: string;
-    dateOfManufacture: string;
-    sku: string;
-    image: string;
-    batchNumber: number;
-    costOfItem: number;
-    price: number;
-    numberOfStock: number;
-    remainingQuantity: number;
-    status: string;
-    class: string;
-    createdAt: string;
-    updatedAt: string;
-    deletedAt: string | null;
-    inventoryId: string;
-  }[];
-  inventoryCategory: {
-    id: string;
-    name: string;
-    parentId: string | null;
-    type: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-  inventorySubCategory: {
-    id: string;
-    name: string;
-    parentId: string;
-    type: string;
-    createdAt: string;
-    updatedAt: string;
-  };
+  inventoryCategory: InventoryCategory;
+  inventorySubCategory: InventorySubCategory;
+  batches: Batch[];
+  salePrice: string;
+  inventoryValue: number;
+  totalRemainingQuantities: number;
+  totalInitialQuantities: number;
 };
 
 // Helper function to map the API data to the desired format
 const generateInventoryEntries = (data: any): InventoryEntries[] => {
   const entries: InventoryEntries[] = data?.inventories.map(
-    (item: InventoryType, index: number) => {
+    (item: InventoryRecord, index: number) => {
       return {
-        id: item?.batches[0]?.id,
+        id: item?.id,
         no: index + 1,
-        name: { image: item?.batches[0]?.image, text: item?.batches[0]?.name },
-        class: item?.batches[0]?.class,
-        salePrice: item?.batches[0]?.price,
-        inventoryValue:
-          item?.batches[0]?.price * item?.batches[0]?.numberOfStock,
+        name: { image: item?.image, text: item?.name },
+        class: item?.class,
+        salePrice: item?.salePrice,
+        inventoryValue: item?.inventoryValue,
         stockLevel: {
-          totalUnits: item?.batches[0]?.numberOfStock,
-          currentUnits: item?.batches[0]?.remainingQuantity,
+          totalUnits: item?.totalInitialQuantities,
+          currentUnits: item?.totalRemainingQuantities,
         },
-        deleted: item?.batches[0]?.deletedAt ?? false,
       };
     }
   );
@@ -217,17 +214,6 @@ const InventoryTable = ({
     {
       title: "SALE PRICE",
       key: "salePrice",
-      valueIsAComponent: true,
-      customValue: (value: number) => {
-        return (
-          <div className="flex items-center gap-1">
-            <NairaSymbol />
-            <span className="text-textBlack">
-              {value && formatNumberWithCommas(value)}
-            </span>
-          </div>
-        );
-      },
       rightIcon: <NairaSymbol color="#828DA9" />,
     },
     {

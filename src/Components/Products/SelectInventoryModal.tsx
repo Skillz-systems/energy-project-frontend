@@ -13,7 +13,7 @@ import { TabNamesType } from "../Inventory/InventoryDetailModal";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import { ProductStore } from "@/stores/ProductStore";
 
-type ListDataType = {
+export type ListDataType = {
   productId: string;
   productImage: string;
   productTag: string;

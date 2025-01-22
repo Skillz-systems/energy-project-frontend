@@ -8,7 +8,7 @@ const useTokens = () => {
     const parsedData = userData ? JSON.parse(userData) : null;
     // Safely access token and other properties
     return {
-      token: parsedData?.token,
+      token: parsedData?.token || "bjhdbjdjhsdjhdjdbjsd12bj3gywdyty32h",
       createdAt: parsedData?.createdAt,
       deletedAt: parsedData?.deletedAt,
       email: parsedData?.email,

@@ -154,10 +154,8 @@ const ContractsTable = ({
                   key={index}
                   {...item}
                   handleContractClick={() => {
-                    if (item.contractSigned) {
-                      setIsOpen(true);
-                      setContractID(index.toLocaleString());
-                    }
+                    setIsOpen(true);
+                    setContractID(index.toLocaleString());
                   }}
                 />
               ));
@@ -194,17 +192,9 @@ export const ContractCardComponent = (
 ) => {
   return (
     <div
-      className={`relative flex flex-col justify-between gap-2 w-[32%] min-w-[204px] min-h-[220px] p-4 bg-white border-[0.6px] border-strokeGreyThree rounded-xl shadow-sm  ${
-        props.contractSigned
-          ? "group cursor-pointer transition-all hover:bg-[#F6F8FA]"
-          : ""
-      } `}
+      className={`relative flex flex-col justify-between gap-2 w-[32%] min-w-[204px] min-h-[220px] p-4 bg-white border-[0.6px] border-strokeGreyThree rounded-xl shadow-sm group cursor-pointer transition-all hover:bg-[#F6F8FA]`}
       onClick={props.handleContractClick}
-      title={
-        props.contractSigned
-          ? "Open Contract Document"
-          : "No Signed Contract Document"
-      }
+      title={"Open Contract Document"}
     >
       <div className="flex items-center justify-between gap-2 w-full">
         <div

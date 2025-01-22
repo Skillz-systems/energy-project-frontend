@@ -449,10 +449,10 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
               <Input
                 type="date"
                 name="dateOfManufacture"
-                label="Date Of Manufacture"
+                label="Purchase Date"
                 value={formData.dateOfManufacture}
                 onChange={handleInputChange}
-                placeholder="Date Of Manufacture"
+                placeholder="Date of Purchase"
                 required={false}
                 errorMessage={getFieldError("dateOfManufacture")}
               />

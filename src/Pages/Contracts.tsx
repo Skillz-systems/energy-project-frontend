@@ -54,10 +54,6 @@ const Contracts = () => {
         setContractsFilter("cancelled");
         setContractsData(generateRandomContracts(25));
         break;
-      case "/contracts/templates":
-        setContractsFilter("templates");
-        setContractsData(generateRandomContracts(5));
-        break;
       default:
         setContractsFilter("");
         setContractsData(generateRandomContracts(100));
@@ -85,11 +81,6 @@ const Contracts = () => {
       link: "/contracts/cancelled",
       count: 25,
     },
-    {
-      title: "Templates",
-      link: "/contracts/templates",
-      count: 5,
-    },
   ];
 
   const dropDownList = {
@@ -109,13 +100,7 @@ const Contracts = () => {
     showCustomButton: true,
   };
 
-  const contractsPaths = [
-    "all",
-    "signed",
-    "unsigned",
-    "cancelled",
-    "templates",
-  ];
+  const contractsPaths = ["all", "signed", "unsigned", "cancelled"];
 
   return (
     <>
@@ -130,13 +115,6 @@ const Contracts = () => {
               value={2240}
             />
             <TitlePill
-              icon={gradientcontract}
-              iconBgColor="bg-[#FDEEC2]"
-              topText="All"
-              bottomText="TEMPLATES"
-              value={4}
-            />
-            <TitlePill
               icon={cancelled}
               iconBgColor="bg-[#FFDBDE]"
               topText="Cancelled"
@@ -145,13 +123,13 @@ const Contracts = () => {
             />
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
-            <ActionButton
+            {/* <ActionButton
               label="New Contract"
               icon={<img src={circleAction} />}
               onClick={() => {
                 setIsOpen(true);
               }}
-            />
+            /> */}
             <DropDown {...dropDownList} />
           </div>
         </section>

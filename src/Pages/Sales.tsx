@@ -6,9 +6,7 @@ import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";
 import circleAction from "../assets/settings/addCircle.svg";
-import cancelled from "../assets/cancelled.svg";
 import gradientsales from "../assets/sales/gradientsales.svg";
-import greensales from "../assets/sales/greensales.svg";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import CreateNewSale from "@/Components/Sales/CreateNewSale";
@@ -41,14 +39,6 @@ const Sales = () => {
         setSalesFilter("");
         setSalesData(generateRandomSalesEntries(100));
         break;
-      case "/sales/new":
-        setSalesFilter("new");
-        setSalesData(generateRandomSalesEntries(25));
-        break;
-      case "/sales/closed":
-        setSalesFilter("closed");
-        setSalesData(generateRandomSalesEntries(75));
-        break;
       default:
         setSalesFilter("");
         setSalesData(generateRandomSalesEntries(100));
@@ -60,16 +50,6 @@ const Sales = () => {
       title: "All Sales",
       link: "/sales/all",
       count: 100,
-    },
-    {
-      title: "New Sales",
-      link: "/sales/new",
-      count: 25,
-    },
-    {
-      title: "Closed Sales",
-      link: "/sales/closed",
-      count: 75,
     },
   ];
 
@@ -90,7 +70,7 @@ const Sales = () => {
     showCustomButton: true,
   };
 
-  const salesPaths = ["all", "new", "closed"];
+  const salesPaths = ["all"];
 
   return (
     <>
@@ -103,20 +83,6 @@ const Sales = () => {
               topText="All"
               bottomText="SALES"
               value={2240}
-            />
-            <TitlePill
-              icon={greensales}
-              iconBgColor="bg-[#E3FAD6]"
-              topText="Active"
-              bottomText="SALES"
-              value={200}
-            />
-            <TitlePill
-              icon={cancelled}
-              iconBgColor="bg-[#FFDBDE]"
-              topText="Cancelled"
-              bottomText="SALES"
-              value={120}
             />
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">

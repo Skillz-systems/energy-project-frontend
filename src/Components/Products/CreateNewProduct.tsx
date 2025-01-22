@@ -106,7 +106,7 @@ const OtherSubmissonData = {
   name: "",
 };
 
-type FormData = z.infer<typeof formSchema>;
+export type FormData = z.infer<typeof formSchema>;
 type OtherFormData = z.infer<typeof otherFormSchema>;
 
 const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
