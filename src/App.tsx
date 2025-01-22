@@ -15,7 +15,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ErrorBoundary } from "react-error-boundary";
 import ErrorPage from "./Pages/ErrorPage";
-import Sales from "./Pages/Sales";
+
 
 function App() {
   return (
@@ -31,7 +31,6 @@ function App() {
           <Route element={<ProtectedRouteWrapper />}>
             <Route path="/home" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/sales/*" element={<Sales />} />
             <Route path="/customers/*" element={<Customers />} />
             <Route path="/agents/*" element={<Agent />} />
             <Route path="/products/*" element={<Products />} />
