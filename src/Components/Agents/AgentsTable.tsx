@@ -98,39 +98,18 @@ const AgentsTable = ({
   // });
 
   // const fetchAgents = async (page = 1, limit = 10, status = "") => {
-  //   try {
-  //     // setIsLoading(true);
   //     const response = await apiCall({
   //       endpoint: `/v1/agents?page=${page}&limit=${limit}${
   //         status ? `&status=${status}` : ""
   //       }`,
   //       method: "get",
   //     });
-
-  //     const transformedAgents: AgentEntries[] = response.data.map(
-  //       (agent: Agent) => ({
-  //         datetime: agent.createdAt,
-  //         name: `${agent.user.firstname} ${agent.user.lastname}`,
-  //         status: agent.user.status,
-  //         onGoingSales: 0,
-  //         inventoryInPossession: 0,
-  //         sales: 0,
-  //         registeredCustomers: 0,
-  //       })
-  //     );
-
-  //     agentData(transformedAgents);
   //     setPagination({
   //       page: response.meta.page,
   //       limit: response.meta.limit,
   //       total: response.meta.total,
   //       lastPage: response.meta.lastPage,
   //     });
-  //   } catch (error) {
-  //     console.error("Failed to fetch agents:", error);
-  //     agentData([]);
-  //   }
-  // };
 
   const filterList = [
     {
@@ -273,7 +252,7 @@ const AgentsTable = ({
             //   onPageChange: (page) => fetchAgents(page)
             // }}
           />
-          {isOpen && agentId && (
+          {agentId && (
             <AgentsModal
               isOpen={isOpen}
               setIsOpen={setIsOpen}

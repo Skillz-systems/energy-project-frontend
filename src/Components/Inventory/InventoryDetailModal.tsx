@@ -44,7 +44,7 @@ type InventoryData = {
 export type TabNamesType = {
   name: string;
   key: string;
-  count: null;
+  count: number | null;
   id?: any;
 };
 
@@ -164,7 +164,7 @@ const InventoryDetailModal = ({
           <p
             className="text-xs text-textDarkGrey font-semibold cursor-pointer over"
             onClick={handleCancelClick}
-            title="Cancel editing user details"
+            title="Cancel editing inventory details"
           >
             Cancel Edit
           </p>

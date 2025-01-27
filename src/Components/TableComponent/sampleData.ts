@@ -51,41 +51,6 @@ export const generateCustomerEntries = (count: number): Entry[] => {
   return entries;
 };
 
-type EntryTwo = {
-  no: number;
-  name: string;
-  status: string;
-  onGoingSales: number;
-  inventoryInPossession: number;
-  sales: number;
-  registeredCustomers: number;
-};
-
-// Generate 'n' random entries
-export const generateAgentEntries = (count: number, _: { classTags: string[]; }): EntryTwo[] => {
-  const names = ["Naomi Gambo", "John Doe", "Mary Jane", "David Smith"];
-  const status = ["active", "barred", "reported"];
-  const numbers = [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-  ];
-
-  const entries: EntryTwo[] = [];
-
-  for (let i = 1; i <= count; i++) {
-    entries.push({
-      no: i,
-      name: getRandomItem(names),
-      status: getRandomItem(status),
-      onGoingSales: getRandomItem(numbers),
-      inventoryInPossession: getRandomItem(numbers),
-      sales: getRandomItem(numbers),
-      registeredCustomers: getRandomItem(numbers),
-    });
-  }
-
-  return entries;
-};
-
 type EntryThree = {
   no: number;
   name: string;
@@ -439,5 +404,49 @@ export const generateRandomInventoryHistoryEntries = (
     });
   }
 
+  return entries;
+};
+
+export const generateRandomTransactionEntries = (count: number) => {
+  const entries = Array.from({ length: count }, (_, index) => ({
+    no: index + 1,
+    transactionId: `TXN${Math.floor(Math.random() * 90000) + 10000}`,
+    customer: `Customer${Math.floor(Math.random() * 50) + 1}`,
+    datetime: new Date().toISOString(),
+    productType: ["Recharge", "Installment"][Math.floor(Math.random() * 2)],
+    amount: (Math.random() * (1000 - 10) + 10).toFixed(2),
+    status: ["Successful", "Reversed"][Math.floor(Math.random() * 2)],
+  }));
+  return entries;
+};
+
+export const generateRandomContracts = (count: number) => {
+  const entries = Array.from({ length: count }, () => ({
+    productCategory: getRandomItem(["SHS", "EAAS", "Rooftop"]),
+    paymentMode: getRandomItem(["Single Deposit", "Recharge", "Instalmental"]),
+    customer: getRandomItem(["John Bull", "Jane Doe"]),
+    contractSigned: getRandomItem([true, false]),
+  }));
+  return entries;
+};
+
+export const generateRandomSalesEntries = (count: number) => {
+  const entries = Array.from({ length: count }, (_, index) => ({
+    no: index + 1,
+    salesId: `5bsdb3b2b2${Math.floor(Math.random() * 90000) + 10000}`,
+    dateCreated: new Date().toISOString(),
+    customer: getRandomItem(["John Bull", "Jane Doe"]),
+    status: getRandomItem([
+      "NEW",
+      "IN CONTRACT",
+      "IN PAYMENT",
+      "IN INVENTORY",
+      "IN INSTALLATION",
+      "CLOSED",
+    ]),
+    productCategory: getRandomItem(["SHS", "EAAS", "Rooftop"]),
+    paymentMode: getRandomItem(["Single Deposit", "Recharge", "Instalmental"]),
+    amount: (Math.random() * (10000000 - 10) + 10).toFixed(2),
+  }));
   return entries;
 };

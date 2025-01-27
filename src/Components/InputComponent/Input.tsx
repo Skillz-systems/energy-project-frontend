@@ -1,3 +1,4 @@
+
 import { ChangeEvent, ReactNode, useEffect, useRef } from "react";
 import { CgChevronDown } from "react-icons/cg";
 import { useState } from "react";
@@ -137,7 +138,9 @@ export const Input = ({
           {iconRight && iconRight}
         </div>
         {errorMessage && (
-          <p className={`mt-1 px-[1.3em] text-xs text-errorTwo font-semibold w-full ${errorClass}`}>
+          <p
+            className={`mt-1 px-[1.3em] text-xs text-errorTwo font-semibold w-full ${errorClass}`}
+          >
             {errorMessage}
           </p>
         )}
@@ -263,7 +266,6 @@ type ModalInputType = {
 
 export const ModalInput = ({
   type = "text",
-  name,
   label,
   placeholder = "Enter your firstname",
   onClick,
@@ -302,7 +304,7 @@ export const ModalInput = ({
                 className="w-full text-sm font-semibold text-textBlack cursor-pointer"
                 onClick={onClick}
               >
-                Change {name} selected
+                Change {label.toLowerCase()} selected
               </span>
             ) : (
               required && <Asterik />
@@ -519,26 +521,36 @@ export type RadioOption = {
 
 export type RadioInputType = {
   name: string;
+  value?: string | string[];
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
   radioOptions: RadioOption[];
   radioLayout?: "row" | "column";
   radioParentStyle?: string;
   radioSelectedStyle?: string;
+  className?: string;
+  radioLabelStyle?: string;
+  selectMultiple?: boolean;
 };
 
 export const RadioInput = ({
   name,
+  value,
   onChange,
   required = false,
   radioOptions,
   radioLayout = "row",
   radioParentStyle,
   radioSelectedStyle,
+  className,
+  radioLabelStyle,
+  selectMultiple = false,
 }: RadioInputType) => {
-  const [selectedValue, setSelectedValue] = useState<string | null>(null);
+  const [selectedValues, setSelectedValues] = useState<string[]>(
+    Array.isArray(value) ? value : value ? [value] : []
+  );
 
-  const handleChange = (value: string) => {
+  const handleSingleChange = (value: string) => {
     const event = {
       target: {
         value: value,
@@ -546,8 +558,34 @@ export const RadioInput = ({
         type: "radio",
       },
     } as ChangeEvent<HTMLInputElement>;
-    setSelectedValue(value);
-    onChange(event);
+    setSelectedValues([value]); // Only one value for single selection
+    onChange(event); // Pass the event to the onChange handler
+  };
+
+  const handleMultipleChange = (value: string) => {
+    const newSelectedValues = selectedValues.includes(value)
+      ? selectedValues.filter((selected) => selected !== value) // Deselect if already selected
+      : [...selectedValues, value]; // Add to selected values
+
+    setSelectedValues(newSelectedValues); // Update the state with selected values
+
+    // Trigger the onChange event without constructing a full ChangeEvent object
+    const event = {
+      target: {
+        value: newSelectedValues,
+        name,
+        type: "checkbox", // Use "checkbox" for multi-selection
+      },
+    } as unknown as ChangeEvent<HTMLInputElement>;
+    onChange(event); // Pass the event to the onChange handler
+  };
+
+  const handleChange = (value: string) => {
+    if (selectMultiple) {
+      handleMultipleChange(value);
+    } else {
+      handleSingleChange(value);
+    }
   };
 
   return (
@@ -561,26 +599,28 @@ export const RadioInput = ({
           <label
             key={option.value}
             htmlFor={`${name}-${index}`}
-            className={`flex items-center justify-center bg-white w-max max-w-[400px] h-[40px] px-[1em] py-[0.2em] 
+            className={`flex items-center justify-center bg-white w-max max-w-[400px]  
             gap-3 rounded-3xl text-base text-center text-textGrey font-semibold transition-all
-            border border-strokeGreyTwo cursor-pointer 
+            border border-strokeGreyTwo cursor-pointer ${
+              className ? className : "h-[35px] px-[1em] py-[0.2em]"
+            }
             ${
-              selectedValue === option.value
+              selectedValues.includes(option.value)
                 ? `${radioSelectedStyle} bg-primaryGradient text-white`
                 : ""
             }`}
           >
             <input
-              type="radio"
+              type={selectMultiple ? "checkbox" : "radio"}
               id={`${name}-${index}`}
               name={name}
               value={option.value}
               onChange={() => handleChange(option.value)}
-              required={required}
+              required={required && !selectMultiple} // Required only for single selection
               className="hidden"
             />
             <span
-              className="flex items-center justify-center"
+              className={`flex items-center justify-center ${radioLabelStyle}`}
               style={{ backgroundColor: option.bgColour, color: option.color }}
             >
               {option.label}

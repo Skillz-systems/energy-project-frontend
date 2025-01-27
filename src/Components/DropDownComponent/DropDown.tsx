@@ -17,6 +17,7 @@ export type DropDownType = {
   isDate?: boolean;
   onDateClick?: (date: string) => void;
   showCustomButton?: boolean;
+  disabled?: boolean[];
   defaultStyle?: boolean;
   cardData?: any;
 };
@@ -35,6 +36,7 @@ export const DropDown = (props: DropDownType) => {
     isDate,
     onDateClick,
     showCustomButton = false,
+    disabled = items?.map(() => false) || [],
     defaultStyle,
     cardData,
   } = props;
@@ -48,11 +50,12 @@ export const DropDown = (props: DropDownType) => {
   };
 
   const handleOptionClick = (index: number, cardData?: any) => {
+    // Prevent clicks if the item is disabled
+    if (disabled[index]) return;
     if (onClickLink) onClickLink(index, cardData);
     setIsOpen(false);
   };
 
-  // Handler for date selection
   const handleDateChange = (date: Date | null) => {
     if (date && onDateClick) {
       setSelectedDate(date);
@@ -111,18 +114,20 @@ export const DropDown = (props: DropDownType) => {
             {items?.map((item, index) => (
               <li
                 key={index}
-                className={`flex items-center justify-between h-max px-2 py-1 text-xs rounded-full cursor-pointer border-[0.4px] border-transparent
+                className={`flex items-center justify-between h-max px-2 py-1 text-xs rounded-full border-[0.4px] border-transparent
                 ${
-                  index === showIcon && !defaultStyle
-                    ? "bg-paleLightBlue text-textBlack"
-                    : "hover:bg-gray-100 text-textDarkGrey hover:border-strokeGreyTwo"
+                  disabled[index]
+                    ? "cursor-not-allowed text-gray-400 bg-gray-100"
+                    : index === showIcon && !defaultStyle
+                    ? "cursor-pointer bg-paleLightBlue text-textBlack"
+                    : "cursor-pointer hover:bg-gray-100 text-textDarkGrey hover:border-strokeGreyTwo"
                 }`}
                 onClick={() => handleOptionClick(index, cardData)}
-                onMouseEnter={() => setShowIcon(index)}
+                onMouseEnter={() => !disabled[index] && setShowIcon(index)}
                 onMouseLeave={() => setShowIcon(null)}
               >
                 {item}
-                {index === showIcon && !defaultStyle ? (
+                {index === showIcon && !defaultStyle && !disabled[index] ? (
                   <svg
                     width="16"
                     height="16"

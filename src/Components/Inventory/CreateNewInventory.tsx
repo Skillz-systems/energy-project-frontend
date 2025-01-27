@@ -335,11 +335,10 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
         noValidate
       >
         <div
-          className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${
-            isFormFilled
+          className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${isFormFilled
               ? "bg-paleCreamGradientLeft"
               : "bg-paleGrayGradientLeft"
-          }`}
+            }`}
         >
           <h2
             style={{ textShadow: "1px 1px grey" }}
@@ -597,8 +596,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
             type="submit"
             loading={loading}
             variant={isFormFilled ? "gradient" : "gray"}
-            // disabled={!isFormFilled}
-            disabled={false}
+            disabled={!isFormFilled}
           />
         </div>
       </form>

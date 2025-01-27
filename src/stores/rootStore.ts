@@ -1,11 +1,10 @@
-
-import { CustomerPageStore } from "./customerStore";
 import { ProductStore } from "./ProductStore";
+import { ContractStore } from "./ContractStore";
 
 function createRootStore() {
   const rootStore = {
     productStore: ProductStore,
-    customerPageStore: CustomerPageStore
+    contractStore: ContractStore,
   };
 
   return rootStore;

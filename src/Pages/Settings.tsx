@@ -137,15 +137,13 @@ const Settings = () => {
           </section>F
         </div>
       </PageLayout>
-      {isOpen && (
-        <CreateNewUserModal
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-          rolesList={rolesList}
-          allUsersRefresh={fetchAllRoles.mutate}
-          allRolesError={fetchAllRoles.error}
-        />
-      )}
+      <CreateNewUserModal
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        rolesList={rolesList}
+        allUsersRefresh={fetchAllRoles.mutate}
+        allRolesError={fetchAllRoles.error}
+      />
     </>
   );
 };
