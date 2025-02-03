@@ -22,7 +22,9 @@ const Contracts = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [_contractsData, setContractsData] = useState<any>(null);
-  const [, setContractsFilter] = useState<string>("");
+  const [contractsFilter, setContractsFilter] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   //   const {
   //     data: transactionsData,
   //     isLoading: transactionsLoading,
@@ -35,6 +37,17 @@ const Contracts = () => {
   //     60000
   //   );
   //   const fetchTransactionsStats = useGetRequest("/v1/transactions/stats", true);
+
+  const paginationInfo = () => {
+    const total = _contractsData.length;
+    return {
+      total,
+      currentPage,
+      entriesPerPage,
+      setCurrentPage,
+      setEntriesPerPage,
+    };
+  };
 
   useEffect(() => {
     switch (location.pathname) {
@@ -53,10 +66,6 @@ const Contracts = () => {
       case "/contracts/cancelled":
         setContractsFilter("cancelled");
         setContractsData(generateRandomContracts(25));
-        break;
-      case "/contracts/templates":
-        setContractsFilter("templates");
-        setContractsData(generateRandomContracts(5));
         break;
       default:
         setContractsFilter("");
@@ -85,11 +94,6 @@ const Contracts = () => {
       link: "/contracts/cancelled",
       count: 25,
     },
-    {
-      title: "Templates",
-      link: "/contracts/templates",
-      count: 5,
-    },
   ];
 
   const dropDownList = {
@@ -109,13 +113,7 @@ const Contracts = () => {
     showCustomButton: true,
   };
 
-  const contractsPaths = [
-    "all",
-    "signed",
-    "unsigned",
-    "cancelled",
-    "templates",
-  ];
+  const contractsPaths = ["all", "signed", "unsigned", "cancelled"];
 
   return (
     <>
@@ -130,13 +128,6 @@ const Contracts = () => {
               value={2240}
             />
             <TitlePill
-              icon={gradientcontract}
-              iconBgColor="bg-[#FDEEC2]"
-              topText="All"
-              bottomText="TEMPLATES"
-              value={4}
-            />
-            <TitlePill
               icon={cancelled}
               iconBgColor="bg-[#FFDBDE]"
               topText="Cancelled"
@@ -145,13 +136,13 @@ const Contracts = () => {
             />
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
-            <ActionButton
+            {/* <ActionButton
               label="New Contract"
               icon={<img src={circleAction} />}
               onClick={() => {
                 setIsOpen(true);
               }}
-            />
+            /> */}
             <DropDown {...dropDownList} />
           </div>
         </section>
@@ -189,6 +180,7 @@ const Contracts = () => {
                           ],
                           isNetworkError: false,
                         }}
+                        paginationInfo={paginationInfo}
                       />
                     }
                   />

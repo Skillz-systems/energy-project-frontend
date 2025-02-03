@@ -13,12 +13,13 @@ import { TabNamesType } from "../Inventory/InventoryDetailModal";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import { ProductStore } from "@/stores/ProductStore";
 
-type ListDataType = {
+export type ListDataType = {
   productId: string;
   productImage: string;
   productTag: string;
   productName: string;
-  productPrice: number;
+  productPrice: string;
+  totalRemainingQuantities: number;
 };
 
 type ProductInventoryType = {
@@ -31,46 +32,42 @@ type InventoryModalProps = {
   setIsInventoryOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-type InventoryCategoryType = {
-  id: string;
-  name: string;
-  parentId: string | null;
-  type: "INVENTORY" | "PRODUCT";
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type BatchType = {
-  id: string;
-  name: string;
-  dateOfManufacture: string | null;
-  sku: string;
-  image: string;
-  batchNumber: number;
-  costOfItem: number;
-  price: number;
-  numberOfStock: number;
-  remainingQuantity: number;
-  status: string;
-  class: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-  inventoryId: string;
-};
-
-type AllInventoryType = {
+type InventoryItem = {
   id: string;
   name: string;
   manufacturerName: string;
+  sku: string;
+  image: string;
+  dateOfManufacture: null | string;
+  status: "IN_STOCK" | string;
+  class: "REGULAR" | string;
   inventoryCategoryId: string;
   inventorySubCategoryId: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-  batches: BatchType[];
-  inventoryCategory: InventoryCategoryType;
-  inventorySubCategory: InventoryCategoryType;
+  inventoryCategory: {
+    id: string;
+    name: string;
+    parentId: null | string;
+    type: string;
+  };
+  inventorySubCategory: {
+    id: string;
+    name: string;
+    parentId: null | string;
+    type: string;
+  };
+  batches: {
+    id: string;
+    costOfItem: number;
+    price: number;
+    batchNumber: number;
+    numberOfStock: number;
+    remainingQuantity: number;
+    inventoryId: string;
+  }[];
+  salePrice: string;
+  inventoryValue: number;
+  totalRemainingQuantities: number;
+  totalInitialQuantities: number;
 };
 
 const SelectInventoryModal = observer(
@@ -86,7 +83,7 @@ const SelectInventoryModal = observer(
     const [_categoryId, setCategoryId] = useState<string>("");
 
     const fetchAllInventoryCategories = useGetRequest(
-      "/v1/inventory/categories",
+      "/v1/inventory/categories/all",
       false
     );
 
@@ -126,12 +123,13 @@ const SelectInventoryModal = observer(
     );
 
     const generateListDataEntries = (data: any): ListDataType[] => {
-      return data?.inventories.map((inventory: AllInventoryType) => ({
-        productId: inventory.batches[0]?.id,
-        productImage: inventory.batches[0]?.image || "",
-        productTag: inventory.inventoryCategory?.name,
-        productName: inventory.name,
-        productPrice: inventory.batches[0]?.price || 0,
+      return data?.inventories?.map((inventory: InventoryItem) => ({
+        productId: inventory?.id,
+        productImage: inventory?.image || "",
+        productTag: inventory?.inventoryCategory?.name,
+        productName: inventory?.name,
+        productPrice: inventory?.salePrice || 0,
+        totalRemainingQuantities: inventory?.totalRemainingQuantities || 0,
       }));
     };
 
@@ -325,6 +323,7 @@ const SelectInventoryModal = observer(
                         productTag={data.productTag}
                         productName={data.productName}
                         productPrice={data.productPrice}
+                        totalRemainingQuantities={data.totalRemainingQuantities}
                         onSelectProduct={(productInfo) => {
                           if (productInfo)
                             rootStore.productStore.addProduct(productInfo);

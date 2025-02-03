@@ -1,32 +1,32 @@
 import { useState } from "react";
-import { Table } from "../TableComponent/Table";
+import { PaginationType, Table } from "../TableComponent/Table";
 import { CardComponent } from "../CardComponents/CardComponent";
 import AgentsModal from "./AgentsModal";
 import { ApiErrorStatesType, useApiCall } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
 import { ErrorComponent } from "@/Pages/ErrorPage";
 
-type UserType = {
+type User = {
   id: string;
   firstname: string;
   lastname: string;
-  username: string | null;
+  username: string;
   password: string;
   email: string;
-  phone: string | null;
+  phone: string;
   location: string;
-  addressType: "HOME" | "WORK";
-  staffId: string | null;
-  longitude: string;
-  latitude: string;
+  addressType: null | string;
+  staffId: null | string;
+  longitude: null | number;
+  latitude: null | number;
   emailVerified: boolean;
   isBlocked: boolean;
-  status: string;
+  status: "active" | string;
   roleId: string;
   createdAt: string;
   updatedAt: string;
-  deletedAt: string | null;
-  lastLogin: string | null;
+  deletedAt: null | string;
+  lastLogin: null | string;
 };
 
 type AgentType = {
@@ -35,8 +35,8 @@ type AgentType = {
   userId: string;
   createdAt: string;
   updatedAt: string;
-  deletedAt: string | null;
-  user: UserType;
+  deletedAt: null | string;
+  user: User;
 };
 
 interface AgentEntries {
@@ -53,7 +53,7 @@ interface AgentEntries {
 }
 
 const generateAgentEntries = (data: any): AgentEntries[] => {
-  const entries: AgentEntries[] = data?.data?.map((agent: AgentType) => {
+  const entries: AgentEntries[] = data?.agents?.map((agent: AgentType) => {
     return {
       id: agent?.id,
       datetime: agent?.createdAt,
@@ -76,12 +76,14 @@ const AgentsTable = ({
   refreshTable,
   error,
   errorData,
+  paginationInfo,
 }: {
   agentData: any;
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
   error: any;
   errorData: ApiErrorStatesType;
+  paginationInfo: PaginationType;
 }) => {
   const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -244,13 +246,7 @@ const AgentsTable = ({
               setQueryData(null);
             }}
             queryValue={isSearchQuery ? queryValue : ""}
-            // pagination={{
-            //   page: pagination.page,
-            //   limit: pagination.limit,
-            //   total: pagination.total,
-            //   lastPage: pagination.lastPage,
-            //   onPageChange: (page) => fetchAgents(page)
-            // }}
+            paginationInfo={paginationInfo}
           />
           {agentId && (
             <AgentsModal

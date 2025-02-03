@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { KeyedMutator } from "swr";
-import { Table } from "../TableComponent/Table";
+import { PaginationType, Table } from "../TableComponent/Table";
 import { GoDotFill } from "react-icons/go";
 import clock from "../../assets/table/clock.svg";
 import CustomerModal from "./CustomerModal";
@@ -95,12 +95,14 @@ const CustomerTable = ({
   refreshTable,
   error,
   errorData,
+  paginationInfo,
 }: {
   customerData: any;
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
   error: any;
   errorData: ApiErrorStatesType;
+  paginationInfo: PaginationType;
 }) => {
   const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -293,6 +295,7 @@ const CustomerTable = ({
               setQueryData(null);
             }}
             queryValue={isSearchQuery ? queryValue : ""}
+            paginationInfo={paginationInfo}
           />
           {customerID && (
             <CustomerModal

@@ -23,8 +23,25 @@ const Users = lazy(() => import("../Components/Settings/Users"));
 
 const Settings = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   const fetchAllRoles = useGetRequest("/v1/roles", true, 60000);
-  const fetchAllUsers = useGetRequest("/v1/users", true, 60000);
+  const fetchAllUsers = useGetRequest(
+    `/v1/users?page=${currentPage}&limit=${entriesPerPage}`,
+    true,
+    60000
+  );
+
+  const paginationInfo = () => {
+    const total = fetchAllUsers?.data?.total;
+    return {
+      total,
+      currentPage,
+      entriesPerPage,
+      setCurrentPage,
+      setEntriesPerPage,
+    };
+  };
 
   const userlocation = useLocation();
   const navigationList = [
@@ -129,6 +146,8 @@ const Settings = () => {
                       refreshTable={fetchAllUsers.mutate}
                       error={fetchAllUsers.error}
                       errorData={fetchAllUsers.errorStates}
+                      paginationInfo={paginationInfo}
+
                     />
                   }
                 />

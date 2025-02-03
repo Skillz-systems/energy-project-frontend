@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ApiErrorStatesType, useApiCall } from "@/utils/useApiCall";
 import { KeyedMutator } from "swr";
 import { ErrorComponent } from "@/Pages/ErrorPage";
-import { Table } from "../TableComponent/Table";
+import { PaginationType, Table } from "../TableComponent/Table";
 import gradientcontract from "../../assets/contracts/gradientcontract.svg";
 import { ProductTag } from "../CardComponents/CardComponent";
 import roletwo from "../../assets/table/roletwo.svg";
@@ -34,12 +34,14 @@ const ContractsTable = ({
   refreshTable,
   error,
   errorData,
+  paginationInfo,
 }: {
   contractsData: any;
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
   error: any;
   errorData: ApiErrorStatesType;
+  paginationInfo: PaginationType;
 }) => {
   const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -115,7 +117,28 @@ const ContractsTable = ({
     } else return generateContractEntries(contractsData);
   };
 
-  console.log(contractID);
+  const contractProducts = [
+    {
+      name: "Lemi 10W",
+      components: [
+        "(1) Solar Unit",
+        "(1) Solar Panel",
+        "(2) LED Bulbs",
+        "Phone Charging Cables",
+      ],
+    },
+    {
+      name: "Lemi 30W",
+      components: [
+        "(1) Solar Unit",
+        "(1) Solar Panel",
+        "(1) Fan",
+        "(3) LED Bulbs",
+        "Phone Charging Cables",
+      ],
+    },
+  ];
+
   return (
     <>
       {!error ? (
@@ -133,10 +156,8 @@ const ContractsTable = ({
                   key={index}
                   {...item}
                   handleContractClick={() => {
-                    if (item.contractSigned) {
-                      setIsOpen(true);
-                      setContractID(index.toLocaleString());
-                    }
+                    setIsOpen(true);
+                    setContractID(index.toLocaleString());
                   }}
                 />
               ));
@@ -146,11 +167,12 @@ const ContractsTable = ({
               setQueryData(null);
             }}
             queryValue={isSearchQuery ? queryValue : ""}
+            paginationInfo={paginationInfo}
           />
           {isOpen && contractID && (
             <ContractModal
               setIsOpen={setIsOpen}
-              contractDocData={{ contractID }}
+              contractDocData={{ contractProducts }}
             />
           )}
         </div>
@@ -173,17 +195,9 @@ export const ContractCardComponent = (
 ) => {
   return (
     <div
-      className={`relative flex flex-col justify-between gap-2 w-[32%] min-w-[204px] min-h-[220px] p-4 bg-white border-[0.6px] border-strokeGreyThree rounded-xl shadow-sm  ${
-        props.contractSigned
-          ? "group cursor-pointer transition-all hover:bg-[#F6F8FA]"
-          : ""
-      } `}
+      className={`relative flex flex-col justify-between gap-2 w-[32%] min-w-[204px] min-h-[220px] p-4 bg-white border-[0.6px] border-strokeGreyThree rounded-xl shadow-sm group cursor-pointer transition-all hover:bg-[#F6F8FA]`}
       onClick={props.handleContractClick}
-      title={
-        props.contractSigned
-          ? "Open Contract Document"
-          : "No Signed Contract Document"
-      }
+      title={"Open Contract Document"}
     >
       <div className="flex items-center justify-between gap-2 w-full">
         <div
