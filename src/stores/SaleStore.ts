@@ -189,6 +189,12 @@ const saleStore = types
         self.products.splice(index, 1);
       }
     },
+    currentProductUnits(productId?: string) {
+      const currentUnits = self.products.find(
+        (p) => p.productId === productId
+      )?.productUnits;
+      return currentUnits;
+    },
     emptyProducts() {
       self.products.clear();
     },

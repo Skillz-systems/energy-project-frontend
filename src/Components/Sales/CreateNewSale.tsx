@@ -111,6 +111,12 @@ const CreateNewSale = observer(
     //   toJS(SaleStore.devices)
     // );
 
+    // const saveSaleItems = () => {
+    //   SaleStore.products.forEach((product) => {
+    //     SaleStore.addSaleItem(product.id); // Assuming each product has an `id` field
+    //   });
+    // };
+
     return (
       <>
         <Modal

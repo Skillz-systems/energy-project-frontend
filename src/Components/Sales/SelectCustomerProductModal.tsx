@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import type React from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Modal } from "../ModalComponent/Modal";
 import { useGetRequest } from "@/utils/useApiCall";
 import { observer } from "mobx-react-lite";
 import { SaleStore } from "@/stores/SaleStore";
-import { TabNamesType } from "../Inventory/InventoryDetailModal";
-import { ListDataType } from "../Products/SelectInventoryModal";
+import type { TabNamesType } from "../Inventory/InventoryDetailModal";
+import type { ListDataType } from "../Products/SelectInventoryModal";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import { TableSearch } from "../TableSearchComponent/TableSearch";
 import searchIcon from "../../assets/search.svg";
@@ -174,7 +175,7 @@ const SelectCustomerProductModal = observer(
       return customerData || [];
     }, [customerData]);
 
-    const getTabName =
+    const activeTabName =
       tabNames.find((tab) => tab.key === tabContent)?.name || "";
 
     const handlePageChange = (page: number) => setCurrentPage(page);
@@ -189,11 +190,11 @@ const SelectCustomerProductModal = observer(
     const handleTabSelect = useCallback(
       (key: string) => {
         setTabContent(key);
-        const selectedTab = tabNames.find(
-          (tab: { key: string }) => tab.key === key
-        );
-        setProductCategoryId(selectedTab?.id || "");
-        setCurrentPage(1);
+        const selectedTab = tabNames.find((tab) => tab.key === key);
+        if (selectedTab) {
+          setProductCategoryId(selectedTab.id);
+          setCurrentPage(1);
+        }
       },
       [tabNames]
     );
@@ -235,6 +236,7 @@ const SelectCustomerProductModal = observer(
                   count: null,
                 }))}
                 onTabSelect={handleTabSelect}
+                activeTabName={activeTabName}
               />
             ) : null}
             <div className="flex items-center justify-between w-full">
@@ -243,7 +245,7 @@ const SelectCustomerProductModal = observer(
                 itemsPerPage={entriesPerPage}
                 currentPage={currentPage}
                 onPageChange={handlePageChange}
-                label={getTabName}
+                label={activeTabName}
               />
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center bg-[#F9F9F9] px-2 text-textDarkGrey w-max gap-1 h-[24px] border-[0.6px] border-strokeGreyThree rounded-full">
@@ -277,7 +279,7 @@ const SelectCustomerProductModal = observer(
                 queryValue={queryValue}
                 setQueryValue={setQueryValue}
                 refreshTable={fetchedData.mutate}
-                placeholder={`Search ${getTabName} here`}
+                placeholder={`Search ${activeTabName} here`}
                 containerClass="w-full"
                 inputContainerStyle="w-full"
                 inputClass="w-full h-[32px] pl-3 bg-[#F9F9F9]"
@@ -292,7 +294,7 @@ const SelectCustomerProductModal = observer(
                 error={fetchProductCategoryById?.error}
                 errorStates={fetchProductCategoryById?.errorStates}
                 refreshData={fetchProductCategoryById?.mutate}
-                errorMessage={`Failed to fetch products list for "${getTabName}".`}
+                errorMessage={`Failed to fetch products list for "${activeTabName}".`}
               >
                 <div
                   className={`flex flex-wrap ${
@@ -312,11 +314,13 @@ const SelectCustomerProductModal = observer(
                           productTag={data.productTag}
                           productName={data.productName}
                           productPrice={data.productPrice}
+                          productUnits={SaleStore.currentProductUnits(
+                            data.productId
+                          )}
                           totalRemainingQuantities={
                             data.totalRemainingQuantities
                           }
                           onSelectProduct={(productInfo) => {
-                            console.log("info:", productInfo);
                             if (productInfo) SaleStore.addProduct(productInfo);
                           }}
                           onRemoveProduct={(productId) =>

@@ -218,6 +218,7 @@ interface QuantitySelectorProps {
   onValueChange: (value: number) => void;
   isSelected: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
+  initialQuantity?: number;
 }
 
 export default function QuantitySelector({
@@ -225,14 +226,13 @@ export default function QuantitySelector({
   onValueChange,
   isSelected,
   onClick,
+  initialQuantity = 1,
 }: QuantitySelectorProps) {
-  const [quantity, setQuantity] = useState<number>(1);
+  const [quantity, setQuantity] = useState<number>(initialQuantity);
 
-  // useEffect(() => {
-  //   if (!isSelected) {
-  //     onValueChange(1);
-  //   }
-  // }, [isSelected, quantity, onValueChange]);
+  useEffect(() => {
+    setQuantity(initialQuantity);
+  }, [initialQuantity]);
 
   const updateQuantity = (adjustment: number) => {
     const newValue = quantity + adjustment;
@@ -352,7 +352,9 @@ export const CardComponent = ({
   readOnly = false,
 }: CardComponentProps) => {
   const inventoryMobile = useBreakpoint("max", 350);
-  const [_productUnits, setProductUnits] = useState<number | any>(productUnits);
+  const [_productUnits, setProductUnits] = useState<number | any>(
+    productUnits || 1
+  );
   const [_selected, setSelected] = useState<boolean>(
     isProductSelected || false
   );
@@ -366,7 +368,11 @@ export const CardComponent = ({
     productPrice,
   };
 
-  useEffect(() => {}, [_productUnits]);
+  useEffect(() => {
+    if (productUnits && productUnits > 1) {
+      setProductUnits(productUnits);
+    }
+  }, [productUnits]);
 
   const updatedProductInfo = {
     ...productInfo,
@@ -754,6 +760,7 @@ export const CardComponent = ({
             }}
             isSelected={_selected}
             onClick={(e) => e.stopPropagation()}
+            initialQuantity={_productUnits}
           />
         ) : (
           <DropDown {...dropDownList} cardData={productInfo} />

@@ -1,11 +1,6 @@
 import React from "react";
-import { formatNumberWithCommas } from "@/utils/helpers";
 import { Tag } from "../Products/ProductDetails";
-import {
-  NairaSymbol,
-  ProductTag,
-  SimpleTag,
-} from "../CardComponents/CardComponent";
+import { ProductTag, SimpleTag } from "../CardComponents/CardComponent";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import { ExtraInfoType } from "./CreateNewSale";
 import { SaleStore } from "@/stores/SaleStore";
@@ -13,27 +8,14 @@ import { SaleStore } from "@/stores/SaleStore";
 const ProductDetailRow = ({
   label,
   value,
-  isPrice = false,
 }: {
   label: string;
   value: string | number;
-  isPrice?: boolean;
 }) => (
   <div className="flex items-center justify-between w-full">
     <Tag name={label} />
-    <p
-      className={`text-xs font-bold text-textDarkGrey ${
-        isPrice ? "flex items-center gap-0.5" : ""
-      }`}
-    >
-      {isPrice && <NairaSymbol color="#828DA9" />}
-      {isPrice ? (
-        formatNumberWithCommas(value)
-      ) : label === "Product Category" ? (
-        <ProductTag productTag={value} />
-      ) : (
-        value
-      )}
+    <p className="text-xs font-bold text-textDarkGrey">
+      {label === "Product Category" ? <ProductTag productTag={value} /> : value}
     </p>
   </div>
 );
@@ -106,7 +88,7 @@ const ProductSaleDisplay = ({
       <ProductDetailRow label="Product Category" value={productTag} />
       <ProductDetailRow label="Product Name" value={productName} />
       <ProductDetailRow label="Product Units" value={productUnits} />
-      <ProductDetailRow label="Product Price" value={productPrice} isPrice />
+      <ProductDetailRow label="Product Price" value={productPrice} />
 
       <div
         className={`flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree ${
