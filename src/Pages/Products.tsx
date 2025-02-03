@@ -138,7 +138,7 @@ const Products = () => {
             <TitlePill
               icon={productgreen}
               iconBgColor="bg-[#E3FAD6]"
-              topText="Instalmental"
+              topText="Installment"
               bottomText="PRODUCTS"
               value={0}
             />

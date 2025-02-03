@@ -72,6 +72,19 @@ const InventoryDetailModal = ({
   );
   const [displayInput, setDisplayInput] = useState<boolean>(false);
   const [tabContent, setTabContent] = useState<string>("details");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
+
+  const paginationInfo = () => {
+    const total = generateRandomInventoryHistoryEntries(50).length;
+    return {
+      total,
+      currentPage,
+      entriesPerPage,
+      setCurrentPage,
+      setEntriesPerPage,
+    };
+  };
 
   const getInventoryData = (data: InventoryData) => {
     const entries = {
@@ -231,6 +244,7 @@ const InventoryDetailModal = ({
           ) : tabContent === "history" ? (
             <InventoryHistory
               historyData={generateRandomInventoryHistoryEntries(50)}
+              paginationInfo={paginationInfo}
             />
           ) : null}
         </div>

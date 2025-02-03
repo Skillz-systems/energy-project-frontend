@@ -4,7 +4,9 @@ import { z } from "zod";
 import { SaleStore } from "@/stores/SaleStore";
 
 const formSchema = z.object({
-  paymentMode: z.string().trim().min(1, "Payment mode is required"),
+  paymentMode: z.enum(["INSTALLMENT", "ONE_OFF"], {
+    required_error: "Payment mode is required",
+  }),
   installmentDuration: z.number().nullable(),
   installmentStartingPrice: z.number().nullable(),
   address: z.string().trim().min(1, "Installation address is required"),
@@ -13,8 +15,8 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-const defaultFormData = {
-  paymentMode: "",
+const defaultFormData: FormData = {
+  paymentMode: "ONE_OFF",
   installmentDuration: "" as unknown as number,
   installmentStartingPrice: "" as unknown as number,
   address: "",
@@ -92,8 +94,8 @@ const ParametersForm = ({
       <SelectInput
         label="Payment Mode"
         options={[
-          { label: "Single Deposit", value: "Single Deposit" },
-          { label: "Instalmental", value: "Instalmental" },
+          { label: "Single Deposit", value: "ONE_OFF" },
+          { label: "Installment", value: "INSTALLMENT" },
         ]}
         value={formData.paymentMode}
         onChange={(selectedValue) =>

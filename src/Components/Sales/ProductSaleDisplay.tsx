@@ -38,7 +38,7 @@ const ProductDetailRow = ({
   </div>
 );
 
-const ExtraInfoSection = ({
+export const ExtraInfoSection = ({
   label,
   onClear,
 }: {
@@ -74,23 +74,17 @@ const ProductSaleDisplay = ({
 }: {
   productData: {
     productId: string;
-    productCategory: string;
     productName: string;
     productUnits: number;
-    productPrice: number;
+    productPrice: string;
     productImage: string;
     productTag: string;
   };
   onRemoveProduct: (productId: string) => void;
   setExtraInfoModal: React.Dispatch<React.SetStateAction<ExtraInfoType>>;
 }) => {
-  const {
-    productId,
-    productCategory,
-    productName,
-    productUnits,
-    productPrice,
-  } = productData;
+  const { productTag, productId, productName, productUnits, productPrice } =
+    productData;
 
   const doesParamsExist = Boolean(
     SaleStore.parameters.find((p) => p.currentProductId === productId)
@@ -109,7 +103,7 @@ const ProductSaleDisplay = ({
 
   return (
     <div className="flex flex-col gap-2 w-full p-2.5 border-[0.6px] border-strokeGreyThree rounded-[20px]">
-      <ProductDetailRow label="Product Category" value={productCategory} />
+      <ProductDetailRow label="Product Category" value={productTag} />
       <ProductDetailRow label="Product Name" value={productName} />
       <ProductDetailRow label="Product Units" value={productUnits} />
       <ProductDetailRow label="Product Price" value={productPrice} isPrice />

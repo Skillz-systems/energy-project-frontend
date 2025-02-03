@@ -228,12 +228,11 @@ export default function QuantitySelector({
 }: QuantitySelectorProps) {
   const [quantity, setQuantity] = useState<number>(1);
 
-  useEffect(() => {
-    if (!isSelected) {
-      setQuantity(1);
-      onValueChange(1);
-    }
-  }, [isSelected, quantity, onValueChange]);
+  // useEffect(() => {
+  //   if (!isSelected) {
+  //     onValueChange(1);
+  //   }
+  // }, [isSelected, quantity, onValueChange]);
 
   const updateQuantity = (adjustment: number) => {
     const newValue = quantity + adjustment;
@@ -747,6 +746,11 @@ export const CardComponent = ({
             totalRemainingQuantities={totalRemainingQuantities}
             onValueChange={(value) => {
               setProductUnits(value);
+              const updatedProductInfo = {
+                ...productInfo,
+                productUnits: value, // Include the updated quantity
+              };
+              onSelectProduct?.(updatedProductInfo); // Call onSelectProduct with the updated values
             }}
             isSelected={_selected}
             onClick={(e) => e.stopPropagation()}

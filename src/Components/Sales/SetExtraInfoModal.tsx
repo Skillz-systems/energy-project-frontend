@@ -3,9 +3,12 @@ import curvedlines from "@/assets/sales/curvedlines.png";
 import skewedsettings from "@/assets/sales/skewedsettings.svg";
 import { ExtraInfoType } from "./CreateNewSale";
 import { MdCancel } from "react-icons/md";
-import ParametersForm from "../Products/ParametersForm";
-import MiscellaneousForm from "../Products/MiscellaneousForm";
+import ParametersForm from "./ParametersForm";
+import MiscellaneousForm from "./MiscellaneousForm";
 import UploadDevicesForm from "./UploadDevicesForm";
+import IdentificationForm from "./IdentificationForm";
+import NextOfKinForm from "./NextOfKin";
+import GuarantorForm from "./GuarantorForm";
 
 const SetExtraInfoModal = ({
   extraInfoModal,
@@ -21,7 +24,13 @@ const SetExtraInfoModal = ({
       ? "Please select parameters for this product."
       : extraInfoModal === "miscellaneous"
       ? "Type the title of the Miscellaneous on the left and the Amount on the right. You can add another cost by clicking the add button bellow."
-      : "Link Device(s)";
+      : extraInfoModal === "devices"
+      ? "Link Device(s)"
+      : extraInfoModal === "identification"
+      ? "Fill Identification Details"
+      : extraInfoModal === "nextOfKin"
+      ? "Fill Next of Kin Details"
+      : "Fill Guarantor Details";
 
   const [description, setDescription] = useState<string>(descriptionText);
   const handleClose = () => {
@@ -52,6 +61,12 @@ const SetExtraInfoModal = ({
             currentProductId={currentProductId}
           />
         );
+      case "identification":
+        return <IdentificationForm handleClose={handleClose} />;
+      case "nextOfKin":
+        return <NextOfKinForm handleClose={handleClose} />;
+      case "guarantor":
+        return <GuarantorForm handleClose={handleClose} />;
       default:
         return null;
     }

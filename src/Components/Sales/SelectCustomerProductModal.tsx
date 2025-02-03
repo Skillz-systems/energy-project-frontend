@@ -33,6 +33,30 @@ interface Customer {
   deletedAt: string | null;
 }
 
+const generateListDataEntries = (data: any): ListDataType[] => {
+  return data?.updatedResults.map((product: any) => ({
+    productId: product?.id,
+    productImage: product?.image || "",
+    productTag: product?.category?.name,
+    productName: product?.name,
+    productPrice: product?.priceRange || "",
+    totalRemainingQuantities:
+      product?.inventories[0]?.inventory?.batches[0]?.remainingQuantity,
+  }));
+};
+
+const generateCustomerListDataEntries = (data: any): any[] => {
+  return data?.customers.map((item: Customer, index: number) => ({
+    sn: index + 1,
+    customerId: item?.id || "",
+    customerName: `${item?.firstname} ${item?.lastname}`,
+    firstname: item?.firstname,
+    lastname: item?.lastname,
+    location: item?.location || "",
+    email: item?.email,
+  }));
+};
+
 const SelectCustomerProductModal = observer(
   ({
     isModalOpen,
@@ -51,13 +75,21 @@ const SelectCustomerProductModal = observer(
     const [entriesPerPage] = useState<number>(12);
     const [_filterValue, setFilterValue] = useState<string>("");
 
-    const fetchAllCustomers = useGetRequest("/v1/customers", false);
+    const fetchAllCustomers = useGetRequest(
+      `/v1/customers?page=${currentPage}&limit=${entriesPerPage}${
+        queryValue && `&search=${queryValue}`
+      }`,
+      false
+    );
     const fetchAllProductCategories = useGetRequest(
       "/v1/products/categories/all",
       false
     );
     const fetchProductCategoryById = useGetRequest(
-      `/v1/products?categoryId=${_filterValue}`
+      `/v1/products?page=${currentPage}&limit=${entriesPerPage}&categoryId=${_filterValue}${
+        queryValue && `&search=${queryValue}`
+      }`,
+      false
     );
     const fetchedData =
       modalType === "customer" ? fetchAllCustomers : fetchProductCategoryById;
@@ -99,28 +131,16 @@ const SelectCustomerProductModal = observer(
       [fetchProductCategoryById.data]
     );
 
-    const generateListDataEntries = (data: any): ListDataType[] => {
-      return data?.updatedResults.map((product: any) => ({
-        productId: product?.id,
-        productImage: product?.image || "",
-        productTag: product?.category?.name,
-        productName: product?.name,
-        productPrice: product?.priceRange || "",
-      }));
-    };
+    // // Initialize tabContent with the first tab's key when modal opens
+    // useEffect(() => {
+    //   if (modalType === "product" && tabNames.length > 0) {
+    //     const firstTabKey = fetchAllProductCategories.data[0].name;
+    //     setTabContent(firstTabKey);
+    //     setProductCategoryId(fetchAllProductCategories.data[0].id);
+    //   }
+    // }, [fetchAllProductCategories.data, modalType, tabNames]);
 
-    const generateCustomerListDataEntries = (data: any): any[] => {
-      return data?.customers.map((item: Customer, index: number) => ({
-        sn: index + 1,
-        customerId: item?.id || "",
-        customerName: `${item?.firstname} ${item?.lastname}`,
-        firstname: item?.firstname,
-        lastname: item?.lastname,
-        location: item?.location || "",
-        email: item?.email,
-      }));
-    };
-
+    // Fetch data for the selected tab
     useEffect(() => {
       const fetchData = async () => {
         if (productCategoryId) {
@@ -143,49 +163,16 @@ const SelectCustomerProductModal = observer(
     }, [dynamicListData, tabContent]);
 
     const paginatedData: [] = useMemo(() => {
-      const startIndex = (currentPage - 1) * entriesPerPage;
-      const endIndex = startIndex + entriesPerPage;
-      const filteredData = currentTabData.filter((item: any) => {
-        const queryWords = queryValue.toLowerCase().split(/\s+/); // Split queryValue into words
-        const productName = item.productName.toLowerCase();
-
-        return queryWords.some((word) => productName.includes(word)); // Check if any word matches
-      });
-
-      if (queryValue) {
-        return filteredData?.slice(startIndex, endIndex);
-      } else {
-        return currentTabData?.slice(startIndex, endIndex);
-      }
-    }, [currentPage, entriesPerPage, currentTabData, queryValue]);
+      return currentTabData;
+    }, [currentTabData]);
 
     const customerData = generateCustomerListDataEntries(
       fetchAllCustomers?.data
     );
 
-    const filteredCustomerData = useMemo(() => {
-      if (!queryValue) return customerData;
-      const queryWords = queryValue.toLowerCase().split(/\s+/);
-      return customerData?.filter((customer: any) => {
-        const fullName = customer.customerName.toLowerCase();
-        const location = customer.location.toLowerCase();
-        const email = customer.email.toLowerCase();
-
-        // Check if any query word matches the customer's full name, location, or email
-        return queryWords.some(
-          (word) =>
-            fullName.includes(word) ||
-            location.includes(word) ||
-            email.includes(word)
-        );
-      });
-    }, [queryValue, customerData]);
-
     const paginatedCustomerData = useMemo(() => {
-      const startIndex = (currentPage - 1) * entriesPerPage;
-      const endIndex = startIndex + entriesPerPage;
-      return filteredCustomerData?.slice(startIndex, endIndex);
-    }, [currentPage, entriesPerPage, filteredCustomerData]);
+      return customerData || [];
+    }, [customerData]);
 
     const getTabName =
       tabNames.find((tab) => tab.key === tabContent)?.name || "";
@@ -252,11 +239,7 @@ const SelectCustomerProductModal = observer(
             ) : null}
             <div className="flex items-center justify-between w-full">
               <ListPagination
-                totalItems={
-                  modalType === "customer"
-                    ? customerData?.length
-                    : paginatedData?.length
-                }
+                totalItems={fetchedData?.data?.total}
                 itemsPerPage={entriesPerPage}
                 currentPage={currentPage}
                 onPageChange={handlePageChange}
@@ -318,7 +301,7 @@ const SelectCustomerProductModal = observer(
                       : "justify-start"
                   } items-center h-full gap-4`}
                 >
-                  {paginatedData?.length > 0 ? (
+                  {fetchedData?.data?.total > 0 ? (
                     paginatedData?.map((data: any, index: number) => {
                       return (
                         <CardComponent
@@ -333,6 +316,7 @@ const SelectCustomerProductModal = observer(
                             data.totalRemainingQuantities
                           }
                           onSelectProduct={(productInfo) => {
+                            console.log("info:", productInfo);
                             if (productInfo) SaleStore.addProduct(productInfo);
                           }}
                           onRemoveProduct={(productId) =>
@@ -363,8 +347,8 @@ const SelectCustomerProductModal = observer(
                 customerData={paginatedCustomerData}
                 customerSelected={SaleStore.customer}
                 onRowClick={(customerInfo) => {
-                  if (customerInfo?.customerId) console.log(customerInfo);
-                  SaleStore.addCustomer(customerInfo);
+                  if (customerInfo?.customerId)
+                    SaleStore.addCustomer(customerInfo);
                 }}
                 onRemoveCustomer={SaleStore.removeCustomer}
               />

@@ -27,7 +27,7 @@ const CardTemplate: StoryFn<any> = () => {
         variant="product-no-image"
         productTag="EAAS"
         productId="124242"
-        productPrice={4000}
+        productPrice={"4000"}
         dropDownList={{
           items: ["View Product", "Cancel Product"],
           onClickLink: (index: number) => {
@@ -63,7 +63,7 @@ Default.args = {
     productId: 124242,
     productImage: solarpanel,
     productPrice: 1200000,
-    paymentModes: ["One-Time", "Instalmental"],
+    paymentModes: ["One-Time", "Installmental"],
     datetime: "2024-11-07T22:43:08.271156Z",
     name: "Ahire Tersoo",
   },
