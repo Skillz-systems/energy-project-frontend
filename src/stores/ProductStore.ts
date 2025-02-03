@@ -5,7 +5,7 @@ const ProductModel = types.model({
   productImage: types.string,
   productTag: types.string,
   productName: types.string,
-  productPrice: types.number,
+  productPrice: types.string,
   productUnits: types.number,
 });
 

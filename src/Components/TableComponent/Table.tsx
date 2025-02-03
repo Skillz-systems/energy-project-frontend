@@ -6,6 +6,14 @@ import { Pagination } from "../PaginationComponent/Pagination";
 import wrong from "../../assets/table/wrong.png";
 import { TableSearch } from "../TableSearchComponent/TableSearch";
 
+export type PaginationType = () => {
+  total: number;
+  currentPage: number;
+  entriesPerPage: number;
+  setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  setEntriesPerPage: React.Dispatch<React.SetStateAction<number>>;
+};
+
 export type TableType = {
   showHeader?: boolean;
   tableTitle?: string;
@@ -35,6 +43,7 @@ export type TableType = {
   loading: boolean;
   refreshTable?: () => Promise<any>;
   queryValue?: string;
+  paginationInfo: PaginationType;
 };
 
 export const Table = (props: TableType) => {
@@ -50,23 +59,28 @@ export const Table = (props: TableType) => {
     loading,
     refreshTable,
     queryValue = "",
+    paginationInfo,
   } = props;
   const [hoveredCell, setHoveredCell] = useState<{
     rowIndex: number;
     colIndex: number;
   } | null>(null);
 
+  const {
+    total,
+    currentPage,
+    entriesPerPage,
+    setCurrentPage,
+    setEntriesPerPage,
+  } = paginationInfo();
+
   // Pagination state
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   const [refreshing, setRefreshing] = useState<boolean>(false);
 
-  const totalEntries = tableData?.length || 0;
+  const totalEntries = total || 0;
   const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * entriesPerPage;
-    const endIndex = startIndex + entriesPerPage;
-    return tableData?.slice(startIndex, endIndex);
-  }, [currentPage, entriesPerPage, tableData]);
+    return tableData || [];
+  }, [tableData]);
 
   useEffect(() => {}, [tableData]);
 
@@ -125,7 +139,7 @@ export const Table = (props: TableType) => {
     <div className="flex flex-col w-full gap-2">
       {loading ? (
         <SkeletonLoader />
-      ) : paginatedData?.length === 0 ? (
+      ) : totalEntries === 0 ? (
         <div className="flex flex-col items-center justify-center pt-10">
           <img src={wrong} alt="No data available" className="w-[100px]" />
           <p className="text-textBlack font-medium">No data available</p>

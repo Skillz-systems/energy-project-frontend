@@ -23,6 +23,8 @@ const Contracts = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [_contractsData, setContractsData] = useState<any>(null);
   const [contractsFilter, setContractsFilter] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   //   const {
   //     data: transactionsData,
   //     isLoading: transactionsLoading,
@@ -35,6 +37,17 @@ const Contracts = () => {
   //     60000
   //   );
   //   const fetchTransactionsStats = useGetRequest("/v1/transactions/stats", true);
+
+  const paginationInfo = () => {
+    const total = _contractsData.length;
+    return {
+      total,
+      currentPage,
+      entriesPerPage,
+      setCurrentPage,
+      setEntriesPerPage,
+    };
+  };
 
   useEffect(() => {
     switch (location.pathname) {
@@ -167,6 +180,7 @@ const Contracts = () => {
                           ],
                           isNetworkError: false,
                         }}
+                        paginationInfo={paginationInfo}
                       />
                     }
                   />

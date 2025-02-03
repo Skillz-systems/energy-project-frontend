@@ -22,6 +22,8 @@ const Agent = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [agentsData, setAgentsData] = useState<any>(null);
   const [agentFilter, setAgentFilter] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   const {
     data: agentData,
     isLoading: agentLoading,
@@ -29,11 +31,24 @@ const Agent = () => {
     error: allAgentError,
     errorStates: allAgentErrorStates,
   } = useGetRequest(
-    `/v1/agents${agentFilter && `?status=${agentFilter}`}`,
+    `/v1/agents?page=${currentPage}&limit=${entriesPerPage}${
+      agentFilter && `?status=${agentFilter}`
+    }`,
     true,
     60000
   );
   const fetchAgentStats = useGetRequest("/v1/agents/statistics/view", true);
+
+  const paginationInfo = () => {
+    const total = agentData?.total;
+    return {
+      total,
+      currentPage,
+      entriesPerPage,
+      setCurrentPage,
+      setEntriesPerPage,
+    };
+  };
 
   useEffect(() => {
     switch (location.pathname) {
@@ -160,6 +175,7 @@ const Agent = () => {
                         refreshTable={allAgentRefresh}
                         error={allAgentError}
                         errorData={allAgentErrorStates}
+                        paginationInfo={paginationInfo}
                       />
                     }
                   />

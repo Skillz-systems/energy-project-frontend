@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ApiErrorStatesType, useApiCall } from "@/utils/useApiCall";
 import { KeyedMutator } from "swr";
 import { ErrorComponent } from "@/Pages/ErrorPage";
-import { Table } from "../TableComponent/Table";
+import { PaginationType, Table } from "../TableComponent/Table";
 import gradientcontract from "../../assets/contracts/gradientcontract.svg";
 import { ProductTag } from "../CardComponents/CardComponent";
 import roletwo from "../../assets/table/roletwo.svg";
@@ -34,12 +34,14 @@ const ContractsTable = ({
   refreshTable,
   error,
   errorData,
+  paginationInfo,
 }: {
   contractsData: any;
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
   error: any;
   errorData: ApiErrorStatesType;
+  paginationInfo: PaginationType;
 }) => {
   const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -165,6 +167,7 @@ const ContractsTable = ({
               setQueryData(null);
             }}
             queryValue={isSearchQuery ? queryValue : ""}
+            paginationInfo={paginationInfo}
           />
           {isOpen && contractID && (
             <ContractModal

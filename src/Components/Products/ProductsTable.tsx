@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Table } from "../TableComponent/Table";
+import { PaginationType, Table } from "../TableComponent/Table";
 import { CardComponent } from "../CardComponents/CardComponent";
 import ProductModal from "./ProductModal";
 import { KeyedMutator } from "swr";
@@ -11,20 +11,22 @@ interface AllProductEntries {
   productImage: string;
   productName: string;
   productTag: string;
-  productPrice: number;
+  productPrice: string;
 }
 
 // Helper function to map the API data to the ProductEntries format
 const generateProductEntries = (data: any): AllProductEntries[] => {
-  const entries: AllProductEntries[] = data?.products.map((product: any) => {
-    return {
-      productId: product?.id,
-      productImage: product?.image,
-      productName: product.name,
-      productTag: product?.category?.name,
-      productPrice: product?.price,
-    };
-  });
+  const entries: AllProductEntries[] = data?.updatedResults?.map(
+    (product: any) => {
+      return {
+        productId: product?.id,
+        productImage: product?.image,
+        productName: product.name,
+        productTag: product?.category?.name,
+        productPrice: product?.priceRange,
+      };
+    }
+  );
 
   return entries;
 };
@@ -35,12 +37,14 @@ const ProductsTable = ({
   refreshTable,
   error,
   errorData,
+  paginationInfo,
 }: {
   productData: any;
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
   error: any;
   errorData: ApiErrorStatesType;
+  paginationInfo: PaginationType;
 }) => {
   const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -144,6 +148,7 @@ const ProductsTable = ({
               setQueryData(null);
             }}
             queryValue={isSearchQuery ? queryValue : ""}
+            paginationInfo={paginationInfo}
           />
           {productId && (
             <ProductModal

@@ -49,8 +49,13 @@ export function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
-export function formatNumberWithCommas(number: number) {
-  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+export function formatNumberWithCommas(number: number | string): string {
+  if (number == null || isNaN(Number(number))) return "0";
+
+  const num = Number(number);
+  const numStr = num.toFixed(num % 1 !== 0 ? 2 : 0);
+
+  return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 export function useIsLoggedIn(route: string) {

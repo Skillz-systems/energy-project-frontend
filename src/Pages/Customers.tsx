@@ -21,6 +21,8 @@ const Customers = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [_customerData, setCustomerData] = useState<any>(null);
   const [customerFilter, setCustomerFilter] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   const {
     data: customerData,
     isLoading: customerLoading,
@@ -28,11 +30,24 @@ const Customers = () => {
     error: allCustomerError,
     errorStates: allCustomerErrorStates,
   } = useGetRequest(
-    `/v1/customers${customerFilter && `?${customerFilter}`}`,
+    `/v1/customers?page=${currentPage}&limit=${entriesPerPage}${
+      customerFilter && `?${customerFilter}`
+    }`,
     true,
     60000
   );
   const fetchCustomerStats = useGetRequest("/v1/customers/stats", true);
+
+  const paginationInfo = () => {
+    const total = customerData?.total;
+    return {
+      total,
+      currentPage,
+      entriesPerPage,
+      setCurrentPage,
+      setEntriesPerPage,
+    };
+  };
 
   useEffect(() => {
     switch (location.pathname) {
@@ -169,6 +184,7 @@ const Customers = () => {
                         refreshTable={allCustomerRefresh}
                         error={allCustomerError}
                         errorData={allCustomerErrorStates}
+                        paginationInfo={paginationInfo}
                       />
                     }
                   />

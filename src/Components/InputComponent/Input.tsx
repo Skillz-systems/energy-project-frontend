@@ -4,7 +4,7 @@ import { useState } from "react";
 import { LuImagePlus } from "react-icons/lu";
 import useBreakpoint from "@/hooks/useBreakpoint";
 
-const Asterik = () => {
+export const Asterik = () => {
   return (
     <span className="mb-1.5">
       <svg
@@ -288,7 +288,7 @@ export const ModalInput = ({
           }  w-full max-w-full py-[1.25em] border-[0.6px] transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent `}
         >
           {isItemsSelected && (
-            <span className="absolute flex left-[1.6em] -top-2 z-50 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out opacity-100">
+            <span className="absolute flex left-[1.6em] -top-2 z-40 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out opacity-100">
               {label.toUpperCase()}
             </span>
           )}
@@ -312,7 +312,7 @@ export const ModalInput = ({
 
           {isItemsSelected ? (
             <div
-              className={`flex flex-col items-center justify-start not-italic text-textBlack w-full px-[1.1em] max-h-[550px] overflow-y-auto
+              className={`flex flex-col items-center justify-start not-italic text-textBlack w-full px-[1.1em] py-2 max-h-[550px] overflow-y-auto
             ${isItemsSelected ? "opacity-100" : "opacity-0"}
           
           `}
@@ -739,7 +739,7 @@ export const SelectInput = ({
           </span>
         </div>
         {isOpen && (
-          <div className="absolute mt-1.5 flex flex-col gap-1 bg-white p-2 border border-strokeGreyTwo rounded-[20px] w-full max-h-60 overflow-y-auto shadow-lg z-10">
+          <div className="absolute mt-1.5 flex flex-col gap-1 bg-white p-2 border border-strokeGreyTwo rounded-[20px] w-full max-h-60 overflow-y-auto shadow-lg z-50">
             {options?.map((option) => (
               <div
                 key={option.value}

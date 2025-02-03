@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { KeyedMutator } from "swr";
-import { Table } from "../TableComponent/Table";
+import { PaginationType, Table } from "../TableComponent/Table";
 import { GoDotFill } from "react-icons/go";
 import { formatNumberWithCommas } from "@/utils/helpers";
 import { NairaSymbol } from "../CardComponents/CardComponent";
@@ -90,11 +90,13 @@ const InventoryTable = ({
   isLoading,
   refreshTable,
   errorData,
+  paginationInfo,
 }: {
   inventoryData: any;
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
   errorData: ApiErrorStatesType;
+  paginationInfo: PaginationType;
 }) => {
   const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -332,6 +334,7 @@ const InventoryTable = ({
               setQueryData(null);
             }}
             queryValue={isSearchQuery ? queryValue : ""}
+            paginationInfo={paginationInfo}
           />
           {inventoryID && (
             <InventoryDetailModal
