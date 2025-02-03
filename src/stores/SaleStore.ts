@@ -325,6 +325,7 @@ export const SaleStore = saleStore.create({
   parameters: [],
   miscellaneousPrices: [],
   devices: [],
+  saleItems: [],
   identificationDetails: {
     idType: "",
     idNumber: "",

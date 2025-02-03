@@ -131,14 +131,14 @@ const SelectCustomerProductModal = observer(
       [fetchProductCategoryById.data]
     );
 
-    // // Initialize tabContent with the first tab's key when modal opens
-    // useEffect(() => {
-    //   if (modalType === "product" && tabNames.length > 0) {
-    //     const firstTabKey = fetchAllProductCategories.data[0].name;
-    //     setTabContent(firstTabKey);
-    //     setProductCategoryId(fetchAllProductCategories.data[0].id);
-    //   }
-    // }, [fetchAllProductCategories.data, modalType, tabNames]);
+    // Initialize tabContent with the first tab's key when modal opens
+    useEffect(() => {
+      if (modalType === "product" && isModalOpen && tabNames.length > 0) {
+        const firstTabKey = tabNames[0].key;
+        setTabContent(firstTabKey);
+        setProductCategoryId(tabNames[0].id);
+      }
+    }, [isModalOpen, modalType, tabNames]);
 
     // Fetch data for the selected tab
     useEffect(() => {
