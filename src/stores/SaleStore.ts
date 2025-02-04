@@ -1,4 +1,53 @@
-import { types, Instance } from "mobx-state-tree";
+import { toJS } from "mobx";
+import { types, Instance, cast, applySnapshot, SnapshotIn } from "mobx-state-tree";
+
+const defaultValues: SnapshotIn<typeof saleStore> = {
+  category: "PRODUCT",
+  customer: null,
+  bvn: "",
+  doesCustomerExist: false,
+  products: [],
+  doesProductCategoryExist: false,
+  parameters: [],
+  miscellaneousPrices: [],
+  devices: [],
+  saleItems: [],
+  identificationDetails: {
+    idType: "",
+    idNumber: "",
+    issuingCountry: "",
+    issueDate: "",
+    expirationDate: "",
+    fullNameAsOnID: "",
+    addressAsOnID: "",
+  },
+  nextOfKinDetails: {
+    fullName: "",
+    relationship: "",
+    phoneNumber: "",
+    email: "",
+    homeAddress: "",
+    dateOfBirth: "",
+    nationality: "",
+  },
+  guarantorDetails: {
+    fullName: "",
+    phoneNumber: "",
+    email: "",
+    homeAddress: "",
+    dateOfBirth: "",
+    nationality: "",
+    identificationDetails: {
+      idType: "",
+      idNumber: "",
+      issuingCountry: "",
+      issueDate: "",
+      expirationDate: "",
+      fullNameAsOnID: "",
+      addressAsOnID: "",
+    },
+  },
+};
 
 const IdentificationDetailsModel = types.model({
   idType: types.string,
@@ -37,6 +86,7 @@ const CustomerModel = types.model({
   lastname: types.string,
   location: types.string,
   email: types.string,
+  phone: types.string,
 });
 
 const ProductModel = types.model({
@@ -79,6 +129,11 @@ const SaleRecipientModel = types.model({
   email: types.string,
 });
 
+const RecipientModel = types.model({
+  currentProductId: types.string,
+  recipient: SaleRecipientModel,
+});
+
 const SaleItemsModel = types.model({
   productId: types.string,
   quantity: types.number,
@@ -93,6 +148,7 @@ const SaleItemsModel = types.model({
 
 const saleStore = types
   .model({
+    category: types.enumeration(["PRODUCT"]),
     customer: types.maybeNull(CustomerModel),
     bvn: types.string,
     doesCustomerExist: types.boolean,
@@ -101,6 +157,7 @@ const saleStore = types
     parameters: types.array(ParametersModel),
     miscellaneousPrices: types.array(MiscellaneousPricesModel),
     devices: types.array(DevicesModel),
+    saleRecipient: types.array(RecipientModel),
     saleItems: types.array(SaleItemsModel),
     identificationDetails: IdentificationDetailsModel,
     nextOfKinDetails: NextOfKinDetailsModel,
@@ -115,37 +172,118 @@ const saleStore = types
         (p) => p.currentProductId === productId
       );
       if (!params) return;
+      console.log("params:", toJS(params));
 
-      const devices =
+      // Ensure devices is a plain array of strings
+      const devices = toJS(
         self.devices.find((d) => d.currentProductId === productId)?.devices ||
-        [];
+          []
+      );
+
+      // Convert `miscellaneousPrices` into a plain object, filtering based on the current productId
       const miscellaneousCosts = self.miscellaneousPrices.reduce(
         (acc, misc) => {
-          Object.entries(misc.costs).forEach(([key, value]) => {
-            acc[key] = value;
-          });
+          // Only include the costs that match the current productId
+          if (misc.currentProductId === productId) {
+            const plainCosts = toJS(misc.costs); // Convert to a plain object
+
+            plainCosts.forEach((cost, name) => {
+              if (typeof cost === "number") {
+                acc[name] = cost; // Use the name as the key and cost as the value
+              } else {
+                console.warn(`Invalid cost value for ${name}:`, cost);
+              }
+            });
+          }
+
           return acc;
         },
         {} as Record<string, number>
       );
 
-      self.saleItems.push({
-        productId,
-        quantity: product.productUnits,
-        paymentMode: params.paymentMode,
-        discount: params.discount || 0,
-        installmentDuration: params.installmentDuration || 0,
-        installmentStartingPrice: params.installmentStartingPrice || 0,
-        devices,
-        miscellaneousPrices: { costs: miscellaneousCosts },
-        saleRecipient: {
-          firstname: "",
-          lastname: "",
-          address: "",
-          phone: "",
-          email: "",
-        },
+      // Fetch or create the saleRecipient for the given productId
+      const recipient = self.saleRecipient.find(
+        (recipient) => recipient.currentProductId === productId
+      );
+
+      // Ensure recipient is copied to avoid using a reference directly
+      const saleRecipient = recipient
+        ? { ...recipient.recipient } // Create a shallow copy of the recipient
+        : {
+            firstname: "",
+            lastname: "",
+            address: "",
+            phone: "",
+            email: "",
+          };
+
+      // Check if saleItem with the same productId exists
+      const existingSaleItem = self.saleItems.find(
+        (item) => item.productId === productId
+      );
+
+      if (existingSaleItem) {
+        // Update existing sale item instead of adding a new one
+        existingSaleItem.quantity = product.productUnits;
+        existingSaleItem.paymentMode = params.paymentMode;
+        existingSaleItem.discount = params.discount || 0;
+        existingSaleItem.installmentDuration = params.installmentDuration || 0;
+        existingSaleItem.installmentStartingPrice =
+          params.installmentStartingPrice || 0;
+        existingSaleItem.devices = cast(devices);
+        existingSaleItem.miscellaneousPrices = {
+          costs: cast(miscellaneousCosts),
+        };
+        existingSaleItem.saleRecipient = { ...saleRecipient };
+      } else {
+        // Add a new sale item if it doesn't exist
+        self.saleItems.push({
+          productId,
+          quantity: product.productUnits,
+          paymentMode: params.paymentMode,
+          discount: params.discount || 0,
+          installmentDuration: params.installmentDuration || 0,
+          installmentStartingPrice: params.installmentStartingPrice || 0,
+          devices: cast(devices),
+          miscellaneousPrices: { costs: cast(miscellaneousCosts) },
+          saleRecipient: { ...saleRecipient },
+        });
+      }
+    },
+    getTransformedSaleItems() {
+      return self.saleItems.map((item) => {
+        // Convert the whole `item` object to a plain object, including nested properties
+        const plainItem = toJS(item);
+
+        // Fetch the relevant miscellaneous prices for the current productId
+        const relevantMiscPrices = self.miscellaneousPrices.find(
+          (m) => m.currentProductId === plainItem.productId
+        ) || { costs: new Map() };
+
+        // Convert the `costs` Map to a plain object
+        const miscellaneousCosts = Array.from(
+          relevantMiscPrices.costs.entries()
+        ).reduce((acc, [name, cost]) => {
+          if (typeof cost === "number") {
+            acc[name] = cost; // Assign cost values directly
+          } else {
+            console.warn(`Invalid cost value for ${name}:`, cost);
+          }
+          return acc;
+        }, {} as Record<string, number>);
+
+        return {
+          ...plainItem,
+          miscellaneousPrices: miscellaneousCosts, // Use the filtered and converted prices
+        };
       });
+    },
+    doesSaleItemHaveInstallment() {
+      const filteredArray = self.saleItems.filter(
+        (item) => item.paymentMode === "INSTALLMENT"
+      );
+      const installmentExists = filteredArray.length > 0;
+      return installmentExists;
     },
     removeSaleItem(productId: string) {
       self.saleItems.replace(
@@ -163,6 +301,9 @@ const saleStore = types
     },
     addUpdateBVN(bvn: string) {
       self.bvn = bvn;
+    },
+    addUpdateCategory(category: "PRODUCT") {
+      self.category = category;
     },
     setCustomerExist(value: boolean) {
       self.doesCustomerExist = value;
@@ -211,6 +352,12 @@ const saleStore = types
     }) {
       self.parameters.push(params);
     },
+    getParametersByProductId(productId: string) {
+      const parameters = self.parameters.find(
+        (p) => p.currentProductId === productId
+      );
+      return parameters;
+    },
     removeParameter(currentProductId?: string) {
       const index = self.parameters.findIndex(
         (p) => p.currentProductId === currentProductId
@@ -239,6 +386,13 @@ const saleStore = types
         );
       }
     },
+    getMiscellaneousByProductId(productId: string) {
+      return (
+        self.miscellaneousPrices.find(
+          (m) => m.currentProductId === productId
+        ) || { costs: new Map() }
+      );
+    },
     removeMiscellaneousPrice(currentProductId?: string) {
       const index = self.miscellaneousPrices.findIndex(
         (p) => p.currentProductId === currentProductId
@@ -261,6 +415,12 @@ const saleStore = types
           DevicesModel.create({ currentProductId, devices: deviceList })
         );
       }
+    },
+    getSelectedDevices(productId: string) {
+      const devices = self.devices.find(
+        (d) => d.currentProductId === productId
+      )?.devices;
+      return devices;
     },
     removeDevices(currentProductId?: string) {
       const index = self.devices.findIndex(
@@ -320,9 +480,56 @@ const saleStore = types
         },
       };
     },
+    addOrUpdateRecipient(
+      currentProductId: string,
+      recipient: {
+        firstname: string;
+        lastname: string;
+        address: string;
+        phone: string;
+        email: string;
+      }
+    ) {
+      const existingIndex = self.saleRecipient.findIndex(
+        (d) => d.currentProductId === currentProductId
+      );
+
+      if (existingIndex !== -1) {
+        // Update the existing recipient using applySnapshot
+        applySnapshot(self.saleRecipient[existingIndex].recipient, recipient);
+      } else {
+        // Add new recipient if not found
+        self.saleRecipient.push(
+          RecipientModel.create({
+            currentProductId,
+            recipient,
+          })
+        );
+      }
+    },
+    getRecipientByProductId(productId: string) {
+      const recipient = self.saleRecipient.find(
+        (r) => r.currentProductId === productId
+      )?.recipient;
+      return recipient;
+    },
+    removeRecipient(currentProductId: string) {
+      const existingIndex = self.saleRecipient.findIndex(
+        (d) => d.currentProductId === currentProductId
+      );
+
+      if (existingIndex !== -1) {
+        // Remove the recipient at the found index
+        self.saleRecipient.splice(existingIndex, 1);
+      }
+    },
+    purgeStore() {
+      applySnapshot(self, defaultValues);
+    },
   }));
 
 export const SaleStore = saleStore.create({
+  category: "PRODUCT",
   customer: null,
   bvn: "",
   doesCustomerExist: false,

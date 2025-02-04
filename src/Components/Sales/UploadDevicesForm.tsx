@@ -79,7 +79,9 @@ const UploadDevicesForm = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [selectedDevices, setSelectedDevices] = useState<string[]>([]);
+  const [selectedDevices, setSelectedDevices] = useState<string[]>(
+    SaleStore.getSelectedDevices(currentProductId) || []
+  );
   const [createDevice, setCreateDevice] = useState<boolean>(false);
 
   const { data, mutate } = useGetRequest("/v1/device", true);
@@ -168,8 +170,10 @@ const UploadDevicesForm = ({
 
   const saveForm = () => {
     if (selectedDevices.length === 0) return;
-    SaleStore.addOrUpdateDevices(currentProductId, selectedDevices);
-    setFormData(defaultFormData);
+    // Ensure selectedDevices is a valid snapshot
+    const validDevices = selectedDevices.map((device) => `${device}`);
+    SaleStore.addOrUpdateDevices(currentProductId, validDevices);
+    SaleStore.addSaleItem(currentProductId);
     handleClose();
   };
 

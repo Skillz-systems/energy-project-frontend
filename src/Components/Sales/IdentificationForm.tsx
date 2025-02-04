@@ -18,7 +18,7 @@ const defaultFormData: FormData = {
 
 const IdentificationForm = ({ handleClose }: { handleClose: () => void }) => {
   const [formData, setFormData] = useState<FormData>(
-    SaleStore.identificationDetails
+    SaleStore.identificationDetails || defaultFormData
   );
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
 
@@ -60,11 +60,15 @@ const IdentificationForm = ({ handleClose }: { handleClose: () => void }) => {
     setFormErrors([]);
     return true;
   };
-
   const saveForm = () => {
     if (!validateItems()) return;
-    SaleStore.addIdentificationDetails(formData);
-    setFormData(defaultFormData);
+
+    SaleStore.addIdentificationDetails({
+      ...formData,
+      issueDate: new Date(formData.issueDate).toISOString(),
+      expirationDate: new Date(formData.expirationDate).toISOString(),
+    });
+
     handleClose();
   };
 
@@ -73,9 +77,11 @@ const IdentificationForm = ({ handleClose }: { handleClose: () => void }) => {
       <SelectInput
         label="ID Type"
         options={[
+          { label: "NIN", value: "Nin" },
           { label: "Passport", value: "Passport" },
-          { label: "Driver's License", value: "Driver's License" },
-          { label: "National ID", value: "National ID" },
+          { label: "Driver's License", value: "Driver_License" },
+          { label: "Voter ID", value: "Voter_ID" },
+          { label: "Social Security Number", value: "Social_Security_Number" },
         ]}
         value={formData.idType}
         onChange={(selectedValue) =>
@@ -114,6 +120,7 @@ const IdentificationForm = ({ handleClose }: { handleClose: () => void }) => {
         placeholder="Enter Issue Date"
         required={false}
         errorMessage={getFieldError("issueDate")}
+        description={"Enter Issue Date"}
       />
       <Input
         type="date"
@@ -124,6 +131,7 @@ const IdentificationForm = ({ handleClose }: { handleClose: () => void }) => {
         placeholder="Enter Expiration Date"
         required={false}
         errorMessage={getFieldError("expirationDate")}
+        description={"Enter Expiration Date"}
       />
       <Input
         type="text"

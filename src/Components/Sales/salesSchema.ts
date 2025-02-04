@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-const saleRecipientSchema = z.object({
+export const saleRecipientSchema = z.object({
   firstname: z.string().trim().min(2, "Firstname is required"),
   lastname: z.string().trim().min(2, "Lastname is required"),
-  address: z.string().trim().min(5, "Address is required"),
+  address: z.string().trim().min(1, "Address is required"),
   phone: z.string().trim().min(10, "Phone number is required"),
   email: z.string().trim().email("Invalid email"),
 });
@@ -11,7 +11,9 @@ const saleRecipientSchema = z.object({
 export const saleItemSchema = z.object({
   productId: z.string().trim().min(10, "Product ID is required"),
   quantity: z.number().min(1, "Quantity must be at least 1"),
-  paymentMode: z.enum(["ONE_OFF", "INSTALLMENT"]),
+  paymentMode: z.enum(["ONE_OFF", "INSTALLMENT"], {
+    message: "Payment Mode is required",
+  }),
   discount: z.number().min(0, "Discount must be a positive number").optional(),
   installmentDuration: z
     .number()
@@ -77,7 +79,9 @@ export const guarantorDetailsSchema = z.object({
 
 export const formSchema = z
   .object({
-    category: z.string().trim().min(3, "Sale Category is required"),
+    category: z.enum(["PRODUCT"], {
+      message: "Category is required",
+    }),
     customerId: z.string().min(1, "Please select at least one customer"),
     bvn: z
       .string()
@@ -90,7 +94,12 @@ export const formSchema = z
     nextOfKinDetails: z
       .union([nextOfKinDetailsSchema, z.literal("").transform(() => undefined)])
       .optional(),
-    identificationDetails: identificationDetailsSchema,
+    identificationDetails: z
+      .union([
+        identificationDetailsSchema,
+        z.literal("").transform(() => undefined),
+      ])
+      .optional(),
     guarantorDetails: z
       .union([guarantorDetailsSchema, z.literal("").transform(() => undefined)])
       .optional(),
@@ -169,7 +178,7 @@ type GuarantorDetails = {
 };
 
 export type SalePayload = {
-  category: "PRODUCT" | "INVENTORY";
+  category: "PRODUCT";
   customerId: string;
   bvn?: string;
   saleItems: SaleItem[];
@@ -179,7 +188,7 @@ export type SalePayload = {
 };
 
 export const defaultSaleFormData: SalePayload = {
-  category: "INVENTORY",
+  category: "PRODUCT",
   customerId: "",
   bvn: "",
   saleItems: [

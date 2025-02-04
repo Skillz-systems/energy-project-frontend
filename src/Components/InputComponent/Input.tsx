@@ -57,6 +57,8 @@ export type InputType = {
   errorMessage?: string;
   errorClass?: string;
   maxLength?: number;
+  description?: string;
+  descriptionClass?: string;
 };
 
 export const Input = ({
@@ -78,6 +80,8 @@ export const Input = ({
   errorMessage,
   errorClass,
   maxLength,
+  description,
+  descriptionClass,
 }: InputType) => {
   const similarTypes = [
     "text",
@@ -139,6 +143,13 @@ export const Input = ({
 
           {iconRight && iconRight}
         </div>
+        {description && (
+          <p
+            className={`mt-1 px-[1.3em] text-xs text-textDarkGrey font-semibold w-full ${descriptionClass}`}
+          >
+            {description}
+          </p>
+        )}
         {errorMessage && (
           <p
             className={`mt-1 px-[1.3em] text-xs text-errorTwo font-semibold w-full ${errorClass}`}

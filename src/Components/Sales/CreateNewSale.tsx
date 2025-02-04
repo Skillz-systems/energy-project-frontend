@@ -27,6 +27,7 @@ export type ExtraInfoType =
   | "parameters"
   | "miscellaneous"
   | "devices"
+  | "recipient"
   | "identification"
   | "nextOfKin"
   | "guarantor"
@@ -71,11 +72,22 @@ const CreateNewSale = observer(
       resetFormErrors(name);
     };
 
+    const payload = {
+      category: SaleStore.category,
+      customerId: SaleStore.customer?.customerId,
+      bvn: SaleStore.bvn,
+      saleItems: SaleStore.getTransformedSaleItems(),
+      nextOfKinDetails: SaleStore.nextOfKinDetails,
+      identificationDetails: SaleStore.identificationDetails,
+      guarantorDetails: SaleStore.guarantorDetails,
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setLoading(true);
       try {
-        const validatedData = formSchema.parse(formData);
+        const validatedData = formSchema.parse(payload);
+        console.log("payload:", validatedData);
         await apiCall({
           endpoint: "/v1/sales/create",
           method: "post",
@@ -98,24 +110,19 @@ const CreateNewSale = observer(
       }
     };
 
-    const isFormFilled = formSchema.safeParse(formData).success;
+    const isFormFilled = formSchema.safeParse(payload).success;
 
     const getFieldError = (fieldName: string) => {
       return formErrors.find((error) => error.path[0] === fieldName)?.message;
     };
 
-    // console.log(
-    //   "EXTRAINFO:",
-    //   toJS(SaleStore.parameters),
-    //   toJS(SaleStore.miscellaneousPrices),
-    //   toJS(SaleStore.devices)
-    // );
-
-    // const saveSaleItems = () => {
-    //   SaleStore.products.forEach((product) => {
-    //     SaleStore.addSaleItem(product.id); // Assuming each product has an `id` field
-    //   });
-    // };
+    // console.log("CUSTOMER:", toJS(SaleStore.customer));
+    // console.log("SALE ITEMS:", toJS(SaleStore.getTransformedSaleItems()));
+    // console.log("BVN:", toJS(SaleStore.bvn));
+    // console.log("IDENTITY:", toJS(SaleStore.identificationDetails));
+    // console.log("NEXT OF KIN:", toJS(SaleStore.nextOfKinDetails));
+    // console.log("GUARANTOR:", toJS(SaleStore.guarantorDetails));
+    // console.log("MISC:", toJS(SaleStore.miscellaneousPrices));
 
     return (
       <>
@@ -148,14 +155,12 @@ const CreateNewSale = observer(
             <div className="flex flex-col items-center justify-center w-full px-[2.5em] gap-4 py-8">
               <SelectInput
                 label="Sale Category"
-                options={[
-                  { label: "Inventory", value: "INVENTORY" },
-                  { label: "Product", value: "PRODUCT" },
-                ]}
+                options={[{ label: "Product", value: "PRODUCT" }]}
                 value={formData.category}
-                onChange={(selectedValue) =>
-                  handleSelectChange("category", selectedValue)
-                }
+                onChange={(selectedValue) => {
+                  handleSelectChange("category", selectedValue);
+                  SaleStore.addUpdateCategory(selectedValue as "PRODUCT");
+                }}
                 required={true}
                 placeholder="Select Sale Category"
                 errorMessage={getFieldError("category")}
@@ -196,23 +201,6 @@ const CreateNewSale = observer(
                     : getFieldError("customerId")
                 }
               />
-              <Input
-                type="text"
-                name="bvn"
-                label="BANK VERIFICATION NUUMBER"
-                value={formData.bvn as string}
-                onChange={(e) => {
-                  const numericValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
-                  if (numericValue.length <= 11) {
-                    handleInputChange(e.target.name, numericValue);
-                    SaleStore.addUpdateBVN(numericValue);
-                  }
-                }}
-                placeholder="Enter 11 digit BVN"
-                required={false}
-                errorMessage={getFieldError("bvn")}
-                maxLength={11}
-              />
               <ModalInput
                 type="button"
                 name="products"
@@ -249,77 +237,104 @@ const CreateNewSale = observer(
                     : getFieldError("products")
                 }
               />
-              <ModalInput
-                type="button"
-                name="identificationDetails"
-                label="IDENTIFICATION DETAILS"
-                onClick={() => {
-                  setExtraInfoModal("identification");
-                }}
-                placeholder="Enter Identification"
-                required={false}
-                isItemsSelected={Boolean(
-                  SaleStore.identificationDetails.idNumber
-                )}
-                customSelectedText="Update Identification Details"
-                itemsSelected={
-                  <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
-                    {SaleStore.identificationDetails.idNumber && (
-                      <ExtraInfoSection
-                        label="Identification"
-                        onClear={() => SaleStore.removeIdentificationDetails()}
-                      />
+              {SaleStore.doesSaleItemHaveInstallment() && (
+                <>
+                  <Input
+                    type="text"
+                    name="bvn"
+                    label="BANK VERIFICATION NUUMBER"
+                    value={SaleStore.bvn || (formData.bvn as string)}
+                    onChange={(e) => {
+                      const numericValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+                      if (numericValue.length <= 11) {
+                        handleInputChange(e.target.name, numericValue);
+                        SaleStore.addUpdateBVN(numericValue);
+                      }
+                    }}
+                    placeholder="Enter 11 digit BVN"
+                    required={false}
+                    errorMessage={getFieldError("bvn")}
+                    maxLength={11}
+                  />
+                  <ModalInput
+                    type="button"
+                    name="identificationDetails"
+                    label="IDENTIFICATION DETAILS"
+                    onClick={() => {
+                      setExtraInfoModal("identification");
+                    }}
+                    placeholder="Enter Identification"
+                    required={false}
+                    isItemsSelected={Boolean(
+                      SaleStore.identificationDetails.idNumber
                     )}
-                  </div>
-                }
-                errorMessage={getFieldError("identificationDetails")}
-              />
-              <ModalInput
-                type="button"
-                name="nextOfKinDetails"
-                label="NEXT OF KIN DETAILS"
-                onClick={() => {
-                  setExtraInfoModal("nextOfKin");
-                }}
-                placeholder="Enter Next of Kin"
-                required={false}
-                isItemsSelected={Boolean(SaleStore.nextOfKinDetails.fullName)}
-                customSelectedText="Update Next of Kin"
-                itemsSelected={
-                  <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
-                    {SaleStore.nextOfKinDetails.fullName && (
-                      <ExtraInfoSection
-                        label="Next of Kin"
-                        onClear={() => SaleStore.removeNextOfKinDetails()}
-                      />
+                    customSelectedText="Update Identification Details"
+                    itemsSelected={
+                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
+                        {SaleStore.identificationDetails.idNumber && (
+                          <ExtraInfoSection
+                            label="Identification"
+                            onClear={() =>
+                              SaleStore.removeIdentificationDetails()
+                            }
+                          />
+                        )}
+                      </div>
+                    }
+                    errorMessage={getFieldError("identificationDetails")}
+                  />
+                  <ModalInput
+                    type="button"
+                    name="nextOfKinDetails"
+                    label="NEXT OF KIN DETAILS"
+                    onClick={() => {
+                      setExtraInfoModal("nextOfKin");
+                    }}
+                    placeholder="Enter Next of Kin"
+                    required={false}
+                    isItemsSelected={Boolean(
+                      SaleStore.nextOfKinDetails.fullName
                     )}
-                  </div>
-                }
-                errorMessage={getFieldError("nextOfKinDetails")}
-              />
-              <ModalInput
-                type="button"
-                name="guarantorDetails"
-                label="GUARANTOR DETAILS"
-                onClick={() => {
-                  setExtraInfoModal("guarantor");
-                }}
-                placeholder="Enter Guarantor"
-                required={false}
-                isItemsSelected={Boolean(SaleStore.guarantorDetails.fullName)}
-                customSelectedText="Update Guarantor"
-                itemsSelected={
-                  <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
-                    {SaleStore.guarantorDetails.fullName && (
-                      <ExtraInfoSection
-                        label="Guarantor"
-                        onClear={() => SaleStore.removeGuarantorDetails()}
-                      />
+                    customSelectedText="Update Next of Kin"
+                    itemsSelected={
+                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
+                        {SaleStore.nextOfKinDetails.fullName && (
+                          <ExtraInfoSection
+                            label="Next of Kin"
+                            onClear={() => SaleStore.removeNextOfKinDetails()}
+                          />
+                        )}
+                      </div>
+                    }
+                    errorMessage={getFieldError("nextOfKinDetails")}
+                  />
+                  <ModalInput
+                    type="button"
+                    name="guarantorDetails"
+                    label="GUARANTOR DETAILS"
+                    onClick={() => {
+                      setExtraInfoModal("guarantor");
+                    }}
+                    placeholder="Enter Guarantor"
+                    required={false}
+                    isItemsSelected={Boolean(
+                      SaleStore.guarantorDetails.fullName
                     )}
-                  </div>
-                }
-                errorMessage={getFieldError("guarantorDetails")}
-              />
+                    customSelectedText="Update Guarantor"
+                    itemsSelected={
+                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
+                        {SaleStore.guarantorDetails.fullName && (
+                          <ExtraInfoSection
+                            label="Guarantor"
+                            onClear={() => SaleStore.removeGuarantorDetails()}
+                          />
+                        )}
+                      </div>
+                    }
+                    errorMessage={getFieldError("guarantorDetails")}
+                  />
+                </>
+              )}
               {apiError && (
                 <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
                   {apiError}
@@ -329,7 +344,8 @@ const CreateNewSale = observer(
                 type="submit"
                 loading={loading}
                 variant={isFormFilled ? "gradient" : "gray"}
-                disabled={!isFormFilled}
+                // disabled={!isFormFilled}
+                disabled={false}
               />
             </div>
           </form>

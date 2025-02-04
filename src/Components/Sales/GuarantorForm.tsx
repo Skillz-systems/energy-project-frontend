@@ -26,7 +26,7 @@ const defaultFormData: FormData = {
 
 const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
   const [formData, setFormData] = useState<FormData>(
-    SaleStore.guarantorDetails
+    SaleStore.guarantorDetails || defaultFormData
   );
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
 
@@ -90,8 +90,19 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
 
   const saveForm = () => {
     if (!validateItems()) return;
-    SaleStore.addGuarantorDetails(formData);
-    setFormData(defaultFormData);
+    SaleStore.addGuarantorDetails({
+      ...formData,
+      dateOfBirth: new Date(formData.dateOfBirth).toISOString(),
+      identificationDetails: {
+        ...formData.identificationDetails,
+        issueDate: new Date(
+          formData.identificationDetails.issueDate
+        ).toISOString(),
+        expirationDate: new Date(
+          formData.identificationDetails.expirationDate
+        ).toISOString(),
+      },
+    });
     handleClose();
   };
 
@@ -163,9 +174,11 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
       <SelectInput
         label="ID Type"
         options={[
+          { label: "NIN", value: "Nin" },
           { label: "Passport", value: "Passport" },
-          { label: "Driver's License", value: "Driver's License" },
-          { label: "National ID", value: "National ID" },
+          { label: "Driver's License", value: "Driver_License" },
+          { label: "Voter ID", value: "Voter_ID" },
+          { label: "Social Security Number", value: "Social_Security_Number" },
         ]}
         value={formData.identificationDetails.idType}
         onChange={(selectedValue) =>

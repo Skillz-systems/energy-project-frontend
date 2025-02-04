@@ -18,7 +18,7 @@ const defaultFormData: FormData = {
 
 const NextOfKinForm = ({ handleClose }: { handleClose: () => void }) => {
   const [formData, setFormData] = useState<FormData>(
-    SaleStore.nextOfKinDetails
+    SaleStore.nextOfKinDetails || defaultFormData
   );
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
 
@@ -56,8 +56,10 @@ const NextOfKinForm = ({ handleClose }: { handleClose: () => void }) => {
 
   const saveForm = () => {
     if (!validateItems()) return;
-    SaleStore.addNextOfKinDetails(formData);
-    setFormData(defaultFormData);
+    SaleStore.addNextOfKinDetails({
+      ...formData,
+      dateOfBirth: new Date(formData.dateOfBirth).toISOString(),
+    });
     handleClose();
   };
 

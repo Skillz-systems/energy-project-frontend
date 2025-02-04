@@ -41,8 +41,7 @@ const generateListDataEntries = (data: any): ListDataType[] => {
     productTag: product?.category?.name,
     productName: product?.name,
     productPrice: product?.priceRange || "",
-    totalRemainingQuantities:
-      product?.inventories[0]?.inventory?.batches[0]?.remainingQuantity,
+    totalRemainingQuantities: product?.inventories[0]?.totalRemainingQuantities,
   }));
 };
 
@@ -55,6 +54,7 @@ const generateCustomerListDataEntries = (data: any): any[] => {
     lastname: item?.lastname,
     location: item?.location || "",
     email: item?.email,
+    phone: item?.phone,
   }));
 };
 

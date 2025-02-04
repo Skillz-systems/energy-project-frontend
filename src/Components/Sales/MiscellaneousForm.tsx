@@ -26,7 +26,17 @@ export default function MiscellaneousForm({
   handleClose: () => void;
   currentProductId: string;
 }) {
-  const [items, setItems] = useState<CostItem[]>([{ name: "", cost: "" }]);
+  const [items, setItems] = useState<CostItem[]>(() => {
+    const miscellaneous =
+      SaleStore.getMiscellaneousByProductId(currentProductId);
+    if (miscellaneous && miscellaneous.costs.size > 0) {
+      return Array.from(miscellaneous.costs.entries()).map(([name, cost]) => ({
+        name,
+        cost: cost.toString(),
+      }));
+    }
+    return [{ name: "", cost: "" }];
+  });
   const [errors, setErrors] = useState<(FormErrors | null)[]>([]);
 
   const addItem = () => {
@@ -89,8 +99,7 @@ export default function MiscellaneousForm({
     }, {} as Record<string, number>);
 
     SaleStore.addOrUpdateMiscellaneousPrice(currentProductId, newItemsObject);
-
-    setItems([{ name: "", cost: "" }]);
+    SaleStore.addSaleItem(currentProductId);
     handleClose();
   };
 
