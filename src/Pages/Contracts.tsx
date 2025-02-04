@@ -1,10 +1,8 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import PageLayout from "./PageLayout";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";
-import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import circleAction from "../assets/settings/addCircle.svg";
 import cancelled from "../assets/cancelled.svg";
 import gradientcontract from "../assets/contracts/gradientcontract.svg";
 import contractsbadge from "../assets/contracts/contractsbadge.png";
@@ -22,7 +20,8 @@ const Contracts = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [_contractsData, setContractsData] = useState<any>(null);
-  const [contractsFilter, setContractsFilter] = useState<string>("");
+  // const [contractsFilter, setContractsFilter] = useState<string>("");
+  const [, setContractsFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   //   const {

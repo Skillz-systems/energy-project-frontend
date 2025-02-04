@@ -10,7 +10,7 @@ import customericon from "../../assets/customers/customericon.svg";
 import creditcardicon from "../../assets/creditcardgrey.svg";
 import { formatDateTime, formatNumberWithCommas } from "@/utils/helpers";
 import producticon from "../../assets/product-grey.svg";
-import { useApiCall, useGetRequest } from "@/utils/useApiCall";
+import { useApiCall } from "@/utils/useApiCall";
 import { toast } from "react-toastify";
 
 type TransactionDetailType = {
@@ -45,7 +45,8 @@ const TransactionModal = ({
   //   false
   // );
 
-  const generateTransactionEntries = (data?: any): TransactionDetailType => {
+  // const generateTransactionEntries = (data?: any): TransactionDetailType => {
+  const generateTransactionEntries = (): TransactionDetailType => {
     return {
       status: "completed",
       transactionId: transactionID,

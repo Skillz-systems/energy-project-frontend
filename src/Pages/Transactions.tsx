@@ -23,7 +23,8 @@ const Transactions = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [_transactionsData, setTransactionsData] = useState<any>(null);
-  const [transactionsFilter, setTransactionsFilter] = useState<string>("");
+  // const [transactionsFilter, setTransactionsFilter] = useState<string>("");
+  const [, setTransactionsFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   //   const {
