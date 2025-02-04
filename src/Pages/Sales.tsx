@@ -1,0 +1,155 @@
+import { lazy, Suspense, useEffect, useState } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import PageLayout from "./PageLayout";
+import transactionsbadge from "../assets/transactions/transactionsbadge.png";
+import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
+import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
+import { DropDown } from "@/Components/DropDownComponent/DropDown";
+import circleAction from "../assets/settings/addCircle.svg";
+import gradientsales from "../assets/sales/gradientsales.svg";
+import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
+import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
+import CreateNewSale from "@/Components/Sales/CreateNewSale";
+import { useGetRequest } from "@/utils/useApiCall";
+
+const SalesTable = lazy(() => import("@/Components/Sales/SalesTable"));
+
+const Sales = () => {
+  const location = useLocation();
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [_salesData, setSalesData] = useState<any>(null);
+  const [salesFilter, setSalesFilter] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
+  const {
+    data: salesData,
+    isLoading: salesLoading,
+    mutate: allSalesRefresh,
+    error: allSalesError,
+    errorStates: allSalesErrorStates,
+  } = useGetRequest(
+    `/v1/sales?page=${currentPage}&limit=${entriesPerPage}${
+      salesFilter && `?status=${salesFilter}`
+    }`,
+    true,
+    60000
+  );
+
+  const paginationInfo = () => {
+    const total = salesData?.total;
+    return {
+      total,
+      currentPage,
+      entriesPerPage,
+      setCurrentPage,
+      setEntriesPerPage,
+    };
+  };
+
+  useEffect(() => {
+    switch (location.pathname) {
+      case "/sales/all":
+        setSalesFilter("");
+        setSalesData(salesData);
+        break;
+      default:
+        setSalesFilter("");
+        setSalesData(salesData);
+    }
+  }, [location.pathname, salesData]);
+
+  const navigationList = [
+    {
+      title: "All Sales",
+      link: "/sales/all",
+      count: _salesData?.total,
+    },
+  ];
+
+  const dropDownList = {
+    items: ["Add New Sale", "Export List"],
+    onClickLink: (index: number) => {
+      switch (index) {
+        case 0:
+          console.log("Adding New Sale...");
+          break;
+        case 1:
+          console.log("Exporting list...");
+          break;
+        default:
+          break;
+      }
+    },
+    showCustomButton: true,
+  };
+
+  const salesPaths = ["all"];
+
+  return (
+    <>
+      <PageLayout pageName="Sales" badge={transactionsbadge}>
+        <section className="flex flex-col-reverse sm:flex-row items-center justify-between w-full bg-paleGrayGradient px-2 md:px-8 py-4 gap-2 min-h-[64px]">
+          <div className="flex flex-wrap w-full items-center gap-2 gap-y-3">
+            <TitlePill
+              icon={gradientsales}
+              iconBgColor="bg-[#FDEEC2]"
+              topText="All"
+              bottomText="SALES"
+              value={_salesData?.total}
+            />
+          </div>
+          <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
+            <ActionButton
+              label="New Sale"
+              icon={<img src={circleAction} />}
+              onClick={() => {
+                setIsOpen(true);
+              }}
+            />
+            <DropDown {...dropDownList} />
+          </div>
+        </section>
+        <div className="flex flex-col w-full px-2 py-8 gap-4 lg:flex-row md:p-8">
+          <SideMenu navigationList={navigationList} />
+          <section className="relative items-start justify-center flex min-h-[415px] w-full overflow-hidden">
+            <Suspense
+              fallback={
+                <LoadingSpinner parentClass="absolute top-[50%] w-full" />
+              }
+            >
+              <Routes>
+                <Route
+                  path="/"
+                  element={<Navigate to="/sales/all" replace />}
+                />
+                {salesPaths.map((path) => (
+                  <Route
+                    key={path}
+                    path={path}
+                    element={
+                      <SalesTable
+                        salesData={_salesData}
+                        isLoading={salesLoading}
+                        refreshTable={allSalesRefresh}
+                        error={allSalesError}
+                        errorData={allSalesErrorStates}
+                        paginationInfo={paginationInfo}
+                      />
+                    }
+                  />
+                ))}
+              </Routes>
+            </Suspense>
+          </section>
+        </div>
+      </PageLayout>
+      <CreateNewSale
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        allSalesRefresh={allSalesRefresh}
+      />
+    </>
+  );
+};
+
+export default Sales;
