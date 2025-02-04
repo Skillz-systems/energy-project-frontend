@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { KeyedMutator } from "swr";
 import { Modal } from "../ModalComponent/Modal";
 import { z } from "zod";
@@ -12,7 +12,7 @@ import { observer } from "mobx-react-lite";
 import ProductSaleDisplay, { ExtraInfoSection } from "./ProductSaleDisplay";
 import SetExtraInfoModal from "./SetExtraInfoModal";
 import { RiDeleteBin5Fill } from "react-icons/ri";
-// import { toJS } from "mobx";
+import { toJS } from "mobx";
 import { formSchema, defaultSaleFormData } from "./salesSchema";
 import { FlutterwavePaymentPayload } from "@/hooks/useFlutterwave";
 import { useFlutterwave, closePaymentModal } from "flutterwave-react-v3";
@@ -77,15 +77,27 @@ const CreateNewSale = observer(
       resetFormErrors(name);
     };
 
-    const payload = {
-      category: SaleStore.category,
-      customerId: SaleStore.customer?.customerId,
-      bvn: SaleStore.bvn,
-      saleItems: SaleStore.getTransformedSaleItems(),
-      nextOfKinDetails: SaleStore.nextOfKinDetails,
-      identificationDetails: SaleStore.identificationDetails,
-      guarantorDetails: SaleStore.guarantorDetails,
-    };
+    const getPayload = useCallback(() => {
+      if (SaleStore.doesSaleItemHaveInstallment()) {
+        const payload = {
+          category: SaleStore.category,
+          customerId: SaleStore.customer?.customerId,
+          saleItems: SaleStore.getTransformedSaleItems(),
+          bvn: SaleStore.bvn,
+          nextOfKinDetails: SaleStore.nextOfKinDetails,
+          identificationDetails: SaleStore.identificationDetails,
+          guarantorDetails: SaleStore.guarantorDetails,
+        };
+        return payload;
+      } else {
+        const payload = {
+          category: SaleStore.category,
+          customerId: SaleStore.customer?.customerId,
+          saleItems: SaleStore.getTransformedSaleItems(),
+        };
+        return payload;
+      }
+    }, []);
 
     const config: FlutterwavePaymentPayload = {
       ...SaleStore.creationResponse,
@@ -104,7 +116,8 @@ const CreateNewSale = observer(
       e.preventDefault();
       setLoading(true);
       try {
-        const validatedData = formSchema.parse(payload);
+        // const validatedData = formSchema.parse(getPayload());
+        const validatedData = toJS(getPayload());
         const response = await apiCall({
           endpoint: "/v1/sales/create",
           method: "post",
@@ -112,16 +125,23 @@ const CreateNewSale = observer(
           successMessage: "Sale created successfully!",
         });
         await allSalesRefresh();
-        SaleStore.addFlutterwaveConfig(response.data);
+        SaleStore.addFlutterwaveConfig({
+          ...response.data,
+          customer: {
+            ...response.data?.customer,
+            phone_number: SaleStore.customer?.phone || "",
+            name: SaleStore.customer?.customerName || "",
+          },
+        });
         handleFlutterPayment({
           callback: (response) => {
-            console.log("Flutter Response:", response);
+            console.log("Flutterwave Response:", response);
             closePaymentModal();
+            SaleStore.purgeStore();
           },
           onClose: () => {},
         });
-        // setIsOpen(false);
-        // SaleStore.purgeStore();
+        setIsOpen(false);
       } catch (error: any) {
         if (error instanceof z.ZodError) {
           setFormErrors(error.issues);
@@ -135,7 +155,11 @@ const CreateNewSale = observer(
       }
     };
 
-    const isFormFilled = formSchema.safeParse(payload).success;
+    useEffect(() => {
+      if (loading && apiError) setApiError(null);
+    }, [getPayload, apiError, loading]);
+
+    const isFormFilled = formSchema.safeParse(toJS(getPayload())).success;
 
     const getFieldError = (fieldName: string) => {
       return formErrors.find((error) => error.path[0] === fieldName)?.message;
