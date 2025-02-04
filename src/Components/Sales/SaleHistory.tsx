@@ -1,4 +1,3 @@
-
 const SaleHistory = () => {
   return (
     <div>SaleHistory</div>
