@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import TabComponent from "../TabComponent/TabComponent";
 import ListPagination from "../PaginationComponent/ListPagination";
 import { CardComponent } from "../CardComponents/CardComponent";
-import rootStore from "../../stores/rootStore";
 import { observer } from "mobx-react-lite";
 import { TableSearch } from "../TableSearchComponent/TableSearch";
 import searchIcon from "../../assets/search.svg";
@@ -13,12 +12,13 @@ import { TabNamesType } from "../Inventory/InventoryDetailModal";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import { ProductStore } from "@/stores/ProductStore";
 
-type ListDataType = {
+export type ListDataType = {
   productId: string;
   productImage: string;
   productTag: string;
   productName: string;
-  productPrice: number;
+  productPrice: string;
+  totalRemainingQuantities: number;
 };
 
 type ProductInventoryType = {
@@ -31,46 +31,42 @@ type InventoryModalProps = {
   setIsInventoryOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-type InventoryCategoryType = {
-  id: string;
-  name: string;
-  parentId: string | null;
-  type: "INVENTORY" | "PRODUCT";
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type BatchType = {
-  id: string;
-  name: string;
-  dateOfManufacture: string | null;
-  sku: string;
-  image: string;
-  batchNumber: number;
-  costOfItem: number;
-  price: number;
-  numberOfStock: number;
-  remainingQuantity: number;
-  status: string;
-  class: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-  inventoryId: string;
-};
-
-type AllInventoryType = {
+type InventoryItem = {
   id: string;
   name: string;
   manufacturerName: string;
+  sku: string;
+  image: string;
+  dateOfManufacture: null | string;
+  status: "IN_STOCK" | string;
+  class: "REGULAR" | string;
   inventoryCategoryId: string;
   inventorySubCategoryId: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-  batches: BatchType[];
-  inventoryCategory: InventoryCategoryType;
-  inventorySubCategory: InventoryCategoryType;
+  inventoryCategory: {
+    id: string;
+    name: string;
+    parentId: null | string;
+    type: string;
+  };
+  inventorySubCategory: {
+    id: string;
+    name: string;
+    parentId: null | string;
+    type: string;
+  };
+  batches: {
+    id: string;
+    costOfItem: number;
+    price: number;
+    batchNumber: number;
+    numberOfStock: number;
+    remainingQuantity: number;
+    inventoryId: string;
+  }[];
+  salePrice: string;
+  inventoryValue: number;
+  totalRemainingQuantities: number;
+  totalInitialQuantities: number;
 };
 
 const SelectInventoryModal = observer(
@@ -86,7 +82,7 @@ const SelectInventoryModal = observer(
     const [_categoryId, setCategoryId] = useState<string>("");
 
     const fetchAllInventoryCategories = useGetRequest(
-      "/v1/inventory/categories",
+      "/v1/inventory/categories/all",
       false
     );
 
@@ -111,7 +107,9 @@ const SelectInventoryModal = observer(
     }, [fetchAllInventoryCategories.data]);
 
     const fetchInventoryCategoryById = useGetRequest(
-      `/v1/inventory?inventoryCategoryId=${_categoryId}`
+      `/v1/inventory?page=${currentPage}&limit=${entriesPerPage}&inventoryCategoryId=${_categoryId}${
+        queryValue && `&search=${queryValue}`
+      }`
     );
 
     const fetchTabData = useCallback(
@@ -126,21 +124,23 @@ const SelectInventoryModal = observer(
     );
 
     const generateListDataEntries = (data: any): ListDataType[] => {
-      return data?.inventories.map((inventory: AllInventoryType) => ({
-        productId: inventory.batches[0]?.id,
-        productImage: inventory.batches[0]?.image || "",
-        productTag: inventory.inventoryCategory?.name,
-        productName: inventory.name,
-        productPrice: inventory.batches[0]?.price || 0,
+      return data?.inventories?.map((inventory: InventoryItem) => ({
+        productId: inventory?.id,
+        productImage: inventory?.image || "",
+        productTag: inventory?.inventoryCategory?.name,
+        productName: inventory?.name,
+        productPrice: inventory?.salePrice || 0,
+        totalRemainingQuantities: inventory?.totalRemainingQuantities || 0,
       }));
     };
 
+    // Initialize tabContent with the first tab's key when modal opens
     useEffect(() => {
-      if (tabNames.length > 0) {
-        setTabContent(tabNames[0]?.key || "");
-        setInventoryCategoryId(tabNames[0]?.id || "");
+      if (isInventoryOpen && tabNames.length > 0) {
+        setTabContent(tabNames[0]?.key);
+        setInventoryCategoryId(tabNames[0]?.id);
       }
-    }, [tabNames]);
+    }, [isInventoryOpen, tabNames]);
 
     useEffect(() => {
       const fetchData = async () => {
@@ -163,38 +163,16 @@ const SelectInventoryModal = observer(
       );
     }, [dynamicListData, tabContent]);
 
-    const paginatedData = useMemo(() => {
-      const startIndex = (currentPage - 1) * entriesPerPage;
-      const endIndex = startIndex + entriesPerPage;
-      const filteredData = currentTabData.filter((item) => {
-        const queryWords = queryValue.toLowerCase().split(/\s+/); // Split queryValue into words
-        const productName = item.productName.toLowerCase();
+    const paginatedData: ListDataType[] = useMemo(() => {
+      return currentTabData;
+    }, [currentTabData]);
 
-        return queryWords.some((word) => productName.includes(word)); // Check if any word matches
-      });
-
-      if (queryValue) {
-        return filteredData?.slice(startIndex, endIndex);
-      } else {
-        return currentTabData?.slice(startIndex, endIndex);
-      }
-    }, [currentPage, entriesPerPage, currentTabData, queryValue]);
-
-    const getTabName =
+    const activeTabName =
       tabNames.find((tab) => tab.key === tabContent)?.name || "";
 
     const handlePageChange = (page: number) => setCurrentPage(page);
 
-    const dropDownList = {
-      items: [],
-      onClickLink: (index: number) => {
-        console.log(index);
-      },
-      defaultStyle: true,
-      showCustomButton: true,
-    };
-
-    const itemsSelected = rootStore.productStore.products.length;
+    const itemsSelected = ProductStore.products.length;
 
     const handleTabSelect = useCallback(
       (key: string) => {
@@ -202,7 +180,7 @@ const SelectInventoryModal = observer(
         const selectedTab = tabNames.find(
           (tab: { key: string }) => tab.key === key
         );
-        setInventoryCategoryId(selectedTab?.id || "");
+        setInventoryCategoryId(selectedTab?.id);
         setCurrentPage(1);
       },
       [tabNames]
@@ -242,22 +220,15 @@ const SelectInventoryModal = observer(
                 count: null,
               }))}
               onTabSelect={handleTabSelect}
+              activeTabName={activeTabName}
             />
             <div className="flex items-center justify-between w-full">
               <ListPagination
-                totalItems={
-                  queryValue
-                    ? currentTabData.filter((item) =>
-                        item.productName
-                          .toLowerCase()
-                          .includes(queryValue.toLowerCase())
-                      ).length
-                    : currentTabData.length
-                }
+                totalItems={fetchInventoryCategoryById?.data?.total}
                 itemsPerPage={entriesPerPage}
                 currentPage={currentPage}
                 onPageChange={handlePageChange}
-                label={getTabName}
+                label={activeTabName}
               />
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center bg-[#F9F9F9] px-2 text-textDarkGrey w-max gap-1 h-[24px] border-[0.6px] border-strokeGreyThree rounded-full">
@@ -291,7 +262,7 @@ const SelectInventoryModal = observer(
                 queryValue={queryValue}
                 setQueryValue={setQueryValue}
                 refreshTable={fetchInventoryCategoryById.mutate}
-                placeholder={`Search ${getTabName} here`}
+                placeholder={`Search ${activeTabName} here`}
                 containerClass="w-full"
                 inputContainerStyle="w-full"
                 inputClass="w-full h-[32px] pl-3 bg-[#F9F9F9]"
@@ -304,7 +275,7 @@ const SelectInventoryModal = observer(
               error={fetchInventoryCategoryById?.error}
               errorStates={fetchInventoryCategoryById?.errorStates}
               refreshData={fetchInventoryCategoryById?.mutate}
-              errorMessage={`Failed to fetch inventory list for "${getTabName}".`}
+              errorMessage={`Failed to fetch inventory list for "${activeTabName}".`}
             >
               <div
                 className={`flex flex-wrap ${
@@ -319,20 +290,22 @@ const SelectInventoryModal = observer(
                       <CardComponent
                         key={`${data.productId}-${index}`}
                         variant={"inventoryTwo"}
-                        dropDownList={dropDownList}
                         productId={data.productId}
                         productImage={data.productImage}
                         productTag={data.productTag}
                         productName={data.productName}
                         productPrice={data.productPrice}
+                        productUnits={ProductStore.currentProductUnits(
+                          data.productId
+                        )}
+                        totalRemainingQuantities={data.totalRemainingQuantities}
                         onSelectProduct={(productInfo) => {
-                          if (productInfo)
-                            rootStore.productStore.addProduct(productInfo);
+                          if (productInfo) ProductStore.addProduct(productInfo);
                         }}
                         onRemoveProduct={(productId) =>
-                          rootStore.productStore.removeProduct(productId)
+                          ProductStore.removeProduct(productId)
                         }
-                        isProductSelected={rootStore.productStore.products.some(
+                        isProductSelected={ProductStore.products.some(
                           (p) => p.productId === data.productId
                         )}
                       />

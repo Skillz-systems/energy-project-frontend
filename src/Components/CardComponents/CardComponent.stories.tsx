@@ -103,7 +103,7 @@ productNoImageCard.args = {
   },
   productTag: "EAAS",
   productId: "124242",
-  productPrice: 4000,
+  productPrice: "4000",
 };
 
 export const inventoryOneCard = CardTemplate.bind({});
@@ -119,7 +119,7 @@ inventoryOneCard.args = {
   },
   productImage: solarpanel,
   productName: "Monochromatic Solar Panels",
-  productPrice: 250000,
+  productPrice: "250000",
 };
 
 export const inventoryTwoCard = CardTemplate.bind({});
@@ -137,7 +137,7 @@ inventoryTwoCard.args = {
   productImage: solarpanel,
   productTag: "Lima Panels",
   productName: "Monochromatic Solar Panels",
-  productPrice: 250000,
+  productPrice: "250000",
   productUnits: 10,
   onSelectProduct: (productInfo: any) => {
     console.log("Product Info:", productInfo);

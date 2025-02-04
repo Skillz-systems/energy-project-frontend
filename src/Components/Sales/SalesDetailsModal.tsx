@@ -10,7 +10,7 @@ import SaleDetails from "./SaleDetails";
 import SaleHistory from "./SaleHistory";
 import SaleTransactions from "./SaleTransactions";
 import { toast } from "react-toastify";
-import { useApiCall } from "@/utils/useApiCall";
+import { useApiCall, useGetRequest } from "@/utils/useApiCall";
 
 export type SaleDetailsType = {
   daysToNextInstallment: string;
@@ -49,26 +49,28 @@ const SalesDetailsModal = ({
   const { apiCall } = useApiCall();
   const [tabContent, setTabContent] = useState<string>("details");
 
-  // const fetchSingleSale = useGetRequest(
-  //   `/v1/sales/single/${salesID}`,
-  //   false
-  // );
+  const fetchSingleSale = useGetRequest(`/v1/sales/${salesID}`, false);
 
   const generateSaleEntries = (): SaleDetailsType => {
+    const data = fetchSingleSale?.data;
+    const customerKey = data?.sale?.customer;
+    const customerName = `${customerKey?.firstname} ${customerKey?.lastname}`;
     return {
       daysToNextInstallment: "29 DAYS",
-      status: "IN CONTRACT",
-      productCategory: "SHS",
-      paymentMode: "INSTALLMENT",
-      saleId: salesID,
-      productName: "Product 1",
+      status: data?.sale?.status,
+      productCategory: data?.product?.categoryName || "N/A",
+      paymentMode: data?.paymentMode,
+      saleId: data?.id,
+      productName: data?.product?.name,
       salePrice: 290000,
-      customer: "John Bull",
-      address: "Abuja",
-      datetime: "2024-12-23T12:34:56",
-      agent: "Jane Doe",
+      customer: customerName,
+      address: customerKey?.location,
+      datetime: data?.createdAt,
+      agent: data?.agent || "N/A",
     };
   };
+
+  const data = generateSaleEntries();
 
   const generateSaleTransactionEntries = (): SaleTransactionsType[] => {
     return [
@@ -90,8 +92,6 @@ const SalesDetailsModal = ({
       },
     ];
   };
-
-  const data = generateSaleEntries();
 
   const cancelSale = async () => {
     const confirmation = prompt(
@@ -155,7 +155,7 @@ const SalesDetailsModal = ({
         setIsOpen(false);
       }}
       leftHeaderComponents={
-        data?.daysToNextInstallment ? (
+        data?.status ? (
           <div className="flex items-center gap-3">
             {[data?.daysToNextInstallment, data?.status].map((item, index) => (
               <SimpleTag
@@ -193,20 +193,10 @@ const SalesDetailsModal = ({
             onTabSelect={(key) => setTabContent(key)}
           />
           <DataStateWrapper
-            isLoading={false}
-            error={""}
-            errorStates={{
-              errorStates: [
-                {
-                  endpoint: "",
-                  errorExists: false,
-                  errorCount: 0,
-                  toastShown: false,
-                },
-              ],
-              isNetworkError: false,
-            }}
-            refreshData={() => Promise.resolve()}
+            isLoading={fetchSingleSale?.isLoading}
+            error={fetchSingleSale?.error}
+            errorStates={fetchSingleSale?.errorStates}
+            refreshData={fetchSingleSale?.mutate}
             errorMessage="Failed to fetch sale details"
           >
             {tabContent === "details" ? (

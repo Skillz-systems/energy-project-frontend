@@ -1,5 +1,5 @@
 // import { useState } from "react";
-import { Table } from "../TableComponent/Table";
+import { PaginationType, Table } from "../TableComponent/Table";
 import { NairaSymbol } from "../CardComponents/CardComponent";
 import { formatDateTime, formatNumberWithCommas } from "@/utils/helpers";
 import roletwo from "../../assets/table/roletwo.svg";
@@ -26,7 +26,13 @@ import { GoDotFill } from "react-icons/go";
 //   return entries;
 // };
 
-const InventoryHistory = ({ historyData }: { historyData: any }) => {
+const InventoryHistory = ({
+  historyData,
+  paginationInfo,
+}: {
+  historyData: any;
+  paginationInfo: PaginationType;
+}) => {
   // const [historyId, setHistoryID] = useState<string | number>("");
   // const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -124,6 +130,7 @@ const InventoryHistory = ({ historyData }: { historyData: any }) => {
           columnList={columnList}
           loading={!historyData}
           tableData={historyData}
+          paginationInfo={paginationInfo}
         />
       </div>
     </>

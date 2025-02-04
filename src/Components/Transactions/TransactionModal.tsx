@@ -45,6 +45,7 @@ const TransactionModal = ({
   //   false
   // );
 
+  // const generateTransactionEntries = (data?: any): TransactionDetailType => {
   const generateTransactionEntries = (): TransactionDetailType => {
     return {
       status: "completed",

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { KeyedMutator } from "swr";
 import { ApiErrorStatesType, useApiCall } from "@/utils/useApiCall";
 import { ErrorComponent } from "@/Pages/ErrorPage";
-import { Table } from "../TableComponent/Table";
+import { PaginationType, Table } from "../TableComponent/Table";
 import TransactionModal from "./TransactionModal";
 import {
   DateTimeTag,
@@ -46,12 +46,14 @@ const TransactionTable = ({
   refreshTable,
   error,
   errorData,
+  paginationInfo,
 }: {
   transactionData: any;
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
   error: any;
   errorData: ApiErrorStatesType;
+  paginationInfo: PaginationType;
 }) => {
   const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -239,6 +241,7 @@ const TransactionTable = ({
               setQueryData(null);
             }}
             queryValue={isSearchQuery ? queryValue : ""}
+            paginationInfo={paginationInfo}
           />
           {transactionID && (
             <TransactionModal

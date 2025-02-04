@@ -200,8 +200,8 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
               onChange={handleMultiSelectChange}
               className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-[10px]"
             >
-              <option value="Single Deposit">Single Deposit</option>
-              <option value="Instalmental">Instalmental</option>
+              <option value="ONE_OFF">Single Deposit</option>
+              <option value="INSTALLMENT">Installment</option>
             </select>
           ) : (
             <div className="flex items-center w-max gap-1">

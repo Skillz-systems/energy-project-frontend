@@ -25,6 +25,8 @@ const Products = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [_productData, setProductData] = useState<any>(null);
   const [formType, setFormType] = useState<ProductFormType>("newProduct");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
 
   const {
     data: productData,
@@ -32,13 +34,28 @@ const Products = () => {
     mutate: allProductsRefresh,
     error: allProductsError,
     errorStates: allProductsErrorStates,
-  } = useGetRequest("/v1/products", true, 60000);
+  } = useGetRequest(
+    `/v1/products?page=${currentPage}&limit=${entriesPerPage}`,
+    true,
+    60000
+  );
 
   const fetchAllProductStats = useGetRequest(
     "/v1/products/statistics/view",
     true,
     60000
   );
+
+  const paginationInfo = () => {
+    const total = productData?.total;
+    return {
+      total,
+      currentPage,
+      entriesPerPage,
+      setCurrentPage,
+      setEntriesPerPage,
+    };
+  };
 
   const navigationList = [
     {
@@ -121,7 +138,7 @@ const Products = () => {
             <TitlePill
               icon={productgreen}
               iconBgColor="bg-[#E3FAD6]"
-              topText="Instalmental"
+              topText="Installment"
               bottomText="PRODUCTS"
               value={0}
             />
@@ -183,6 +200,7 @@ const Products = () => {
                         refreshTable={allProductsRefresh}
                         error={allProductsError}
                         errorData={allProductsErrorStates}
+                        paginationInfo={paginationInfo}
                       />
                     }
                   />

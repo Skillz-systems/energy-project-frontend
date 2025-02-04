@@ -23,7 +23,10 @@ const Transactions = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [_transactionsData, setTransactionsData] = useState<any>(null);
+  // const [transactionsFilter, setTransactionsFilter] = useState<string>("");
   const [, setTransactionsFilter] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   //   const {
   //     data: transactionsData,
   //     isLoading: transactionsLoading,
@@ -36,6 +39,17 @@ const Transactions = () => {
   //     60000
   //   );
   //   const fetchTransactionsStats = useGetRequest("/v1/transactions/stats", true);
+
+  const paginationInfo = () => {
+    const total = _transactionsData?.length;
+    return {
+      total,
+      currentPage,
+      entriesPerPage,
+      setCurrentPage,
+      setEntriesPerPage,
+    };
+  };
 
   useEffect(() => {
     switch (location.pathname) {
@@ -149,6 +163,7 @@ const Transactions = () => {
                           ],
                           isNetworkError: false,
                         }}
+                        paginationInfo={paginationInfo}
                       />
                     }
                   />

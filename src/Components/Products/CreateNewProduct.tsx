@@ -11,11 +11,11 @@ import {
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import SelectInventoryModal from "./SelectInventoryModal";
 import { observer } from "mobx-react-lite";
-import rootStore from "../../stores/rootStore";
 import { CardComponent } from "../CardComponents/CardComponent";
 import { Modal } from "@/Components/ModalComponent/Modal";
 import { z } from "zod";
 import { ProductStore } from "@/stores/ProductStore";
+import { toJS } from "mobx";
 
 export type ProductFormType = "newProduct" | "newCategory";
 
@@ -48,16 +48,6 @@ const formSchema = z.object({
     .trim()
     .min(1, "Product Name is required")
     .max(50, "Product Name cannot exceed 50 characters"),
-  price: z
-    .string()
-    .trim()
-    .regex(
-      /^\d+(\.\d{1,2})?$/,
-      "Price must be a valid number with up to 2 decimal places"
-    )
-    .transform(Number)
-    .refine((num) => num > 0, "Price must be greater than 0")
-    .transform((value) => value.toString()),
   productImage: z
     .instanceof(File)
     .refine(
@@ -88,17 +78,20 @@ const otherFormSchema = z.object({
 
 const mainSchema = formSchema.extend({
   paymentModes: paymentModesSchema,
-  inventoryBatchId: z
-    .array(z.string())
+  inventories: z
+    .array(
+      z.object({
+        inventoryId: z.string(),
+        quantity: z.number().min(1, "Quantity must be at least 1"),
+      })
+    )
     .nonempty("Select at least 1 inventory item"),
 });
-
 const defaultFormData = {
   categoryId: "",
   name: "",
-  inventoryBatchId: [],
+  inventories: [],
   paymentModes: [],
-  price: "",
   productImage: null,
 };
 
@@ -106,7 +99,7 @@ const OtherSubmissonData = {
   name: "",
 };
 
-type FormData = z.infer<typeof formSchema>;
+export type FormData = z.infer<typeof formSchema>;
 type OtherFormData = z.infer<typeof otherFormSchema>;
 
 const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
@@ -169,28 +162,35 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
 
           // Convert form data to an object
           const formFields = Object.fromEntries(formSubmissionData.entries());
-          const inventoryBatchIds = rootStore.productStore.products.map(
-            (product) => product.productId
-          );
+          const inventories = ProductStore.products.map((product) => ({
+            inventoryId: product.productId,
+            quantity: product.productUnits,
+          }));
 
           // Parse the data using the main schema
           const validatedData = mainSchema.parse({
             ...formFields,
             categoryId: formData.categoryId,
             paymentModes: paymentModes,
-            inventoryBatchId: inventoryBatchIds,
+            inventories: inventories,
           });
 
           const submissionData = new FormData();
 
           // Iterate and append validated data to FormData
           Object.entries(validatedData).forEach(([key, value]) => {
-            if (value instanceof File) {
-              submissionData.append(key, value);
-            } else if (value !== null && value !== undefined) {
-              submissionData.append(key, String(value));
+            if (key !== "inventories") {
+              if (value instanceof File) {
+                submissionData.append(key, value);
+              } else if (value !== null && value !== undefined) {
+                submissionData.append(key, String(value));
+              }
             }
           });
+          submissionData.append(
+            "inventories",
+            JSON.stringify(validatedData.inventories)
+          );
 
           // Make the API call
           await apiCall({
@@ -219,7 +219,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
         setIsOpen(false);
         setFormData(defaultFormData);
         setPaymentModes([]);
-        rootStore.productStore.emptyProducts();
+        ProductStore.emptyProducts();
         setOtherFormData(OtherSubmissonData);
       } catch (error: any) {
         if (error instanceof z.ZodError) {
@@ -234,8 +234,8 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
       }
     };
 
-    const selectedProducts = rootStore.productStore.products;
-    const { categoryId, name, price, productImage } = formData;
+    const selectedProducts = ProductStore.products;
+    const { categoryId, name, productImage } = formData;
     const isFormFilled =
       formType === "newProduct"
         ? productImage &&
@@ -306,7 +306,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                   />
                   <ModalInput
                     type="button"
-                    name="inventoryBatchId"
+                    name="inventories"
                     label="INVENTORY"
                     onClick={() => setIsInventoryOpen(true)}
                     placeholder="Select Inventory"
@@ -315,6 +315,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                     itemsSelected={
                       <div className="flex flex-wrap items-center w-full gap-4">
                         {selectedProducts?.map((data, index) => {
+                          console.log(toJS(selectedProducts));
                           return (
                             <CardComponent
                               key={`${data.productId}-${index}`}
@@ -327,7 +328,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                               productUnits={data.productUnits}
                               readOnly={true}
                               onRemoveProduct={(productId) =>
-                                rootStore.productStore.removeProduct(productId)
+                                ProductStore.removeProduct(productId)
                               }
                             />
                           );
@@ -337,30 +338,20 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                     errorMessage={
                       !ProductStore.doesProductCategoriesExist
                         ? "Failed to fetch inventory categories"
-                        : getFieldError("inventoryBatchId")
+                        : getFieldError("inventories")
                     }
                   />
                   <SelectMultipleInput
                     label="Payment Modes"
                     options={[
-                      { label: "Single Deposit", value: "Single Deposit" },
-                      { label: "Instalmental", value: "Instalmental" },
+                      { label: "Single Deposit", value: "ONE_OFF" },
+                      { label: "Installment", value: "INSTALLMENT" },
                     ]}
                     value={paymentModes}
                     onChange={(values) => setPaymentModes(values)}
                     placeholder="Select Payment Modes"
                     required={true}
                     errorMessage={getFieldError("paymentModes")}
-                  />
-                  <Input
-                    type="number"
-                    name="price"
-                    label="SELLING PRICE"
-                    value={price}
-                    onChange={handleInputChange}
-                    placeholder="Selling Price"
-                    required={true}
-                    errorMessage={getFieldError("price")}
                   />
                   <FileInput
                     name="productImage"

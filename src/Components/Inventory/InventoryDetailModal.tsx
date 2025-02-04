@@ -15,29 +15,36 @@ import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 type InventoryData = {
   id: string;
   name: string;
-  dateOfManufacture: string;
+  manufacturerName: string;
   sku: string;
   image: string;
-  batchNumber: number;
-  costOfItem: number;
-  price: number;
-  numberOfStock: number;
-  remainingQuantity: number;
+  dateOfManufacture: string;
   status: string;
   class: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-  inventoryId: string;
-  inventory: {
+  inventoryCategoryId: string;
+  inventorySubCategoryId: string;
+  batches: {
+    id: string;
+    costOfItem: number;
+    price: number;
+    batchNumber: number;
+    numberOfStock: number;
+    remainingQuantity: number;
+    inventoryId: string;
+  }[];
+  inventoryCategory: {
     id: string;
     name: string;
-    manufacturerName: string;
-    inventoryCategoryId: string;
-    inventorySubCategoryId: string;
-    createdAt: string;
-    updatedAt: string;
-    deletedAt: string | null;
+    parentId: string | null;
+    type: string;
+    children: {
+      id: string;
+      name: string;
+      parentId: string;
+      type: string;
+      createdAt: string;
+      updatedAt: string;
+    }[];
   };
 };
 
@@ -60,11 +67,24 @@ const InventoryDetailModal = ({
   refreshTable: KeyedMutator<any>;
 }) => {
   const fetchSingleBatchInventory = useGetRequest(
-    `/v1/inventory/batch/${inventoryID}`,
+    `/v1/inventory/${inventoryID}`,
     false
   );
   const [displayInput, setDisplayInput] = useState<boolean>(false);
   const [tabContent, setTabContent] = useState<string>("details");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
+
+  const paginationInfo = () => {
+    const total = generateRandomInventoryHistoryEntries(50).length;
+    return {
+      total,
+      currentPage,
+      entriesPerPage,
+      setCurrentPage,
+      setEntriesPerPage,
+    };
+  };
 
   const getInventoryData = (data: InventoryData) => {
     const entries = {
@@ -72,13 +92,13 @@ const InventoryDetailModal = ({
       inventoryImage: data?.image,
       inventoryName: data?.name,
       inventoryClass: data?.class,
-      inventoryCategory: "",
+      inventoryCategory: data?.inventoryCategory?.name,
       sku: data?.sku,
-      manufacturerName: data?.inventory?.manufacturerName,
+      manufacturerName: data?.manufacturerName,
       dateOfManufacture: data?.dateOfManufacture,
-      numberOfStock: data?.numberOfStock,
-      costPrice: data?.costOfItem,
-      salePrice: data?.price,
+      numberOfStock: data?.batches[0]?.numberOfStock,
+      costPrice: data?.batches[0]?.costOfItem,
+      salePrice: data?.batches[0]?.price,
     };
     return entries;
   };
@@ -224,6 +244,7 @@ const InventoryDetailModal = ({
           ) : tabContent === "history" ? (
             <InventoryHistory
               historyData={generateRandomInventoryHistoryEntries(50)}
+              paginationInfo={paginationInfo}
             />
           ) : null}
         </div>
