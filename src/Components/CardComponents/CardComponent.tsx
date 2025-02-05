@@ -226,7 +226,7 @@ export default function QuantitySelector({
   onValueChange,
   isSelected,
   onClick,
-  initialQuantity = 1,
+  initialQuantity = 0,
 }: QuantitySelectorProps) {
   const [quantity, setQuantity] = useState<number>(initialQuantity);
 
@@ -238,14 +238,14 @@ export default function QuantitySelector({
     const newValue = quantity + adjustment;
 
     if (totalRemainingQuantities) {
-      if (newValue >= 1 && newValue <= totalRemainingQuantities) {
+      if (newValue >= 0 && newValue <= totalRemainingQuantities) {
         setQuantity(newValue);
         onValueChange(newValue);
       }
     }
   };
 
-  const isMinusDisabled = quantity === 1;
+  const isMinusDisabled = quantity === 0;
   const isPlusDisabled = quantity === totalRemainingQuantities;
 
   return (
@@ -353,7 +353,7 @@ export const CardComponent = ({
 }: CardComponentProps) => {
   const inventoryMobile = useBreakpoint("max", 350);
   const [_productUnits, setProductUnits] = useState<number | any>(
-    productUnits || 1
+    productUnits || 0
   );
   const [_selected, setSelected] = useState<boolean>(
     isProductSelected || false
@@ -369,7 +369,7 @@ export const CardComponent = ({
   };
 
   useEffect(() => {
-    if (productUnits && productUnits > 1) {
+    if (productUnits && productUnits > 0) {
       setProductUnits(productUnits);
     }
   }, [productUnits]);
@@ -380,6 +380,7 @@ export const CardComponent = ({
   };
 
   const handleSelectProduct = () => {
+    if (totalRemainingQuantities === 0) return;
     if (!_selected) {
       if (updatedProductInfo) {
         // Check if onSelectProduct is defined before calling it
@@ -413,6 +414,12 @@ export const CardComponent = ({
           : "w-[32%] min-w-[204px]"
       } bg-white border-[0.6px] rounded-[20px] ${
         _selected || readOnly ? "border-success" : "border-strokeGreyThree"
+      } ${
+        (variant === "inventoryOne" || variant === "inventoryTwo") &&
+        totalRemainingQuantities &&
+        totalRemainingQuantities > 0
+          ? "cursor-pointer"
+          : ""
       }`}
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovered(true)}
@@ -689,6 +696,20 @@ export const CardComponent = ({
                 </p>
               )}
               <p className="text-textDarkGrey text-xs">{productName}</p>
+              <p
+                className={`${
+                  totalRemainingQuantities === 0
+                    ? "text-red-500 font-semibold"
+                    : "text-textDarkGrey font-medium"
+                } text-xs`}
+              >
+                {totalRemainingQuantities === 0
+                  ? "Out of Stock"
+                  : `Qty remaining: ${
+                      totalRemainingQuantities &&
+                      totalRemainingQuantities - updatedProductInfo.productUnits
+                    }`}
+              </p>
             </div>
           ) : null}
         </div>

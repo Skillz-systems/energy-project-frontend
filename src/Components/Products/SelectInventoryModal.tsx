@@ -224,7 +224,7 @@ const SelectInventoryModal = observer(
             />
             <div className="flex items-center justify-between w-full">
               <ListPagination
-                totalItems={fetchInventoryCategoryById?.data?.total}
+                totalItems={fetchInventoryCategoryById?.data?.total || 0}
                 itemsPerPage={entriesPerPage}
                 currentPage={currentPage}
                 onPageChange={handlePageChange}

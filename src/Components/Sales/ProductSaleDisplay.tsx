@@ -5,7 +5,7 @@ import { RiDeleteBin5Fill } from "react-icons/ri";
 import { ExtraInfoType } from "./CreateNewSale";
 import { SaleStore } from "@/stores/SaleStore";
 
-const ProductDetailRow = ({
+export const ProductDetailRow = ({
   label,
   value,
 }: {
