@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect } from "react";
 
+
+
 const ContractModal = ({
   setIsOpen,
   contractDocData,
@@ -7,6 +9,7 @@ const ContractModal = ({
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   contractDocData: {
     contractProducts: { name: string; components: string[] }[];
+    contractID: string; // Add contractID here
   };
 }) => {
   const handleClose = useCallback(() => {

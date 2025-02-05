@@ -1,45 +1,79 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import PageLayout from "./PageLayout";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";
-import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import circleAction from "../assets/settings/addCircle.svg";
 import cancelled from "../assets/cancelled.svg";
 import gradientcontract from "../assets/contracts/gradientcontract.svg";
 import contractsbadge from "../assets/contracts/contractsbadge.png";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import CreateNewContract from "@/Components/Contracts/CreateNewContract";
-import { generateRandomContracts } from "@/Components/TableComponent/sampleData";
-// import { useGetRequest } from "@/utils/useApiCall";
+import { useApiCall } from "@/utils/useApiCall";
 
-const ContractsTable = lazy(
-  () => import("@/Components/Contracts/ContractsTable")
-);
+const ContractsTable = lazy(() => import("@/Components/Contracts/ContractsTable"));
 
 const Contracts = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [_contractsData, setContractsData] = useState<any>(null);
+  const [contractsData, setContractsData] = useState<any>({ contracts: [] }); // Default to empty array
   const [contractsFilter, setContractsFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
-  //   const {
-  //     data: transactionsData,
-  //     isLoading: transactionsLoading,
-  //     mutate: allTransactionsRefresh,
-  //     error: allTransactionsError,
-  //     errorStates: allTransactionsErrorStates,
-  //   } = useGetRequest(
-  //     `/v1/transactions${transactionsFilter && `?status=${transactionsFilter}`}`,
-  //     true,
-  //     60000
-  //   );
-  //   const fetchTransactionsStats = useGetRequest("/v1/transactions/stats", true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<any>(null);
+  const { apiCall } = useApiCall();
+
+
+  const fetchContracts = async (filter: string = "") => {
+    setIsLoading(true);
+    try {
+      const response = await apiCall({
+        endpoint: `/v1/contract${filter ? `?status=${filter}` : ""}`,
+        method: "get",
+        successMessage: "",
+        showToast: false,
+      });
+      setContractsData(response.data);
+    } catch (error) {
+
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchContracts();
+  }, []);
+
+
+
+  useEffect(() => {
+    switch (location.pathname) {
+      case "/contracts/all":
+        setContractsFilter("");
+        fetchContracts();
+        break;
+      case "/contracts/signed":
+        setContractsFilter("signed");
+        fetchContracts("signed");
+        break;
+      case "/contracts/unsigned":
+        setContractsFilter("unsigned");
+        fetchContracts("unsigned");
+        break;
+      case "/contracts/cancelled":
+        setContractsFilter("cancelled");
+        fetchContracts("cancelled");
+        break;
+      default:
+        setContractsFilter("");
+        fetchContracts();
+    }
+  }, [location.pathname]);
 
   const paginationInfo = () => {
-    const total = _contractsData.length;
+    const total = contractsData?.contracts?.length || 0; 
     return {
       total,
       currentPage,
@@ -49,50 +83,26 @@ const Contracts = () => {
     };
   };
 
-  useEffect(() => {
-    switch (location.pathname) {
-      case "/contracts/all":
-        setContractsFilter("");
-        setContractsData(generateRandomContracts(100));
-        break;
-      case "/contracts/signed":
-        setContractsFilter("signed");
-        setContractsData(generateRandomContracts(75));
-        break;
-      case "/contracts/unsigned":
-        setContractsFilter("unsigned");
-        setContractsData(generateRandomContracts(50));
-        break;
-      case "/contracts/cancelled":
-        setContractsFilter("cancelled");
-        setContractsData(generateRandomContracts(25));
-        break;
-      default:
-        setContractsFilter("");
-        setContractsData(generateRandomContracts(100));
-    }
-  }, [location.pathname]);
-
   const navigationList = [
     {
       title: "All Contracts",
       link: "/contracts/all",
-      count: 100,
+      count: contractsData?.contracts?.length || 0, 
     },
     {
       title: "Signed Contracts",
       link: "/contracts/signed",
-      count: 75,
+      count: contractsData?.contracts?.filter((contract: any) => contract.signedAt).length || 0, 
     },
     {
       title: "Unsigned Contracts",
       link: "/contracts/unsigned",
-      count: 50,
+      count: contractsData?.contracts?.filter((contract: any) => !contract.signedAt).length || 0, 
     },
     {
       title: "Cancelled Contracts",
       link: "/contracts/cancelled",
-      count: 25,
+      count: contractsData?.contracts?.filter((contract: any) => contract.status === "cancelled").length || 0, 
     },
   ];
 
@@ -125,62 +135,48 @@ const Contracts = () => {
               iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="CONTRACTS"
-              value={2240}
+              value={contractsData?.contracts?.length || 0}
             />
             <TitlePill
               icon={cancelled}
               iconBgColor="bg-[#FFDBDE]"
               topText="Cancelled"
               bottomText="CONTRACTS"
-              value={120}
+              value={contractsData?.contracts?.filter((contract: any) => contract.status === "cancelled").length || 0}
             />
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
-            {/* <ActionButton
-              label="New Contract"
-              icon={<img src={circleAction} />}
-              onClick={() => {
-                setIsOpen(true);
-              }}
-            /> */}
             <DropDown {...dropDownList} />
           </div>
         </section>
         <div className="flex flex-col w-full px-2 py-8 gap-4 lg:flex-row md:p-8">
           <SideMenu navigationList={navigationList} />
           <section className="relative items-start justify-center flex min-h-[415px] w-full overflow-hidden">
-            <Suspense
-              fallback={
-                <LoadingSpinner parentClass="absolute top-[50%] w-full" />
-              }
-            >
+            <Suspense fallback={<LoadingSpinner parentClass="absolute top-[50%] w-full" />}>
               <Routes>
-                <Route
-                  path="/"
-                  element={<Navigate to="/contracts/all" replace />}
-                />
+                <Route path="/" element={<Navigate to="/contracts/all" replace />} />
                 {contractsPaths.map((path) => (
                   <Route
                     key={path}
                     path={path}
                     element={
                       <ContractsTable
-                        contractsData={_contractsData}
-                        isLoading={false}
-                        refreshTable={() => Promise.resolve()}
-                        error={""}
+                        contractsData={contractsData}
+                        isLoading={isLoading}
+                        refreshTable={() => fetchContracts(contractsFilter)}
+                        error={error}
                         errorData={{
                           errorStates: [
                             {
                               endpoint: "",
-                              errorExists: false,
-                              errorCount: 0,
+                              errorExists: !!error,
+                              errorCount: error ? 1 : 0,
                               toastShown: false,
                             },
                           ],
                           isNetworkError: false,
                         }}
-                        paginationInfo={paginationInfo}
+                        paginationInfo={paginationInfo()}
                       />
                     }
                   />
@@ -193,7 +189,7 @@ const Contracts = () => {
       <CreateNewContract
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        allContractsRefresh={() => Promise.resolve()}
+        allContractsRefresh={() => fetchContracts(contractsFilter)}
       />
     </>
   );
