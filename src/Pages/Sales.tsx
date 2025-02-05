@@ -62,7 +62,7 @@ const Sales = () => {
     {
       title: "All Sales",
       link: "/sales/all",
-      count: _salesData?.total,
+      count: salesData?.total || 0,
     },
   ];
 

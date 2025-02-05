@@ -68,7 +68,7 @@ const Agent = () => {
         setAgentFilter("");
         setAgentsData(agentData);
     }
-  }, [location.pathname, agentData, allAgentErrorStates]);
+  }, [location.pathname, agentData]);
 
   const navigationList = [
     {
