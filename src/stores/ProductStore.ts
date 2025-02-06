@@ -5,7 +5,7 @@ const ProductModel = types.model({
   productImage: types.string,
   productTag: types.string,
   productName: types.string,
-  productPrice: types.number,
+  productPrice: types.string,
   productUnits: types.number,
 });
 
@@ -16,7 +16,20 @@ const productStore = types
   })
   .actions((self) => ({
     addProduct(product: any) {
-      self.products.push(product);
+      const existingIndex = self.products.findIndex(
+        (p) => p.productId === product.productId
+      );
+
+      if (existingIndex !== -1) {
+        // Update existing product
+        self.products[existingIndex] = {
+          ...self.products[existingIndex],
+          ...product,
+        };
+      } else {
+        // Add new product
+        self.products.push(product);
+      }
     },
     removeProduct(productId?: string) {
       const index = self.products.findIndex((p) => p.productId === productId);
@@ -24,14 +37,11 @@ const productStore = types
         self.products.splice(index, 1);
       }
     },
-    updateProduct(
-      productId: string,
-      updatedFields: Partial<Instance<typeof ProductModel>>
-    ) {
-      const product = self.products.find((p) => p.productId === productId);
-      if (product) {
-        Object.assign(product, updatedFields);
-      }
+    currentProductUnits(productId?: string) {
+      const currentUnits = self.products.find(
+        (p) => p.productId === productId
+      )?.productUnits;
+      return currentUnits;
     },
     getProductById(productId: string) {
       const product = self.products.find(

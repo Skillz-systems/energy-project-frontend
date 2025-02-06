@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Table } from "../TableComponent/Table";
+import { PaginationType, Table } from "../TableComponent/Table";
 import role from "../../assets/table/role.svg";
 import clock from "../../assets/table/clock.svg";
 import { GoDotFill } from "react-icons/go";
@@ -45,6 +45,7 @@ const Users = ({
   refreshTable,
   error,
   errorData,
+  paginationInfo,
 }: {
   rolesList: any;
   data: any;
@@ -52,6 +53,7 @@ const Users = ({
   refreshTable: KeyedMutator<any>;
   error: any;
   errorData: ApiErrorStatesType;
+  paginationInfo: PaginationType;
 }) => {
   const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -204,6 +206,7 @@ const Users = ({
               setQueryData(null);
             }}
             queryValue={isSearchQuery ? queryValue : ""}
+            paginationInfo={paginationInfo}
           />
           <UserModal
             isOpen={isOpen}

@@ -22,6 +22,8 @@ const Agent = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [agentsData, setAgentsData] = useState<any>(null);
   const [agentFilter, setAgentFilter] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   const {
     data: agentData,
     isLoading: agentLoading,
@@ -29,11 +31,24 @@ const Agent = () => {
     error: allAgentError,
     errorStates: allAgentErrorStates,
   } = useGetRequest(
-    `/v1/agents${agentFilter && `?status=${agentFilter}`}`,
+    `/v1/agents?page=${currentPage}&limit=${entriesPerPage}&${
+      agentFilter && `status=${agentFilter}`
+    }`,
     true,
     60000
   );
   const fetchAgentStats = useGetRequest("/v1/agents/statistics/view", true);
+
+  const paginationInfo = () => {
+    const total = agentData?.total;
+    return {
+      total,
+      currentPage,
+      entriesPerPage,
+      setCurrentPage,
+      setEntriesPerPage,
+    };
+  };
 
   useEffect(() => {
     switch (location.pathname) {
@@ -45,15 +60,15 @@ const Agent = () => {
         setAgentFilter("active");
         setAgentsData(agentData);
         break;
-      case "/agents/barred":
-        setAgentFilter("barred");
-        setAgentsData(agentData);
-        break;
+      // case "/agents/barred":
+      //   setAgentFilter("barred");
+      //   setAgentsData(agentData);
+      //   break;
       default:
         setAgentFilter("");
         setAgentsData(agentData);
     }
-  }, [location.pathname, agentData, allAgentErrorStates]);
+  }, [location.pathname, agentData]);
 
   const navigationList = [
     {
@@ -61,16 +76,16 @@ const Agent = () => {
       link: "/agents/all",
       count: fetchAgentStats?.data?.total || 0,
     },
-    {
-      title: "Active Agents",
-      link: "/agents/active",
-      count: fetchAgentStats?.data?.active || 0,
-    },
-    {
-      title: "Barred Agents",
-      link: "/agents/barred",
-      count: fetchAgentStats?.data?.barred || 0,
-    },
+    // {
+    //   title: "Active Agents",
+    //   link: "/agents/active",
+    //   count: fetchAgentStats?.data?.active || 0,
+    // },
+    // {
+    //   title: "Barred Agents",
+    //   link: "/agents/barred",
+    //   count: fetchAgentStats?.data?.barred || 0,
+    // },
   ];
 
   const dropDownList = {
@@ -90,7 +105,8 @@ const Agent = () => {
     showCustomButton: true,
   };
 
-  const agentsPaths = ["all", "active", "barred"];
+  // const agentsPaths = ["all", "active", "barred"];
+  const agentsPaths = ["all"];
 
   return (
     <>
@@ -160,6 +176,7 @@ const Agent = () => {
                         refreshTable={allAgentRefresh}
                         error={allAgentError}
                         errorData={allAgentErrorStates}
+                        paginationInfo={paginationInfo}
                       />
                     }
                   />

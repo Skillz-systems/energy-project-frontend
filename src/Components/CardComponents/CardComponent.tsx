@@ -49,10 +49,11 @@ export type CardComponentProps = {
   productStatus?: string;
   productId?: string;
   installment?: number;
-  productPrice?: number;
+  productPrice?: string;
   productImage?: string;
   productName?: string;
   productUnits?: number;
+  totalRemainingQuantities?: number;
   onSelectProduct?: (productInfo: {
     productPrice: any;
     productUnits: any;
@@ -64,11 +65,16 @@ export type CardComponentProps = {
   onRemoveProduct?: (productId?: string) => void;
   isProductSelected?: boolean;
   readOnly?: boolean;
+  isSale?: boolean;
 };
 
-export const ProductTag = ({ productTag }: { productTag?: string }) => {
+export const ProductTag = ({
+  productTag,
+}: {
+  productTag?: string | number;
+}) => {
   return (
-    <p
+    <span
       className={`flex items-center justify-center ${
         productTag === "EAAS"
           ? "bg-purpleBlue"
@@ -78,7 +84,7 @@ export const ProductTag = ({ productTag }: { productTag?: string }) => {
       } w-max text-textBlack text-[12px] font-normal px-1 border-[0.4px] border-strokeGreyTwo rounded-[40px]`}
     >
       {productTag}
-    </p>
+    </span>
   );
 };
 
@@ -209,32 +215,42 @@ export const NairaSymbol = ({ color }: { color?: string }) => {
 };
 
 interface QuantitySelectorProps {
+  totalRemainingQuantities?: number;
   onValueChange: (value: number) => void;
   isSelected: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
+  initialQuantity?: number;
+  isSale?: boolean;
 }
 
 export default function QuantitySelector({
+  totalRemainingQuantities = 1,
   onValueChange,
   isSelected,
   onClick,
+  initialQuantity = 0,
+  isSale,
 }: QuantitySelectorProps) {
-  const [quantity, setQuantity] = useState<number>(1);
+  const [quantity, setQuantity] = useState<number>(initialQuantity);
 
   useEffect(() => {
-    if (!isSelected) {
-      setQuantity(1);
-      onValueChange(1);
-    }
-  }, [isSelected, quantity, onValueChange]);
+    setQuantity(initialQuantity);
+  }, [initialQuantity]);
 
   const updateQuantity = (adjustment: number) => {
     const newValue = quantity + adjustment;
-    if (newValue >= 1) {
+
+    if (
+      !isSale ||
+      (newValue >= 0 && newValue <= (totalRemainingQuantities ?? Infinity))
+    ) {
       setQuantity(newValue);
       onValueChange(newValue);
     }
   };
+
+  const isMinusDisabled = quantity === 0;
+  const isPlusDisabled = isSale && quantity === totalRemainingQuantities;
 
   return (
     <div
@@ -244,8 +260,8 @@ export default function QuantitySelector({
       {isSelected && (
         <button
           onClick={() => updateQuantity(-1)}
-          disabled={quantity === 0}
-          className="group rounded-full disabled:opacity-50 transition-colors"
+          disabled={isMinusDisabled}
+          className="group rounded-full disabled:opacity-50 transition-colors disabled:cursor-not-allowed"
           aria-label="Decrease quantity"
         >
           <svg
@@ -276,7 +292,8 @@ export default function QuantitySelector({
       {isSelected && (
         <button
           onClick={() => updateQuantity(1)}
-          className="group rounded-full disabled:opacity-50 transition-colors"
+          disabled={isPlusDisabled}
+          className="group rounded-full disabled:opacity-50 transition-colors disabled:cursor-not-allowed"
           aria-label="Increase quantity"
         >
           <svg
@@ -332,14 +349,17 @@ export const CardComponent = ({
   productImage,
   productName,
   productUnits,
+  totalRemainingQuantities,
   onSelectProduct,
   onRemoveProduct,
   isProductSelected,
+  isSale = false,
   readOnly = false,
 }: CardComponentProps) => {
   const inventoryMobile = useBreakpoint("max", 350);
-  const [_productUnits, setProductUnits] = useState<number | any>(productUnits);
-  const [_productPrice, setProductPrice] = useState<number | any>(productPrice);
+  const [_productUnits, setProductUnits] = useState<number | any>(
+    productUnits || 0
+  );
   const [_selected, setSelected] = useState<boolean>(
     isProductSelected || false
   );
@@ -353,15 +373,19 @@ export const CardComponent = ({
     productPrice,
   };
 
-  useEffect(() => {}, [_productPrice, _productUnits]);
+  useEffect(() => {
+    if (productUnits && productUnits > 0) {
+      setProductUnits(productUnits);
+    }
+  }, [productUnits]);
 
   const updatedProductInfo = {
     ...productInfo,
-    productPrice: _productPrice,
     productUnits: _productUnits,
   };
 
   const handleSelectProduct = () => {
+    if (totalRemainingQuantities === 0 && isSale) return;
     if (!_selected) {
       if (updatedProductInfo) {
         // Check if onSelectProduct is defined before calling it
@@ -395,6 +419,13 @@ export const CardComponent = ({
           : "w-[32%] min-w-[204px]"
       } bg-white border-[0.6px] rounded-[20px] ${
         _selected || readOnly ? "border-success" : "border-strokeGreyThree"
+      } ${
+        (variant === "inventoryOne" || variant === "inventoryTwo") &&
+        isSale &&
+        totalRemainingQuantities &&
+        totalRemainingQuantities > 0
+          ? "cursor-pointer"
+          : ""
       }`}
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovered(true)}
@@ -552,7 +583,7 @@ export const CardComponent = ({
       </div>
       {/* MIDDLE */}
       {variant === "salesTransactions" ? null : (
-        <div className="flex flex-col gap-2 p-2 test">
+        <div className="flex flex-col gap-2 p-2">
           {variant === "agent" ? (
             <>
               <div className="flex items-center justify-between">
@@ -671,6 +702,23 @@ export const CardComponent = ({
                 </p>
               )}
               <p className="text-textDarkGrey text-xs">{productName}</p>
+              {isSale && (
+                <p
+                  className={`${
+                    totalRemainingQuantities === 0
+                      ? "text-red-500 font-semibold"
+                      : "text-textDarkGrey font-medium"
+                  } text-xs`}
+                >
+                  {totalRemainingQuantities === 0
+                    ? "Out of Stock"
+                    : `Qty remaining: ${
+                        totalRemainingQuantities &&
+                        totalRemainingQuantities -
+                          updatedProductInfo.productUnits
+                      }`}
+                </p>
+              )}
             </div>
           ) : null}
         </div>
@@ -678,7 +726,9 @@ export const CardComponent = ({
       {/* BOTTOM */}
       <div
         className={`flex items-center ${
-          variant === "transactions" || variant === "salesTransactions"
+          variant === "transactions" ||
+          variant === "salesTransactions" ||
+          variant === "inventoryOne"
             ? "justify-end"
             : "justify-between"
         } ${
@@ -702,25 +752,22 @@ export const CardComponent = ({
           />
         ) : variant === "product-no-image" ? (
           <SimpleTag
-            text={productPrice && formatNumberWithCommas(productPrice)}
-            dotColour="#49526A"
-            customIcon={<NairaSymbol color="#828DA9" />}
+            text={productPrice}
+            showIcon={false}
             containerClass="bg-successTwo text-textDarkGrey font-bold px-2 py-1 border border-successThree rounded-full"
           />
         ) : variant === "inventoryOne" ? (
-          <SimpleTag
-            text={productPrice && formatNumberWithCommas(productPrice)}
-            customIcon={<NairaSymbol color="#828DA9" />}
-            containerClass="text-textBlack font-medium px-1 py-0.5 bg-[#eceef1] border-[0.4px] border-strokeGreyTwo rounded-full"
-          />
+          productPrice ? (
+            <SimpleTag
+              text={productPrice}
+              showIcon={false}
+              containerClass="text-textBlack font-medium px-1 py-0.5 bg-[#eceef1] border-[0.4px] border-strokeGreyTwo rounded-full"
+            />
+          ) : null
         ) : variant === "inventoryTwo" ? (
           <SimpleTag
-            text={formatNumberWithCommas(_productPrice || productPrice)}
-            customIcon={
-              <NairaSymbol
-                color={_selected || readOnly ? undefined : "#828DA9"}
-              />
-            }
+            text={productPrice}
+            showIcon={false}
             containerClass="text-textBlack font-medium"
           />
         ) : variant === "salesTransactions" ? null : (
@@ -736,12 +783,19 @@ export const CardComponent = ({
 
         {variant === "inventoryTwo" ? (
           <QuantitySelector
+            // totalRemainingQuantities={totalRemainingQuantities}
             onValueChange={(value) => {
               setProductUnits(value);
-              setProductPrice(productPrice && value * productPrice);
+              const updatedProductInfo = {
+                ...productInfo,
+                productUnits: value, // Include the updated quantity
+              };
+              onSelectProduct?.(updatedProductInfo); // Call onSelectProduct with the updated values
             }}
             isSelected={_selected}
             onClick={(e) => e.stopPropagation()}
+            initialQuantity={_productUnits}
+            isSale={isSale}
           />
         ) : (
           <DropDown {...dropDownList} cardData={productInfo} />

@@ -27,18 +27,33 @@ const Inventory = () => {
   const [_inventoryData, setInventoryData] = useState<any>(null);
   const [formType, setFormType] = useState<InventoryFormType>("newInventory");
   const [inventoryFilter, setInventoryFilter] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   const {
     data: inventoryData,
     isLoading: inventoryLoading,
     mutate: allInventoryRefresh,
     errorStates: allInventoryErrorStates,
   } = useGetRequest(
-    `/v1/inventory${inventoryFilter && `?class=${inventoryFilter}`}`,
+    `/v1/inventory?page=${currentPage}&limit=${entriesPerPage}&${
+      inventoryFilter && `class=${inventoryFilter}`
+    }`,
     true,
     60000
   );
 
   const fetchInventoryStats = useGetRequest("/v1/inventory/stats", true);
+
+  const paginationInfo = () => {
+    const total = inventoryData?.total;
+    return {
+      total,
+      currentPage,
+      entriesPerPage,
+      setCurrentPage,
+      setEntriesPerPage,
+    };
+  };
 
   function getFilteredClassCount(classList: InventoryClass) {
     const filteredClass =
@@ -188,6 +203,7 @@ const Inventory = () => {
                         isLoading={inventoryLoading}
                         refreshTable={allInventoryRefresh}
                         errorData={allInventoryErrorStates}
+                        paginationInfo={paginationInfo}
                       />
                     }
                   />

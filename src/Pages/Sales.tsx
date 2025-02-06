@@ -6,70 +6,69 @@ import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";
 import circleAction from "../assets/settings/addCircle.svg";
-import cancelled from "../assets/cancelled.svg";
 import gradientsales from "../assets/sales/gradientsales.svg";
-import greensales from "../assets/sales/greensales.svg";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import CreateNewSale from "@/Components/Sales/CreateNewSale";
-import { generateRandomSalesEntries } from "@/Components/TableComponent/sampleData";
-// import { useGetRequest } from "@/utils/useApiCall";
+import { useGetRequest } from "@/utils/useApiCall";
+import { observer } from "mobx-react-lite";
+import { SaleStore } from "@/stores/SaleStore";
 
 const SalesTable = lazy(() => import("@/Components/Sales/SalesTable"));
 
-const Sales = () => {
+const Sales = observer(() => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [_salesData, setSalesData] = useState<any>(null);
   const [salesFilter, setSalesFilter] = useState<string>("");
-  //   const {
-  //     data: salesData,
-  //     isLoading: salesLoading,
-  //     mutate: allSalesRefresh,
-  //     error: allSalesError,
-  //     errorStates: allSalesErrorStates,
-  //   } = useGetRequest(
-  //     `/v1/sales${salesFilter && `?status=${salesFilter}`}`,
-  //     true,
-  //     60000
-  //   );
-  //   const fetchSalesStats = useGetRequest("/v1/sales/stats", true);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
+  const {
+    data: salesData,
+    isLoading: salesLoading,
+    mutate: allSalesRefresh,
+    error: allSalesError,
+    errorStates: allSalesErrorStates,
+  } = useGetRequest(
+    `/v1/sales?page=${currentPage}&limit=${entriesPerPage}&${
+      salesFilter && `status=${salesFilter}`
+    }`,
+    true,
+    60000
+  );
+
+  const paginationInfo = () => {
+    const total = salesData?.total;
+    return {
+      total,
+      currentPage,
+      entriesPerPage,
+      setCurrentPage,
+      setEntriesPerPage,
+    };
+  };
 
   useEffect(() => {
     switch (location.pathname) {
       case "/sales/all":
         setSalesFilter("");
-        setSalesData(generateRandomSalesEntries(100));
-        break;
-      case "/sales/new":
-        setSalesFilter("new");
-        setSalesData(generateRandomSalesEntries(25));
-        break;
-      case "/sales/closed":
-        setSalesFilter("closed");
-        setSalesData(generateRandomSalesEntries(75));
+        setSalesData(salesData);
         break;
       default:
         setSalesFilter("");
-        setSalesData(generateRandomSalesEntries(100));
+        setSalesData(salesData);
     }
-  }, [location.pathname]);
+  }, [location.pathname, salesData]);
+
+  useEffect(() => {
+    SaleStore.purgeStore();
+  }, []);
 
   const navigationList = [
     {
       title: "All Sales",
       link: "/sales/all",
-      count: 100,
-    },
-    {
-      title: "New Sales",
-      link: "/sales/new",
-      count: 25,
-    },
-    {
-      title: "Closed Sales",
-      link: "/sales/closed",
-      count: 75,
+      count: salesData?.total || 0,
     },
   ];
 
@@ -90,7 +89,7 @@ const Sales = () => {
     showCustomButton: true,
   };
 
-  const salesPaths = ["all", "new", "closed"];
+  const salesPaths = ["all"];
 
   return (
     <>
@@ -102,21 +101,7 @@ const Sales = () => {
               iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="SALES"
-              value={2240}
-            />
-            <TitlePill
-              icon={greensales}
-              iconBgColor="bg-[#E3FAD6]"
-              topText="Active"
-              bottomText="SALES"
-              value={200}
-            />
-            <TitlePill
-              icon={cancelled}
-              iconBgColor="bg-[#FFDBDE]"
-              topText="Cancelled"
-              bottomText="SALES"
-              value={120}
+              value={_salesData?.total}
             />
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
@@ -150,20 +135,11 @@ const Sales = () => {
                     element={
                       <SalesTable
                         salesData={_salesData}
-                        isLoading={false}
-                        refreshTable={() => Promise.resolve()}
-                        error={""}
-                        errorData={{
-                          errorStates: [
-                            {
-                              endpoint: "",
-                              errorExists: false,
-                              errorCount: 0,
-                              toastShown: false,
-                            },
-                          ],
-                          isNetworkError: false,
-                        }}
+                        isLoading={salesLoading}
+                        refreshTable={allSalesRefresh}
+                        error={allSalesError}
+                        errorData={allSalesErrorStates}
+                        paginationInfo={paginationInfo}
                       />
                     }
                   />
@@ -176,10 +152,10 @@ const Sales = () => {
       <CreateNewSale
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        allSalesRefresh={() => Promise.resolve()}
+        allSalesRefresh={allSalesRefresh}
       />
     </>
   );
-};
+});
 
 export default Sales;

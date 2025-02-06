@@ -3,7 +3,7 @@ import { CardComponent } from "../CardComponents/CardComponent";
 const InventoryDetails = ({ inventoryData }: { inventoryData: any[] }) => {
   return (
     <div className="flex items-center flex-wrap gap-4 md:gap-3 lg:gap-4 w-full">
-      {inventoryData.map((inventory, index) => (
+      {inventoryData?.map((inventory, index) => (
         <CardComponent
           key={index}
           variant="inventoryOne"

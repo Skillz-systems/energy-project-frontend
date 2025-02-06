@@ -21,6 +21,8 @@ const Customers = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [_customerData, setCustomerData] = useState<any>(null);
   const [customerFilter, setCustomerFilter] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   const {
     data: customerData,
     isLoading: customerLoading,
@@ -28,11 +30,24 @@ const Customers = () => {
     error: allCustomerError,
     errorStates: allCustomerErrorStates,
   } = useGetRequest(
-    `/v1/customers${customerFilter && `?status=${customerFilter}`}`,
+    `/v1/customers?page=${currentPage}&limit=${entriesPerPage}&${
+      customerFilter && `status=${customerFilter}`
+    }`,
     true,
     60000
   );
   const fetchCustomerStats = useGetRequest("/v1/customers/stats", true);
+
+  const paginationInfo = () => {
+    const total = customerData?.total;
+    return {
+      total,
+      currentPage,
+      entriesPerPage,
+      setCurrentPage,
+      setEntriesPerPage,
+    };
+  };
 
   useEffect(() => {
     switch (location.pathname) {
@@ -40,16 +55,12 @@ const Customers = () => {
         setCustomerFilter("");
         setCustomerData(customerData);
         break;
-      case "/customers/new":
-        setCustomerFilter("new");
-        setCustomerData(customerData);
-        break;
       case "/customers/active":
-        setCustomerFilter("active");
+        setCustomerFilter(`active`);
         setCustomerData(customerData);
         break;
       case "/customers/barred":
-        setCustomerFilter("barred");
+        setCustomerFilter(`barred`);
         setCustomerData(customerData);
         break;
       default:
@@ -63,11 +74,6 @@ const Customers = () => {
       title: "All Customers",
       link: "/customers/all",
       count: fetchCustomerStats?.data?.totalCustomerCount || 0,
-    },
-    {
-      title: "New Customers",
-      link: "/customers/new",
-      count: fetchCustomerStats?.data?.newCustomerCount || 0,
     },
     {
       title: "Active Customers",
@@ -98,7 +104,7 @@ const Customers = () => {
     showCustomButton: true,
   };
 
-  const customerPaths = ["all", "new", "active", "barred"];
+  const customerPaths = ["all", "active", "barred"];
 
   return (
     <>
@@ -169,6 +175,7 @@ const Customers = () => {
                         refreshTable={allCustomerRefresh}
                         error={allCustomerError}
                         errorData={allCustomerErrorStates}
+                        paginationInfo={paginationInfo}
                       />
                     }
                   />

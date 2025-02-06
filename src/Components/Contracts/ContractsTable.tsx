@@ -2,11 +2,12 @@ import { useState } from "react";
 import { ApiErrorStatesType, useApiCall } from "@/utils/useApiCall";
 import { KeyedMutator } from "swr";
 import { ErrorComponent } from "@/Pages/ErrorPage";
-import { Table } from "../TableComponent/Table";
+import { PaginationType, Table } from "../TableComponent/Table";
 import gradientcontract from "../../assets/contracts/gradientcontract.svg";
-import { ProductTag } from "../CardComponents/CardComponent";
+// import { ProductTag } from "../CardComponents/CardComponent";
 import roletwo from "../../assets/table/roletwo.svg";
 import ContractModal from "./ContractModal";
+import { Contract } from "./contractType";
 
 type ContractEntries = {
   productCategory: string;
@@ -17,12 +18,12 @@ type ContractEntries = {
 
 // Helper function to map the API data to the desired format
 const generateContractEntries = (data: any): ContractEntries[] => {
-  const entries: ContractEntries[] = data?.map((item: any) => {
+  const entries: ContractEntries[] = data?.contracts?.map((item: Contract) => {
     return {
-      productCategory: item?.productCategory,
-      paymentMode: item?.paymentMode,
-      customer: item?.customer,
-      contractSigned: item?.contractSigned,
+      productCategory: "",
+      paymentMode: "",
+      customer: item?.fullNameAsOnID,
+      contractSigned: Boolean(item?.signedAt),
     };
   });
   return entries;
@@ -34,12 +35,14 @@ const ContractsTable = ({
   refreshTable,
   error,
   errorData,
+  paginationInfo,
 }: {
   contractsData: any;
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
   error: any;
   errorData: ApiErrorStatesType;
+  paginationInfo: PaginationType;
 }) => {
   const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -115,7 +118,28 @@ const ContractsTable = ({
     } else return generateContractEntries(contractsData);
   };
 
-  console.log(contractID);
+  const contractProducts = [
+    {
+      name: "Lemi 10W",
+      components: [
+        "(1) Solar Unit",
+        "(1) Solar Panel",
+        "(2) LED Bulbs",
+        "Phone Charging Cables",
+      ],
+    },
+    {
+      name: "Lemi 30W",
+      components: [
+        "(1) Solar Unit",
+        "(1) Solar Panel",
+        "(1) Fan",
+        "(3) LED Bulbs",
+        "Phone Charging Cables",
+      ],
+    },
+  ];
+
   return (
     <>
       {!error ? (
@@ -133,10 +157,8 @@ const ContractsTable = ({
                   key={index}
                   {...item}
                   handleContractClick={() => {
-                    if (item.contractSigned) {
-                      setIsOpen(true);
-                      setContractID(index.toLocaleString());
-                    }
+                    setIsOpen(true);
+                    setContractID(index.toLocaleString());
                   }}
                 />
               ));
@@ -146,11 +168,12 @@ const ContractsTable = ({
               setQueryData(null);
             }}
             queryValue={isSearchQuery ? queryValue : ""}
+            paginationInfo={paginationInfo}
           />
           {isOpen && contractID && (
             <ContractModal
               setIsOpen={setIsOpen}
-              contractDocData={{ contractID }}
+              contractDocData={{ contractProducts }}
             />
           )}
         </div>
@@ -173,17 +196,9 @@ export const ContractCardComponent = (
 ) => {
   return (
     <div
-      className={`relative flex flex-col justify-between gap-2 w-[32%] min-w-[204px] min-h-[220px] p-4 bg-white border-[0.6px] border-strokeGreyThree rounded-xl shadow-sm  ${
-        props.contractSigned
-          ? "group cursor-pointer transition-all hover:bg-[#F6F8FA]"
-          : ""
-      } `}
+      className={`relative flex flex-col justify-between gap-2 w-[32%] min-w-[204px] min-h-[220px] p-4 bg-white border-[0.6px] border-strokeGreyThree rounded-xl shadow-sm group cursor-pointer transition-all hover:bg-[#F6F8FA]`}
       onClick={props.handleContractClick}
-      title={
-        props.contractSigned
-          ? "Open Contract Document"
-          : "No Signed Contract Document"
-      }
+      title={"Open Contract Document"}
     >
       <div className="flex items-center justify-between gap-2 w-full">
         <div
@@ -226,10 +241,10 @@ export const ContractCardComponent = (
         </div>
       </div>
       <div className="flex flex-col gap-2.5 w-full">
-        <div className="flex items-center gap-1 pl-1 pr-2 py-1 w-max bg-[#F6F8FA] border-[0.4px] border-strokeGreyTwo rounded-full">
+        {/* <div className="flex items-center gap-1 pl-1 pr-2 py-1 w-max bg-[#F6F8FA] border-[0.4px] border-strokeGreyTwo rounded-full">
           <ProductTag productTag={props.productCategory} />
           <p className="text-textBlack text-xs">{props.paymentMode}</p>
-        </div>
+        </div> */}
         <div className={`flex items-center gap-1 w-max`}>
           <img src={roletwo} alt="icon" />
           <span className="bg-[#EFF2FF] px-2 py-1 text-xs text-textBlack font-semibold rounded-full capitalize">

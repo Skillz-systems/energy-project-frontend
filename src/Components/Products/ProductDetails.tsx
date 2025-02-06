@@ -2,12 +2,8 @@ import React, { useState } from "react";
 import producticon from "../../assets/product-grey.svg";
 import creditcardicon from "../../assets/creditcardgrey.svg";
 import settingsicon from "../../assets/settings.svg";
-import {
-  NairaSymbol,
-  NameTag,
-  ProductTag,
-} from "../CardComponents/CardComponent";
-import { formatDateTime, formatNumberWithCommas } from "../../utils/helpers";
+import { NameTag, ProductTag } from "../CardComponents/CardComponent";
+import { formatDateTime } from "../../utils/helpers";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { SmallFileInput } from "../InputComponent/Input";
 import { LuImagePlus } from "react-icons/lu";
@@ -18,7 +14,7 @@ interface ProductDetailsProps {
   productImage: string;
   productName: string;
   productTag: string;
-  productPrice: number;
+  productPrice: string;
   paymentModes: string[] | string;
   datetime: string;
   name: string;
@@ -45,7 +41,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
   productImage = "",
   productName = "",
   productTag = "",
-  productPrice = 0,
+  productPrice = "",
   paymentModes = [],
   datetime = "",
   name = "",
@@ -56,7 +52,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
     productId,
     productImage: productImage ?? "",
     productTag,
-    productPrice,
     paymentModes,
     productName: `${productTag}-${productId}`,
   });
@@ -174,21 +169,9 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
         </p>
         <div className="flex items-center justify-between">
           <Tag name="Product Price" />
-          {displayInput ? (
-            <input
-              type="number"
-              name="productPrice"
-              value={formData.productPrice}
-              onChange={handleChange}
-              placeholder="Enter Product Price"
-              className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
-            />
-          ) : (
-            <p className="flex items-center gap-0.5 text-xs font-bold text-textDarkGrey">
-              <NairaSymbol color="#828DA9" />
-              {formatNumberWithCommas(productPrice)}
-            </p>
-          )}
+          <p className="flex items-center gap-0.5 text-xs font-bold text-textDarkGrey">
+            {productPrice}
+          </p>
         </div>
         <div className="flex items-center justify-between">
           <Tag name="Payment Mode(s)" variant="ink" />
@@ -200,8 +183,8 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
               onChange={handleMultiSelectChange}
               className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-[10px]"
             >
-              <option value="Single Deposit">Single Deposit</option>
-              <option value="Instalmental">Instalmental</option>
+              <option value="ONE_OFF">Single Deposit</option>
+              <option value="INSTALLMENT">Installment</option>
             </select>
           ) : (
             <div className="flex items-center w-max gap-1">
