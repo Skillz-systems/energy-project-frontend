@@ -157,6 +157,7 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
         placeholder="Enter Date of Birth"
         required={false}
         errorMessage={getFieldError("dateOfBirth")}
+        description={"Enter Date of Birth"}
       />
       <Input
         type="text"
@@ -217,6 +218,7 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
         placeholder="Enter Issue Date"
         required={false}
         errorMessage={getFieldError("issueDate")}
+        description={"Enter Issue Date"}
       />
       <Input
         type="date"
@@ -227,6 +229,7 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
         placeholder="Enter Expiration Date"
         required={false}
         errorMessage={getFieldError("expirationDate")}
+        description={"Enter Expiration Date"}
       />
       <Input
         type="text"

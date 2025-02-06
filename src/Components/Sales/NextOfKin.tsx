@@ -124,6 +124,7 @@ const NextOfKinForm = ({ handleClose }: { handleClose: () => void }) => {
         placeholder="Enter Date of Birth"
         required={false}
         errorMessage={getFieldError("dateOfBirth")}
+        description={"Enter Date of Birth"}
       />
       <Input
         type="text"

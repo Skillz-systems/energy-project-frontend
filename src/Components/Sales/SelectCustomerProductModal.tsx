@@ -218,135 +218,134 @@ const SelectCustomerProductModal = observer(
         }
         rightHeaderContainerClass="h-full items-start"
       >
-        <DataStateWrapper
-          isLoading={fetchedData?.isLoading}
-          error={fetchedData?.error}
-          errorStates={fetchedData?.errorStates}
-          refreshData={fetchedData?.mutate}
-          errorMessage={`Failed to fetch ${
-            modalType === "customer" ? "customers" : "product categories"
-          }`}
-        >
-          <div className="flex flex-col gap-2 px-4 py-8">
-            {modalType === "product" ? (
-              <TabComponent
-                tabs={tabNames.map(({ name, key }) => ({
-                  name,
-                  key,
-                  count: null,
-                }))}
-                onTabSelect={handleTabSelect}
-                activeTabName={activeTabName}
-              />
-            ) : null}
-            <div className="flex items-center justify-between w-full">
-              <ListPagination
-                totalItems={fetchedData?.data?.total}
-                itemsPerPage={entriesPerPage}
-                currentPage={currentPage}
-                onPageChange={handlePageChange}
-                label={activeTabName}
-              />
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center bg-[#F9F9F9] px-2 text-textDarkGrey w-max gap-1 h-[24px] border-[0.6px] border-strokeGreyThree rounded-full">
-                  <p className="flex items-center justify-center text-xs">
-                    Item{itemsSelected > 1 ? "s" : ""} Selected
-                  </p>
-                  <span className="flex items-center justify-center w-max h-4 px-1 bg-[#EAEEF2] text-xs border-[0.2px] border-strokeGrey rounded-full">
-                    {itemsSelected}
-                  </span>
-                </div>
-                <button
-                  disabled={itemsSelected === 0}
-                  onClick={() => setModalOpen(false)}
-                  className={`text-sm  ${
-                    itemsSelected > 0
-                      ? "bg-primaryGradient text-white"
-                      : "bg-[#F6F8FA] text-textDarkGrey cursor-not-allowed"
-                  } h-[24px] px-4 border-[0.6px] border-strokeGreyTwo rounded-full`}
-                >
-                  Done
-                </button>
+        <div className="flex flex-col gap-2 px-4 py-8">
+          {modalType === "product" ? (
+            <TabComponent
+              tabs={tabNames.map(({ name, key }) => ({
+                name,
+                key,
+                count: null,
+              }))}
+              onTabSelect={handleTabSelect}
+              activeTabName={activeTabName}
+            />
+          ) : null}
+          <div className="flex items-center justify-between w-full">
+            <ListPagination
+              totalItems={fetchedData?.data?.total || 0}
+              itemsPerPage={entriesPerPage}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+              label={activeTabName}
+            />
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center bg-[#F9F9F9] px-2 text-textDarkGrey w-max gap-1 h-[24px] border-[0.6px] border-strokeGreyThree rounded-full">
+                <p className="flex items-center justify-center text-xs">
+                  Item{itemsSelected > 1 ? "s" : ""} Selected
+                </p>
+                <span className="flex items-center justify-center w-max h-4 px-1 bg-[#EAEEF2] text-xs border-[0.2px] border-strokeGrey rounded-full">
+                  {itemsSelected}
+                </span>
               </div>
-            </div>
-            <div className="w-full">
-              <TableSearch
-                name={"Search"}
-                onSearch={(query: string) => {
-                  setQueryValue(query);
-                  setCurrentPage(1);
-                }}
-                queryValue={queryValue}
-                setQueryValue={setQueryValue}
-                refreshTable={fetchedData.mutate}
-                placeholder={`Search ${activeTabName} here`}
-                containerClass="w-full"
-                inputContainerStyle="w-full"
-                inputClass="w-full h-[32px] pl-3 bg-[#F9F9F9]"
-                buttonContainerStyle="w-full h-[32px] pl-3 pr-2 bg-white shadow-innerCustom"
-                icon={searchIcon}
-              />
-            </div>
-            {/* CONDITIONALLY RENDER THE CUSTOMER AND PRODUCT DATA HERE */}
-            {modalType === "product" ? (
-              <DataStateWrapper
-                isLoading={fetchProductCategoryById?.isLoading}
-                error={fetchProductCategoryById?.error}
-                errorStates={fetchProductCategoryById?.errorStates}
-                refreshData={fetchProductCategoryById?.mutate}
-                errorMessage={`Failed to fetch products list for "${activeTabName}".`}
+              <button
+                disabled={itemsSelected === 0}
+                onClick={() => setModalOpen(false)}
+                className={`text-sm  ${
+                  itemsSelected > 0
+                    ? "bg-primaryGradient text-white"
+                    : "bg-[#F6F8FA] text-textDarkGrey cursor-not-allowed"
+                } h-[24px] px-4 border-[0.6px] border-strokeGreyTwo rounded-full`}
               >
-                <div
-                  className={`flex flex-wrap ${
-                    fetchProductCategoryById?.error
-                      ? "justify-center"
-                      : "justify-start"
-                  } items-center h-full gap-4`}
-                >
-                  {fetchedData?.data?.total > 0 ? (
-                    paginatedData?.map((data: any, index: number) => {
-                      return (
-                        <CardComponent
-                          key={`${data.productId}-${index}`}
-                          variant={"inventoryTwo"}
-                          productId={data.productId}
-                          productImage={data.productImage}
-                          productTag={data.productTag}
-                          productName={data.productName}
-                          productPrice={data.productPrice}
-                          productUnits={SaleStore.currentProductUnits(
-                            data.productId
-                          )}
-                          totalRemainingQuantities={
-                            data.totalRemainingQuantities
-                          }
-                          onSelectProduct={(productInfo) => {
-                            if (productInfo) SaleStore.addProduct(productInfo);
-                          }}
-                          onRemoveProduct={(productId) =>
-                            SaleStore.removeProduct(productId)
-                          }
-                          isProductSelected={SaleStore.products.some(
-                            (p) => p.productId === data.productId
-                          )}
-                        />
-                      );
-                    })
-                  ) : (
-                    <div className="flex flex-col items-center justify-center w-full h-full pt-16">
-                      <img
-                        src={wrong}
-                        alt="No data available"
-                        className="w-[100px]"
+                Done
+              </button>
+            </div>
+          </div>
+          <div className="w-full">
+            <TableSearch
+              name={"Search"}
+              onSearch={(query: string) => {
+                setQueryValue(query);
+                setCurrentPage(1);
+              }}
+              queryValue={queryValue}
+              setQueryValue={setQueryValue}
+              refreshTable={fetchedData.mutate}
+              placeholder={`Search ${activeTabName} here`}
+              containerClass="w-full"
+              inputContainerStyle="w-full"
+              inputClass="w-full h-[32px] pl-3 bg-[#F9F9F9]"
+              buttonContainerStyle="w-full h-[32px] pl-3 pr-2 bg-white shadow-innerCustom"
+              icon={searchIcon}
+            />
+          </div>
+          {/* CONDITIONALLY RENDER THE CUSTOMER AND PRODUCT DATA HERE */}
+          {modalType === "product" ? (
+            <DataStateWrapper
+              isLoading={fetchProductCategoryById?.isLoading}
+              error={fetchProductCategoryById?.error}
+              errorStates={fetchProductCategoryById?.errorStates}
+              refreshData={fetchProductCategoryById?.mutate}
+              errorMessage={`Failed to fetch products list for "${activeTabName}".`}
+            >
+              <div
+                className={`flex flex-wrap ${
+                  fetchProductCategoryById?.error
+                    ? "justify-center"
+                    : "justify-start"
+                } items-center h-full gap-4`}
+              >
+                {fetchedData?.data?.total > 0 ? (
+                  paginatedData?.map((data: any, index: number) => {
+                    return (
+                      <CardComponent
+                        key={`${data.productId}-${index}`}
+                        variant={"inventoryTwo"}
+                        isSale={true}
+                        productId={data.productId}
+                        productImage={data.productImage}
+                        productTag={data.productTag}
+                        productName={data.productName}
+                        productPrice={data.productPrice}
+                        productUnits={SaleStore.currentProductUnits(
+                          data.productId
+                        )}
+                        totalRemainingQuantities={data.totalRemainingQuantities}
+                        onSelectProduct={(productInfo) => {
+                          if (productInfo) SaleStore.addProduct(productInfo);
+                        }}
+                        onRemoveProduct={(productId) =>
+                          SaleStore.removeProduct(productId)
+                        }
+                        isProductSelected={SaleStore.products.some(
+                          (p) => p.productId === data.productId
+                        )}
                       />
-                      <p className="text-textBlack font-medium">
-                        No data available
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </DataStateWrapper>
-            ) : (
+                    );
+                  })
+                ) : (
+                  <div className="flex flex-col items-center justify-center w-full h-full pt-16">
+                    <img
+                      src={wrong}
+                      alt="No data available"
+                      className="w-[100px]"
+                    />
+                    <p className="text-textBlack font-medium">
+                      No data available
+                    </p>
+                  </div>
+                )}
+              </div>
+            </DataStateWrapper>
+          ) : (
+            <DataStateWrapper
+              isLoading={fetchAllCustomers?.isLoading}
+              error={fetchAllCustomers?.error}
+              errorStates={fetchAllCustomers?.errorStates}
+              refreshData={fetchAllCustomers?.mutate}
+              errorMessage={`Failed to fetch ${
+                modalType === "customer" ? "customers" : "product categories"
+              }`}
+            >
               <CustomerSalesTable
                 customerData={paginatedCustomerData}
                 customerSelected={SaleStore.customer}
@@ -356,9 +355,9 @@ const SelectCustomerProductModal = observer(
                 }}
                 onRemoveCustomer={SaleStore.removeCustomer}
               />
-            )}
-          </div>
-        </DataStateWrapper>
+            </DataStateWrapper>
+          )}
+        </div>
       </Modal>
     );
   }

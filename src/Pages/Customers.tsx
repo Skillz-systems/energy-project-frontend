@@ -30,8 +30,8 @@ const Customers = () => {
     error: allCustomerError,
     errorStates: allCustomerErrorStates,
   } = useGetRequest(
-    `/v1/customers?page=${currentPage}&limit=${entriesPerPage}${
-      customerFilter && `?${customerFilter}`
+    `/v1/customers?page=${currentPage}&limit=${entriesPerPage}&${
+      customerFilter && `status=${customerFilter}`
     }`,
     true,
     60000
@@ -55,16 +55,12 @@ const Customers = () => {
         setCustomerFilter("");
         setCustomerData(customerData);
         break;
-      case "/customers/new":
-        setCustomerFilter(`isNew=true`);
-        setCustomerData(customerData);
-        break;
       case "/customers/active":
-        setCustomerFilter(`status=active`);
+        setCustomerFilter(`active`);
         setCustomerData(customerData);
         break;
       case "/customers/barred":
-        setCustomerFilter(`status=barred`);
+        setCustomerFilter(`barred`);
         setCustomerData(customerData);
         break;
       default:
@@ -78,11 +74,6 @@ const Customers = () => {
       title: "All Customers",
       link: "/customers/all",
       count: fetchCustomerStats?.data?.totalCustomerCount || 0,
-    },
-    {
-      title: "New Customers",
-      link: "/customers/new",
-      count: fetchCustomerStats?.data?.newCustomerCount || 0,
     },
     {
       title: "Active Customers",
@@ -113,7 +104,7 @@ const Customers = () => {
     showCustomButton: true,
   };
 
-  const customerPaths = ["all", "new", "active", "barred"];
+  const customerPaths = ["all", "active", "barred"];
 
   return (
     <>
