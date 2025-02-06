@@ -109,9 +109,7 @@ export default function MiscellaneousForm({
         {items.map((item, index) => (
           <div
             key={index}
-            className={`grid grid-cols-[1fr,1fr,auto] gap-4 items-start ${
-              errors[index] ? "animate-shake" : ""
-            }`}
+            className="grid grid-cols-[1fr,1fr,auto] gap-4 items-start"
           >
             <div className="space-y-1">
               <input

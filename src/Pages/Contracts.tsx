@@ -29,8 +29,8 @@ const Contracts = () => {
     error: allContractsError,
     errorStates: allContractsErrorStates,
   } = useGetRequest(
-    `/v1/contract?page=${currentPage}&limit=${entriesPerPage}${
-      contractsFilter && `?status=${contractsFilter}`
+    `/v1/contract?page=${currentPage}&limit=${entriesPerPage}&${
+      contractsFilter && `status=${contractsFilter}`
     }`,
     true,
     60000

@@ -31,8 +31,8 @@ const Agent = () => {
     error: allAgentError,
     errorStates: allAgentErrorStates,
   } = useGetRequest(
-    `/v1/agents?page=${currentPage}&limit=${entriesPerPage}${
-      agentFilter && `?status=${agentFilter}`
+    `/v1/agents?page=${currentPage}&limit=${entriesPerPage}&${
+      agentFilter && `status=${agentFilter}`
     }`,
     true,
     60000
@@ -60,10 +60,10 @@ const Agent = () => {
         setAgentFilter("active");
         setAgentsData(agentData);
         break;
-      case "/agents/barred":
-        setAgentFilter("barred");
-        setAgentsData(agentData);
-        break;
+      // case "/agents/barred":
+      //   setAgentFilter("barred");
+      //   setAgentsData(agentData);
+      //   break;
       default:
         setAgentFilter("");
         setAgentsData(agentData);
@@ -76,16 +76,16 @@ const Agent = () => {
       link: "/agents/all",
       count: fetchAgentStats?.data?.total || 0,
     },
-    {
-      title: "Active Agents",
-      link: "/agents/active",
-      count: fetchAgentStats?.data?.active || 0,
-    },
-    {
-      title: "Barred Agents",
-      link: "/agents/barred",
-      count: fetchAgentStats?.data?.barred || 0,
-    },
+    // {
+    //   title: "Active Agents",
+    //   link: "/agents/active",
+    //   count: fetchAgentStats?.data?.active || 0,
+    // },
+    // {
+    //   title: "Barred Agents",
+    //   link: "/agents/barred",
+    //   count: fetchAgentStats?.data?.barred || 0,
+    // },
   ];
 
   const dropDownList = {
@@ -105,7 +105,8 @@ const Agent = () => {
     showCustomButton: true,
   };
 
-  const agentsPaths = ["all", "active", "barred"];
+  // const agentsPaths = ["all", "active", "barred"];
+  const agentsPaths = ["all"];
 
   return (
     <>

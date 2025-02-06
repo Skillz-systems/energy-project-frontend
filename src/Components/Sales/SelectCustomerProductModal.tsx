@@ -300,6 +300,7 @@ const SelectCustomerProductModal = observer(
                       <CardComponent
                         key={`${data.productId}-${index}`}
                         variant={"inventoryTwo"}
+                        isSale={true}
                         productId={data.productId}
                         productImage={data.productImage}
                         productTag={data.productTag}

@@ -368,12 +368,9 @@ const saleStore = types
       return parameters;
     },
     removeParameter(currentProductId?: string) {
-      const index = self.parameters.findIndex(
-        (p) => p.currentProductId === currentProductId
+      self.parameters.replace(
+        self.parameters.filter((p) => p.currentProductId !== currentProductId)
       );
-      if (index !== -1) {
-        self.parameters.splice(index, 1);
-      }
     },
     addOrUpdateMiscellaneousPrice(
       currentProductId: string,
@@ -403,12 +400,11 @@ const saleStore = types
       );
     },
     removeMiscellaneousPrice(currentProductId?: string) {
-      const index = self.miscellaneousPrices.findIndex(
-        (p) => p.currentProductId === currentProductId
+      self.miscellaneousPrices.replace(
+        self.miscellaneousPrices.filter(
+          (p) => p.currentProductId !== currentProductId
+        )
       );
-      if (index !== -1) {
-        self.miscellaneousPrices.splice(index, 1);
-      }
     },
     addOrUpdateDevices(currentProductId: string, deviceList: string[]) {
       const existingIndex = self.devices.findIndex(
@@ -432,12 +428,9 @@ const saleStore = types
       return devices;
     },
     removeDevices(currentProductId?: string) {
-      const index = self.devices.findIndex(
-        (d) => d.currentProductId === currentProductId
+      self.devices.replace(
+        self.devices.filter((d) => d.currentProductId !== currentProductId)
       );
-      if (index !== -1) {
-        self.devices.splice(index, 1);
-      }
     },
     addIdentificationDetails(details: typeof self.identificationDetails) {
       self.identificationDetails = details;
@@ -523,14 +516,11 @@ const saleStore = types
       return recipient;
     },
     removeRecipient(currentProductId: string) {
-      const existingIndex = self.saleRecipient.findIndex(
-        (d) => d.currentProductId === currentProductId
+      self.saleRecipient.replace(
+        self.saleRecipient.filter(
+          (d) => d.currentProductId !== currentProductId
+        )
       );
-
-      if (existingIndex !== -1) {
-        // Remove the recipient at the found index
-        self.saleRecipient.splice(existingIndex, 1);
-      }
     },
     purgeStore() {
       applySnapshot(self, defaultValues);
