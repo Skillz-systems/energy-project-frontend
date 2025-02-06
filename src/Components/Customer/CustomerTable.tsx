@@ -81,7 +81,7 @@ const generateCustomerEntries = (data: any): CustomerEntries[] => {
         name: `${item?.firstname} ${item?.lastname}`,
         email: item?.email,
         location: item?.location,
-        product: 1,
+        product: "N/A",
         status: item?.status,
       };
     }

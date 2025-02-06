@@ -4,9 +4,10 @@ import { KeyedMutator } from "swr";
 import { ErrorComponent } from "@/Pages/ErrorPage";
 import { PaginationType, Table } from "../TableComponent/Table";
 import gradientcontract from "../../assets/contracts/gradientcontract.svg";
-import { ProductTag } from "../CardComponents/CardComponent";
+// import { ProductTag } from "../CardComponents/CardComponent";
 import roletwo from "../../assets/table/roletwo.svg";
 import ContractModal from "./ContractModal";
+import { Contract } from "./contractType";
 
 type ContractEntries = {
   productCategory: string;
@@ -17,12 +18,12 @@ type ContractEntries = {
 
 // Helper function to map the API data to the desired format
 const generateContractEntries = (data: any): ContractEntries[] => {
-  const entries: ContractEntries[] = data?.map((item: any) => {
+  const entries: ContractEntries[] = data?.contracts?.map((item: Contract) => {
     return {
-      productCategory: item?.productCategory,
-      paymentMode: item?.paymentMode,
-      customer: item?.customer,
-      contractSigned: item?.contractSigned,
+      productCategory: "",
+      paymentMode: "",
+      customer: item?.fullNameAsOnID,
+      contractSigned: Boolean(item?.signedAt),
     };
   });
   return entries;
@@ -240,10 +241,10 @@ export const ContractCardComponent = (
         </div>
       </div>
       <div className="flex flex-col gap-2.5 w-full">
-        <div className="flex items-center gap-1 pl-1 pr-2 py-1 w-max bg-[#F6F8FA] border-[0.4px] border-strokeGreyTwo rounded-full">
+        {/* <div className="flex items-center gap-1 pl-1 pr-2 py-1 w-max bg-[#F6F8FA] border-[0.4px] border-strokeGreyTwo rounded-full">
           <ProductTag productTag={props.productCategory} />
           <p className="text-textBlack text-xs">{props.paymentMode}</p>
-        </div>
+        </div> */}
         <div className={`flex items-center gap-1 w-max`}>
           <img src={roletwo} alt="icon" />
           <span className="bg-[#EFF2FF] px-2 py-1 text-xs text-textBlack font-semibold rounded-full capitalize">

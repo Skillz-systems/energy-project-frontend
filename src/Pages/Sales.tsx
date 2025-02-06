@@ -11,10 +11,12 @@ import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import CreateNewSale from "@/Components/Sales/CreateNewSale";
 import { useGetRequest } from "@/utils/useApiCall";
+import { observer } from "mobx-react-lite";
+import { SaleStore } from "@/stores/SaleStore";
 
 const SalesTable = lazy(() => import("@/Components/Sales/SalesTable"));
 
-const Sales = () => {
+const Sales = observer(() => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [_salesData, setSalesData] = useState<any>(null);
@@ -28,8 +30,8 @@ const Sales = () => {
     error: allSalesError,
     errorStates: allSalesErrorStates,
   } = useGetRequest(
-    `/v1/sales?page=${currentPage}&limit=${entriesPerPage}${
-      salesFilter && `?status=${salesFilter}`
+    `/v1/sales?page=${currentPage}&limit=${entriesPerPage}&${
+      salesFilter && `status=${salesFilter}`
     }`,
     true,
     60000
@@ -58,11 +60,15 @@ const Sales = () => {
     }
   }, [location.pathname, salesData]);
 
+  useEffect(() => {
+    SaleStore.purgeStore();
+  }, []);
+
   const navigationList = [
     {
       title: "All Sales",
       link: "/sales/all",
-      count: _salesData?.total,
+      count: salesData?.total || 0,
     },
   ];
 
@@ -150,6 +156,6 @@ const Sales = () => {
       />
     </>
   );
-};
+});
 
 export default Sales;

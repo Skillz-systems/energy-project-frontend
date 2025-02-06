@@ -14,11 +14,6 @@ import SetExtraInfoModal from "./SetExtraInfoModal";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import { toJS } from "mobx";
 import { formSchema, defaultSaleFormData } from "./salesSchema";
-import { FlutterwavePaymentPayload } from "@/hooks/useFlutterwave";
-import { useFlutterwave, closePaymentModal } from "flutterwave-react-v3";
-
-const public_key = import.meta.env.VITE_FLW_PUBLIC_KEY;
-const base_url = import.meta.env.VITE_API_BASE_URL;
 
 type CreateSalesType = {
   isOpen: boolean;
@@ -99,19 +94,6 @@ const CreateNewSale = observer(
       }
     }, []);
 
-    const config: FlutterwavePaymentPayload = {
-      ...SaleStore.creationResponse,
-      public_key,
-      redirect_url: `${base_url}/sales`,
-      customer: {
-        email: SaleStore.creationResponse.customer.email,
-        phone_number: SaleStore.customer?.phone || "",
-        name: SaleStore.customer?.customerName || "",
-      },
-    };
-
-    const handleFlutterPayment = useFlutterwave(config);
-
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setLoading(true);
@@ -125,23 +107,10 @@ const CreateNewSale = observer(
           successMessage: "Sale created successfully!",
         });
         await allSalesRefresh();
-        SaleStore.addFlutterwaveConfig({
-          ...response.data,
-          customer: {
-            ...response.data?.customer,
-            phone_number: SaleStore.customer?.phone || "",
-            name: SaleStore.customer?.customerName || "",
-          },
-        });
-        handleFlutterPayment({
-          callback: (response) => {
-            console.log("Flutterwave Response:", response);
-            closePaymentModal();
-            SaleStore.purgeStore();
-          },
-          onClose: () => {},
-        });
+        const redirectLink = response?.data?.link;
+        if (redirectLink) window.open(redirectLink, "_blank");
         setIsOpen(false);
+        SaleStore.purgeStore();
       } catch (error: any) {
         if (error instanceof z.ZodError) {
           setFormErrors(error.issues);

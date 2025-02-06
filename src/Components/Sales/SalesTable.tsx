@@ -65,33 +65,6 @@ const SalesTable = ({
 
   const filterList = [
     {
-      name: "Status",
-      items: ["All", "New", "Closed"],
-      onClickLink: async (index: number) => {
-        const data = ["All", "New", "Closed"].map((item) =>
-          item.toLocaleLowerCase()
-        );
-        const query = data[index];
-        setQueryValue(query);
-        if (queryData) setQueryData(null);
-        setQueryLoading(true);
-        setQueryValue(query);
-        try {
-          const response = await apiCall({
-            endpoint: `/v1/sales?status=${encodeURIComponent(query)}`,
-            method: "get",
-            successMessage: "",
-            showToast: false,
-          });
-          setQueryData(response.data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setQueryLoading(false);
-        }
-      },
-    },
-    {
       name: "Search",
       onSearch: async (query: string) => {
         setQueryValue(query);

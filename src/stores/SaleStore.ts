@@ -53,25 +53,6 @@ const defaultValues: SnapshotIn<typeof saleStore> = {
       addressAsOnID: "",
     },
   },
-  creationResponse: {
-    amount: 0,
-    tx_ref: "",
-    currency: "",
-    customer: {
-      email: "",
-      phone_number: "",
-      name: "",
-    },
-    payment_options: "",
-    customizations: {
-      title: "",
-      description: "",
-      logo: "",
-    },
-    meta: {
-      saleId: "",
-    },
-  },
 };
 
 const IdentificationDetailsModel = types.model({
@@ -171,26 +152,6 @@ const SaleItemsModel = types.model({
   saleRecipient: SaleRecipientModel,
 });
 
-const FlutterWaveModel = types.model({
-  amount: types.number,
-  tx_ref: types.string,
-  currency: types.string,
-  customer: types.model({
-    email: types.string,
-    phone_number: types.string,
-    name: types.string,
-  }),
-  payment_options: types.string,
-  customizations: types.model({
-    title: types.string,
-    description: types.string,
-    logo: types.string,
-  }),
-  meta: types.model({
-    saleId: types.string,
-  }),
-});
-
 const saleStore = types
   .model({
     category: types.enumeration(["PRODUCT"]),
@@ -207,7 +168,6 @@ const saleStore = types
     identificationDetails: IdentificationDetailsModel,
     nextOfKinDetails: NextOfKinDetailsModel,
     guarantorDetails: GuarantorModel,
-    creationResponse: FlutterWaveModel,
   })
   .actions((self) => ({
     addSaleItem(productId: string) {
@@ -218,7 +178,6 @@ const saleStore = types
         (p) => p.currentProductId === productId
       );
       if (!params) return;
-      console.log("params:", toJS(params));
 
       // Ensure devices is a plain array of strings
       const devices = toJS(
@@ -376,6 +335,10 @@ const saleStore = types
         self.products.splice(index, 1);
       }
     },
+    getProductById(productId?: string) {
+      const product = self.products.find((p) => p.productId === productId);
+      return product;
+    },
     currentProductUnits(productId?: string) {
       const currentUnits = self.products.find(
         (p) => p.productId === productId
@@ -405,12 +368,9 @@ const saleStore = types
       return parameters;
     },
     removeParameter(currentProductId?: string) {
-      const index = self.parameters.findIndex(
-        (p) => p.currentProductId === currentProductId
+      self.parameters.replace(
+        self.parameters.filter((p) => p.currentProductId !== currentProductId)
       );
-      if (index !== -1) {
-        self.parameters.splice(index, 1);
-      }
     },
     addOrUpdateMiscellaneousPrice(
       currentProductId: string,
@@ -440,12 +400,11 @@ const saleStore = types
       );
     },
     removeMiscellaneousPrice(currentProductId?: string) {
-      const index = self.miscellaneousPrices.findIndex(
-        (p) => p.currentProductId === currentProductId
+      self.miscellaneousPrices.replace(
+        self.miscellaneousPrices.filter(
+          (p) => p.currentProductId !== currentProductId
+        )
       );
-      if (index !== -1) {
-        self.miscellaneousPrices.splice(index, 1);
-      }
     },
     addOrUpdateDevices(currentProductId: string, deviceList: string[]) {
       const existingIndex = self.devices.findIndex(
@@ -469,12 +428,9 @@ const saleStore = types
       return devices;
     },
     removeDevices(currentProductId?: string) {
-      const index = self.devices.findIndex(
-        (d) => d.currentProductId === currentProductId
+      self.devices.replace(
+        self.devices.filter((d) => d.currentProductId !== currentProductId)
       );
-      if (index !== -1) {
-        self.devices.splice(index, 1);
-      }
     },
     addIdentificationDetails(details: typeof self.identificationDetails) {
       self.identificationDetails = details;
@@ -560,35 +516,11 @@ const saleStore = types
       return recipient;
     },
     removeRecipient(currentProductId: string) {
-      const existingIndex = self.saleRecipient.findIndex(
-        (d) => d.currentProductId === currentProductId
+      self.saleRecipient.replace(
+        self.saleRecipient.filter(
+          (d) => d.currentProductId !== currentProductId
+        )
       );
-
-      if (existingIndex !== -1) {
-        // Remove the recipient at the found index
-        self.saleRecipient.splice(existingIndex, 1);
-      }
-    },
-    addFlutterwaveConfig(data: {
-      amount: number;
-      tx_ref: string;
-      currency: string;
-      customer: {
-        email: string;
-        phone_number: string;
-        name: string;
-      };
-      payment_options: string;
-      customizations: {
-        title: string;
-        description: string;
-        logo: string;
-      };
-      meta: {
-        saleId: string;
-      };
-    }) {
-      self.creationResponse = data;
     },
     purgeStore() {
       applySnapshot(self, defaultValues);
@@ -639,25 +571,6 @@ export const SaleStore = saleStore.create({
       expirationDate: "",
       fullNameAsOnID: "",
       addressAsOnID: "",
-    },
-  },
-  creationResponse: {
-    amount: 0,
-    tx_ref: "",
-    currency: "",
-    customer: {
-      email: "",
-      phone_number: "",
-      name: "",
-    },
-    payment_options: "",
-    customizations: {
-      title: "",
-      description: "",
-      logo: "",
-    },
-    meta: {
-      saleId: "",
     },
   },
 });

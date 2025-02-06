@@ -3,14 +3,13 @@ import PageLayout from "./PageLayout";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import cancelled from "../assets/cancelled.svg";
+// import cancelled from "../assets/cancelled.svg";
 import gradientcontract from "../assets/contracts/gradientcontract.svg";
 import contractsbadge from "../assets/contracts/contractsbadge.png";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
-import CreateNewContract from "@/Components/Contracts/CreateNewContract";
-import { generateRandomContracts } from "@/Components/TableComponent/sampleData";
-// import { useGetRequest } from "@/utils/useApiCall";
+// import CreateNewContract from "@/Components/Contracts/CreateNewContract";
+import { useGetRequest } from "@/utils/useApiCall";
 
 const ContractsTable = lazy(
   () => import("@/Components/Contracts/ContractsTable")
@@ -18,27 +17,27 @@ const ContractsTable = lazy(
 
 const Contracts = () => {
   const location = useLocation();
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  // const [isOpen, setIsOpen] = useState<boolean>(false);
   const [_contractsData, setContractsData] = useState<any>(null);
-  // const [contractsFilter, setContractsFilter] = useState<string>("");
-  const [, setContractsFilter] = useState<string>("");
+  const [contractsFilter, setContractsFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
-  //   const {
-  //     data: transactionsData,
-  //     isLoading: transactionsLoading,
-  //     mutate: allTransactionsRefresh,
-  //     error: allTransactionsError,
-  //     errorStates: allTransactionsErrorStates,
-  //   } = useGetRequest(
-  //     `/v1/transactions${transactionsFilter && `?status=${transactionsFilter}`}`,
-  //     true,
-  //     60000
-  //   );
-  //   const fetchTransactionsStats = useGetRequest("/v1/transactions/stats", true);
+  const {
+    data: contractsData,
+    isLoading: contractsLoading,
+    mutate: allContractsRefresh,
+    error: allContractsError,
+    errorStates: allContractsErrorStates,
+  } = useGetRequest(
+    `/v1/contract?page=${currentPage}&limit=${entriesPerPage}&${
+      contractsFilter && `status=${contractsFilter}`
+    }`,
+    true,
+    60000
+  );
 
   const paginationInfo = () => {
-    const total = _contractsData.length;
+    const total = contractsData?.total;
     return {
       total,
       currentPage,
@@ -52,47 +51,49 @@ const Contracts = () => {
     switch (location.pathname) {
       case "/contracts/all":
         setContractsFilter("");
-        setContractsData(generateRandomContracts(100));
+        setContractsData(contractsData);
         break;
-      case "/contracts/signed":
-        setContractsFilter("signed");
-        setContractsData(generateRandomContracts(75));
-        break;
-      case "/contracts/unsigned":
-        setContractsFilter("unsigned");
-        setContractsData(generateRandomContracts(50));
-        break;
-      case "/contracts/cancelled":
-        setContractsFilter("cancelled");
-        setContractsData(generateRandomContracts(25));
-        break;
+      // case "/contracts/signed":
+      //   setContractsFilter("signed");
+      //   setContractsData(contractsData);
+
+      //   break;
+      // case "/contracts/unsigned":
+      //   setContractsFilter("unsigned");
+      //   setContractsData(contractsData);
+
+      //   break;
+      // case "/contracts/cancelled":
+      //   setContractsFilter("cancelled");
+      //   setContractsData(contractsData);
+      //   break;
       default:
         setContractsFilter("");
-        setContractsData(generateRandomContracts(100));
+        setContractsData(contractsData);
     }
-  }, [location.pathname]);
+  }, [contractsData, location.pathname]);
 
   const navigationList = [
     {
       title: "All Contracts",
       link: "/contracts/all",
-      count: 100,
+      count: contractsData?.total || 0,
     },
-    {
-      title: "Signed Contracts",
-      link: "/contracts/signed",
-      count: 75,
-    },
-    {
-      title: "Unsigned Contracts",
-      link: "/contracts/unsigned",
-      count: 50,
-    },
-    {
-      title: "Cancelled Contracts",
-      link: "/contracts/cancelled",
-      count: 25,
-    },
+    // {
+    //   title: "Signed Contracts",
+    //   link: "/contracts/signed",
+    //   count: 75,
+    // },
+    // {
+    //   title: "Unsigned Contracts",
+    //   link: "/contracts/unsigned",
+    //   count: 50,
+    // },
+    // {
+    //   title: "Cancelled Contracts",
+    //   link: "/contracts/cancelled",
+    //   count: 25,
+    // },
   ];
 
   const dropDownList = {
@@ -112,7 +113,8 @@ const Contracts = () => {
     showCustomButton: true,
   };
 
-  const contractsPaths = ["all", "signed", "unsigned", "cancelled"];
+  // const contractsPaths = ["all", "signed", "unsigned", "cancelled"];
+  const contractsPaths = ["all"];
 
   return (
     <>
@@ -124,15 +126,15 @@ const Contracts = () => {
               iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="CONTRACTS"
-              value={2240}
+              value={contractsData?.total}
             />
-            <TitlePill
+            {/*<TitlePill
               icon={cancelled}
               iconBgColor="bg-[#FFDBDE]"
               topText="Cancelled"
               bottomText="CONTRACTS"
               value={120}
-            />
+            />*/}
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
             {/* <ActionButton
@@ -165,20 +167,10 @@ const Contracts = () => {
                     element={
                       <ContractsTable
                         contractsData={_contractsData}
-                        isLoading={false}
-                        refreshTable={() => Promise.resolve()}
-                        error={""}
-                        errorData={{
-                          errorStates: [
-                            {
-                              endpoint: "",
-                              errorExists: false,
-                              errorCount: 0,
-                              toastShown: false,
-                            },
-                          ],
-                          isNetworkError: false,
-                        }}
+                        isLoading={contractsLoading}
+                        refreshTable={allContractsRefresh}
+                        error={allContractsError}
+                        errorData={allContractsErrorStates}
                         paginationInfo={paginationInfo}
                       />
                     }
@@ -189,11 +181,11 @@ const Contracts = () => {
           </section>
         </div>
       </PageLayout>
-      <CreateNewContract
+      {/* <CreateNewContract
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        allContractsRefresh={() => Promise.resolve()}
-      />
+        allContractsRefresh={allContractsRefresh}
+      /> */}
     </>
   );
 };
