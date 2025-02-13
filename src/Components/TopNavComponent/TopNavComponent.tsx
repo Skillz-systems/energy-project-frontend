@@ -4,22 +4,22 @@ import { useNavigate } from "react-router-dom";
 import { MenuButton } from "../MenuComponent/MenuButton";
 import UserProfile from "../UserPill";
 import { useFormattedCurrentDate } from "../../hooks/useFormattedCurrentDate";
-import notification from "../../assets/notification.svg";
-import search from "../../assets/search.svg";
-import close from "../../assets/close.svg";
+// import notification from "../../assets/notification.svg";
+// import search from "../../assets/search.svg";
+// import close from "../../assets/close.svg";
 import support from "../../assets/support.svg";
 import { DropDown } from "../DropDownComponent/DropDown";
 import Cookies from "js-cookie";
 import useTokens from "../../hooks/useTokens";
 import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
-import { Modal } from '@/Components/ModalComponent/Modal';
+import { Modal } from "@/Components/ModalComponent/Modal";
 
 const TopNavComponent = () => {
   const { role } = useTokens();
   const navigate = useNavigate();
   const currentDate = useFormattedCurrentDate();
-  const [showSearchInput, setSearchInput] = useState<boolean>(false);
-  const [query, setQuery] = useState<string>("");
+  // const [showSearchInput, setSearchInput] = useState<boolean>(false);
+  // const [query, setQuery] = useState<string>("");
 
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -42,10 +42,10 @@ const TopNavComponent = () => {
     };
   }, []);
 
-  const handleSearch = () => {
-    console.log(query);
-    setSearchInput(false);
-  };
+  // const handleSearch = () => {
+  //   console.log(query);
+  //   setSearchInput(false);
+  // };
 
   const dropDownList = {
     items: ["My Profile", "Logout"],
@@ -86,7 +86,10 @@ const TopNavComponent = () => {
           <UserProfile role={role.role} />
         </div>
         <div className="flex items-center w-max max-w-[350px] gap-1 sm:gap-4">
-          {showSearchInput ? null : (
+          <span className="hidden sm:flex items-center justify-center bg-[#F6F8FA] h-[32px] px-2 py-1 text-xs text-textDarkGrey border-[0.6px] border-strokeGreyThree rounded-full">
+            {currentDate}
+          </span>
+          {/* {showSearchInput ? null : (
             <>
               <span className="hidden sm:flex items-center justify-center bg-[#F6F8FA] h-[32px] px-2 py-1 text-xs text-textDarkGrey border-[0.6px] border-strokeGreyThree rounded-full">
                 {currentDate}
@@ -108,8 +111,8 @@ const TopNavComponent = () => {
                 </span>
               </div>
             </>
-          )}
-          {showSearchInput ? (
+          )} */}
+          {/* {showSearchInput ? (
             <div className="flex w-full items-center gap-2">
               <input
                 type="search"
@@ -134,8 +137,8 @@ const TopNavComponent = () => {
                 className="w-[16px] cursor-pointer"
               />
             </div>
-          )}
-          {showSearchInput ? (
+          )} */}
+          {/* {showSearchInput ? (
             <div
               className="flex items-center justify-center w-[40px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom  transition-all hover:bg-[#E2E4EB]"
               onClick={() => setSearchInput(false)}
@@ -148,7 +151,8 @@ const TopNavComponent = () => {
             </div>
           ) : (
             <DropDown {...dropDownList} />
-          )}
+          )} */}
+          <DropDown {...dropDownList} />
         </div>
       </header>
       <Modal

@@ -18,6 +18,7 @@ const InventoryDetails = ({ inventoryData }: { inventoryData: any[] }) => {
           productImage={inventory.productImage}
           productName={inventory.productName}
           productPrice={inventory.productPrice}
+          quantity={inventory.quantity}
         />
       ))}
     </div>

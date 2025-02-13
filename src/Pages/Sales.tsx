@@ -19,10 +19,17 @@ const SalesTable = lazy(() => import("@/Components/Sales/SalesTable"));
 const Sales = observer(() => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [_salesData, setSalesData] = useState<any>(null);
-  const [salesFilter, setSalesFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
+  const [tableQueryParams, setTableQueryParams] = useState<Record<
+    string,
+    any
+  > | null>({});
+
+  const queryString = Object.entries(tableQueryParams || {})
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .join("&");
+
   const {
     data: salesData,
     isLoading: salesLoading,
@@ -30,8 +37,8 @@ const Sales = observer(() => {
     error: allSalesError,
     errorStates: allSalesErrorStates,
   } = useGetRequest(
-    `/v1/sales?page=${currentPage}&limit=${entriesPerPage}&${
-      salesFilter && `status=${salesFilter}`
+    `/v1/sales?page=${currentPage}&limit=${entriesPerPage}${
+      queryString && `&${queryString}`
     }`,
     true,
     60000
@@ -49,16 +56,19 @@ const Sales = observer(() => {
   };
 
   useEffect(() => {
+    setTableQueryParams({});
     switch (location.pathname) {
       case "/sales/all":
-        setSalesFilter("");
-        setSalesData(salesData);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+        }));
         break;
       default:
-        setSalesFilter("");
-        setSalesData(salesData);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+        }));
     }
-  }, [location.pathname, salesData]);
+  }, [location.pathname]);
 
   useEffect(() => {
     SaleStore.purgeStore();
@@ -73,13 +83,10 @@ const Sales = observer(() => {
   ];
 
   const dropDownList = {
-    items: ["Add New Sale", "Export List"],
+    items: ["Export List"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
-          console.log("Adding New Sale...");
-          break;
-        case 1:
           console.log("Exporting list...");
           break;
         default:
@@ -101,7 +108,7 @@ const Sales = observer(() => {
               iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="SALES"
-              value={_salesData?.total}
+              value={salesData?.total}
             />
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
@@ -134,12 +141,13 @@ const Sales = observer(() => {
                     path={path}
                     element={
                       <SalesTable
-                        salesData={_salesData}
+                        salesData={salesData}
                         isLoading={salesLoading}
                         refreshTable={allSalesRefresh}
                         error={allSalesError}
                         errorData={allSalesErrorStates}
                         paginationInfo={paginationInfo}
+                        setTableQueryParams={setTableQueryParams}
                       />
                     }
                   />

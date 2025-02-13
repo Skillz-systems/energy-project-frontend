@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { KeyedMutator } from "swr";
 import { Modal } from "@/Components/ModalComponent/Modal";
-import editInput from "../../assets/settings/editInput.svg";
+// import editInput from "../../assets/settings/editInput.svg";
 import { DropDown } from "../DropDownComponent/DropDown";
 import { useGetRequest } from "@/utils/useApiCall";
 import { CustomerType } from "./CustomerTable";
 import TabComponent from "../TabComponent/TabComponent";
-import { Icon } from "../Settings/UserModal";
-import call from "../../assets/settings/call.svg";
-import message from "../../assets/settings/message.svg";
+// import { Icon } from "../Settings/UserModal";
+// import call from "../../assets/settings/call.svg";
+// import message from "../../assets/settings/message.svg";
 import CustomerDetails, { DetailsType } from "./CustomerDetails";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 
@@ -23,7 +23,7 @@ const CustomerModal = ({
   customerID: string;
   refreshTable: KeyedMutator<any>;
 }) => {
-  const [displayInput, setDisplayInput] = useState<boolean>(false);
+  // const [displayInput, setDisplayInput] = useState<boolean>(false);
   const [tabContent, setTabContent] = useState<string>("customerDetails");
 
   const fetchSingleCustomer = useGetRequest(
@@ -43,19 +43,13 @@ const CustomerModal = ({
     };
   };
 
-  const handleCancelClick = () => setDisplayInput(false);
+  // const handleCancelClick = () => setDisplayInput(false);
 
   const dropDownList = {
-    items: ["Call Customer", "Message Customer", "Delete Customer"],
+    items: ["Delete Customer"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
-          console.log("Call Customer");
-          break;
-        case 1:
-          console.log("Message Customer");
-          break;
-        case 2:
           console.log("Delete Customer");
           break;
         default:
@@ -75,15 +69,15 @@ const CustomerModal = ({
     { name: "Tickets", key: "tickets", count: 0 },
   ];
 
-  const handleCallClick = () => {
-    const callURL = `tel:${fetchSingleCustomer?.data?.phone}`;
-    window.open(callURL, "_self");
-  };
+  // const handleCallClick = () => {
+  //   const callURL = `tel:${fetchSingleCustomer?.data?.phone}`;
+  //   window.open(callURL, "_self");
+  // };
 
-  const handleWhatsAppClick = () => {
-    const whatsappURL = `https://wa.me/${fetchSingleCustomer?.data?.phone}`;
-    window.open(whatsappURL, "_blank");
-  };
+  // const handleWhatsAppClick = () => {
+  //   const whatsappURL = `https://wa.me/${fetchSingleCustomer?.data?.phone}`;
+  //   window.open(whatsappURL, "_blank");
+  // };
 
   return (
     <Modal
@@ -91,28 +85,29 @@ const CustomerModal = ({
       bodyStyle="pb-44 overflow-auto"
       isOpen={isOpen}
       onClose={() => {
-        setTabContent("details");
+        setTabContent("customerDetails");
         setIsOpen(false);
+        // setDisplayInput(false)
       }}
       leftHeaderContainerClass="pl-2"
-      rightHeaderComponents={
-        displayInput ? (
-          <p
-            className="text-xs text-textDarkGrey font-semibold cursor-pointer over"
-            onClick={handleCancelClick}
-            title="Cancel editing customer details"
-          >
-            Cancel Edit
-          </p>
-        ) : (
-          <button
-            className="flex items-center justify-center w-[24px] h-[24px] bg-white border border-strokeGreyTwo rounded-full hover:bg-slate-100"
-            onClick={() => setDisplayInput(true)}
-          >
-            <img src={editInput} alt="Edit Button" width="15px" />
-          </button>
-        )
-      }
+      // rightHeaderComponents={
+      //   displayInput ? (
+      //     <p
+      //       className="text-xs text-textDarkGrey font-semibold cursor-pointer over"
+      //       onClick={handleCancelClick}
+      //       title="Cancel editing customer details"
+      //     >
+      //       Cancel Edit
+      //     </p>
+      //   ) : (
+      //     <button
+      //       className="flex items-center justify-center w-[24px] h-[24px] bg-white border border-strokeGreyTwo rounded-full hover:bg-slate-100"
+      //       onClick={() => setDisplayInput(true)}
+      //     >
+      //       <img src={editInput} alt="Edit Button" width="15px" />
+      //     </button>
+      //   )
+      // }
     >
       <div className="bg-white">
         <header
@@ -129,12 +124,12 @@ const CustomerModal = ({
             </p>
           )}
           <div className="flex items-center justify-end gap-2">
-            <Icon icon={call} iconText="Call" handleClick={handleCallClick} />
+            {/* <Icon icon={call} iconText="Call" handleClick={handleCallClick} />
             <Icon
               icon={message}
               iconText="Message"
               handleClick={handleWhatsAppClick}
-            />
+            /> */}
             <DropDown {...dropDownList} />
           </div>
         </header>
@@ -159,7 +154,7 @@ const CustomerModal = ({
               <CustomerDetails
                 {...generateCustomerEntries(fetchSingleCustomer?.data)}
                 refreshTable={refreshTable}
-                displayInput={displayInput}
+                displayInput={false}
               />
             </DataStateWrapper>
           ) : (

@@ -20,7 +20,7 @@ const CustomerDetails = ({
   ...data
 }: DetailsType & {
   refreshTable: KeyedMutator<any>;
-  displayInput: boolean;
+  displayInput?: boolean;
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState({
