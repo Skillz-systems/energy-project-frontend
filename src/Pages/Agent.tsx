@@ -5,25 +5,32 @@ import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import inventorybadge from "../assets/inventory/inventorybadge.png";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import avatar from "../assets/agents/avatar.svg";
-import cancelled from "../assets/cancelled.svg";
-import wallet from "../assets/agents/wallet.svg";
+// import cancelled from "../assets/cancelled.svg";
+// import wallet from "../assets/agents/wallet.svg";
 import circleAction from "../assets/settings/addCircle.svg";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import CreateNewAgents from "@/Components/Agents/CreateNewAgents";
 import { useGetRequest } from "@/utils/useApiCall";
-import { NairaSymbol } from "@/Components/CardComponents/CardComponent";
+// import { NairaSymbol } from "@/Components/CardComponents/CardComponent";
 
 const AgentsTable = lazy(() => import("@/Components/Agents/AgentsTable"));
 
 const Agent = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [agentsData, setAgentsData] = useState<any>(null);
-  const [agentFilter, setAgentFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
+  const [tableQueryParams, setTableQueryParams] = useState<Record<
+    string,
+    any
+  > | null>({});
+
+  const queryString = Object.entries(tableQueryParams || {})
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .join("&");
+
   const {
     data: agentData,
     isLoading: agentLoading,
@@ -31,8 +38,8 @@ const Agent = () => {
     error: allAgentError,
     errorStates: allAgentErrorStates,
   } = useGetRequest(
-    `/v1/agents?page=${currentPage}&limit=${entriesPerPage}&${
-      agentFilter && `status=${agentFilter}`
+    `/v1/agents?page=${currentPage}&limit=${entriesPerPage}${
+      queryString && `&${queryString}`
     }`,
     true,
     60000
@@ -51,24 +58,19 @@ const Agent = () => {
   };
 
   useEffect(() => {
+    setTableQueryParams({});
     switch (location.pathname) {
       case "/agents/all":
-        setAgentFilter("");
-        setAgentsData(agentData);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+        }));
         break;
-      case "/agents/active":
-        setAgentFilter("active");
-        setAgentsData(agentData);
-        break;
-      // case "/agents/barred":
-      //   setAgentFilter("barred");
-      //   setAgentsData(agentData);
-      //   break;
       default:
-        setAgentFilter("");
-        setAgentsData(agentData);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+        }));
     }
-  }, [location.pathname, agentData]);
+  }, [location.pathname]);
 
   const navigationList = [
     {
@@ -89,13 +91,10 @@ const Agent = () => {
   ];
 
   const dropDownList = {
-    items: ["Add New Agent", "Export List"],
+    items: ["Export List"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
-          setIsOpen(true);
-          break;
-        case 1:
           console.log("Exporting list...");
           break;
         default:
@@ -113,14 +112,14 @@ const Agent = () => {
       <PageLayout pageName="Agents" badge={inventorybadge}>
         <section className="flex flex-col-reverse sm:flex-row items-center justify-between w-full bg-paleGrayGradient px-2 md:px-8 py-4 gap-2 min-h-[64px]">
           <div className="flex flex-wrap w-full items-center gap-2 gap-y-3">
-            <TitlePill
+            {/* <TitlePill
               icon={wallet}
               iconBgColor="bg-[#E3FAD6]"
               topText="Revenue From"
               bottomText="Agents"
               leftIcon={<NairaSymbol />}
               value={0}
-            />
+            /> */}
             <TitlePill
               icon={avatar}
               iconBgColor="bg-[#FDEEC2]"
@@ -128,20 +127,20 @@ const Agent = () => {
               bottomText="Agents"
               value={fetchAgentStats?.data?.total || 0}
             />
-            <TitlePill
+            {/* <TitlePill
               icon={avatar}
               iconBgColor="bg-[#FDEEC2]"
               topText="Sales Done by"
               bottomText="Agents"
               value={0}
-            />
-            <TitlePill
+            /> */}
+            {/* <TitlePill
               icon={cancelled}
               iconBgColor="bg-[#FFDBDE]"
               topText="Barred"
               bottomText="Agents"
               value={fetchAgentStats?.data?.barred || 0}
-            />
+            /> */}
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
             <ActionButton
@@ -171,12 +170,13 @@ const Agent = () => {
                     path={path}
                     element={
                       <AgentsTable
-                        agentData={agentsData}
+                        agentData={agentData}
                         isLoading={agentLoading}
                         refreshTable={allAgentRefresh}
                         error={allAgentError}
                         errorData={allAgentErrorStates}
                         paginationInfo={paginationInfo}
+                        setTableQueryParams={setTableQueryParams}
                       />
                     }
                   />

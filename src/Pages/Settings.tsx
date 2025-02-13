@@ -25,9 +25,20 @@ const Settings = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
+  const [tableQueryParams, setTableQueryParams] = useState<Record<
+    string,
+    any
+  > | null>({});
+
+  const queryString = Object.entries(tableQueryParams || {})
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .join("&");
+
   const fetchAllRoles = useGetRequest("/v1/roles", true, 60000);
   const fetchAllUsers = useGetRequest(
-    `/v1/users?page=${currentPage}&limit=${entriesPerPage}`,
+    `/v1/users?page=${currentPage}&limit=${entriesPerPage}${
+      queryString && `&${queryString}`
+    }`,
     true,
     60000
   );
@@ -147,7 +158,7 @@ const Settings = () => {
                       error={fetchAllUsers.error}
                       errorData={fetchAllUsers.errorStates}
                       paginationInfo={paginationInfo}
-
+                      setTableQueryParams={setTableQueryParams}
                     />
                   }
                 />

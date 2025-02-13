@@ -64,7 +64,7 @@ export const Pagination = ({
   }
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-1 w-full h-[45px]">
+    <div className="flex flex-wrap items-center justify-between gap-1 w-full min-h-[45px]">
       <div
         className={`flex items-center sm:w-auto h-[24px]
         ${

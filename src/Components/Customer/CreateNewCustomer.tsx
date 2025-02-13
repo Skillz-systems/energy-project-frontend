@@ -28,6 +28,8 @@ const customerSchema = z.object({
       errorMap: () => ({ message: "Please select an address type" }),
     })
     .default("HOME"),
+  longitude: z.string().optional(),
+  latitude: z.string().optional(),
 });
 
 type CustomerFormData = z.infer<typeof customerSchema>;
@@ -200,7 +202,7 @@ const CreateNewCustomer = ({
             value={formData.location}
             onChange={handleInputChange}
             placeholder="Address"
-            required={false}
+            required={true}
             errorMessage={getFieldError("location")}
           />
           {apiError && (

@@ -19,10 +19,17 @@ const CustomerTable = lazy(() => import("@/Components/Customer/CustomerTable"));
 const Customers = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [_customerData, setCustomerData] = useState<any>(null);
-  const [customerFilter, setCustomerFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
+  const [tableQueryParams, setTableQueryParams] = useState<Record<
+    string,
+    any
+  > | null>({});
+
+  const queryString = Object.entries(tableQueryParams || {})
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .join("&");
+
   const {
     data: customerData,
     isLoading: customerLoading,
@@ -30,8 +37,8 @@ const Customers = () => {
     error: allCustomerError,
     errorStates: allCustomerErrorStates,
   } = useGetRequest(
-    `/v1/customers?page=${currentPage}&limit=${entriesPerPage}&${
-      customerFilter && `status=${customerFilter}`
+    `/v1/customers?page=${currentPage}&limit=${entriesPerPage}${
+      queryString && `&${queryString}`
     }`,
     true,
     60000
@@ -50,24 +57,31 @@ const Customers = () => {
   };
 
   useEffect(() => {
+    setTableQueryParams({});
     switch (location.pathname) {
       case "/customers/all":
-        setCustomerFilter("");
-        setCustomerData(customerData);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+        }));
         break;
       case "/customers/active":
-        setCustomerFilter(`active`);
-        setCustomerData(customerData);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+          status: "active",
+        }));
         break;
       case "/customers/barred":
-        setCustomerFilter(`barred`);
-        setCustomerData(customerData);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+          status: "barred",
+        }));
         break;
       default:
-        setCustomerFilter("");
-        setCustomerData(customerData);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+        }));
     }
-  }, [location.pathname, customerData]);
+  }, [location.pathname]);
 
   const navigationList = [
     {
@@ -88,13 +102,10 @@ const Customers = () => {
   ];
 
   const dropDownList = {
-    items: ["Add New Customer", "Export List"],
+    items: ["Export List"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
-          setIsOpen(true);
-          break;
-        case 1:
           console.log("Exporting list...");
           break;
         default:
@@ -122,7 +133,7 @@ const Customers = () => {
               icon={gradientcustomer}
               iconBgColor="bg-[#FDEEC2]"
               topText="New"
-              bottomText="CUSTOMERS"
+              bottomText="LEADS"
               value={fetchCustomerStats?.data?.newCustomerCount || 0}
             />
             <TitlePill
@@ -170,12 +181,13 @@ const Customers = () => {
                     path={path}
                     element={
                       <CustomerTable
-                        customerData={_customerData}
+                        customerData={customerData}
                         isLoading={customerLoading}
                         refreshTable={allCustomerRefresh}
                         error={allCustomerError}
                         errorData={allCustomerErrorStates}
                         paginationInfo={paginationInfo}
+                        setTableQueryParams={setTableQueryParams}
                       />
                     }
                   />

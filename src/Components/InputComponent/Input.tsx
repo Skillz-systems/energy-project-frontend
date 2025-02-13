@@ -3,6 +3,7 @@ import { CgChevronDown } from "react-icons/cg";
 import { useState } from "react";
 import { LuImagePlus } from "react-icons/lu";
 import useBreakpoint from "@/hooks/useBreakpoint";
+import { IoIosSwap } from "react-icons/io";
 
 export const Asterik = () => {
   return (
@@ -315,14 +316,16 @@ export const ModalInput = ({
             }`}
           >
             {isItemsSelected ? (
-              <span
-                className="w-full text-sm font-semibold text-textBlack cursor-pointer"
+              <button
+                type="button"
+                className="flex items-center justify-center w-max gap-1 bg-white text-xs px-2 py-1 text-textDarkGrey font-medium border border-strokeGreyTwo rounded-full hover:text-textBlack hover:border-textBlack transition-all"
                 onClick={onClick}
               >
                 {customSelectedText
                   ? customSelectedText
                   : `Change ${label.toLowerCase()} selected`}
-              </span>
+                <IoIosSwap />
+              </button>
             ) : (
               required && <Asterik />
             )}
@@ -438,7 +441,7 @@ export const FileInput = ({
             <button
               type="button"
               disabled={disabled}
-              className="text-sm text-textGrey italic"
+              className="text-sm text-textGrey italic truncate"
             >
               {selectedFile ? (
                 <span className="text-sm not-italic font-semibold text-textBlack">

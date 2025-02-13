@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import Home from "./Pages/Home";
-import Dashboard from "./Pages/Dashboard";
+// import Dashboard from "./Pages/Dashboard";
 import Sales from "./Pages/Sales";
 import Transactions from "./Pages/Transactions";
 import Customers from "./Pages/Customers";
@@ -32,7 +32,7 @@ function App() {
           {/* Protected Routes */}
           <Route element={<ProtectedRouteWrapper />}>
             <Route path="/home" element={<Home />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            {/* <Route path="/dashboard" element={<Dashboard />} /> */}
             <Route path="/sales/*" element={<Sales />} />
             <Route path="/transactions/*" element={<Transactions />} />
             <Route path="/customers/*" element={<Customers />} />

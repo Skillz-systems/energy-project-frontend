@@ -6,7 +6,7 @@ import ActionButton from "../Components/ActionButtonComponent/ActionButton";
 import { DropDown } from "../Components/DropDownComponent/DropDown";
 import circleAction from "../assets/settings/addCircle.svg";
 import productgradient from "../assets/products/productgradient.svg";
-import productgreen from "../assets/products/productgreen.svg";
+// import productgreen from "../assets/products/productgreen.svg";
 import cancelled from "../assets/cancelled.svg";
 import LoadingSpinner from "../Components/Loaders/LoadingSpinner";
 import { SideMenu } from "../Components/SideMenuComponent/SideMenu";
@@ -23,10 +23,17 @@ const ProductsTable = lazy(
 const Products = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [_productData, setProductData] = useState<any>(null);
   const [formType, setFormType] = useState<ProductFormType>("newProduct");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
+  const [tableQueryParams, setTableQueryParams] = useState<Record<
+    string,
+    any
+  > | null>({});
+
+  const queryString = Object.entries(tableQueryParams || {})
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .join("&");
 
   const {
     data: productData,
@@ -35,7 +42,9 @@ const Products = () => {
     error: allProductsError,
     errorStates: allProductsErrorStates,
   } = useGetRequest(
-    `/v1/products?page=${currentPage}&limit=${entriesPerPage}`,
+    `/v1/products?page=${currentPage}&limit=${entriesPerPage}${
+      queryString && `&${queryString}`
+    }`,
     true,
     60000
   );
@@ -63,55 +72,32 @@ const Products = () => {
       link: "/products/all",
       count: fetchAllProductStats.data?.allProducts || 0,
     },
-    // {
-    //   title: "SHS",
-    //   link: "/products/shs",
-    //   count: 50,
-    // },
-    // {
-    //   title: "EAAS",
-    //   link: "/products/eaas",
-    //   count: 25,
-    // },
-    // {
-    //   title: "Rooftop",
-    //   link: "/products/rooftop",
-    //   count: 25,
-    // },
   ];
 
   useEffect(() => {
+    setTableQueryParams({});
     switch (location.pathname) {
       case "/products/all":
-        setProductData(productData);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+        }));
         break;
-      // case "/products/shs":
-      //   setProductData(productData);
-      //   break;
-      // case "/products/eaas":
-      //   setProductData(productData);
-      //   break;
-      // case "/products/rooftop":
-      //   setProductData(productData);
-      //   break;
       default:
-        setProductData(productData);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+        }));
     }
-  }, [location.pathname, productData]);
+  }, [location.pathname]);
 
   const dropDownList = {
-    items: ["Add New Product", "Create New Category", "Export List"],
+    items: ["Create New Category", "Export List"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
-          setFormType("newProduct");
-          setIsOpen(true);
-          break;
-        case 1:
           setFormType("newCategory");
           setIsOpen(true);
           break;
-        case 2:
+        case 1:
           console.log("Exporting list...");
           break;
         default:
@@ -121,7 +107,7 @@ const Products = () => {
     showCustomButton: true,
   };
 
-  const productPaths = ["all", "shs", "eaas", "rooftop"];
+  const productPaths = ["all"];
 
   return (
     <>
@@ -135,7 +121,7 @@ const Products = () => {
               bottomText="PRODUCTS"
               value={fetchAllProductStats.data?.allProducts || 0}
             />
-            <TitlePill
+            {/* <TitlePill
               icon={productgreen}
               iconBgColor="bg-[#E3FAD6]"
               topText="Installment"
@@ -155,7 +141,7 @@ const Products = () => {
               topText="Recharge"
               bottomText="PRODUCTS"
               value={0}
-            />
+            /> */}
             <TitlePill
               icon={cancelled}
               iconBgColor="bg-[#FFDBDE]"
@@ -195,12 +181,13 @@ const Products = () => {
                     path={path}
                     element={
                       <ProductsTable
-                        productData={_productData}
+                        productData={productData}
                         isLoading={productLoading}
                         refreshTable={allProductsRefresh}
                         error={allProductsError}
                         errorData={allProductsErrorStates}
                         paginationInfo={paginationInfo}
+                        setTableQueryParams={setTableQueryParams}
                       />
                     }
                   />
