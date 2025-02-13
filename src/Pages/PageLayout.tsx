@@ -24,7 +24,7 @@ const PageLayout: React.FC<LayoutProps> = ({
         {showheaderBadge && (
           <HeaderBadge pageName={pageName as string} image={badge as string} />
         )}
-        <div className={className}>{children}</div>
+        <div className={`${className}`}>{children}</div>
       </div>
     </main>
   );

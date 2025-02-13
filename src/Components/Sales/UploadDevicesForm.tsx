@@ -87,6 +87,11 @@ const UploadDevicesForm = ({
   const product = SaleStore.getProductById(currentProductId);
 
   const { data, mutate } = useGetRequest("/v1/device", true);
+  const {
+    data: productData,
+    isLoading: productLoading,
+    error: productError,
+  } = useGetRequest(`/v1/products/${product?.productId}`, true);
 
   const filterDevices = async () => {
     const newParams: Record<string, string> = {};
@@ -180,9 +185,9 @@ const UploadDevicesForm = ({
   };
 
   return (
-    <form className="flex flex-col justify-between h-full min-h-[370px] gap-2">
+    <form className="flex flex-col justify-between h-full max-h-[400px] gap-2">
       {createDevice ? (
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[360px] overflow-y-auto">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label
@@ -345,6 +350,7 @@ const UploadDevicesForm = ({
               </label>
             </div>
           </div>
+
           {apiError && <p className="text-sm text-red-500 mt-2">{apiError}</p>}
           <div className="flex items-center justify-between gap-1">
             <button
@@ -445,14 +451,6 @@ const UploadDevicesForm = ({
                       <MdFilterList className="text-textDarkGrey w-5 h-5" />
                     )}
                   </span>
-                  <LuPlus
-                    className="text-textDarkGrey w-5 h-5"
-                    title="Create New Device"
-                    onClick={() => {
-                      setCreateDevice(true);
-                      setDescription("Create New Device");
-                    }}
-                  />
                 </div>
               </div>
               {loading && (
@@ -471,35 +469,64 @@ const UploadDevicesForm = ({
               )}
             </div>
 
-            {!loading && filteredDevices === null && (
-              <div className="flex flex-col items-center justify-center w-full mt-6 gap-1">
-                <p className="text-sm text-textBlack font-medium">
-                  Link the Product Below
+            {!loading &&
+              filteredDevices === null &&
+              (productLoading ? (
+                <p className="text-sm text-textBlack font-medium text-center mt-6">
+                  Loading Product Inventories
                 </p>
-                <div className="flex flex-col gap-2 w-full p-2.5 border-[0.6px] border-strokeGreyThree rounded-[20px]">
-                  <ProductDetailRow
-                    label="Product Category"
-                    value={product?.productTag || ""}
-                  />
-                  <ProductDetailRow
-                    label="Product Name"
-                    value={product?.productName || ""}
-                  />
-                  <ProductDetailRow
-                    label="Product Units"
-                    value={product?.productUnits || ""}
-                  />
-                  <ProductDetailRow
-                    label="Product Price"
-                    value={product?.productPrice || ""}
-                  />
+              ) : productError ? (
+                <p className="text-sm text-textBlack font-medium text-center mt-6">
+                  Failed to load product inventories
+                </p>
+              ) : (
+                <div className="flex flex-col items-center justify-center w-full mt-6 gap-1">
+                  <p className="text-sm text-textBlack font-medium">
+                    Link the Product Inventories Below
+                  </p>
+                  <div className="flex flex-col gap-2 items-center justify-center w-full h-full pt-12 pr-3 max-h-[250px] overflow-y-auto">
+                    {productData?.inventories?.map((item: any) => (
+                      <div className="flex items-center justify-between w-full gap-3">
+                        <div
+                          key={item.id}
+                          className="flex flex-col bg-white gap-2 w-full p-2.5 border-[0.6px] border-strokeGreyThree rounded-[20px]"
+                        >
+                          <ProductDetailRow
+                            label="Inventory Name"
+                            value={item?.name || ""}
+                          />
+                          <ProductDetailRow
+                            label="Manufacturer Name"
+                            value={item?.manufacturerName || ""}
+                          />
+                          <ProductDetailRow
+                            label="Inventory Status"
+                            value={item?.status || ""}
+                          />
+                          <ProductDetailRow
+                            label="Total Qty Remaining"
+                            value={item?.totalRemainingQuantities || ""}
+                          />
+                        </div>
+                        <div className="flex items-center justify-center p-0.5 bg-slate-200 rounded-full border-[0.6px] border-strokeGreyTwo cursor-pointer">
+                          <LuPlus
+                            className="text-textDarkGrey w-4 h-4"
+                            title="Create New Device"
+                            onClick={() => {
+                              setCreateDevice(true);
+                              setDescription("Create New Device");
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              ))}
 
             {filteredDevices === null ||
             filteredDevices?.length === 0 ? null : (
-              <div className="overflow-auto max-h-[270px] border border-strokeGreyTwo rounded-md bg-white mt-2">
+              <div className="overflow-auto max-h-[220px] border border-strokeGreyTwo rounded-md bg-white mt-2">
                 <table className="w-full border-collapse">
                   <thead className="bg-gray-100 sticky top-0 z-10">
                     <tr>
@@ -565,7 +592,7 @@ const UploadDevicesForm = ({
           </div>
 
           {filteredDevices !== null && filteredDevices?.length > 0 && (
-            <div className="space-y-1">
+            <div className="flex flex-col w-full gap-1 px-5 pb-4 mt-4 absolute bottom-0 left-0">
               <p className="text-sm text-textBlack font-medium">
                 {selectedDevices?.length === 0
                   ? "No device selected"

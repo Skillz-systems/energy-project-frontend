@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import editInput from "../../assets/settings/editInput.svg";
-import { DropDown } from "../DropDownComponent/DropDown";
+// import editInput from "../../assets/settings/editInput.svg";
+// import { DropDown } from "../DropDownComponent/DropDown";
 import TabComponent from "../TabComponent/TabComponent";
 import ProductDetails from "./ProductDetails";
 import InventoryDetails from "./InventoryDetails";
@@ -74,6 +74,7 @@ const ProductModal = ({
       return {
         productImage: item?.inventory?.image,
         productName: item?.inventory?.name,
+        quantity: item?.quantity,
       };
     });
     return entries;
@@ -87,31 +88,27 @@ const ProductModal = ({
     return generateProductInventoryEntries(fetchProductInventories?.data);
   }, [fetchProductInventories]);
 
-  const [displayInput, setDisplayInput] = useState<boolean>(false);
+  // const [displayInput, setDisplayInput] = useState<boolean>(false);
   const [tabContent, setTabContent] = useState<string>("productDetails");
 
-  const handleCancelClick = () => {
-    setDisplayInput(false);
-  };
+  // const handleCancelClick = () => {
+  //   setDisplayInput(false);
+  // };
 
-  const dropDownList = {
-    items: ["Edit Product", "Cancel Product"],
-    onClickLink: (index: number) => {
-      switch (index) {
-        case 0:
-          setDisplayInput(true);
-          console.log("Edit Product");
-          break;
-        case 1:
-          console.log("Cancel Product");
-          break;
-        default:
-          break;
-      }
-    },
-    defaultStyle: true,
-    showCustomButton: true,
-  };
+  // const dropDownList = {
+  //   items: ["Cancel Product"],
+  //   onClickLink: (index: number) => {
+  //     switch (index) {
+  //       case 0:
+  //         console.log("Cancel Product");
+  //         break;
+  //       default:
+  //         break;
+  //     }
+  //   },
+  //   defaultStyle: true,
+  //   showCustomButton: true,
+  // };
 
   const tabNames = [
     { name: "Product Details", key: "productDetails", count: null },
@@ -129,25 +126,26 @@ const ProductModal = ({
       onClose={() => {
         setIsOpen(false);
         setTabContent("productDetails");
+        // setDisplayInput(false);
       }}
-      rightHeaderComponents={
-        displayInput ? (
-          <p
-            className="text-xs text-textDarkGrey font-semibold cursor-pointer over"
-            onClick={handleCancelClick}
-            title="Cancel editing product details"
-          >
-            Cancel Edit
-          </p>
-        ) : (
-          <button
-            className="flex items-center justify-center w-[24px] h-[24px] bg-white border border-strokeGreyTwo rounded-full hover:bg-slate-100"
-            onClick={() => setDisplayInput(true)}
-          >
-            <img src={editInput} alt="Edit Button" width="15px" />
-          </button>
-        )
-      }
+      // rightHeaderComponents={
+      //   displayInput ? (
+      //     <p
+      //       className="text-xs text-textDarkGrey font-semibold cursor-pointer over"
+      //       onClick={handleCancelClick}
+      //       title="Cancel editing product details"
+      //     >
+      //       Cancel Edit
+      //     </p>
+      //   ) : (
+      //     <button
+      //       className="flex items-center justify-center w-[24px] h-[24px] bg-white border border-strokeGreyTwo rounded-full hover:bg-slate-100"
+      //       onClick={() => setDisplayInput(true)}
+      //     >
+      //       <img src={editInput} alt="Edit Button" width="15px" />
+      //     </button>
+      //   )
+      // }
     >
       <div className="bg-white">
         <header
@@ -160,9 +158,9 @@ const ProductModal = ({
               {productData?.productName}
             </p>
           )}
-          <div className="flex items-center justify-end gap-2">
+          {/* <div className="flex items-center justify-end gap-2">
             <DropDown {...dropDownList} />
-          </div>
+          </div> */}
         </header>
         <div className="flex flex-col w-full gap-4 px-4 py-2">
           <TabComponent
@@ -183,7 +181,7 @@ const ProductModal = ({
             >
               <ProductDetails
                 {...productData}
-                displayInput={displayInput}
+                displayInput={false}
                 refreshTable={refreshTable}
               />
             </DataStateWrapper>

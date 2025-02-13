@@ -455,6 +455,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                 placeholder="Date of Purchase"
                 required={false}
                 errorMessage={getFieldError("dateOfManufacture")}
+                description="Date Of Manufacture"
               />
 
               <Input

@@ -63,7 +63,7 @@ export const TableSearch = (props: TableSearchType) => {
               if (e.key === "Enter") handleSearch();
             }}
             autoFocus
-            placeholder={placeholder || "Enter your query"}
+            placeholder={placeholder || "Search"}
           />
         </div>
       ) : (

@@ -7,8 +7,8 @@ import agents from "@/assets/home/agents.svg";
 import products from "@/assets/home/products.svg";
 import inventory from "@/assets/home/inventory.svg";
 import contracts from "@/assets/home/contracts.svg";
-import support from "@/assets/home/support.svg";
-import communication from "@/assets/home/communication.svg";
+// import support from "@/assets/home/support.svg";
+// import communication from "@/assets/home/communication.svg";
 import settings from "@/assets/home/settings.svg";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComponent";
@@ -31,8 +31,8 @@ const Home = () => {
     Products: 10,
     Inventory: 15,
     Contracts: 2,
-    Support: 3,
-    Communication: 4,
+    // Support: 3,
+    // Communication: 4,
     Settings: 0,
   };
   const homeData = [
@@ -59,12 +59,12 @@ const Home = () => {
       sectionImage: contracts,
       location: "/contracts",
     },
-    { sectionName: "Support", sectionImage: support, location: "/support" },
-    {
-      sectionName: "Communication",
-      sectionImage: communication,
-      location: "/communication",
-    },
+    // { sectionName: "Support", sectionImage: support, location: "/support" },
+    // {
+    //   sectionName: "Communication",
+    //   sectionImage: communication,
+    //   location: "/communication",
+    // },
     { sectionName: "Settings", sectionImage: settings, location: "/settings" },
   ];
 
@@ -85,7 +85,7 @@ const Home = () => {
               if (!isMobile) navigate(section.location);
             }}
           >
-            {section?.notificationCount && section.notificationCount > 0 ? (
+            {/* {section?.notificationCount && section.notificationCount > 0 ? (
               <div
                 className={`flex items-center justify-center ${
                   section?.notificationCount >= 10 ? "bg-grape" : "bg-[#FDEEC2]"
@@ -97,8 +97,8 @@ const Home = () => {
                 </span>
               </div>
             ) : (
-              <div className="sm:h-[24px]"></div>
-            )}
+              )} */}
+            <div className="sm:h-[24px]"></div>
             <div className="flex flex-col items-center justify-center pb-4 sm:p-0">
               <div className="w-[143px] h-[143px] sm:w-[128px] sm:h-[128px] overflow-hidden">
                 <img

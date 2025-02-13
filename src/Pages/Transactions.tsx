@@ -5,10 +5,9 @@ import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import transactionsbadge from "../assets/transactions/transactionsbadge.png";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";
-import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
-import reversal from "../assets/transactions/reversalactionicon.svg";
+// import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
+// import reversal from "../assets/transactions/reversalactionicon.svg";
 import wallet from "../assets/agents/wallet.svg";
-import { NairaSymbol } from "@/Components/CardComponents/CardComponent";
 import redwallet from "../assets/transactions/redwallet.svg";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import ReverseTransactions from "@/Components/Transactions/ReverseTransactions";
@@ -107,7 +106,6 @@ const Transactions = () => {
               iconBgColor="bg-[#E3FAD6]"
               topText="All"
               bottomText="TRANSACTIONS"
-              leftIcon={<NairaSymbol />}
               value={100}
             />
             <TitlePill
@@ -119,13 +117,13 @@ const Transactions = () => {
             />
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
-            <ActionButton
+            {/* <ActionButton
               label="Process Reversal"
               icon={<img src={reversal} />}
               onClick={() => {
                 setIsOpen(true);
               }}
-            />
+            /> */}
             <DropDown {...dropDownList} />
           </div>
         </section>

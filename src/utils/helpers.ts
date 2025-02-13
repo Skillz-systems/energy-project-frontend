@@ -3,6 +3,8 @@ import useTokens from "../hooks/useTokens";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
 
+type SortOrder = "asc" | "desc";
+
 export function copyToClipboard(value: any) {
   if (!navigator.clipboard) {
     return;
@@ -83,3 +85,32 @@ export const checkIfArraysAreEqual = (arr1: string[], arr2: string[]) => {
   if (arr1.length !== arr2.length) return false;
   return arr1.every((item) => arr2.includes(item));
 };
+
+export function sortArrayByKey<T extends Record<string, any>>(
+  arr: T[],
+  key: keyof T,
+  order: SortOrder = "asc"
+): T[] {
+  return arr.sort((a, b) => {
+    const valueA = a[key];
+    const valueB = b[key];
+
+    // Handle undefined or null values
+    if (valueA == null && valueB == null) return 0;
+    if (valueA == null) return order === "asc" ? -1 : 1;
+    if (valueB == null) return order === "asc" ? 1 : -1;
+
+    // Sorting logic for numbers or strings
+    if (typeof valueA === "number" && typeof valueB === "number") {
+      return order === "asc" ? valueA - valueB : valueB - valueA;
+    }
+
+    if (typeof valueA === "string" && typeof valueB === "string") {
+      return order === "asc"
+        ? valueA.localeCompare(valueB)
+        : valueB.localeCompare(valueA);
+    }
+
+    return 0;
+  });
+}

@@ -118,7 +118,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
             <img
               src={productImage}
               alt="Product Image"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded-full"
             />
           </div>
         )}
@@ -230,9 +230,9 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
           </div>
           <div className="flex items-center justify-between">
             <Tag name="Created By" />
-            <p className="text-xs font-bold text-textDarkGrey">
+            <div className="text-xs font-bold text-textDarkGrey">
               <NameTag name={name} />
-            </p>
+            </div>
           </div>
         </div>
       )}

@@ -70,9 +70,9 @@ export const Modal = ({
 
   // Modal size mapping
   const sizeClasses = {
-    small: "w-[90vw] sm:w-[50vw] md:w-[40vw] lg:w-[30vw] xl:w-[25vw]",
-    medium: "w-[95vw] sm:w-[70vw] md:w-[60vw] lg:w-[50vw] xl:w-[40vw]",
-    large: "w-[100vw] sm:w-[90vw] md:w-[75vw] lg:w-[65vw] xl:w-[50vw]",
+    small: "w-[90vw] sm:w-[50vw] md:w-[40vw] lg:w-[30vw] xl:w-[25vw] max-w-[360px]",
+    medium: "w-[95vw] sm:w-[70vw] md:w-[60vw] lg:w-[50vw] xl:w-[42vw] max-w-[530px]",
+    large: "w-[100vw] sm:w-[90vw] md:w-[75vw] lg:w-[65vw] xl:w-[50vw] max-w-[660px]",
   };
 
   // Conditional layout styles

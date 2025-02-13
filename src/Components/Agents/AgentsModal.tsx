@@ -4,7 +4,7 @@ import { DropDown } from "../DropDownComponent/DropDown";
 import TabComponent from "../TabComponent/TabComponent";
 import { useGetRequest } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
-import editInput from "../../assets/settings/editInput.svg";
+// import editInput from "../../assets/settings/editInput.svg";
 import AgentDetails, { AgentUserType } from "./AgentDetails";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 
@@ -19,7 +19,7 @@ const AgentModal = ({
   agentID: string;
   refreshTable: KeyedMutator<any>;
 }) => {
-  const [displayInput, setDisplayInput] = useState<boolean>(false);
+  // const [displayInput, setDisplayInput] = useState<boolean>(false);
   const [tabContent, setTabContent] = useState<string>("agentDetails");
 
   const fetchSingleAgent = useGetRequest(`/v1/agents/${agentID}`, false);
@@ -38,15 +38,15 @@ const AgentModal = ({
     };
   };
 
-  const handleCancelClick = () => setDisplayInput(false);
+  // const handleCancelClick = () => setDisplayInput(false);
 
   const dropDownList = {
-    items: ["Edit Agent", "Cancel Agent"],
+    items: ["Cancel Agent"],
     onClickLink: (index: number) => {
       switch (index) {
-        case 0:
-          setDisplayInput(true);
-          break;
+        // case 0:
+        //   setDisplayInput(true);
+        //   break;
         case 1:
           console.log("Cancel Agent");
           break;
@@ -77,25 +77,26 @@ const AgentModal = ({
       onClose={() => {
         setIsOpen(false);
         setTabContent("agentDetails");
+        // setDisplayInput(false)
       }}
-      rightHeaderComponents={
-        displayInput ? (
-          <p
-            className="text-xs text-textDarkGrey font-semibold cursor-pointer over"
-            onClick={handleCancelClick}
-            title="Cancel editing agent details"
-          >
-            Cancel Edit
-          </p>
-        ) : (
-          <button
-            className="flex items-center justify-center w-[24px] h-[24px] bg-white border border-strokeGreyTwo rounded-full hover:bg-slate-100"
-            onClick={() => setDisplayInput(true)}
-          >
-            <img src={editInput} alt="Edit Button" width="15px" />
-          </button>
-        )
-      }
+      // rightHeaderComponents={
+      //   displayInput ? (
+      //     <p
+      //       className="text-xs text-textDarkGrey font-semibold cursor-pointer over"
+      //       onClick={handleCancelClick}
+      //       title="Cancel editing agent details"
+      //     >
+      //       Cancel Edit
+      //     </p>
+      //   ) : (
+      //     <button
+      //       className="flex items-center justify-center w-[24px] h-[24px] bg-white border border-strokeGreyTwo rounded-full hover:bg-slate-100"
+      //       onClick={() => setDisplayInput(true)}
+      //     >
+      //       <img src={editInput} alt="Edit Button" width="15px" />
+      //     </button>
+      //   )
+      // }
     >
       <div className="bg-white">
         <header
@@ -136,7 +137,7 @@ const AgentModal = ({
               <AgentDetails
                 {...generateAgentEntries(fetchSingleAgent.data)}
                 refreshTable={refreshTable}
-                displayInput={displayInput}
+                displayInput={false}
               />
             </DataStateWrapper>
           ) : (

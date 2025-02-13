@@ -44,6 +44,7 @@ export type TableType = {
   refreshTable?: () => Promise<any>;
   queryValue?: string;
   paginationInfo: PaginationType;
+  clearFilters?: () => void;
 };
 
 export const Table = (props: TableType) => {
@@ -60,6 +61,7 @@ export const Table = (props: TableType) => {
     refreshTable,
     queryValue = "",
     paginationInfo,
+    clearFilters,
   } = props;
   const [hoveredCell, setHoveredCell] = useState<{
     rowIndex: number;
@@ -147,6 +149,7 @@ export const Table = (props: TableType) => {
             className="bg-[#F6F8FA] px-4 py-1 text-textDarkGrey font-medium border border-strokeGreyTwo mt-4 rounded-full hover:text-textBlack transition-all"
             onClick={async () => {
               setRefreshing(true);
+              clearFilters!();
               await refreshTable!();
               setRefreshing(false);
             }}
@@ -173,6 +176,15 @@ export const Table = (props: TableType) => {
                       }}
                     >
                       {refreshing ? "Refreshing..." : "Refresh Table"}
+                    </button>
+                    <button
+                      className="bg-white text-xs px-2 py-1 text-textDarkGrey font-medium border border-strokeGreyTwo rounded-full hover:text-textBlack hover:border-textBlack transition-all"
+                      onClick={async () => {
+                        clearFilters!();
+                        await refreshTable!();
+                      }}
+                    >
+                      Reset Filters
                     </button>
                   </div>
                   <div className="flex items-center justify-end gap-2">

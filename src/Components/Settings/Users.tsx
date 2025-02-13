@@ -3,7 +3,7 @@ import { PaginationType, Table } from "../TableComponent/Table";
 import role from "../../assets/table/role.svg";
 import clock from "../../assets/table/clock.svg";
 import { GoDotFill } from "react-icons/go";
-import { ApiErrorStatesType, useApiCall } from "../../utils/useApiCall";
+import { ApiErrorStatesType } from "../../utils/useApiCall";
 import UserModal from "./UserModal";
 import { capitalizeFirstLetter } from "../../utils/helpers";
 import { KeyedMutator } from "swr";
@@ -46,6 +46,7 @@ const Users = ({
   error,
   errorData,
   paginationInfo,
+  setTableQueryParams,
 }: {
   rolesList: any;
   data: any;
@@ -54,13 +55,13 @@ const Users = ({
   error: any;
   errorData: ApiErrorStatesType;
   paginationInfo: PaginationType;
+  setTableQueryParams: React.Dispatch<
+    React.SetStateAction<Record<string, any> | null>
+  >;
 }) => {
-  const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [userID, setUserID] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
-  const [queryData, setQueryData] = useState<any>(null);
-  const [queryLoading, setQueryLoading] = useState<boolean>(false);
   const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
 
   const filterList = [
@@ -82,42 +83,22 @@ const Users = ({
         } else {
           setQueryValue("");
         }
-        setQueryLoading(true);
-        try {
-          const response = await apiCall({
-            endpoint: index === 0 ? "/v1/users" : `/v1/users?roleId=${roleId}`,
-            method: "get",
-            showToast: false,
-          });
-          setQueryData(response.data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setQueryLoading(false);
-        }
-        return;
+        setIsSearchQuery(true);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+          roleId: roleId,
+        }));
       },
     },
     {
       name: "Search",
       onSearch: async (query: string) => {
-        setIsSearchQuery(true);
-        if (queryData) setQueryData(null);
-        setQueryLoading(true);
         setQueryValue(query);
-        try {
-          const response = await apiCall({
-            endpoint: `/v1/users?search=${encodeURIComponent(query)}`,
-            method: "get",
-            successMessage: "",
-            showToast: false,
-          });
-          setQueryData(response.data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setQueryLoading(false);
-        }
+        setIsSearchQuery(true);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+          search: query,
+        }));
       },
       isSearch: true,
     },
@@ -187,9 +168,7 @@ const Users = ({
   ];
 
   const getTableData = () => {
-    if (queryValue && queryData) {
-      return generateUserEntries(queryData);
-    } else return generateUserEntries(data);
+    return generateUserEntries(data);
   };
   return (
     <>
@@ -199,14 +178,14 @@ const Users = ({
             tableTitle="USERS"
             filterList={filterList}
             columnList={columnList}
-            loading={queryLoading || isLoading}
+            loading={isLoading}
             tableData={getTableData()}
             refreshTable={async () => {
               await refreshTable();
-              setQueryData(null);
             }}
             queryValue={isSearchQuery ? queryValue : ""}
             paginationInfo={paginationInfo}
+            clearFilters={() => setTableQueryParams({})}
           />
           <UserModal
             isOpen={isOpen}

@@ -1,7 +1,7 @@
 import { useApiCall, useGetRequest } from "../../utils/useApiCall";
 import roletwo from "../../assets/table/roletwo.svg";
-import call from "../../assets/settings/call.svg";
-import message from "../../assets/settings/message.svg";
+// import call from "../../assets/settings/call.svg";
+// import message from "../../assets/settings/message.svg";
 import editInput from "../../assets/settings/editInput.svg";
 import { useState } from "react";
 import { GoDotFill } from "react-icons/go";
@@ -27,15 +27,15 @@ const UserModal = ({
     true
   );
 
-  const handleCallClick = () => {
-    const callURL = `tel:${data?.phone}`;
-    window.open(callURL, "_self");
-  };
+  // const handleCallClick = () => {
+  //   const callURL = `tel:${data?.phone}`;
+  //   window.open(callURL, "_self");
+  // };
 
-  const handleWhatsAppClick = () => {
-    const whatsappURL = `https://wa.me/${data?.phone}`;
-    window.open(whatsappURL, "_blank");
-  };
+  // const handleWhatsAppClick = () => {
+  //   const whatsappURL = `https://wa.me/${data?.phone}`;
+  //   window.open(whatsappURL, "_blank");
+  // };
 
   const deleteUserById = async () => {
     const confirmation = prompt(
@@ -166,12 +166,12 @@ const UserModal = ({
             </div>
           ) : null}
           <div className="flex items-center justify-end gap-2">
-            <Icon icon={call} iconText="Call" handleClick={handleCallClick} />
+            {/* <Icon icon={call} iconText="Call" handleClick={handleCallClick} />
             <Icon
               icon={message}
               iconText="Message"
               handleClick={handleWhatsAppClick}
-            />
+            /> */}
             <DropDown {...dropDownList} />
           </div>
         </header>
