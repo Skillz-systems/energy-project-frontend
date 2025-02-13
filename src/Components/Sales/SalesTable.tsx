@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ApiErrorStatesType, useApiCall } from "@/utils/useApiCall";
+import { ApiErrorStatesType } from "@/utils/useApiCall";
 import { KeyedMutator } from "swr";
 import { PaginationType, Table } from "../TableComponent/Table";
 import { ErrorComponent } from "@/Pages/ErrorPage";
@@ -14,7 +14,7 @@ import { formatNumberWithCommas } from "@/utils/helpers";
 
 type SalesEntries = {
   no: string;
-  salesId: string;
+  paymentMode: string;
   dateCreated: string;
   customer: string;
   status: string;
@@ -29,7 +29,10 @@ const generateSalesEntries = (data: any): SalesEntries[] => {
       const customerName = `${customerKey?.firstname} ${customerKey?.lastname}`;
       return {
         no: index + 1,
-        salesId: item?.id,
+        paymentMode:
+          item?.paymentMode === "ONE_OFF"
+            ? "SINGLE DEPOSIT"
+            : item?.paymentMode,
         dateCreated: item?.createdAt,
         customer: customerName,
         status: item?.sale?.status,
@@ -47,6 +50,7 @@ const SalesTable = ({
   error,
   errorData,
   paginationInfo,
+  setTableQueryParams,
 }: {
   salesData: any;
   isLoading: boolean;
@@ -54,13 +58,13 @@ const SalesTable = ({
   error: any;
   errorData: ApiErrorStatesType;
   paginationInfo: PaginationType;
+  setTableQueryParams: React.Dispatch<
+    React.SetStateAction<Record<string, any> | null>
+  >;
 }) => {
-  const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [salesID, setSalesID] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
-  const [queryData, setQueryData] = useState<any>(null);
-  const [queryLoading, setQueryLoading] = useState<boolean>(false);
   const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
 
   const filterList = [
@@ -69,28 +73,21 @@ const SalesTable = ({
       onSearch: async (query: string) => {
         setQueryValue(query);
         setIsSearchQuery(true);
-        if (queryData) setQueryData(null);
-        setQueryLoading(true);
-        setQueryValue(query);
-        try {
-          const response = await apiCall({
-            endpoint: `/v1/sales?search=${encodeURIComponent(query)}`,
-            method: "get",
-            successMessage: "",
-            showToast: false,
-          });
-          setQueryData(response.data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setQueryLoading(false);
-        }
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+          search: query,
+        }));
       },
       isSearch: true,
     },
     {
       onDateClick: (date: string) => {
-        console.log("Date:", date);
+        setQueryValue(date);
+        setIsSearchQuery(false);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+          createdAt: date.split("T")[0],
+        }));
       },
       isDate: true,
     },
@@ -98,21 +95,20 @@ const SalesTable = ({
 
   const columnList = [
     { title: "S/N", key: "no" },
-    { title: "SALES ID", key: "salesId" },
-    {
-      title: "DATE CREATED",
-      key: "dateCreated",
-      valueIsAComponent: true,
-      customValue: (value: string) => {
-        return <DateTimeTag datetime={value} showAll={false} />;
-      },
-    },
     {
       title: "CUSTOMER",
       key: "customer",
       valueIsAComponent: true,
       customValue: (value: string) => {
         return <NameTag name={value} />;
+      },
+    },
+    {
+      title: "DATE CREATED",
+      key: "dateCreated",
+      valueIsAComponent: true,
+      customValue: (value: string) => {
+        return <DateTimeTag datetime={value} showAll={false} />;
       },
     },
     {
@@ -145,6 +141,7 @@ const SalesTable = ({
         </svg>
       ),
     },
+    { title: "PAYMENT MODE", key: "paymentMode" },
     {
       title: "TOTAL AMOUNT",
       key: "amount",
@@ -197,9 +194,7 @@ const SalesTable = ({
   ];
 
   const getTableData = () => {
-    if (queryValue && queryData) {
-      return generateSalesEntries(queryData);
-    } else return generateSalesEntries(salesData);
+    return generateSalesEntries(salesData);
   };
 
   return (
@@ -210,14 +205,14 @@ const SalesTable = ({
             tableTitle="SALES"
             filterList={filterList}
             columnList={columnList}
-            loading={queryLoading || isLoading}
+            loading={isLoading}
             tableData={getTableData()}
             refreshTable={async () => {
               await refreshTable();
-              setQueryData(null);
             }}
             queryValue={isSearchQuery ? queryValue : ""}
             paginationInfo={paginationInfo}
+            clearFilters={() => setTableQueryParams({})}
           />
           {salesID && (
             <SalesDetailsModal

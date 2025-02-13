@@ -15,7 +15,7 @@ import { CardComponent } from "../CardComponents/CardComponent";
 import { Modal } from "@/Components/ModalComponent/Modal";
 import { z } from "zod";
 import { ProductStore } from "@/stores/ProductStore";
-import { toJS } from "mobx";
+// import { toJS } from "mobx";
 
 export type ProductFormType = "newProduct" | "newCategory";
 
@@ -43,11 +43,7 @@ const formSchema = z.object({
     .trim()
     .min(1, "Inventory Category is required")
     .default(""),
-  name: z
-    .string()
-    .trim()
-    .min(1, "Product Name is required")
-    .max(50, "Product Name cannot exceed 50 characters"),
+  name: z.string().trim().min(1, "Product Name is required"),
   productImage: z
     .instanceof(File)
     .refine(
@@ -315,7 +311,6 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                     itemsSelected={
                       <div className="flex flex-wrap items-center w-full gap-4">
                         {selectedProducts?.map((data, index) => {
-                          console.log(toJS(selectedProducts));
                           return (
                             <CardComponent
                               key={`${data.productId}-${index}`}

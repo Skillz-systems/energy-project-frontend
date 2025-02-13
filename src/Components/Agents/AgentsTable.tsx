@@ -2,7 +2,7 @@ import { useState } from "react";
 import { PaginationType, Table } from "../TableComponent/Table";
 import { CardComponent } from "../CardComponents/CardComponent";
 import AgentsModal from "./AgentsModal";
-import { ApiErrorStatesType, useApiCall } from "../../utils/useApiCall";
+import { ApiErrorStatesType } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
 import { ErrorComponent } from "@/Pages/ErrorPage";
 
@@ -77,6 +77,7 @@ const AgentsTable = ({
   error,
   errorData,
   paginationInfo,
+  setTableQueryParams,
 }: {
   agentData: any;
   isLoading: boolean;
@@ -84,109 +85,64 @@ const AgentsTable = ({
   error: any;
   errorData: ApiErrorStatesType;
   paginationInfo: PaginationType;
+  setTableQueryParams: React.Dispatch<
+    React.SetStateAction<Record<string, any> | null>
+  >;
 }) => {
-  const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [agentId, setAgentId] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
-  const [queryData, setQueryData] = useState<any>(null);
-  const [queryLoading, setQueryLoading] = useState<boolean>(false);
   const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
-  // const [, setPagination] = useState({
-  //   page: 1,
-  //   limit: 10,
-  //   total: 0,
-  //   lastPage: 1,
-  // });
-
-  // const fetchAgents = async (page = 1, limit = 10, status = "") => {
-  //     const response = await apiCall({
-  //       endpoint: `/v1/agents?page=${page}&limit=${limit}${
-  //         status ? `&status=${status}` : ""
-  //       }`,
-  //       method: "get",
-  //     });
-  //     setPagination({
-  //       page: response.meta.page,
-  //       limit: response.meta.limit,
-  //       total: response.meta.total,
-  //       lastPage: response.meta.lastPage,
-  //     });
 
   const filterList = [
-    {
-      name: "Status",
-      items: [
-        "All Agents",
-        "Active Agents",
-        "Inactive Agents",
-        "Barred Agents",
-      ],
-      onClickLink: async (index: number) => {
-        const data = ["", "active", "inactive", "barred"];
-        const query = data[index];
-        setQueryValue(query);
-        if (queryData) setQueryData(null);
-        setQueryLoading(true);
-        setQueryValue(query);
-        try {
-          const response = await apiCall({
-            endpoint: `/v1/agents${
-              index !== 0 ? `?status=${encodeURIComponent(query)}` : ""
-            }`,
-            method: "get",
-            successMessage: "",
-            showToast: false,
-          });
-          setQueryData(response.data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setQueryLoading(false);
-        }
-      },
-    },
-    {
-      name: "Search",
-      onSearch: async (query: string) => {
-        setIsSearchQuery(true);
-        if (queryData) setQueryData(null);
-        setQueryLoading(true);
-        setQueryValue(query);
-        try {
-          const response = await apiCall({
-            endpoint: `/v1/agents?search=${encodeURIComponent(query)}`,
-            method: "get",
-            successMessage: "",
-            showToast: false,
-          });
-          setQueryData(response.data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setQueryLoading(false);
-        }
-      },
-      isSearch: true,
-    },
+    // {
+    //   name: "Status",
+    //   items: ["Active Agents", "Inactive Agents", "Barred Agents"],
+    //   onClickLink: async (index: number) => {
+    //     const data = ["Active", "Inactive", "Barred"].map((item) =>
+    //       item.toLocaleLowerCase()
+    //     );
+    //     const query = data[index];
+    //     setQueryValue(query);
+    //     setIsSearchQuery(true);
+    //     setTableQueryParams((prevParams) => ({
+    //       ...prevParams,
+    //       status: query,
+    //     }));
+    //   },
+    // },
+    // {
+    //   name: "Search",
+    //   onSearch: async (query: string) => {
+    //     setQueryValue(query);
+    //     setIsSearchQuery(true);
+    //     setTableQueryParams((prevParams) => ({
+    //       ...prevParams,
+    //       search: query,
+    //     }));
+    //   },
+    //   isSearch: true,
+    // },
     {
       onDateClick: (date: string) => {
-        console.log("Date:", date);
+        setQueryValue(date);
+        setIsSearchQuery(false);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+          createdAt: date.split("T")[0],
+        }));
       },
       isDate: true,
     },
   ];
 
   const dropDownList = {
-    items: ["View Agent profile", "Barr Agent"],
+    items: ["View Agent profile"],
     onClickLink: (index: number, cardData: any) => {
       switch (index) {
         case 0:
           setAgentId(cardData?.productId);
           setIsOpen(true);
-          break;
-        case 1:
-          console.log("Agent Barred");
           break;
         default:
           break;
@@ -197,9 +153,7 @@ const AgentsTable = ({
   };
 
   const getTableData = () => {
-    if (queryValue && queryData) {
-      return generateAgentEntries(queryData);
-    } else return generateAgentEntries(agentData);
+    return generateAgentEntries(agentData);
   };
 
   return (
@@ -211,7 +165,7 @@ const AgentsTable = ({
             tableTitle="ALL AGENTS"
             tableClassname="flex flex-wrap items-center gap-4"
             tableData={getTableData()}
-            loading={queryLoading || isLoading}
+            loading={isLoading}
             filterList={filterList}
             cardComponent={(data) => {
               return data?.map((item: AgentEntries, index) => (
@@ -243,10 +197,10 @@ const AgentsTable = ({
             }}
             refreshTable={async () => {
               await refreshTable();
-              setQueryData(null);
             }}
             queryValue={isSearchQuery ? queryValue : ""}
             paginationInfo={paginationInfo}
+            clearFilters={() => setTableQueryParams({})}
           />
           {agentId && (
             <AgentsModal

@@ -98,8 +98,9 @@ const CreateNewSale = observer(
       e.preventDefault();
       setLoading(true);
       try {
-        // const validatedData = formSchema.parse(getPayload());
-        const validatedData = toJS(getPayload());
+        const validatedData = SaleStore.doesSaleItemHaveInstallment()
+          ? formSchema.parse(getPayload())
+          : toJS(getPayload());
         const response = await apiCall({
           endpoint: "/v1/sales/create",
           method: "post",
@@ -128,7 +129,15 @@ const CreateNewSale = observer(
       if (loading && apiError) setApiError(null);
     }, [getPayload, apiError, loading]);
 
-    const isFormFilled = formSchema.safeParse(toJS(getPayload())).success;
+    const altFormFilled = Boolean(
+      SaleStore.category &&
+        SaleStore.customer?.customerId &&
+        SaleStore.saleRecipient.length > 1 &&
+        SaleStore.devices.length > 1
+    );
+    const isFormFilled = SaleStore.doesSaleItemHaveInstallment()
+      ? formSchema.safeParse(toJS(getPayload())).success
+      : altFormFilled;
 
     const getFieldError = (fieldName: string) => {
       return formErrors.find((error) => error.path[0] === fieldName)?.message;
@@ -362,8 +371,7 @@ const CreateNewSale = observer(
                 type="submit"
                 loading={loading}
                 variant={isFormFilled ? "gradient" : "gray"}
-                // disabled={!isFormFilled}
-                disabled={false}
+                disabled={!isFormFilled}
               />
             </div>
           </form>

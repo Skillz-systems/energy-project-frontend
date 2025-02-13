@@ -3,7 +3,7 @@ import { PaginationType, Table } from "../TableComponent/Table";
 import { CardComponent } from "../CardComponents/CardComponent";
 import ProductModal from "./ProductModal";
 import { KeyedMutator } from "swr";
-import { ApiErrorStatesType, useApiCall } from "../../utils/useApiCall";
+import { ApiErrorStatesType } from "../../utils/useApiCall";
 import { ErrorComponent } from "@/Pages/ErrorPage";
 
 interface AllProductEntries {
@@ -38,6 +38,7 @@ const ProductsTable = ({
   error,
   errorData,
   paginationInfo,
+  setTableQueryParams,
 }: {
   productData: any;
   isLoading: boolean;
@@ -45,13 +46,13 @@ const ProductsTable = ({
   error: any;
   errorData: ApiErrorStatesType;
   paginationInfo: PaginationType;
+  setTableQueryParams: React.Dispatch<
+    React.SetStateAction<Record<string, any> | null>
+  >;
 }) => {
-  const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [productId, setProductId] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
-  const [queryData, setQueryData] = useState<any>(null);
-  const [queryLoading, setQueryLoading] = useState<boolean>(false);
   const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
 
   const filterList = [
@@ -65,29 +66,23 @@ const ProductsTable = ({
     {
       name: "Search",
       onSearch: async (query: string) => {
-        setIsSearchQuery(true);
-        if (queryData) setQueryData(null);
-        setQueryLoading(true);
         setQueryValue(query);
-        try {
-          const response = await apiCall({
-            endpoint: `/v1/products?search=${encodeURIComponent(query)}`,
-            method: "get",
-            successMessage: "",
-            showToast: false,
-          });
-          setQueryData(response.data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setQueryLoading(false);
-        }
+        setIsSearchQuery(true);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+          search: query,
+        }));
       },
       isSearch: true,
     },
     {
       onDateClick: (date: string) => {
-        console.log("Date:", date);
+        setQueryValue(date);
+        setIsSearchQuery(false);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+          createdAt: date.split("T")[0],
+        }));
       },
       isDate: true,
     },
@@ -113,9 +108,7 @@ const ProductsTable = ({
   };
 
   const getTableData = () => {
-    if (queryValue && queryData) {
-      return generateProductEntries(queryData);
-    } else return generateProductEntries(productData);
+    return generateProductEntries(productData);
   };
 
   return (
@@ -127,7 +120,7 @@ const ProductsTable = ({
             tableTitle="ALL PRODUCTS"
             tableClassname="flex flex-wrap items-center gap-4"
             tableData={getTableData()}
-            loading={queryLoading || isLoading}
+            loading={isLoading}
             filterList={filterList}
             cardComponent={(data) => {
               return data?.map((item: AllProductEntries, index) => (
@@ -145,10 +138,11 @@ const ProductsTable = ({
             }}
             refreshTable={async () => {
               await refreshTable();
-              setQueryData(null);
             }}
             queryValue={isSearchQuery ? queryValue : ""}
             paginationInfo={paginationInfo}
+            clearFilters={() => setTableQueryParams({})}
+
           />
           {productId && (
             <ProductModal

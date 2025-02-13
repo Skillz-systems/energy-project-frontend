@@ -24,19 +24,26 @@ type InventoryClass = "REGULAR" | "RETURNED" | "REFURBISHED";
 const Inventory = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [_inventoryData, setInventoryData] = useState<any>(null);
   const [formType, setFormType] = useState<InventoryFormType>("newInventory");
-  const [inventoryFilter, setInventoryFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
+  const [tableQueryParams, setTableQueryParams] = useState<Record<
+    string,
+    any
+  > | null>({});
+
+  const queryString = Object.entries(tableQueryParams || {})
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .join("&");
+
   const {
     data: inventoryData,
     isLoading: inventoryLoading,
     mutate: allInventoryRefresh,
     errorStates: allInventoryErrorStates,
   } = useGetRequest(
-    `/v1/inventory?page=${currentPage}&limit=${entriesPerPage}&${
-      inventoryFilter && `class=${inventoryFilter}`
+    `/v1/inventory?page=${currentPage}&limit=${entriesPerPage}${
+      queryString && `&${queryString}`
     }`,
     true,
     60000
@@ -87,28 +94,37 @@ const Inventory = () => {
   ];
 
   useEffect(() => {
+    setTableQueryParams({});
     switch (location.pathname) {
       case "/inventory/all":
-        setInventoryFilter("");
-        setInventoryData(inventoryData);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+        }));
         break;
       case "/inventory/regular":
-        setInventoryFilter("REGULAR");
-        setInventoryData(inventoryData);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+          class: "REGULAR",
+        }));
         break;
       case "/inventory/returned":
-        setInventoryFilter("RETURNED");
-        setInventoryData(inventoryData);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+          class: "RETURNED",
+        }));
         break;
       case "/inventory/refurbished":
-        setInventoryFilter("REFURBISHED");
-        setInventoryData(inventoryData);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+          class: "REFURBISHED",
+        }));
         break;
       default:
-        setInventoryFilter("");
-        setInventoryData(inventoryData);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+        }));
     }
-  }, [location.pathname, inventoryData]);
+  }, [location.pathname]);
 
   const dropDownList = {
     items: ["Create New Category", "Create New Sub-Category", "Export List"],
@@ -199,11 +215,12 @@ const Inventory = () => {
                     path={path}
                     element={
                       <InventoryTable
-                        inventoryData={_inventoryData}
+                        inventoryData={inventoryData}
                         isLoading={inventoryLoading}
                         refreshTable={allInventoryRefresh}
                         errorData={allInventoryErrorStates}
                         paginationInfo={paginationInfo}
+                        setTableQueryParams={setTableQueryParams}
                       />
                     }
                   />

@@ -5,10 +5,10 @@ import inventory from "../../assets/table/inventory.svg";
 import customer from "../../assets/table/customer.svg";
 import product from "../../assets/table/product.svg";
 import checkers from "../../assets/table/checkers.svg";
-import call from "../../assets/settings/call.svg";
-import message from "../../assets/settings/message.svg";
+// import call from "../../assets/settings/call.svg";
+// import message from "../../assets/settings/message.svg";
 import { GoDotFill } from "react-icons/go";
-import { Icon } from "../Settings/UserModal";
+// import { Icon } from "../Settings/UserModal";
 import { DropDown } from "../DropDownComponent/DropDown";
 import { formatDateTime, formatNumberWithCommas } from "../../utils/helpers";
 import useBreakpoint from "../../hooks/useBreakpoint";
@@ -66,6 +66,7 @@ export type CardComponentProps = {
   isProductSelected?: boolean;
   readOnly?: boolean;
   isSale?: boolean;
+  quantity?: number;
 };
 
 export const ProductTag = ({
@@ -183,14 +184,24 @@ export const DateTimeTag = ({
   );
 };
 
-export const NameTag = ({ name }: { name?: string }) => {
+export const NameTag = ({
+  name,
+  className,
+}: {
+  name?: string;
+  className?: string;
+}) => {
   return (
-    <span className="flex items-center gap-0.5">
+    <div className="flex items-center gap-0.5">
       <img src={smile} alt="Smile Icon" />
-      <span className="flex items-center justify-center bg-paleLightBlue text-xs px-2 text-textBlack font-semibold rounded-full h-[24px]">
+      <p
+        className={`flex items-center bg-paleLightBlue text-xs px-2 text-textBlack font-semibold rounded-full h-[24px] ${
+          className ? className : "justify-center"
+        }`}
+      >
         {name}
-      </span>
-    </span>
+      </p>
+    </div>
   );
 };
 
@@ -228,7 +239,7 @@ export default function QuantitySelector({
   onValueChange,
   isSelected,
   onClick,
-  initialQuantity = 0,
+  initialQuantity = 1,
   isSale,
 }: QuantitySelectorProps) {
   const [quantity, setQuantity] = useState<number>(initialQuantity);
@@ -242,14 +253,14 @@ export default function QuantitySelector({
 
     if (
       !isSale ||
-      (newValue >= 0 && newValue <= (totalRemainingQuantities ?? Infinity))
+      (newValue >= 1 && newValue <= (totalRemainingQuantities ?? Infinity))
     ) {
       setQuantity(newValue);
       onValueChange(newValue);
     }
   };
 
-  const isMinusDisabled = quantity === 0;
+  const isMinusDisabled = quantity === 1;
   const isPlusDisabled = isSale && quantity === totalRemainingQuantities;
 
   return (
@@ -324,8 +335,8 @@ export default function QuantitySelector({
 
 export const CardComponent = ({
   variant = "agent",
-  handleCallClick,
-  handleWhatsAppClick,
+  // handleCallClick,
+  // handleWhatsAppClick,
   dropDownList,
   name,
   status,
@@ -355,10 +366,11 @@ export const CardComponent = ({
   isProductSelected,
   isSale = false,
   readOnly = false,
+  quantity,
 }: CardComponentProps) => {
   const inventoryMobile = useBreakpoint("max", 350);
   const [_productUnits, setProductUnits] = useState<number | any>(
-    productUnits || 0
+    productUnits || (totalRemainingQuantities === 0 ? 0 : 1)
   );
   const [_selected, setSelected] = useState<boolean>(
     isProductSelected || false
@@ -374,10 +386,10 @@ export const CardComponent = ({
   };
 
   useEffect(() => {
-    if (productUnits && productUnits > 0) {
+    if (productUnits && productUnits > 0 && _productUnits > 0) {
       setProductUnits(productUnits);
     }
-  }, [productUnits]);
+  }, [productUnits, _productUnits]);
 
   const updatedProductInfo = {
     ...productInfo,
@@ -385,7 +397,8 @@ export const CardComponent = ({
   };
 
   const handleSelectProduct = () => {
-    if (totalRemainingQuantities === 0 && isSale) return;
+    // if (totalRemainingQuantities === 0 && isSale) return;
+    if (totalRemainingQuantities === 0) return;
     if (!_selected) {
       if (updatedProductInfo) {
         // Check if onSelectProduct is defined before calling it
@@ -395,7 +408,7 @@ export const CardComponent = ({
       }
     } else {
       setSelected(false);
-      setProductUnits(0);
+      setProductUnits(1);
       // Ensure onRemoveProduct is called only if defined
       onRemoveProduct?.(productId);
     }
@@ -482,22 +495,22 @@ export const CardComponent = ({
           </p>
         ) : variant === "product-no-image" ? (
           <div className="flex items-center justify-center w-full h-[120px]">
-            <div className="relative w-full max-w-[134px] h-full">
+            <div className="relative w-full max-w-[200px] h-full">
               <img
                 src={productImage || checkers}
                 width="100%"
                 alt="Product"
-                className="w-full h-full object-contain"
+                className="w-full h-full object-cover rounded-md"
               />
             </div>
           </div>
         ) : variant === "inventoryOne" || variant === "inventoryTwo" ? (
           <div className="flex items-center justify-center w-full h-[120px]">
-            <div className="relative w-full max-w-[134px] h-full">
+            <div className="relative w-full max-w-[200px] h-full">
               <img
                 src={productImage}
                 alt="Product"
-                className="w-full h-full object-contain"
+                className="w-full h-full object-cover rounded-md"
               />
             </div>
           </div>
@@ -554,7 +567,10 @@ export const CardComponent = ({
             </div>
           </div>
         ) : (
-          <NameTag name={name} />
+          <NameTag
+            name={name}
+            className="justify-start max-w-[150px] truncate"
+          />
         )}
 
         {variant === "agent" ? (
@@ -702,6 +718,11 @@ export const CardComponent = ({
                 </p>
               )}
               <p className="text-textDarkGrey text-xs">{productName}</p>
+              {quantity && (
+                <p className="text-textDarkGrey font-medium text-xs">
+                  Qty remaining: {quantity}
+                </p>
+              )}
               {isSale && (
                 <p
                   className={`${
@@ -728,7 +749,8 @@ export const CardComponent = ({
         className={`flex items-center ${
           variant === "transactions" ||
           variant === "salesTransactions" ||
-          variant === "inventoryOne"
+          variant === "inventoryOne" ||
+          variant === "agent"
             ? "justify-end"
             : "justify-between"
         } ${
@@ -744,42 +766,35 @@ export const CardComponent = ({
             : "border-t-strokeGreyThree"
         }  rounded-b-[20px]`}
       >
-        {variant === "transactions" ? null : variant === "sales" ? (
-          <SimpleTag
-            text={`${installment} DAYS`}
-            dotColour="#49526A"
-            containerClass="bg-[#F6F8FA] text-textDarkGrey font-light px-2 py-1 border-[0.4px] border-strokeGreyTwo rounded-full"
-          />
-        ) : variant === "product-no-image" ? (
-          <SimpleTag
-            text={productPrice}
-            showIcon={false}
-            containerClass="bg-successTwo text-textDarkGrey font-bold px-2 py-1 border border-successThree rounded-full"
-          />
-        ) : variant === "inventoryOne" ? (
-          productPrice ? (
+        {
+          variant === "transactions" ? null : variant === "sales" ? (
+            <SimpleTag
+              text={`${installment} DAYS`}
+              dotColour="#49526A"
+              containerClass="bg-[#F6F8FA] text-textDarkGrey font-light px-2 py-1 border-[0.4px] border-strokeGreyTwo rounded-full"
+            />
+          ) : variant === "product-no-image" ? (
             <SimpleTag
               text={productPrice}
               showIcon={false}
-              containerClass="text-textBlack font-medium px-1 py-0.5 bg-[#eceef1] border-[0.4px] border-strokeGreyTwo rounded-full"
+              containerClass="bg-successTwo text-textDarkGrey font-bold px-2 py-1 border border-successThree rounded-full"
             />
-          ) : null
-        ) : variant === "inventoryTwo" ? (
-          <SimpleTag
-            text={productPrice}
-            showIcon={false}
-            containerClass="text-textBlack font-medium"
-          />
-        ) : variant === "salesTransactions" ? null : (
-          <div className="flex items-center gap-2">
-            <Icon icon={call} iconText="Call" handleClick={handleCallClick} />
-            <Icon
-              icon={message}
-              iconText="Message"
-              handleClick={handleWhatsAppClick}
+          ) : variant === "inventoryOne" ? (
+            productPrice ? (
+              <SimpleTag
+                text={productPrice}
+                showIcon={false}
+                containerClass="text-textBlack font-medium px-1 py-0.5 bg-[#eceef1] border-[0.4px] border-strokeGreyTwo rounded-full"
+              />
+            ) : null
+          ) : variant === "inventoryTwo" ? (
+            <SimpleTag
+              text={productPrice}
+              showIcon={false}
+              containerClass="text-textBlack font-medium"
             />
-          </div>
-        )}
+          ) : variant === "salesTransactions" ? null : null // </div> //   /> //     handleClick={handleWhatsAppClick} //     iconText="Message" //     icon={message} //   <Icon //   <Icon icon={call} iconText="Call" handleClick={handleCallClick} /> // <div className="flex items-center gap-2">
+        }
 
         {variant === "inventoryTwo" ? (
           <QuantitySelector

@@ -110,7 +110,7 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
             <img
               src={inventoryImage}
               alt="Inventory Image"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover rounded-full"
             />
           </div>
         )}

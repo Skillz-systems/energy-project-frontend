@@ -5,7 +5,7 @@ import { GoDotFill } from "react-icons/go";
 import { formatNumberWithCommas } from "@/utils/helpers";
 import { NairaSymbol } from "../CardComponents/CardComponent";
 import InventoryDetailModal from "./InventoryDetailModal";
-import { ApiErrorStatesType, useApiCall } from "@/utils/useApiCall";
+import { ApiErrorStatesType } from "@/utils/useApiCall";
 import { ErrorComponent } from "@/Pages/ErrorPage";
 
 interface InventoryEntries {
@@ -91,19 +91,20 @@ const InventoryTable = ({
   refreshTable,
   errorData,
   paginationInfo,
+  setTableQueryParams,
 }: {
   inventoryData: any;
   isLoading: boolean;
   refreshTable: KeyedMutator<any>;
   errorData: ApiErrorStatesType;
   paginationInfo: PaginationType;
+  setTableQueryParams: React.Dispatch<
+    React.SetStateAction<Record<string, any> | null>
+  >;
 }) => {
-  const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [inventoryID, setInventoryID] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
-  const [queryData, setQueryData] = useState<any>(null);
-  const [queryLoading, setQueryLoading] = useState<boolean>(false);
   const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
 
   const filterList = [
@@ -114,50 +115,33 @@ const InventoryTable = ({
         setIsSearchQuery(false);
         const selectedClass = ["REGULAR", "RETURNED", "REFURBISHED"][index];
         setQueryValue(selectedClass);
-        setQueryLoading(true);
-        try {
-          const response = await apiCall({
-            endpoint: `/v1/inventory?class=${encodeURIComponent(
-              selectedClass
-            )}`,
-            method: "get",
-            successMessage: "",
-            showToast: false,
-          });
-          setQueryData(response.data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setQueryLoading(false);
-        }
+        setIsSearchQuery(true);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+          class: selectedClass,
+        }));
       },
     },
     {
       name: "Search",
       onSearch: async (query: string) => {
-        setIsSearchQuery(true);
-        if (queryData) setQueryData(null);
-        setQueryLoading(true);
         setQueryValue(query);
-        try {
-          const response = await apiCall({
-            endpoint: `/v1/inventory?search=${encodeURIComponent(query)}`,
-            method: "get",
-            successMessage: "",
-            showToast: false,
-          });
-          setQueryData(response.data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setQueryLoading(false);
-        }
+        setIsSearchQuery(true);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+          search: query,
+        }));
       },
       isSearch: true,
     },
     {
       onDateClick: (date: string) => {
-        console.log("Date:", date);
+        setQueryValue(date);
+        setIsSearchQuery(false);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+          createdAt: date.split("T")[0],
+        }));
       },
       isDate: true,
     },
@@ -172,12 +156,13 @@ const InventoryTable = ({
       customValue: (value: { image: string; text: string }) => {
         return (
           <div className="flex items-center gap-1 w-max">
-            <div className="relative flex items-center w-[64px] h-[64px] py-1">
+            <div className="relative flex items-center w-[64px] h-[64px] py-1.5 pr-2">
               {value.image ? (
                 <img
                   src={value.image}
                   alt={`${value.text} Image`}
-                  className="w-full max-w-[54px] max-h-[48px] object-contain"
+                  className="w-full h-full object-cover rounded-sm"
+                  loading="eager"
                 />
               ) : (
                 <span className="bg-gray-100 flex items-center justify-center w-[54px] h-[48px] px-1 text-textBlack text-[9px] text-center font-medium rounded-md">
@@ -314,9 +299,7 @@ const InventoryTable = ({
   ];
 
   const getTableData = () => {
-    if (queryValue && queryData) {
-      return generateInventoryEntries(queryData);
-    } else return generateInventoryEntries(inventoryData);
+    return generateInventoryEntries(inventoryData);
   };
 
   return (
@@ -327,14 +310,14 @@ const InventoryTable = ({
             tableTitle="INVENTORY"
             filterList={filterList}
             columnList={columnList}
-            loading={queryLoading || isLoading}
+            loading={isLoading}
             tableData={getTableData()}
             refreshTable={async () => {
               await refreshTable();
-              setQueryData(null);
             }}
             queryValue={isSearchQuery ? queryValue : ""}
             paginationInfo={paginationInfo}
+            clearFilters={() => setTableQueryParams({})}
           />
           {inventoryID && (
             <InventoryDetailModal

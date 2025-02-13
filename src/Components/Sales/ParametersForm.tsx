@@ -100,72 +100,78 @@ const ParametersForm = ({
   };
 
   return (
-    <div className="flex flex-col justify-between h-full min-h-[360px] gap-2">
-      <SelectInput
-        label="Payment Mode"
-        options={[
-          { label: "Single Deposit", value: "ONE_OFF" },
-          { label: "Installment", value: "INSTALLMENT" },
-        ]}
-        value={formData.paymentMode}
-        onChange={(selectedValue) =>
-          handleSelectChange("paymentMode", selectedValue)
-        }
-        placeholder="Select Payment Mode"
-        required={true}
-        errorMessage={getFieldError("paymentMode")}
-      />
-      <Input
-        type="number"
-        name="installmentDuration"
-        label="NUMBER OF INSTALLMENTS"
-        value={formData.installmentDuration as number}
-        onChange={handleInputChange}
-        placeholder="Number of Installments"
-        required={formData.paymentMode === "INSTALLMENT" ? true : false}
-        errorMessage={getFieldError("installmentDuration")}
-        description={
-          formData.installmentDuration === 0
-            ? "Enter Number of Installments"
-            : ""
-        }
-      />
-      <Input
-        type="number"
-        name="installmentStartingPrice"
-        label="INITIAL PAYMENT AMOUNT"
-        value={formData.installmentStartingPrice as number}
-        onChange={handleInputChange}
-        placeholder="Initial Payment Amount"
-        required={formData.paymentMode === "INSTALLMENT" ? true : false}
-        errorMessage={getFieldError("installmentStartingPrice")}
-        description={
-          formData.installmentStartingPrice === 0
-            ? "Enter Initial Payment Amount"
-            : ""
-        }
-      />
-      <Input
-        type="text"
-        name="address"
-        label="ADDRESS"
-        value={formData.address}
-        onChange={handleInputChange}
-        placeholder="Address"
-        required={true}
-        errorMessage={getFieldError("address")}
-      />
-      <Input
-        type="number"
-        name="discount"
-        label="DISCOUNT"
-        value={formData.discount as number}
-        onChange={handleInputChange}
-        placeholder="Discount"
-        required={false}
-        errorMessage={getFieldError("discount")}
-        description={formData.discount === 0 ? "Enter Discount Value" : ""}
-      />
+    <div className="flex flex-col justify-between w-full h-full min-h-[360px]">
+      <div className="flex flex-col gap-3">
+        <SelectInput
+          label="Payment Mode"
+          options={[
+            { label: "Single Deposit", value: "ONE_OFF" },
+            { label: "Installment", value: "INSTALLMENT" },
+          ]}
+          value={formData.paymentMode}
+          onChange={(selectedValue) =>
+            handleSelectChange("paymentMode", selectedValue)
+          }
+          placeholder="Select Payment Mode"
+          required={true}
+          errorMessage={getFieldError("paymentMode")}
+        />
+        {formData.paymentMode === "INSTALLMENT" ? (
+          <Input
+            type="number"
+            name="installmentDuration"
+            label="NUMBER OF INSTALLMENTS"
+            value={formData.installmentDuration as number}
+            onChange={handleInputChange}
+            placeholder="Number of Installments"
+            required={true}
+            errorMessage={getFieldError("installmentDuration")}
+            description={
+              formData.installmentDuration === 0
+                ? "Enter Number of Installments"
+                : ""
+            }
+          />
+        ) : null}
+        {formData.paymentMode === "INSTALLMENT" ? (
+          <Input
+            type="number"
+            name="installmentStartingPrice"
+            label="INITIAL PAYMENT AMOUNT"
+            value={formData.installmentStartingPrice as number}
+            onChange={handleInputChange}
+            placeholder="Initial Payment Amount"
+            required={true}
+            errorMessage={getFieldError("installmentStartingPrice")}
+            description={
+              formData.installmentStartingPrice === 0
+                ? "Enter Initial Payment Amount"
+                : ""
+            }
+          />
+        ) : null}
+        <Input
+          type="text"
+          name="address"
+          label="ADDRESS"
+          value={formData.address}
+          onChange={handleInputChange}
+          placeholder="Address"
+          required={true}
+          errorMessage={getFieldError("address")}
+        />
+        <Input
+          type="number"
+          name="discount"
+          label="DISCOUNT"
+          value={formData.discount as number}
+          onChange={handleInputChange}
+          placeholder="Discount"
+          required={false}
+          errorMessage={getFieldError("discount")}
+          description={formData.discount === 0 ? "Enter Discount Value" : ""}
+        />
+      </div>
       <div className="flex items-center justify-between gap-1">
         <button
           type="button"
