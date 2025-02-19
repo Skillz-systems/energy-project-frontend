@@ -111,18 +111,18 @@ const AgentsTable = ({
     //     }));
     //   },
     // },
-    // {
-    //   name: "Search",
-    //   onSearch: async (query: string) => {
-    //     setQueryValue(query);
-    //     setIsSearchQuery(true);
-    //     setTableQueryParams((prevParams) => ({
-    //       ...prevParams,
-    //       search: query,
-    //     }));
-    //   },
-    //   isSearch: true,
-    // },
+    {
+      name: "Search",
+      onSearch: async (query: string) => {
+        setQueryValue(query);
+        setIsSearchQuery(true);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+          search: query,
+        }));
+      },
+      isSearch: true,
+    },
     {
       onDateClick: (date: string) => {
         setQueryValue(date);

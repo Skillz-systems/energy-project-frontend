@@ -486,11 +486,11 @@ const UploadDevicesForm = ({
                   </p>
                   <div className="flex flex-col gap-2 items-center justify-center w-full h-full pt-12 pr-3 max-h-[250px] overflow-y-auto">
                     {productData?.inventories?.map((item: any) => (
-                      <div className="flex items-center justify-between w-full gap-3">
-                        <div
-                          key={item.id}
-                          className="flex flex-col bg-white gap-2 w-full p-2.5 border-[0.6px] border-strokeGreyThree rounded-[20px]"
-                        >
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between w-full gap-3"
+                      >
+                        <div className="flex flex-col bg-white gap-2 w-full p-2.5 border-[0.6px] border-strokeGreyThree rounded-[20px]">
                           <ProductDetailRow
                             label="Inventory Name"
                             value={item?.name || ""}

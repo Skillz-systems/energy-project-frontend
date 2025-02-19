@@ -74,11 +74,26 @@ const SetExtraInfoModal = observer(
             />
           );
         case "identification":
-          return <IdentificationForm handleClose={handleClose} />;
+          return (
+            <IdentificationForm
+              handleClose={handleClose}
+              currentProductId={currentProductId}
+            />
+          );
         case "nextOfKin":
-          return <NextOfKinForm handleClose={handleClose} />;
+          return (
+            <NextOfKinForm
+              handleClose={handleClose}
+              currentProductId={currentProductId}
+            />
+          );
         case "guarantor":
-          return <GuarantorForm handleClose={handleClose} />;
+          return (
+            <GuarantorForm
+              handleClose={handleClose}
+              currentProductId={currentProductId}
+            />
+          );
         default:
           return null;
       }

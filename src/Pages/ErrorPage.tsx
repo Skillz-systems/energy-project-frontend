@@ -174,7 +174,7 @@ export const ErrorComponent = ({
       <p className="text-sm text-textBlack text-center">
         {errorData?.errorStates[0]?.errorCount < 5
           ? message
-          : "Blocked fetch dues to multiple errors. Try again later."}
+          : "Blocked fetch dues to multiple failed errors. Try again later."}
       </p>
       <div
         className="mt-6 inline-flex items-center px-5 py-2 text-base font-medium rounded-md text-white bg-errorGradient hover:bg-inversedErrorGradient transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary cursor-pointer"

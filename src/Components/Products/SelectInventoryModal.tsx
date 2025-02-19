@@ -11,6 +11,7 @@ import { Modal } from "@/Components/ModalComponent/Modal";
 import { TabNamesType } from "../Inventory/InventoryDetailModal";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import { ProductStore } from "@/stores/ProductStore";
+import { formatNumberWithCommas } from "@/utils/helpers";
 
 export type ListDataType = {
   productId: string;
@@ -63,7 +64,10 @@ type InventoryItem = {
     remainingQuantity: number;
     inventoryId: string;
   }[];
-  salePrice: string;
+  salePrice: {
+    minimumInventoryBatchPrice: number;
+    maximumInventoryBatchPrice: number;
+  };
   inventoryValue: number;
   totalRemainingQuantities: number;
   totalInitialQuantities: number;
@@ -129,7 +133,17 @@ const SelectInventoryModal = observer(
         productImage: inventory?.image || "",
         productTag: inventory?.inventoryCategory?.name,
         productName: inventory?.name,
-        productPrice: inventory?.salePrice || 0,
+        productPrice:
+          inventory?.salePrice?.minimumInventoryBatchPrice ===
+          inventory?.salePrice?.maximumInventoryBatchPrice
+            ? `₦ ${formatNumberWithCommas(
+                inventory?.salePrice?.maximumInventoryBatchPrice
+              )}`
+            : `₦ ${formatNumberWithCommas(
+                inventory?.salePrice?.minimumInventoryBatchPrice
+              )} - ${formatNumberWithCommas(
+                inventory?.salePrice?.maximumInventoryBatchPrice
+              )}`,
         totalRemainingQuantities: inventory?.totalRemainingQuantities || 0,
       }));
     };

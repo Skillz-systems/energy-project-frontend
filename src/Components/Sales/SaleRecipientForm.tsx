@@ -38,9 +38,7 @@ const SaleRecipientForm = ({
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
   };
 
-  const isFormFilled = Object.entries(formData).every(
-    ([, value]) => value.trim() !== ""
-  );
+  const isFormFilled = saleRecipientSchema.safeParse(formData).success;
 
   const getFieldError = (fieldName: string) => {
     return formErrors.find((error) => error.path[0] === fieldName)?.message;
