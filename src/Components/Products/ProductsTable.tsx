@@ -5,13 +5,17 @@ import ProductModal from "./ProductModal";
 import { KeyedMutator } from "swr";
 import { ApiErrorStatesType } from "../../utils/useApiCall";
 import { ErrorComponent } from "@/Pages/ErrorPage";
+import { formatNumberWithCommas } from "@/utils/helpers";
 
 interface AllProductEntries {
   productId: string;
   productImage: string;
   productName: string;
   productTag: string;
-  productPrice: string;
+  productPrice: {
+    minimumInventoryBatchPrice: number;
+    maximumInventoryBatchPrice: number;
+  };
 }
 
 // Helper function to map the API data to the ProductEntries format
@@ -123,18 +127,33 @@ const ProductsTable = ({
             loading={isLoading}
             filterList={filterList}
             cardComponent={(data) => {
-              return data?.map((item: AllProductEntries, index) => (
-                <CardComponent
-                  key={index}
-                  variant="product-no-image"
-                  productId={item.productId}
-                  productImage={item.productImage}
-                  productName={item.productName}
-                  productTag={item.productTag}
-                  productPrice={item.productPrice}
-                  dropDownList={dropDownList}
-                />
-              ));
+              return data?.map((item: AllProductEntries, index) => {
+                const {
+                  minimumInventoryBatchPrice,
+                  maximumInventoryBatchPrice,
+                } = item.productPrice;
+                const formattedPrice =
+                  minimumInventoryBatchPrice === maximumInventoryBatchPrice
+                    ? `₦ ${formatNumberWithCommas(maximumInventoryBatchPrice)}`
+                    : `₦ ${formatNumberWithCommas(
+                        minimumInventoryBatchPrice
+                      )} - ${formatNumberWithCommas(
+                        maximumInventoryBatchPrice
+                      )}`;
+
+                return (
+                  <CardComponent
+                    key={index}
+                    variant="product-no-image"
+                    productId={item.productId}
+                    productImage={item.productImage}
+                    productName={item.productName}
+                    productTag={item.productTag}
+                    productPrice={formattedPrice}
+                    dropDownList={dropDownList}
+                  />
+                );
+              });
             }}
             refreshTable={async () => {
               await refreshTable();
@@ -142,7 +161,6 @@ const ProductsTable = ({
             queryValue={isSearchQuery ? queryValue : ""}
             paginationInfo={paginationInfo}
             clearFilters={() => setTableQueryParams({})}
-
           />
           {productId && (
             <ProductModal

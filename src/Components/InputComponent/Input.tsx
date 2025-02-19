@@ -689,6 +689,14 @@ export const SelectInput = ({
   const [valueLabel, setValueLabel] = useState<string | number>("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    // Find the label corresponding to the initial value
+    const selectedOption = options.find((option) => option.value === value);
+    if (selectedOption) {
+      setValueLabel(selectedOption.label);
+    }
+  }, [value, options]);
+
   const handleSelect = (selectedValue: string) => {
     onChange(selectedValue);
     setIsOpen(false);
@@ -748,7 +756,7 @@ export const SelectInput = ({
           <div className="w-full">
             {value ? (
               <span className="font-semibold text-textBlack uppercase">
-                {valueLabel || value}
+                {valueLabel}
               </span>
             ) : (
               <span className="text-textGrey italic">{placeholder}</span>

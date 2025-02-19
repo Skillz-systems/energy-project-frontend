@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import useTokens from "../hooks/useTokens";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
+import { toJS } from "mobx";
 
 type SortOrder = "asc" | "desc";
 
@@ -52,11 +53,16 @@ export function capitalizeFirstLetter(str: string) {
 }
 
 export function formatNumberWithCommas(number: number | string): string {
+  // Trim whitespace if the input is a string
+  if (typeof number === "string") number = number.trim();
+
+  // Ensure number is valid and convert it
   if (number == null || isNaN(Number(number))) return "0";
 
   const num = Number(number);
   const numStr = num.toFixed(num % 1 !== 0 ? 2 : 0);
 
+  // Add commas for thousands separators
   return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
@@ -114,3 +120,11 @@ export function sortArrayByKey<T extends Record<string, any>>(
     return 0;
   });
 }
+
+export const formatDateForInput = (isoDate: string | undefined): string => {
+  if (!isoDate) return "";
+  const date = new Date(isoDate);
+  return date.toISOString().split("T")[0]; // Format to "YYYY-MM-DD"
+};
+
+export const revalidateStore = (store: any) => toJS(store);

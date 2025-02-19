@@ -495,7 +495,7 @@ export const CardComponent = ({
           </p>
         ) : variant === "product-no-image" ? (
           <div className="flex items-center justify-center w-full h-[120px]">
-            <div className="relative w-full max-w-[200px] h-full">
+            <div className="relative w-full h-full">
               <img
                 src={productImage || checkers}
                 width="100%"
@@ -506,7 +506,7 @@ export const CardComponent = ({
           </div>
         ) : variant === "inventoryOne" || variant === "inventoryTwo" ? (
           <div className="flex items-center justify-center w-full h-[120px]">
-            <div className="relative w-full max-w-[200px] h-full">
+            <div className="relative w-full h-full">
               <img
                 src={productImage}
                 alt="Product"

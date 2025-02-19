@@ -7,20 +7,18 @@ const formSchema = z.object({
   paymentMode: z.enum(["INSTALLMENT", "ONE_OFF"], {
     required_error: "Payment mode is required",
   }),
-  installmentDuration: z.number().nullable(),
-  installmentStartingPrice: z.number().nullable(),
-  address: z.string().trim().min(1, "Installation address is required"),
-  discount: z.number().nullable(),
+  installmentDuration: z.number().optional(),
+  installmentStartingPrice: z.number().optional(),
+  discount: z.number().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 const defaultFormData: FormData = {
-  paymentMode: "INSTALLMENT",
-  installmentDuration: "" as unknown as number,
-  installmentStartingPrice: "" as unknown as number,
-  address: "",
-  discount: "" as unknown as number,
+  paymentMode: "ONE_OFF",
+  installmentDuration: 0,
+  installmentStartingPrice: 0,
+  discount: 0,
 };
 
 const ParametersForm = ({
@@ -56,12 +54,11 @@ const ParametersForm = ({
 
   const isFormFilled =
     formData.paymentMode === "ONE_OFF"
-      ? Boolean(formData.paymentMode && formData.address)
+      ? Boolean(formData.paymentMode)
       : Boolean(
           formData.paymentMode &&
             formData.installmentDuration &&
-            formData.installmentStartingPrice &&
-            formData.address
+            formData.installmentStartingPrice
         );
   const getFieldError = (fieldName: string) => {
     return formErrors.find((error) => error.path[0] === fieldName)?.message;
@@ -88,9 +85,8 @@ const ParametersForm = ({
 
   const saveForm = () => {
     if (!validateItems()) return;
-    SaleStore.addParameters({
+    SaleStore.addParameters(currentProductId, {
       ...formData,
-      currentProductId: currentProductId,
       installmentDuration: Number(formData.installmentDuration),
       installmentStartingPrice: Number(formData.installmentStartingPrice),
       discount: Number(formData.discount),
@@ -150,16 +146,6 @@ const ParametersForm = ({
             }
           />
         ) : null}
-        <Input
-          type="text"
-          name="address"
-          label="ADDRESS"
-          value={formData.address}
-          onChange={handleInputChange}
-          placeholder="Address"
-          required={true}
-          errorMessage={getFieldError("address")}
-        />
         <Input
           type="number"
           name="discount"
