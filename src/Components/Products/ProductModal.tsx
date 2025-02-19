@@ -16,7 +16,10 @@ type ProductDetails = {
   name: string;
   description: string;
   image: string;
-  priceRange: string;
+  priceRange: {
+    minimumInventoryBatchPrice: number;
+    maximumInventoryBatchPrice: number;
+  };
   currency: string;
   paymentModes: string;
   creatorId: string;

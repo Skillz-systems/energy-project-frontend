@@ -28,12 +28,12 @@ export const TableSearch = (props: TableSearchType) => {
     buttonContainerStyle,
     icon,
   } = props;
-  const [isSearching, setIsSearching] = useState<boolean>(false);
   const [query, setQuery] = useState<string>("");
+  const [isSearching, setIsSearching] = useState<boolean>(false);
 
   const handleSearch = () => {
     if (onSearch && query) onSearch(query);
-    setIsSearching(false);
+    setIsSearching(query ? true : false);
   };
 
   const handleInput = async (e: React.ChangeEvent<HTMLInputElement>) => {

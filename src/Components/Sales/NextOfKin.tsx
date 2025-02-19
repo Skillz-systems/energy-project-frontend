@@ -3,6 +3,7 @@ import { Input } from "../InputComponent/Input";
 import { z } from "zod";
 import { nextOfKinDetailsSchema } from "./salesSchema";
 import { SaleStore } from "@/stores/SaleStore";
+import { formatDateForInput } from "@/utils/helpers";
 
 type FormData = z.infer<typeof nextOfKinDetailsSchema>;
 
@@ -16,10 +17,20 @@ const defaultFormData: FormData = {
   nationality: "",
 };
 
-const NextOfKinForm = ({ handleClose }: { handleClose: () => void }) => {
-  const [formData, setFormData] = useState<FormData>(
-    SaleStore.nextOfKinDetails || defaultFormData
-  );
+const NextOfKinForm = ({
+  handleClose,
+  currentProductId,
+}: {
+  handleClose: () => void;
+  currentProductId: string;
+}) => {
+  const savedData =
+    SaleStore.getNextOfKinByProductId(currentProductId) || defaultFormData;
+
+  const [formData, setFormData] = useState<FormData>({
+    ...savedData,
+    dateOfBirth: formatDateForInput(savedData.dateOfBirth),
+  });
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
 
   const handleInputChange = (
@@ -33,12 +44,7 @@ const NextOfKinForm = ({ handleClose }: { handleClose: () => void }) => {
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
   };
 
-  const isFormFilled = Object.entries(formData)
-    .filter(
-      ([key]) =>
-        !["email", "homeAddress", "dateOfBirth", "nationality"].includes(key)
-    )
-    .every(([, value]) => value !== "");
+  const isFormFilled = nextOfKinDetailsSchema.safeParse(formData).success;
 
   const getFieldError = (fieldName: string) => {
     return formErrors.find((error) => error.path[0] === fieldName)?.message;
@@ -56,10 +62,13 @@ const NextOfKinForm = ({ handleClose }: { handleClose: () => void }) => {
 
   const saveForm = () => {
     if (!validateItems()) return;
-    SaleStore.addNextOfKinDetails({
+    SaleStore.addNextOfKinDetails(currentProductId, {
       ...formData,
-      dateOfBirth: new Date(formData.dateOfBirth).toISOString(),
+      dateOfBirth: !formData.dateOfBirth
+        ? ""
+        : new Date(formData.dateOfBirth).toISOString(),
     });
+    SaleStore.addSaleItem(currentProductId);
     handleClose();
   };
 
