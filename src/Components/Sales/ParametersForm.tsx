@@ -7,18 +7,18 @@ const formSchema = z.object({
   paymentMode: z.enum(["INSTALLMENT", "ONE_OFF"], {
     required_error: "Payment mode is required",
   }),
-  installmentDuration: z.number().nullable(),
-  installmentStartingPrice: z.number().nullable(),
-  discount: z.number().nullable(),
+  installmentDuration: z.number().optional(),
+  installmentStartingPrice: z.number().optional(),
+  discount: z.number().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 const defaultFormData: FormData = {
   paymentMode: "ONE_OFF",
-  installmentDuration: "" as unknown as number,
-  installmentStartingPrice: "" as unknown as number,
-  discount: "" as unknown as number,
+  installmentDuration: 0,
+  installmentStartingPrice: 0,
+  discount: 0,
 };
 
 const ParametersForm = ({
@@ -85,9 +85,8 @@ const ParametersForm = ({
 
   const saveForm = () => {
     if (!validateItems()) return;
-    SaleStore.addParameters({
+    SaleStore.addParameters(currentProductId, {
       ...formData,
-      currentProductId: currentProductId,
       installmentDuration: Number(formData.installmentDuration),
       installmentStartingPrice: Number(formData.installmentStartingPrice),
       discount: Number(formData.discount),

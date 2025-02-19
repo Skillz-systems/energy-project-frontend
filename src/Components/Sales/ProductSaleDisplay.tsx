@@ -5,7 +5,6 @@ import { RiDeleteBin5Fill } from "react-icons/ri";
 import { ExtraInfoType } from "./CreateNewSale";
 import { SaleStore } from "@/stores/SaleStore";
 import { observer } from "mobx-react-lite";
-import { toJS } from "mobx";
 
 export const ProductDetailRow = ({
   label,
@@ -28,6 +27,7 @@ const ProductSaleDisplay = observer(
     onRemoveProduct,
     setExtraInfoModal,
     getIsFormFilled,
+    getFieldError,
   }: {
     productData: {
       productId: string;
@@ -40,6 +40,7 @@ const ProductSaleDisplay = observer(
     onRemoveProduct: (productId: string) => void;
     setExtraInfoModal: React.Dispatch<React.SetStateAction<ExtraInfoType>>;
     getIsFormFilled: () => boolean;
+    getFieldError: (fieldName: string, productId: string) => string[];
   }) => {
     const { productTag, productId, productName, productUnits, productPrice } =
       productData;
@@ -62,8 +63,6 @@ const ProductSaleDisplay = observer(
     const doesGuarantorExist = Boolean(
       SaleStore.getGuarantorByProductId(productId)
     );
-
-    console.log(toJS(SaleStore));
 
     const identityTypes = ["identification", "nextOfKin", "guarantor"];
     const types = ["parameters", "miscellaneous", "devices", "recipient"];
@@ -103,6 +102,19 @@ const ProductSaleDisplay = observer(
         </div>
       </div>
     );
+
+    const allErrors = [
+      ...getFieldError("quantity", productId),
+      ...getFieldError("paymentMode", productId),
+      ...getFieldError("installmentDuration", productId),
+      ...getFieldError("installmentStartingPrice", productId),
+      ...getFieldError("devices", productId),
+      ...getFieldError("miscellaneousPrices", productId),
+      ...getFieldError("saleRecipient", productId),
+      ...getFieldError("identificationDetails", productId),
+      ...getFieldError("nextOfKinDetails", productId),
+      ...getFieldError("guarantorDetails", productId),
+    ];
 
     return (
       <div className="flex flex-col gap-2 w-full p-2.5 border-[0.6px] border-strokeGreyThree rounded-[20px]">
@@ -189,13 +201,6 @@ const ProductSaleDisplay = observer(
               title="Remove Product"
               onClick={() => {
                 onRemoveProduct(productId);
-                SaleStore.removeParameter(productId);
-                SaleStore.removeMiscellaneousPrice(productId);
-                SaleStore.removeDevices(productId);
-                SaleStore.removeRecipient(productId);
-                SaleStore.removeIdentificationDetails(productId);
-                SaleStore.removeNextOfKinDetails(productId);
-                SaleStore.removeGuarantorDetails(productId);
                 getIsFormFilled();
               }}
             >
@@ -203,6 +208,16 @@ const ProductSaleDisplay = observer(
             </span>
           </div>
         </div>
+        {/* ERROR SECTION */}
+        {allErrors.length > 0 && (
+          <div className="p-3 mt-4 border border-red-500 rounded-md bg-red-50">
+            {allErrors.map((error, index) => (
+              <p key={index} className="text-sm text-red-600">
+                {error}.
+              </p>
+            ))}
+          </div>
+        )}
       </div>
     );
   }

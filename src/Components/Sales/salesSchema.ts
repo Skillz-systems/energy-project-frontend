@@ -85,30 +85,112 @@ export const guarantorDetailsSchema = z.object({
   identificationDetails: identificationDetailsSchema,
 });
 
-export const saleItemSchema = z.object({
-  productId: z.string().trim().min(10, "Product ID is required"),
-  quantity: z.number().min(1, "Quantity must be at least 1"),
-  paymentMode: z.enum(["ONE_OFF", "INSTALLMENT"], {
-    message: "Payment Mode is required",
-  }),
-  discount: z.number().min(0, "Discount must be a positive number").optional(),
-  installmentDuration: z
-    .number()
-    .min(1, "Installment duration must be at least 1 month")
-    .optional(),
-  installmentStartingPrice: z
-    .number()
-    .min(1, "Installment starting price must be positive")
-    .optional(),
-  devices: z.array(z.string()).min(1, "At least one device is required"),
-  miscellaneousPrices: z
-    .record(z.string(), z.number().min(0, "Price must be a positive number"))
-    .optional(),
-  saleRecipient: saleRecipientSchema,
-  identificationDetails: identificationDetailsSchema.optional(),
-  nextOfKinDetails: nextOfKinDetailsSchema.optional(),
-  guarantorDetails: guarantorDetailsSchema.optional(),
-});
+export const saleItemSchema = z
+  .object({
+    productId: z.string().trim().min(10, "Product ID is required"),
+    quantity: z.number().min(1, "Quantity must be at least 1"),
+    paymentMode: z.enum(["ONE_OFF", "INSTALLMENT"], {
+      message: "Payment Mode is required",
+    }),
+    discount: z.number().optional(),
+    installmentDuration: z.number().optional(),
+    installmentStartingPrice: z.number().optional(),
+    devices: z.array(z.string()).min(1, "At least one device is required"),
+    miscellaneousPrices: z
+      .record(z.string(), z.number().min(0, "Price must be a positive number"))
+      .optional(),
+    saleRecipient: saleRecipientSchema,
+    identificationDetails: identificationDetailsSchema.optional(),
+    nextOfKinDetails: nextOfKinDetailsSchema.optional(),
+    guarantorDetails: guarantorDetailsSchema.optional(),
+  })
+  .superRefine((data, ctx) => {
+    // Conditional validation: If payment mode is INSTALLMENT, ensure related fields are filled
+    if (data.paymentMode === "INSTALLMENT") {
+      if (!data.installmentDuration) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Installment duration is required for installment payments",
+          path: ["installmentDuration"],
+        });
+      }
+      if (!data.installmentStartingPrice) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Installment starting price is required for installment payments",
+          path: ["installmentStartingPrice"],
+        });
+      }
+
+      // Validate identificationDetails
+      if (!data.identificationDetails) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Identification details are required for installment payments",
+          path: ["identificationDetails"],
+        });
+      } else {
+        // Validate the nested schema for identificationDetails
+        const identificationValidation = identificationDetailsSchema.safeParse(
+          data.identificationDetails
+        );
+        if (!identificationValidation.success) {
+          identificationValidation.error.issues.forEach((issue) => {
+            ctx.addIssue({
+              ...issue,
+              path: ["identificationDetails", ...issue.path],
+            });
+          });
+        }
+      }
+
+      // Validate nextOfKinDetails
+      if (!data.nextOfKinDetails) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Next of kin details are required for installment payments",
+          path: ["nextOfKinDetails"],
+        });
+      } else {
+        // Validate the nested schema for nextOfKinDetails
+        const nextOfKinValidation = nextOfKinDetailsSchema.safeParse(
+          data.nextOfKinDetails
+        );
+        if (!nextOfKinValidation.success) {
+          nextOfKinValidation.error.issues.forEach((issue) => {
+            ctx.addIssue({
+              ...issue,
+              path: ["nextOfKinDetails", ...issue.path],
+            });
+          });
+        }
+      }
+
+      // Validate guarantorDetails
+      if (!data.guarantorDetails) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Guarantor details are required for installment payments",
+          path: ["guarantorDetails"],
+        });
+      } else {
+        // Validate the nested schema for guarantorDetails
+        const guarantorValidation = guarantorDetailsSchema.safeParse(
+          data.guarantorDetails
+        );
+        if (!guarantorValidation.success) {
+          guarantorValidation.error.issues.forEach((issue) => {
+            ctx.addIssue({
+              ...issue,
+              path: ["guarantorDetails", ...issue.path],
+            });
+          });
+        }
+      }
+    }
+  });
 
 export const formSchema = z.object({
   category: z.enum(["PRODUCT"], {
@@ -123,10 +205,9 @@ export const formSchema = z.object({
     .length(11, "BVN must be exactly 11 digits")
     .regex(/^\d+$/, "BVN must contain only numbers")
     .optional()
-    .or(z.literal("")),
 });
 
-type SaleItem = {
+export type SaleItem = {
   productId: string;
   quantity: number;
   paymentMode: "INSTALLMENT" | "ONE_OFF";
@@ -144,9 +225,9 @@ type SaleItem = {
     phone: string;
     email: string;
   };
-  nextOfKinDetails: NextOfKinDetails;
-  identificationDetails: IdentificationDetails;
-  guarantorDetails: GuarantorDetails;
+  nextOfKinDetails?: NextOfKinDetails;
+  identificationDetails?: IdentificationDetails;
+  guarantorDetails?: GuarantorDetails;
 };
 
 type NextOfKinDetails = {

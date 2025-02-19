@@ -213,7 +213,9 @@ const SelectCustomerProductModal = observer(
     return (
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+        }}
         layout="right"
         size="large"
         bodyStyle="pb-[100px]"
@@ -260,7 +262,9 @@ const SelectCustomerProductModal = observer(
               </div>
               <button
                 disabled={itemsSelected === 0}
-                onClick={() => setModalOpen(false)}
+                onClick={() => {
+                  setModalOpen(false);
+                }}
                 className={`text-sm  ${
                   itemsSelected > 0
                     ? "bg-primaryGradient text-white"
@@ -323,10 +327,14 @@ const SelectCustomerProductModal = observer(
                         totalRemainingQuantities={data.totalRemainingQuantities}
                         onSelectProduct={(productInfo) => {
                           if (productInfo) SaleStore.addProduct(productInfo);
+                          SaleStore.addSaleItem(
+                            productInfo.productId as string
+                          );
                         }}
-                        onRemoveProduct={(productId) =>
-                          SaleStore.removeProduct(productId)
-                        }
+                        onRemoveProduct={(productId) => {
+                          SaleStore.removeProduct(productId as string);
+                          SaleStore.removeSaleItem(productId as string);
+                        }}
                         isProductSelected={SaleStore.products.some(
                           (p) => p.productId === data.productId
                         )}

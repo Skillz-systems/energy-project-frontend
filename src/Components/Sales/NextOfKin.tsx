@@ -68,6 +68,7 @@ const NextOfKinForm = ({
         ? ""
         : new Date(formData.dateOfBirth).toISOString(),
     });
+    SaleStore.addSaleItem(currentProductId);
     handleClose();
   };
 

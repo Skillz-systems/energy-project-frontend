@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { KeyedMutator } from "swr";
 import { Modal } from "../ModalComponent/Modal";
-import { z } from "zod";
+import { z, ZodIssue } from "zod";
 import { useApiCall } from "@/utils/useApiCall";
 import { Input, ModalInput, SelectInput } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
@@ -12,8 +12,13 @@ import { observer } from "mobx-react-lite";
 import ProductSaleDisplay from "./ProductSaleDisplay";
 import SetExtraInfoModal from "./SetExtraInfoModal";
 import { RiDeleteBin5Fill } from "react-icons/ri";
-import { formSchema, defaultSaleFormData } from "./salesSchema";
-import { capitalizeFirstLetter } from "@/utils/helpers";
+import {
+  formSchema,
+  defaultSaleFormData,
+  SalePayload,
+  SaleItem,
+} from "./salesSchema";
+import { capitalizeFirstLetter, revalidateStore } from "@/utils/helpers";
 
 type CreateSalesType = {
   isOpen: boolean;
@@ -67,12 +72,12 @@ const CreateNewSale = observer(
     };
 
     const getPayload = useCallback(() => {
-      const payload = {
+      const payload: SalePayload = {
         category: SaleStore.category,
-        customerId: SaleStore.customer?.customerId,
-        saleItems: SaleStore.getTransformedSaleItems(),
-        bvn: formData.bvn,
+        customerId: SaleStore.customer?.customerId as string,
+        saleItems: SaleStore.getTransformedSaleItems() as SaleItem[],
       };
+      if (SaleStore.doesSaleItemHaveInstallment()) payload.bvn = formData.bvn;
       return payload;
     }, [formData]);
 
@@ -84,11 +89,12 @@ const CreateNewSale = observer(
       resetFormErrors(name);
     };
 
+    const payload = getPayload();
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setLoading(true);
       try {
-        const validatedData = formSchema.parse(getPayload());
+        const validatedData = formSchema.parse(payload);
         const response = await apiCall({
           endpoint: "/v1/sales/create",
           method: "post",
@@ -116,15 +122,41 @@ const CreateNewSale = observer(
 
     useEffect(() => {
       if (loading && apiError) setApiError("");
-    }, [getPayload, apiError, loading]);
+    }, [payload, apiError, loading]);
 
     const getIsFormFilled = () => {
-      return formSchema.safeParse(getPayload()).success;
+      const isPayloadValid = formSchema.safeParse(payload).success;
+      return isPayloadValid;
     };
 
     const getFieldError = (fieldName: string) => {
       return formErrors.find((error) => error.path[0] === fieldName)?.message;
     };
+
+    const getSaleItemFieldErrorByIndex = (
+      fieldName: string,
+      productId: string
+    ) => {
+      return formErrors
+        .filter((error: ZodIssue) => {
+          // Ensure the error is related to the saleItems array
+          if (error.path[0] === "saleItems") {
+            // Check if the error is for the specific productId
+            const saleItemIndex = error.path[1] as number;
+            const saleItem = SaleStore.saleItems[saleItemIndex];
+            return saleItem && saleItem.productId === productId;
+          }
+          return false;
+        })
+        .filter((error) => {
+          // Filter errors for the specific fieldName
+          const errorField = error.path[2]; // The field name in the saleItemSchema
+          return errorField === fieldName;
+        })
+        .map((error) => error.message);
+    };
+
+    revalidateStore(SaleStore);
 
     return (
       <>
@@ -215,7 +247,7 @@ const CreateNewSale = observer(
                 required={true}
                 isItemsSelected={selectedProducts.length > 0}
                 itemsSelected={
-                  <div className="flex flex-wrap items-center w-full gap-4">
+                  <div className="flex flex-wrap items-center w-full gap-6">
                     {selectedProducts?.map((data, index) => {
                       return (
                         <ProductSaleDisplay
@@ -229,6 +261,7 @@ const CreateNewSale = observer(
                             setExtraInfoModal(value);
                           }}
                           getIsFormFilled={getIsFormFilled}
+                          getFieldError={getSaleItemFieldErrorByIndex}
                         />
                       );
                     })}

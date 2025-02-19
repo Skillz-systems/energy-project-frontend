@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import useTokens from "../hooks/useTokens";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
+import { toJS } from "mobx";
 
 type SortOrder = "asc" | "desc";
 
@@ -125,3 +126,5 @@ export const formatDateForInput = (isoDate: string | undefined): string => {
   const date = new Date(isoDate);
   return date.toISOString().split("T")[0]; // Format to "YYYY-MM-DD"
 };
+
+export const revalidateStore = (store: any) => toJS(store);

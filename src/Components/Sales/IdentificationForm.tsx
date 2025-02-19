@@ -68,6 +68,7 @@ const IdentificationForm = ({
     setFormErrors([]);
     return true;
   };
+  
   const saveForm = () => {
     if (!validateItems()) return;
     SaleStore.addOrUpdateIdentity(currentProductId, {
@@ -79,7 +80,7 @@ const IdentificationForm = ({
         ? ""
         : new Date(formData.expirationDate)?.toISOString(),
     });
-
+    SaleStore.addSaleItem(currentProductId);
     handleClose();
   };
 

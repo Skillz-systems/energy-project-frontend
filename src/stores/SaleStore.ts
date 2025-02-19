@@ -37,6 +37,16 @@ const IdentificationDetailsModel = types.model({
   identity: IdentityModel,
 });
 
+const GuarantorIdentityModel = types.model({
+  idType: types.string,
+  idNumber: types.string,
+  issuingCountry: types.string,
+  issueDate: types.string,
+  expirationDate: types.string,
+  fullNameAsOnID: types.string,
+  addressAsOnID: types.string,
+});
+
 const GuarantorModel = types.model({
   fullName: types.string,
   phoneNumber: types.string,
@@ -44,7 +54,7 @@ const GuarantorModel = types.model({
   homeAddress: types.string,
   dateOfBirth: types.string,
   nationality: types.string,
-  identificationDetails: IdentityModel,
+  identificationDetails: GuarantorIdentityModel,
 });
 
 const GuarantorDetailsModel = types.model({
@@ -86,12 +96,16 @@ const ProductModel = types.model({
   productTag: types.string,
 });
 
+const ParamModel = types.model({
+  paymentMode: types.enumeration(["INSTALLMENT", "ONE_OFF"]),
+  installmentDuration: types.number,
+  installmentStartingPrice: types.number,
+  discount: types.number,
+});
+
 const ParametersModel = types.model({
   currentProductId: types.string,
-  paymentMode: types.enumeration(["INSTALLMENT", "ONE_OFF"]),
-  installmentDuration: types.maybeNull(types.number),
-  installmentStartingPrice: types.maybeNull(types.number),
-  discount: types.maybeNull(types.number),
+  params: ParamModel,
 });
 
 const MiscellaneousPricesModel = types.model({
@@ -131,9 +145,9 @@ const SaleItemsModel = types.model({
   devices: types.array(types.string),
   miscellaneousPrices: types.maybe(SaleMiscellaneousPricesModel),
   saleRecipient: types.maybe(SaleRecipientModel),
-  nextOfKin: types.maybe(NextOfKinModel),
-  identity: types.maybe(IdentityModel),
-  guarantor: types.maybe(GuarantorModel),
+  nextOfKinDetails: types.maybe(NextOfKinModel),
+  identificationDetails: types.maybe(IdentityModel),
+  guarantorDetails: types.maybe(GuarantorModel),
 });
 
 const saleStore = types
@@ -155,12 +169,12 @@ const saleStore = types
   .actions((self) => ({
     addSaleItem(productId: string) {
       const product = self.products.find((p) => p.productId === productId);
-      if (!product) return;
+      // if (!product) return;
 
       const params = self.parameters.find(
         (p) => p.currentProductId === productId
       );
-      if (!params) return;
+      // if (!params) return;
 
       // Ensure devices is a plain array of strings
       const devices = toJS(
@@ -206,7 +220,7 @@ const saleStore = types
           };
 
       const nextOfKin = self.nextOfKinDetails.find(
-        (i) => i.currentProductId !== productId
+        (i) => i.currentProductId === productId
       );
 
       const saleNextOfKin = nextOfKin
@@ -222,9 +236,8 @@ const saleStore = types
           };
 
       const identity = self.identificationDetails.find(
-        (i) => i.currentProductId !== productId
+        (i) => i.currentProductId === productId
       );
-
       const identityData = {
         idType: "",
         idNumber: "",
@@ -238,11 +251,11 @@ const saleStore = types
       const saleIdentity = identity ? { ...identity.identity } : identityData;
 
       const guarantor = self.guarantorDetails.find(
-        (i) => i.currentProductId !== productId
+        (i) => i.currentProductId === productId
       );
 
       const saleGuarantor = guarantor
-        ? { ...guarantor.guarantor }
+        ? { ...toJS(guarantor.guarantor) }
         : {
             fullName: "",
             phoneNumber: "",
@@ -260,54 +273,52 @@ const saleStore = types
 
       if (existingSaleItem) {
         // Update existing sale item instead of adding a new one
-        existingSaleItem.quantity = product.productUnits;
-        existingSaleItem.paymentMode = params.paymentMode;
-        existingSaleItem.discount = params.discount || 0;
-        existingSaleItem.installmentDuration = params.installmentDuration || 0;
+        existingSaleItem.quantity = product?.productUnits || 0;
+        existingSaleItem.paymentMode = params?.params?.paymentMode || "ONE_OFF";
+        existingSaleItem.discount = params?.params?.discount || 0;
+        existingSaleItem.installmentDuration =
+          params?.params?.installmentDuration || 0;
         existingSaleItem.installmentStartingPrice =
-          params.installmentStartingPrice || 0;
+          params?.params?.installmentStartingPrice || 0;
         existingSaleItem.devices = cast(devices);
         existingSaleItem.miscellaneousPrices = {
           costs: cast(miscellaneousCosts),
         };
         existingSaleItem.saleRecipient = { ...saleRecipient };
-        existingSaleItem.nextOfKin = { ...saleNextOfKin };
-        existingSaleItem.identity = { ...saleIdentity };
-        existingSaleItem.guarantor = { ...saleGuarantor };
+        existingSaleItem.identificationDetails = { ...saleIdentity };
+        existingSaleItem.nextOfKinDetails = { ...saleNextOfKin };
+        existingSaleItem.guarantorDetails = { ...saleGuarantor };
       } else {
         // Add a new sale item if it doesn't exist
         self.saleItems.push({
           productId,
-          quantity: product.productUnits,
-          paymentMode: params.paymentMode,
-          discount: params.discount || 0,
-          installmentDuration: params.installmentDuration || 0,
-          installmentStartingPrice: params.installmentStartingPrice || 0,
+          quantity: product?.productUnits || 0,
+          paymentMode: params?.params?.paymentMode || "ONE_OFF",
+          discount: params?.params?.discount || 0,
+          installmentDuration: params?.params?.installmentDuration || 0,
+          installmentStartingPrice:
+            params?.params?.installmentStartingPrice || 0,
           devices: cast(devices),
           miscellaneousPrices: { costs: cast(miscellaneousCosts) },
           saleRecipient: { ...saleRecipient },
-          nextOfKin: { ...saleNextOfKin },
-          identity: { ...saleIdentity },
-          guarantor: { ...saleGuarantor },
+          identificationDetails: { ...saleIdentity },
+          nextOfKinDetails: { ...saleNextOfKin },
+          guarantorDetails: { ...saleGuarantor },
         });
       }
     },
     getTransformedSaleItems() {
       return self.saleItems.map((item) => {
-        // Convert the whole `item` object to a plain object, including nested properties
         const plainItem = toJS(item);
-
-        // Fetch the relevant miscellaneous prices for the current productId
         const relevantMiscPrices = self.miscellaneousPrices.find(
           (m) => m.currentProductId === plainItem.productId
         ) || { costs: new Map() };
 
-        // Convert the `costs` Map to a plain object
         const miscellaneousCosts = Array.from(
           relevantMiscPrices.costs.entries()
         ).reduce((acc, [name, cost]) => {
           if (typeof cost === "number") {
-            acc[name] = cost; // Assign cost values directly
+            acc[name] = cost;
           } else {
             console.warn(`Invalid cost value for ${name}:`, cost);
           }
@@ -318,22 +329,31 @@ const saleStore = types
           delete plainItem.miscellaneousPrices;
         }
 
-        // Remove keys if `paymentMode` is `ONE_OFF`
-        if (plainItem.paymentMode === "ONE_OFF") {
-          delete plainItem.installmentDuration;
-          delete plainItem.installmentStartingPrice;
-          delete plainItem.identity;
-          delete plainItem.nextOfKin;
-          delete plainItem.guarantor;
-        }
-
-        // Only add `miscellaneousPrices` if it's not an empty object
         const transformedItem = {
           ...plainItem,
           ...(Object.keys(miscellaneousCosts).length > 0 && {
             miscellaneousPrices: miscellaneousCosts,
           }),
         };
+
+        if (plainItem.paymentMode === "ONE_OFF") {
+          delete transformedItem.nextOfKinDetails;
+          delete transformedItem.identificationDetails;
+          delete transformedItem.guarantorDetails;
+        } else {
+          if (plainItem.nextOfKinDetails) {
+            transformedItem.nextOfKinDetails = plainItem.nextOfKinDetails;
+          }
+
+          if (plainItem.identificationDetails) {
+            transformedItem.identificationDetails =
+              plainItem.identificationDetails;
+          }
+
+          if (plainItem.guarantorDetails) {
+            transformedItem.guarantorDetails = plainItem.guarantorDetails;
+          }
+        }
 
         return transformedItem;
       });
@@ -381,11 +401,18 @@ const saleStore = types
         self.products.push(product);
       }
     },
-    removeProduct(productId?: string) {
+    removeProduct(productId: string) {
+      this.removeParameter(productId);
+      this.removeMiscellaneousPrice(productId);
+      this.removeDevices(productId);
+      this.removeRecipient(productId);
+      this.removeIdentificationDetails(productId);
+      this.removeNextOfKinDetails(productId);
+      this.removeGuarantorDetails(productId);
+
       const index = self.products.findIndex((p) => p.productId === productId);
-      if (index !== -1) {
-        self.products.splice(index, 1);
-      }
+      if (index !== -1) self.products.splice(index, 1);
+      this.removeSaleItem(productId);
     },
     getProductById(productId?: string) {
       const product = self.products.find((p) => p.productId === productId);
@@ -403,19 +430,34 @@ const saleStore = types
     setProductCategoryExist(value: boolean) {
       self.doesProductCategoryExist = value;
     },
-    addParameters(params: {
-      currentProductId: string;
-      paymentMode: "INSTALLMENT" | "ONE_OFF";
-      installmentDuration: number | null;
-      installmentStartingPrice: number | null;
-      discount: number | null;
-    }) {
-      self.parameters.push(params);
+    addParameters(
+      currentProductId: string,
+      params: {
+        paymentMode: "INSTALLMENT" | "ONE_OFF";
+        installmentDuration: number;
+        installmentStartingPrice: number;
+        discount: number;
+      }
+    ) {
+      const existingIndex = self.parameters.findIndex(
+        (d) => d.currentProductId === currentProductId
+      );
+
+      if (existingIndex !== -1) {
+        applySnapshot(self.parameters[existingIndex].params, params);
+      } else {
+        self.parameters.push(
+          ParametersModel.create({
+            currentProductId,
+            params: toJS(params),
+          })
+        );
+      }
     },
     getParametersByProductId(productId: string) {
       const parameters = self.parameters.find(
         (p) => p.currentProductId === productId
-      );
+      )?.params;
       return parameters;
     },
     removeParameter(currentProductId?: string) {
@@ -425,8 +467,8 @@ const saleStore = types
       self.saleItems.forEach((item) => {
         if (item.productId === currentProductId) {
           item.paymentMode = "ONE_OFF";
-          item.installmentDuration = undefined;
-          item.installmentStartingPrice = undefined;
+          item.installmentDuration = 0;
+          item.installmentStartingPrice = 0;
           item.discount = 0;
         }
       });
@@ -527,7 +569,7 @@ const saleStore = types
         self.identificationDetails.push(
           IdentificationDetailsModel.create({
             currentProductId,
-            identity,
+            identity: toJS(identity),
           })
         );
       }
@@ -547,7 +589,7 @@ const saleStore = types
       // Set `identity` to `undefined` for the matching `productId` in `saleItems`
       self.saleItems.forEach((item) => {
         if (item.productId === currentProductId) {
-          item.identity = undefined;
+          item.identificationDetails = undefined;
         }
       });
     },
@@ -576,7 +618,7 @@ const saleStore = types
         self.nextOfKinDetails.push(
           NextOfKinDetailsModel.create({
             currentProductId,
-            nextOfKin,
+            nextOfKin: toJS(nextOfKin),
           })
         );
       }
@@ -595,7 +637,7 @@ const saleStore = types
       );
       self.saleItems.forEach((item) => {
         if (item.productId === currentProductId) {
-          item.nextOfKin = undefined;
+          item.nextOfKinDetails = undefined;
         }
       });
     },
@@ -623,16 +665,17 @@ const saleStore = types
         (d) => d.currentProductId === currentProductId
       );
 
+      const clonedGuarantor = toJS(guarantor);
       if (existingIndex !== -1) {
         applySnapshot(
           self.guarantorDetails[existingIndex].guarantor,
-          guarantor
+          clonedGuarantor
         );
       } else {
         self.guarantorDetails.push(
           GuarantorDetailsModel.create({
             currentProductId,
-            guarantor,
+            guarantor: clonedGuarantor,
           })
         );
       }
@@ -651,7 +694,7 @@ const saleStore = types
       );
       self.saleItems.forEach((item) => {
         if (item.productId === currentProductId) {
-          item.guarantor = undefined;
+          item.guarantorDetails = undefined;
         }
       });
     },
@@ -677,7 +720,7 @@ const saleStore = types
         self.saleRecipient.push(
           RecipientModel.create({
             currentProductId,
-            recipient,
+            recipient: toJS(recipient),
           })
         );
       }
@@ -715,9 +758,11 @@ export const SaleStore = saleStore.create({
   miscellaneousPrices: [],
   devices: [],
   saleItems: [],
+  saleRecipient: [],
   identificationDetails: [],
   nextOfKinDetails: [],
   guarantorDetails: [],
 });
 
 export type SaleStoreType = Instance<typeof saleStore>;
+export type SaleItemStoreType = Instance<typeof SaleStore.saleItems>;

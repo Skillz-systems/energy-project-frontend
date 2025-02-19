@@ -119,6 +119,7 @@ const GuarantorForm = ({
             ).toISOString(),
       },
     });
+    SaleStore.addSaleItem(currentProductId);
     handleClose();
   };
 
