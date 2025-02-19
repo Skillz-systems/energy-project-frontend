@@ -3,7 +3,7 @@ import producticon from "../../assets/product-grey.svg";
 import creditcardicon from "../../assets/creditcardgrey.svg";
 import settingsicon from "../../assets/settings.svg";
 import { NameTag, ProductTag } from "../CardComponents/CardComponent";
-import { formatDateTime } from "../../utils/helpers";
+import { formatDateTime, formatNumberWithCommas } from "../../utils/helpers";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { SmallFileInput } from "../InputComponent/Input";
 import { LuImagePlus } from "react-icons/lu";
@@ -14,7 +14,10 @@ interface ProductDetailsProps {
   productImage: string;
   productName: string;
   productTag: string;
-  productPrice: string;
+  productPrice: {
+    minimumInventoryBatchPrice: number;
+    maximumInventoryBatchPrice: number;
+  };
   paymentModes: string[] | string;
   datetime: string;
   name: string;
@@ -41,7 +44,10 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
   productImage = "",
   productName = "",
   productTag = "",
-  productPrice = "",
+  productPrice = {
+    minimumInventoryBatchPrice: 0,
+    maximumInventoryBatchPrice: 0,
+  },
   paymentModes = [],
   datetime = "",
   name = "",
@@ -96,6 +102,9 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       setLoading(false);
     }
   };
+
+  const { minimumInventoryBatchPrice, maximumInventoryBatchPrice } =
+    productPrice;
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col w-full gap-4">
@@ -170,7 +179,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
         <div className="flex items-center justify-between">
           <Tag name="Product Price" />
           <p className="flex items-center gap-0.5 text-xs font-bold text-textDarkGrey">
-            {productPrice}
+            {minimumInventoryBatchPrice === maximumInventoryBatchPrice
+              ? `₦ ${formatNumberWithCommas(maximumInventoryBatchPrice)}`
+              : `₦ ${formatNumberWithCommas(
+                  minimumInventoryBatchPrice
+                )} - ${formatNumberWithCommas(maximumInventoryBatchPrice)}`}
           </p>
         </div>
         <div className="flex items-center justify-between">

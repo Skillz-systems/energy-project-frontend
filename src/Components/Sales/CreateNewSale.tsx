@@ -9,11 +9,11 @@ import { SaleStore } from "@/stores/SaleStore";
 import SelectCustomerProductModal from "./SelectCustomerProductModal";
 import roletwo from "../../assets/table/roletwo.svg";
 import { observer } from "mobx-react-lite";
-import ProductSaleDisplay, { ExtraInfoSection } from "./ProductSaleDisplay";
+import ProductSaleDisplay from "./ProductSaleDisplay";
 import SetExtraInfoModal from "./SetExtraInfoModal";
 import { RiDeleteBin5Fill } from "react-icons/ri";
-import { toJS } from "mobx";
 import { formSchema, defaultSaleFormData } from "./salesSchema";
+import { capitalizeFirstLetter } from "@/utils/helpers";
 
 type CreateSalesType = {
   isOpen: boolean;
@@ -44,7 +44,9 @@ const CreateNewSale = observer(
       "customer"
     );
     const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
-    const [apiError, setApiError] = useState<string | null>(null);
+    const [apiError, setApiError] = useState<string | Record<string, string[]>>(
+      ""
+    );
     const [extraInfoModal, setExtraInfoModal] = useState<ExtraInfoType>("");
     const [currentProductId, setCurrentProductId] = useState<string>("");
 
@@ -53,15 +55,7 @@ const CreateNewSale = observer(
 
     const resetFormErrors = (name: string) => {
       setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-      setApiError(null);
-    };
-
-    const handleInputChange = (name: string, value: string) => {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-      resetFormErrors(name);
+      setApiError("");
     };
 
     const handleSelectChange = (name: string, values: string | string[]) => {
@@ -73,34 +67,28 @@ const CreateNewSale = observer(
     };
 
     const getPayload = useCallback(() => {
-      if (SaleStore.doesSaleItemHaveInstallment()) {
-        const payload = {
-          category: SaleStore.category,
-          customerId: SaleStore.customer?.customerId,
-          saleItems: SaleStore.getTransformedSaleItems(),
-          bvn: SaleStore.bvn,
-          nextOfKinDetails: SaleStore.nextOfKinDetails,
-          identificationDetails: SaleStore.identificationDetails,
-          guarantorDetails: SaleStore.guarantorDetails,
-        };
-        return payload;
-      } else {
-        const payload = {
-          category: SaleStore.category,
-          customerId: SaleStore.customer?.customerId,
-          saleItems: SaleStore.getTransformedSaleItems(),
-        };
-        return payload;
-      }
-    }, []);
+      const payload = {
+        category: SaleStore.category,
+        customerId: SaleStore.customer?.customerId,
+        saleItems: SaleStore.getTransformedSaleItems(),
+        bvn: formData.bvn,
+      };
+      return payload;
+    }, [formData]);
+
+    const handleInputChange = (name: string, value: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+      resetFormErrors(name);
+    };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setLoading(true);
       try {
-        const validatedData = SaleStore.doesSaleItemHaveInstallment()
-          ? formSchema.parse(getPayload())
-          : toJS(getPayload());
+        const validatedData = formSchema.parse(getPayload());
         const response = await apiCall({
           endpoint: "/v1/sales/create",
           method: "post",
@@ -117,8 +105,9 @@ const CreateNewSale = observer(
           setFormErrors(error.issues);
         } else {
           const message =
-            error?.response?.data?.message || "Internal Server Error";
-          setApiError(`Sale creation failed: ${message}.`);
+            error?.response?.data?.error ||
+            "Sale Creation Failed: Internal Server Error";
+          setApiError(message);
         }
       } finally {
         setLoading(false);
@@ -126,30 +115,16 @@ const CreateNewSale = observer(
     };
 
     useEffect(() => {
-      if (loading && apiError) setApiError(null);
+      if (loading && apiError) setApiError("");
     }, [getPayload, apiError, loading]);
 
-    const altFormFilled = Boolean(
-      SaleStore.category &&
-        SaleStore.customer?.customerId &&
-        SaleStore.saleRecipient.length > 1 &&
-        SaleStore.devices.length > 1
-    );
-    const isFormFilled = SaleStore.doesSaleItemHaveInstallment()
-      ? formSchema.safeParse(toJS(getPayload())).success
-      : altFormFilled;
+    const getIsFormFilled = () => {
+      return formSchema.safeParse(getPayload()).success;
+    };
 
     const getFieldError = (fieldName: string) => {
       return formErrors.find((error) => error.path[0] === fieldName)?.message;
     };
-
-    // console.log("CUSTOMER:", toJS(SaleStore.customer));
-    // console.log("SALE ITEMS:", toJS(SaleStore.getTransformedSaleItems()));
-    // console.log("BVN:", toJS(SaleStore.bvn));
-    // console.log("IDENTITY:", toJS(SaleStore.identificationDetails));
-    // console.log("NEXT OF KIN:", toJS(SaleStore.nextOfKinDetails));
-    // console.log("GUARANTOR:", toJS(SaleStore.guarantorDetails));
-    // console.log("MISC:", toJS(SaleStore.miscellaneousPrices));
 
     return (
       <>
@@ -167,7 +142,7 @@ const CreateNewSale = observer(
           >
             <div
               className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${
-                isFormFilled
+                getIsFormFilled()
                   ? "bg-paleCreamGradientLeft"
                   : "bg-paleGrayGradientLeft"
               }`}
@@ -253,6 +228,7 @@ const CreateNewSale = observer(
                             setCurrentProductId(data.productId);
                             setExtraInfoModal(value);
                           }}
+                          getIsFormFilled={getIsFormFilled}
                         />
                       );
                     })}
@@ -265,113 +241,46 @@ const CreateNewSale = observer(
                 }
               />
               {SaleStore.doesSaleItemHaveInstallment() && (
-                <>
-                  <Input
-                    type="text"
-                    name="bvn"
-                    label="BANK VERIFICATION NUUMBER"
-                    value={SaleStore.bvn || (formData.bvn as string)}
-                    onChange={(e) => {
-                      const numericValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
-                      if (numericValue.length <= 11) {
-                        handleInputChange(e.target.name, numericValue);
-                        SaleStore.addUpdateBVN(numericValue);
-                      }
-                    }}
-                    placeholder="Enter 11 digit BVN"
-                    required={false}
-                    errorMessage={getFieldError("bvn")}
-                    maxLength={11}
-                  />
-                  <ModalInput
-                    type="button"
-                    name="identificationDetails"
-                    label="IDENTIFICATION DETAILS"
-                    onClick={() => {
-                      setExtraInfoModal("identification");
-                    }}
-                    placeholder="Enter Identification"
-                    required={false}
-                    isItemsSelected={Boolean(
-                      SaleStore.identificationDetails.idNumber
-                    )}
-                    customSelectedText="Update Identification Details"
-                    itemsSelected={
-                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
-                        {SaleStore.identificationDetails.idNumber && (
-                          <ExtraInfoSection
-                            label="Identification"
-                            onClear={() =>
-                              SaleStore.removeIdentificationDetails()
-                            }
-                          />
-                        )}
-                      </div>
+                <Input
+                  type="text"
+                  name="bvn"
+                  label="BANK VERIFICATION NUUMBER"
+                  value={formData.bvn as string}
+                  onChange={(e) => {
+                    const numericValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+                    if (numericValue.length <= 11) {
+                      handleInputChange(e.target.name, numericValue);
                     }
-                    errorMessage={getFieldError("identificationDetails")}
-                  />
-                  <ModalInput
-                    type="button"
-                    name="nextOfKinDetails"
-                    label="NEXT OF KIN DETAILS"
-                    onClick={() => {
-                      setExtraInfoModal("nextOfKin");
-                    }}
-                    placeholder="Enter Next of Kin"
-                    required={false}
-                    isItemsSelected={Boolean(
-                      SaleStore.nextOfKinDetails.fullName
-                    )}
-                    customSelectedText="Update Next of Kin"
-                    itemsSelected={
-                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
-                        {SaleStore.nextOfKinDetails.fullName && (
-                          <ExtraInfoSection
-                            label="Next of Kin"
-                            onClear={() => SaleStore.removeNextOfKinDetails()}
-                          />
-                        )}
-                      </div>
-                    }
-                    errorMessage={getFieldError("nextOfKinDetails")}
-                  />
-                  <ModalInput
-                    type="button"
-                    name="guarantorDetails"
-                    label="GUARANTOR DETAILS"
-                    onClick={() => {
-                      setExtraInfoModal("guarantor");
-                    }}
-                    placeholder="Enter Guarantor"
-                    required={false}
-                    isItemsSelected={Boolean(
-                      SaleStore.guarantorDetails.fullName
-                    )}
-                    customSelectedText="Update Guarantor"
-                    itemsSelected={
-                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
-                        {SaleStore.guarantorDetails.fullName && (
-                          <ExtraInfoSection
-                            label="Guarantor"
-                            onClear={() => SaleStore.removeGuarantorDetails()}
-                          />
-                        )}
-                      </div>
-                    }
-                    errorMessage={getFieldError("guarantorDetails")}
-                  />
-                </>
+                  }}
+                  placeholder="Enter 11 digit BVN"
+                  required={false}
+                  errorMessage={getFieldError("bvn")}
+                  maxLength={11}
+                />
               )}
-              {apiError && (
-                <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
-                  {apiError}
+
+              {apiError !== "" && typeof apiError === "string" ? (
+                <div className="p-3 mt-4 border border-red-500 rounded-md bg-red-50">
+                  <p className="text-sm text-red-600">{apiError}</p>
                 </div>
+              ) : (
+                Object.keys(apiError).length > 0 && (
+                  <div className="p-3 mt-4 border border-red-500 rounded-md bg-red-50">
+                    {Object.entries(apiError).map(([key, errors]) => (
+                      <p key={key} className="text-sm text-red-600">
+                        <strong>{capitalizeFirstLetter(key)}:</strong>{" "}
+                        {errors.join(", ")}
+                      </p>
+                    ))}
+                  </div>
+                )
               )}
+
               <ProceedButton
                 type="submit"
                 loading={loading}
-                variant={isFormFilled ? "gradient" : "gray"}
-                disabled={!isFormFilled}
+                variant={getIsFormFilled() ? "gradient" : "gray"}
+                disabled={!getIsFormFilled()}
               />
             </div>
           </form>

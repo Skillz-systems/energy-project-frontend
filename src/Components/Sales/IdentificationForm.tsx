@@ -3,6 +3,7 @@ import { Input, SelectInput } from "../InputComponent/Input";
 import { z } from "zod";
 import { identificationDetailsSchema } from "./salesSchema";
 import { SaleStore } from "@/stores/SaleStore";
+import { formatDateForInput } from "@/utils/helpers";
 
 type FormData = z.infer<typeof identificationDetailsSchema>;
 
@@ -16,10 +17,21 @@ const defaultFormData: FormData = {
   addressAsOnID: "",
 };
 
-const IdentificationForm = ({ handleClose }: { handleClose: () => void }) => {
-  const [formData, setFormData] = useState<FormData>(
-    SaleStore.identificationDetails || defaultFormData
-  );
+const IdentificationForm = ({
+  handleClose,
+  currentProductId,
+}: {
+  handleClose: () => void;
+  currentProductId: string;
+}) => {
+  const savedData =
+    SaleStore.getIdentityByProductId(currentProductId) || defaultFormData;
+
+  const [formData, setFormData] = useState<FormData>({
+    ...savedData,
+    issueDate: formatDateForInput(savedData.issueDate),
+    expirationDate: formatDateForInput(savedData.expirationDate),
+  });
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
 
   const handleInputChange = (
@@ -41,11 +53,7 @@ const IdentificationForm = ({ handleClose }: { handleClose: () => void }) => {
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
   };
 
-  const isFormFilled = Object.entries(formData)
-    .filter(
-      ([key]) => !["issueDate", "expirationDate", "addressAsOnID"].includes(key)
-    )
-    .every(([, value]) => value !== "");
+  const isFormFilled = identificationDetailsSchema.safeParse(formData).success;
 
   const getFieldError = (fieldName: string) => {
     return formErrors.find((error) => error.path[0] === fieldName)?.message;
@@ -62,11 +70,14 @@ const IdentificationForm = ({ handleClose }: { handleClose: () => void }) => {
   };
   const saveForm = () => {
     if (!validateItems()) return;
-
-    SaleStore.addIdentificationDetails({
+    SaleStore.addOrUpdateIdentity(currentProductId, {
       ...formData,
-      issueDate: new Date(formData.issueDate).toISOString(),
-      expirationDate: new Date(formData.expirationDate).toISOString(),
+      issueDate: !formData.issueDate
+        ? ""
+        : new Date(formData.issueDate)?.toISOString(),
+      expirationDate: !formData.issueDate
+        ? ""
+        : new Date(formData.expirationDate)?.toISOString(),
     });
 
     handleClose();

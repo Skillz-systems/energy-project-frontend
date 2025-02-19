@@ -3,6 +3,7 @@ import { Input, SelectInput } from "../InputComponent/Input";
 import { z } from "zod";
 import { guarantorDetailsSchema } from "./salesSchema";
 import { SaleStore } from "@/stores/SaleStore";
+import { formatDateForInput } from "@/utils/helpers";
 
 type FormData = z.infer<typeof guarantorDetailsSchema>;
 
@@ -24,10 +25,26 @@ const defaultFormData: FormData = {
   },
 };
 
-const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
-  const [formData, setFormData] = useState<FormData>(
-    SaleStore.guarantorDetails || defaultFormData
-  );
+const GuarantorForm = ({
+  handleClose,
+  currentProductId,
+}: {
+  handleClose: () => void;
+  currentProductId: string;
+}) => {
+  const savedData =
+    SaleStore.getGuarantorByProductId(currentProductId) || defaultFormData;
+  const [formData, setFormData] = useState<FormData>({
+    ...savedData,
+    dateOfBirth: savedData.dateOfBirth,
+    identificationDetails: {
+      ...savedData.identificationDetails,
+      issueDate: formatDateForInput(savedData.identificationDetails.issueDate),
+      expirationDate: formatDateForInput(
+        savedData.identificationDetails.expirationDate
+      ),
+    },
+  });
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
 
   const handleInputChange = (
@@ -67,12 +84,7 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
     }));
   };
 
-  const isFormFilled = Object.entries(formData)
-    .filter(
-      ([key]) =>
-        !["email", "homeAddress", "dateOfBirth", "nationality"].includes(key)
-    )
-    .every(([, value]) => value !== "");
+  const isFormFilled = guarantorDetailsSchema.safeParse(formData).success;
 
   const getFieldError = (fieldName: string) => {
     return formErrors.find((error) => error.path[0] === fieldName)?.message;
@@ -90,17 +102,21 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
 
   const saveForm = () => {
     if (!validateItems()) return;
-    SaleStore.addGuarantorDetails({
+    SaleStore.addUpdateGuarantorDetails(currentProductId, {
       ...formData,
-      dateOfBirth: new Date(formData.dateOfBirth).toISOString(),
+      dateOfBirth: !formData.dateOfBirth
+        ? ""
+        : new Date(formData.dateOfBirth).toISOString(),
       identificationDetails: {
         ...formData.identificationDetails,
-        issueDate: new Date(
-          formData.identificationDetails.issueDate
-        ).toISOString(),
-        expirationDate: new Date(
-          formData.identificationDetails.expirationDate
-        ).toISOString(),
+        issueDate: !formData.identificationDetails.issueDate
+          ? ""
+          : new Date(formData.identificationDetails.issueDate).toISOString(),
+        expirationDate: !formData.identificationDetails.expirationDate
+          ? ""
+          : new Date(
+              formData.identificationDetails.expirationDate
+            ).toISOString(),
       },
     });
     handleClose();

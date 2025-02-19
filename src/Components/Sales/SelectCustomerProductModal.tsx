@@ -14,6 +14,7 @@ import TabComponent from "../TabComponent/TabComponent";
 import wrong from "../../assets/table/wrong.png";
 import { CardComponent } from "../CardComponents/CardComponent";
 import CustomerSalesTable from "./CustomerSalesTable";
+import { formatNumberWithCommas } from "@/utils/helpers";
 
 interface Customer {
   id: string;
@@ -40,7 +41,17 @@ const generateListDataEntries = (data: any): ListDataType[] => {
     productImage: product?.image || "",
     productTag: product?.category?.name,
     productName: product?.name,
-    productPrice: product?.priceRange || "",
+    productPrice:
+      product?.priceRange?.minimumInventoryBatchPrice ===
+      product?.priceRange?.maximumInventoryBatchPrice
+        ? `₦ ${formatNumberWithCommas(
+            product?.priceRange?.maximumInventoryBatchPrice
+          )}`
+        : `₦ ${formatNumberWithCommas(
+            product?.priceRange?.minimumInventoryBatchPrice
+          )} - ${formatNumberWithCommas(
+            product?.priceRange?.maximumInventoryBatchPrice
+          )}`,
     totalRemainingQuantities: product?.inventories[0]?.totalRemainingQuantities,
   }));
 };

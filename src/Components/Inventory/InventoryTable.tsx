@@ -13,7 +13,10 @@ interface InventoryEntries {
   no: number;
   name: { image: string; text: string };
   class: string;
-  salePrice: number;
+  salePrice: {
+    minimumInventoryBatchPrice: number;
+    maximumInventoryBatchPrice: number;
+  };
   inventoryValue: number;
   stockLevel: { totalUnits: number; currentUnits: number };
   deleted: boolean;
@@ -201,6 +204,27 @@ const InventoryTable = ({
     {
       title: "SALE PRICE",
       key: "salePrice",
+      valueIsAComponent: true,
+      customValue: (value: {
+        minimumInventoryBatchPrice: number;
+        maximumInventoryBatchPrice: number;
+      }) => {
+        const { minimumInventoryBatchPrice, maximumInventoryBatchPrice } =
+          value;
+        const formattedPrice =
+          minimumInventoryBatchPrice === maximumInventoryBatchPrice
+            ? formatNumberWithCommas(maximumInventoryBatchPrice)
+            : `${formatNumberWithCommas(
+                minimumInventoryBatchPrice
+              )} - ${formatNumberWithCommas(maximumInventoryBatchPrice)}`;
+
+        return (
+          <div className="flex items-center gap-1">
+            <NairaSymbol />
+            <span className="text-textBlack">{formattedPrice}</span>
+          </div>
+        );
+      },
       rightIcon: <NairaSymbol color="#828DA9" />,
     },
     {
@@ -224,7 +248,15 @@ const InventoryTable = ({
       key: "stockLevel",
       valueIsAComponent: true,
       customValue: (value: { totalUnits: number; currentUnits: number }) => {
-        const statusLevel = (value.currentUnits / value.totalUnits) * 100;
+        const statusLevel =
+          value.totalUnits && value.currentUnits
+            ? (value.currentUnits / value.totalUnits) * 100
+            : 0; // Ensure default is 0 if values are missing
+
+        const displayStatusLevel = isNaN(statusLevel)
+          ? 0
+          : statusLevel.toFixed();
+
         const getStatusLevel =
           statusLevel > 50
             ? "bg-successThree border-inkBlue"
@@ -233,7 +265,7 @@ const InventoryTable = ({
         return (
           <div className="flex items-center gap-0 w-full">
             <span className="flex items-center justify-center w-[130px] text-textGrey font-bold px-1 h-[24px] bg-[#F6F8FA] border-[0.6px] border-strokeGreyThree rounded-full">
-              {value.currentUnits && formatNumberWithCommas(value.currentUnits)}
+              {value.currentUnits && formatNumberWithCommas(value.currentUnits)}{" "}
               /
               <span className="font-normal">
                 {value.totalUnits && formatNumberWithCommas(value.totalUnits)}
@@ -255,7 +287,7 @@ const InventoryTable = ({
                       : `${statusLevel}%`,
                 }}
               >
-                {statusLevel.toFixed()}%
+                {displayStatusLevel}%
               </span>
             </div>
           </div>

@@ -22,36 +22,12 @@ export const ProductDetailRow = ({
   </div>
 );
 
-export const ExtraInfoSection = observer(
-  ({ label, onClear }: { label: string; onClear: () => void }) => (
-    <div className="flex flex-col gap-2 w-full">
-      <div className="flex items-center justify-between w-full">
-        <div className="flex items-center justify-between w-max gap-2">
-          <p className="text-textDarkGrey text-sm font-semibold">{label}</p>
-          <SimpleTag
-            text={"SAVED"}
-            dotColour="#00AF50"
-            containerClass="bg-[#F6F8FA] text-success font-semibold px-2 py-1 border-[0.4px] border-strokeGreyThree rounded-full"
-          />
-        </div>
-        <button
-          type="button"
-          className="text-sm font-semibold text-errorTwo"
-          title={`Clear ${label}`}
-          onClick={onClear}
-        >
-          Clear
-        </button>
-      </div>
-    </div>
-  )
-);
-
 const ProductSaleDisplay = observer(
   ({
     productData,
     onRemoveProduct,
     setExtraInfoModal,
+    getIsFormFilled,
   }: {
     productData: {
       productId: string;
@@ -63,6 +39,7 @@ const ProductSaleDisplay = observer(
     };
     onRemoveProduct: (productId: string) => void;
     setExtraInfoModal: React.Dispatch<React.SetStateAction<ExtraInfoType>>;
+    getIsFormFilled: () => boolean;
   }) => {
     const { productTag, productId, productName, productUnits, productPrice } =
       productData;
@@ -76,13 +53,56 @@ const ProductSaleDisplay = observer(
     const doesRecipientExist = Boolean(
       SaleStore.getRecipientByProductId(productId)
     );
-
-    // const extraInfoExist =
-    //   doesParamsExist ||
-    //   (miscellaneousCosts && Object.keys(miscellaneousCosts).length > 0) ||
-    //   doesDevicesExist;
+    const doesIdentityExist = Boolean(
+      SaleStore.getIdentityByProductId(productId)
+    );
+    const doesNextOfKinExist = Boolean(
+      SaleStore.getNextOfKinByProductId(productId)
+    );
+    const doesGuarantorExist = Boolean(
+      SaleStore.getGuarantorByProductId(productId)
+    );
 
     console.log(toJS(SaleStore));
+
+    const identityTypes = ["identification", "nextOfKin", "guarantor"];
+    const types = ["parameters", "miscellaneous", "devices", "recipient"];
+
+    const filteredTypes = SaleStore.doesSaleItemHaveInstallment()
+      ? types.concat(identityTypes)
+      : types;
+
+    const ExtraInfoSection = ({
+      label,
+      onClear,
+    }: {
+      label: string;
+      onClear: () => void;
+    }) => (
+      <div className="flex flex-col gap-2 w-full">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center justify-between w-max gap-2">
+            <p className="text-textDarkGrey text-sm font-semibold">{label}</p>
+            <SimpleTag
+              text={"SAVED"}
+              dotColour="#00AF50"
+              containerClass="bg-[#F6F8FA] text-success font-semibold px-2 py-1 border-[0.4px] border-strokeGreyThree rounded-full"
+            />
+          </div>
+          <button
+            type="button"
+            className="text-sm font-semibold text-errorTwo"
+            title={`Clear ${label}`}
+            onClick={() => {
+              onClear();
+              getIsFormFilled();
+            }}
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+    );
 
     return (
       <div className="flex flex-col gap-2 w-full p-2.5 border-[0.6px] border-strokeGreyThree rounded-[20px]">
@@ -116,32 +136,53 @@ const ProductSaleDisplay = observer(
               onClear={() => SaleStore.removeRecipient(productId)}
             />
           )}
-
+          {doesIdentityExist && (
+            <ExtraInfoSection
+              label="Identification"
+              onClear={() => SaleStore.removeIdentificationDetails(productId)}
+            />
+          )}
+          {doesNextOfKinExist && (
+            <ExtraInfoSection
+              label="Next of Kin"
+              onClear={() => SaleStore.removeNextOfKinDetails(productId)}
+            />
+          )}
+          {doesGuarantorExist && (
+            <ExtraInfoSection
+              label="Guarantor"
+              onClear={() => SaleStore.removeGuarantorDetails(productId)}
+            />
+          )}
           <div className="flex items-center justify-between gap-2 w-full">
-            <div className="flex flex-wrap items-center justify-between w-[90%] gap-1 gap-y-3">
-              {["parameters", "miscellaneous", "devices", "recipient"].map(
-                (type) => (
-                  <div
-                    key={type}
-                    className={`flex items-center justify-center text-sm font-medium px-3 py-1 w-max rounded-full cursor-pointer transition-all
+            <div className="flex flex-wrap items-center w-[90%] gap-3 gap-y-3">
+              {filteredTypes?.map((type) => (
+                <div
+                  key={type}
+                  className={`flex items-center justify-center text-sm font-medium px-3 py-1 w-max rounded-full cursor-pointer transition-all
                   ${
                     type === "parameters"
                       ? "bg-primaryGradient text-white"
                       : "bg-white text-textDarkGrey border-[0.6px] border-strokeGreyTwo"
                   }
                   `}
-                    onClick={() => setExtraInfoModal(type as ExtraInfoType)}
-                  >
-                    {type === "parameters"
-                      ? "Set Parameters"
-                      : type === "miscellaneous"
-                      ? "Set Miscellaneous Costs"
-                      : type === "devices"
-                      ? "Link Device"
-                      : "Set Recipient"}
-                  </div>
-                )
-              )}
+                  onClick={() => setExtraInfoModal(type as ExtraInfoType)}
+                >
+                  {type === "parameters"
+                    ? "Set Parameters"
+                    : type === "miscellaneous"
+                    ? "Set Miscellaneous Costs"
+                    : type === "devices"
+                    ? "Link Device"
+                    : type === "recipient"
+                    ? "Set Recipient"
+                    : type === "identification"
+                    ? "Set Identity"
+                    : type === "nextOfKin"
+                    ? "Set Next of Kin"
+                    : "Set Guarantor"}
+                </div>
+              ))}
             </div>
             <span
               className="flex items-center justify-center w-7 h-7 bg-white cursor-pointer border-[0.6px] border-strokeGreyTwo rounded-full transition-all hover:opacity-50"
@@ -152,6 +193,10 @@ const ProductSaleDisplay = observer(
                 SaleStore.removeMiscellaneousPrice(productId);
                 SaleStore.removeDevices(productId);
                 SaleStore.removeRecipient(productId);
+                SaleStore.removeIdentificationDetails(productId);
+                SaleStore.removeNextOfKinDetails(productId);
+                SaleStore.removeGuarantorDetails(productId);
+                getIsFormFilled();
               }}
             >
               <RiDeleteBin5Fill color="#FC4C5D" />

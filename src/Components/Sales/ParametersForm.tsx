@@ -9,17 +9,15 @@ const formSchema = z.object({
   }),
   installmentDuration: z.number().nullable(),
   installmentStartingPrice: z.number().nullable(),
-  address: z.string().trim().min(1, "Installation address is required"),
   discount: z.number().nullable(),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 const defaultFormData: FormData = {
-  paymentMode: "INSTALLMENT",
+  paymentMode: "ONE_OFF",
   installmentDuration: "" as unknown as number,
   installmentStartingPrice: "" as unknown as number,
-  address: "",
   discount: "" as unknown as number,
 };
 
@@ -56,12 +54,11 @@ const ParametersForm = ({
 
   const isFormFilled =
     formData.paymentMode === "ONE_OFF"
-      ? Boolean(formData.paymentMode && formData.address)
+      ? Boolean(formData.paymentMode)
       : Boolean(
           formData.paymentMode &&
             formData.installmentDuration &&
-            formData.installmentStartingPrice &&
-            formData.address
+            formData.installmentStartingPrice
         );
   const getFieldError = (fieldName: string) => {
     return formErrors.find((error) => error.path[0] === fieldName)?.message;
@@ -150,16 +147,6 @@ const ParametersForm = ({
             }
           />
         ) : null}
-        <Input
-          type="text"
-          name="address"
-          label="ADDRESS"
-          value={formData.address}
-          onChange={handleInputChange}
-          placeholder="Address"
-          required={true}
-          errorMessage={getFieldError("address")}
-        />
         <Input
           type="number"
           name="discount"
