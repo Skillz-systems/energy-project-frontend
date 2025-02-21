@@ -17,38 +17,14 @@ const defaultFormData: FormData = {
   nationality: "",
 };
 
-const NextOfKinForm = ({
-  handleClose,
-  currentProductId,
-}: {
-  handleClose: () => void;
-  currentProductId: string;
-}) => {
-  const savedData =
-    SaleStore.getNextOfKinByProductId(currentProductId) || defaultFormData;
+const NextOfKinForm = ({ handleClose }: { handleClose: () => void }) => {
+  const savedData = SaleStore.nextOfKinDetails || defaultFormData;
 
   const [formData, setFormData] = useState<FormData>({
     ...savedData,
     dateOfBirth: formatDateForInput(savedData.dateOfBirth),
   });
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-  };
-
-  const isFormFilled = nextOfKinDetailsSchema.safeParse(formData).success;
-
-  const getFieldError = (fieldName: string) => {
-    return formErrors.find((error) => error.path[0] === fieldName)?.message;
-  };
 
   const validateItems = () => {
     const result = nextOfKinDetailsSchema.safeParse(formData);
@@ -60,15 +36,32 @@ const NextOfKinForm = ({
     return true;
   };
 
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    validateItems();
+    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+  };
+
+  const isFormFilled = nextOfKinDetailsSchema.safeParse(formData).success;
+
+  const getFieldError = (fieldName: string) => {
+    return formErrors.find((error) => error.path[0] === fieldName)?.message;
+  };
+
   const saveForm = () => {
     if (!validateItems()) return;
-    SaleStore.addNextOfKinDetails(currentProductId, {
+    SaleStore.addNextOfKinDetails({
       ...formData,
       dateOfBirth: !formData.dateOfBirth
         ? ""
         : new Date(formData.dateOfBirth).toISOString(),
     });
-    SaleStore.addSaleItem(currentProductId);
     handleClose();
   };
 
@@ -131,7 +124,7 @@ const NextOfKinForm = ({
         value={formData.dateOfBirth || ""}
         onChange={handleInputChange}
         placeholder="Enter Date of Birth"
-        required={false}
+        required={true}
         errorMessage={getFieldError("dateOfBirth")}
         description={"Enter Date of Birth"}
       />
