@@ -16,20 +16,23 @@ export const identificationDetailsSchema = z
     issueDate: z
       .string()
       .trim()
-      .refine((date) => date === "" || !isNaN(Date.parse(date)), {
+      .nonempty({ message: "Issue date is required" })
+      .refine((date) => !isNaN(Date.parse(date)), {
         message: "Invalid issue date",
       })
-      .refine((date) => date === "" || new Date(date) <= new Date(), {
+      .refine((date) => new Date(date) <= new Date(), {
         message: "Issue date cannot be in the future",
       }),
+
     expirationDate: z
       .string()
       .trim()
-      .refine((date) => date === "" || !isNaN(Date.parse(date)), {
+      .nonempty({ message: "Expiration date is required" })
+      .refine((date) => !isNaN(Date.parse(date)), {
         message: "Invalid expiration date",
       })
-      .refine((date) => date === "" || new Date(date) <= new Date(), {
-        message: "Expiration date cannot be in the future",
+      .refine((date) => new Date(date) > new Date(), {
+        message: "Expiration date must be in the future",
       }),
     fullNameAsOnID: z.string().trim().min(3, "Full name as on ID is required"),
     addressAsOnID: z.string().trim(),
@@ -58,10 +61,11 @@ export const nextOfKinDetailsSchema = z.object({
   dateOfBirth: z
     .string()
     .trim()
-    .refine((date) => date === "" || !isNaN(Date.parse(date)), {
+    .nonempty({ message: "Issue date is required" })
+    .refine((date) => !isNaN(Date.parse(date)), {
       message: "Invalid date of birth",
     })
-    .refine((date) => date === "" || new Date(date) <= new Date(), {
+    .refine((date) => new Date(date) <= new Date(), {
       message: "Date of birth cannot be in the future",
     }),
   nationality: z.string().trim(),
@@ -75,10 +79,11 @@ export const guarantorDetailsSchema = z.object({
   dateOfBirth: z
     .string()
     .trim()
-    .refine((date) => date === "" || !isNaN(Date.parse(date)), {
+    .nonempty({ message: "Issue date is required" })
+    .refine((date) => !isNaN(Date.parse(date)), {
       message: "Invalid date of birth",
     })
-    .refine((date) => date === "" || new Date(date) <= new Date(), {
+    .refine((date) => new Date(date) <= new Date(), {
       message: "Date of birth cannot be in the future",
     }),
   nationality: z.string().trim(),

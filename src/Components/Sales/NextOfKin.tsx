@@ -26,23 +26,6 @@ const NextOfKinForm = ({ handleClose }: { handleClose: () => void }) => {
   });
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-  };
-
-  const isFormFilled = nextOfKinDetailsSchema.safeParse(formData).success;
-
-  const getFieldError = (fieldName: string) => {
-    return formErrors.find((error) => error.path[0] === fieldName)?.message;
-  };
-
   const validateItems = () => {
     const result = nextOfKinDetailsSchema.safeParse(formData);
     if (!result.success) {
@@ -51,6 +34,24 @@ const NextOfKinForm = ({ handleClose }: { handleClose: () => void }) => {
     }
     setFormErrors([]);
     return true;
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    validateItems();
+    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+  };
+
+  const isFormFilled = nextOfKinDetailsSchema.safeParse(formData).success;
+
+  const getFieldError = (fieldName: string) => {
+    return formErrors.find((error) => error.path[0] === fieldName)?.message;
   };
 
   const saveForm = () => {
@@ -123,7 +124,7 @@ const NextOfKinForm = ({ handleClose }: { handleClose: () => void }) => {
         value={formData.dateOfBirth || ""}
         onChange={handleInputChange}
         placeholder="Enter Date of Birth"
-        required={false}
+        required={true}
         errorMessage={getFieldError("dateOfBirth")}
         description={"Enter Date of Birth"}
       />

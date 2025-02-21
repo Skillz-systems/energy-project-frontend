@@ -27,31 +27,6 @@ const IdentificationForm = ({ handleClose }: { handleClose: () => void }) => {
   });
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-  };
-
-  const handleSelectChange = (name: string, values: string | string[]) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: values,
-    }));
-    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-  };
-
-  const isFormFilled = identificationDetailsSchema.safeParse(formData).success;
-
-  const getFieldError = (fieldName: string) => {
-    return formErrors.find((error) => error.path[0] === fieldName)?.message;
-  };
-
   const validateItems = () => {
     const result = identificationDetailsSchema.safeParse(formData);
     if (!result.success) {
@@ -60,6 +35,33 @@ const IdentificationForm = ({ handleClose }: { handleClose: () => void }) => {
     }
     setFormErrors([]);
     return true;
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    validateItems();
+    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+  };
+
+  const handleSelectChange = (name: string, values: string | string[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: values,
+    }));
+    validateItems();
+    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+  };
+
+  const isFormFilled = identificationDetailsSchema.safeParse(formData).success;
+
+  const getFieldError = (fieldName: string) => {
+    return formErrors.find((error) => error.path[0] === fieldName)?.message;
   };
 
   const saveForm = () => {
@@ -122,7 +124,7 @@ const IdentificationForm = ({ handleClose }: { handleClose: () => void }) => {
         value={formData.issueDate}
         onChange={handleInputChange}
         placeholder="Enter Issue Date"
-        required={false}
+        required={true}
         errorMessage={getFieldError("issueDate")}
         description={"Enter Issue Date"}
       />
@@ -133,7 +135,7 @@ const IdentificationForm = ({ handleClose }: { handleClose: () => void }) => {
         value={formData.expirationDate}
         onChange={handleInputChange}
         placeholder="Enter Expiration Date"
-        required={false}
+        required={true}
         errorMessage={getFieldError("expirationDate")}
         description={"Enter Expiration Date"}
       />
