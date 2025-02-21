@@ -25,15 +25,8 @@ const defaultFormData: FormData = {
   },
 };
 
-const GuarantorForm = ({
-  handleClose,
-  currentProductId,
-}: {
-  handleClose: () => void;
-  currentProductId: string;
-}) => {
-  const savedData =
-    SaleStore.getGuarantorByProductId(currentProductId) || defaultFormData;
+const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
+  const savedData = SaleStore.guarantorDetails || defaultFormData;
   const [formData, setFormData] = useState<FormData>({
     ...savedData,
     dateOfBirth: savedData.dateOfBirth,
@@ -47,6 +40,16 @@ const GuarantorForm = ({
   });
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
 
+  const validateItems = () => {
+    const result = guarantorDetailsSchema.safeParse(formData);
+    if (!result.success) {
+      setFormErrors(result.error.issues);
+      return false;
+    }
+    setFormErrors([]);
+    return true;
+  };
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -55,6 +58,7 @@ const GuarantorForm = ({
       ...prev,
       [name]: value,
     }));
+    validateItems();
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
   };
 
@@ -69,6 +73,16 @@ const GuarantorForm = ({
         [name]: value,
       },
     }));
+    validateItems();
+    setFormErrors((prev) =>
+      prev.filter(
+        (error) =>
+          !(
+            Array.isArray(error.path) &&
+            error.path.join(".") === `identificationDetails.${name}`
+          )
+      )
+    );
   };
 
   const handleNestedSelectChange = (
@@ -82,27 +96,33 @@ const GuarantorForm = ({
         [name]: values,
       },
     }));
+    validateItems();
+    setFormErrors((prev) =>
+      prev.filter(
+        (error) =>
+          !(
+            Array.isArray(error.path) &&
+            error.path.join(".") === `identificationDetails.${name}`
+          )
+      )
+    );
   };
 
   const isFormFilled = guarantorDetailsSchema.safeParse(formData).success;
 
   const getFieldError = (fieldName: string) => {
-    return formErrors.find((error) => error.path[0] === fieldName)?.message;
-  };
-
-  const validateItems = () => {
-    const result = guarantorDetailsSchema.safeParse(formData);
-    if (!result.success) {
-      setFormErrors(result.error.issues);
-      return false;
-    }
-    setFormErrors([]);
-    return true;
+    // Check for both top-level and nested paths
+    const error = formErrors.find(
+      (err) =>
+        err.path.join(".") === fieldName || // Top-level check
+        err.path.join(".") === `identificationDetails.${fieldName}` // Nested field check
+    );
+    return error?.message;
   };
 
   const saveForm = () => {
     if (!validateItems()) return;
-    SaleStore.addUpdateGuarantorDetails(currentProductId, {
+    SaleStore.addGuarantorDetails({
       ...formData,
       dateOfBirth: !formData.dateOfBirth
         ? ""
@@ -119,7 +139,6 @@ const GuarantorForm = ({
             ).toISOString(),
       },
     });
-    SaleStore.addSaleItem(currentProductId);
     handleClose();
   };
 
@@ -172,7 +191,7 @@ const GuarantorForm = ({
         value={formData.dateOfBirth || ""}
         onChange={handleInputChange}
         placeholder="Enter Date of Birth"
-        required={false}
+        required={true}
         errorMessage={getFieldError("dateOfBirth")}
         description={"Enter Date of Birth"}
       />
@@ -233,7 +252,7 @@ const GuarantorForm = ({
         value={formData.identificationDetails.issueDate}
         onChange={handleNestedInputChange}
         placeholder="Enter Issue Date"
-        required={false}
+        required={true}
         errorMessage={getFieldError("issueDate")}
         description={"Enter Issue Date"}
       />
@@ -244,7 +263,7 @@ const GuarantorForm = ({
         value={formData.identificationDetails.expirationDate}
         onChange={handleNestedInputChange}
         placeholder="Enter Expiration Date"
-        required={false}
+        required={true}
         errorMessage={getFieldError("expirationDate")}
         description={"Enter Expiration Date"}
       />

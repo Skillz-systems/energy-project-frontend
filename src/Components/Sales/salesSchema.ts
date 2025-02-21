@@ -16,20 +16,23 @@ export const identificationDetailsSchema = z
     issueDate: z
       .string()
       .trim()
-      .refine((date) => date === "" || !isNaN(Date.parse(date)), {
+      .nonempty({ message: "Issue date is required" })
+      .refine((date) => !isNaN(Date.parse(date)), {
         message: "Invalid issue date",
       })
-      .refine((date) => date === "" || new Date(date) <= new Date(), {
+      .refine((date) => new Date(date) <= new Date(), {
         message: "Issue date cannot be in the future",
       }),
+
     expirationDate: z
       .string()
       .trim()
-      .refine((date) => date === "" || !isNaN(Date.parse(date)), {
+      .nonempty({ message: "Expiration date is required" })
+      .refine((date) => !isNaN(Date.parse(date)), {
         message: "Invalid expiration date",
       })
-      .refine((date) => date === "" || new Date(date) <= new Date(), {
-        message: "Expiration date cannot be in the future",
+      .refine((date) => new Date(date) > new Date(), {
+        message: "Expiration date must be in the future",
       }),
     fullNameAsOnID: z.string().trim().min(3, "Full name as on ID is required"),
     addressAsOnID: z.string().trim(),
@@ -58,10 +61,11 @@ export const nextOfKinDetailsSchema = z.object({
   dateOfBirth: z
     .string()
     .trim()
-    .refine((date) => date === "" || !isNaN(Date.parse(date)), {
+    .nonempty({ message: "Issue date is required" })
+    .refine((date) => !isNaN(Date.parse(date)), {
       message: "Invalid date of birth",
     })
-    .refine((date) => date === "" || new Date(date) <= new Date(), {
+    .refine((date) => new Date(date) <= new Date(), {
       message: "Date of birth cannot be in the future",
     }),
   nationality: z.string().trim(),
@@ -75,10 +79,11 @@ export const guarantorDetailsSchema = z.object({
   dateOfBirth: z
     .string()
     .trim()
-    .refine((date) => date === "" || !isNaN(Date.parse(date)), {
+    .nonempty({ message: "Issue date is required" })
+    .refine((date) => !isNaN(Date.parse(date)), {
       message: "Invalid date of birth",
     })
-    .refine((date) => date === "" || new Date(date) <= new Date(), {
+    .refine((date) => new Date(date) <= new Date(), {
       message: "Date of birth cannot be in the future",
     }),
   nationality: z.string().trim(),
@@ -100,9 +105,6 @@ export const saleItemSchema = z
       .record(z.string(), z.number().min(0, "Price must be a positive number"))
       .optional(),
     saleRecipient: saleRecipientSchema,
-    identificationDetails: identificationDetailsSchema.optional(),
-    nextOfKinDetails: nextOfKinDetailsSchema.optional(),
-    guarantorDetails: guarantorDetailsSchema.optional(),
   })
   .superRefine((data, ctx) => {
     // Conditional validation: If payment mode is INSTALLMENT, ensure related fields are filled
@@ -122,7 +124,35 @@ export const saleItemSchema = z
           path: ["installmentStartingPrice"],
         });
       }
+    }
+  });
 
+export const formSchema = z
+  .object({
+    category: z.enum(["PRODUCT"], {
+      message: "Category is required",
+    }),
+    customerId: z.string().min(1, "Please select at least one customer"),
+    saleItems: z
+      .array(saleItemSchema)
+      .min(1, "At least one sale item is required"),
+    bvn: z
+      .string()
+      .length(11, "BVN must be exactly 11 digits")
+      .regex(/^\d+$/, "BVN must contain only numbers")
+      .optional(),
+    identificationDetails: identificationDetailsSchema.optional(),
+    nextOfKinDetails: nextOfKinDetailsSchema.optional(),
+    guarantorDetails: guarantorDetailsSchema.optional(),
+  })
+  .superRefine((data, ctx) => {
+    // Check if any sale item has paymentMode as "INSTALLMENT"
+    const hasInstallment = data.saleItems.some(
+      (item) => item.paymentMode === "INSTALLMENT"
+    );
+
+    // If any sale item has paymentMode as "INSTALLMENT", enforce identificationDetails, nextOfKinDetails and guarantorDetails
+    if (hasInstallment) {
       // Validate identificationDetails
       if (!data.identificationDetails) {
         ctx.addIssue({
@@ -192,21 +222,6 @@ export const saleItemSchema = z
     }
   });
 
-export const formSchema = z.object({
-  category: z.enum(["PRODUCT"], {
-    message: "Category is required",
-  }),
-  customerId: z.string().min(1, "Please select at least one customer"),
-  saleItems: z
-    .array(saleItemSchema)
-    .min(1, "At least one sale item is required"),
-  bvn: z
-    .string()
-    .length(11, "BVN must be exactly 11 digits")
-    .regex(/^\d+$/, "BVN must contain only numbers")
-    .optional()
-});
-
 export type SaleItem = {
   productId: string;
   quantity: number;
@@ -225,9 +240,6 @@ export type SaleItem = {
     phone: string;
     email: string;
   };
-  nextOfKinDetails?: NextOfKinDetails;
-  identificationDetails?: IdentificationDetails;
-  guarantorDetails?: GuarantorDetails;
 };
 
 type NextOfKinDetails = {
@@ -265,6 +277,9 @@ export type SalePayload = {
   customerId: string;
   bvn?: string;
   saleItems: SaleItem[];
+  nextOfKinDetails?: NextOfKinDetails;
+  identificationDetails?: IdentificationDetails;
+  guarantorDetails?: GuarantorDetails;
 };
 
 export const defaultSaleFormData: SalePayload = {
@@ -272,4 +287,39 @@ export const defaultSaleFormData: SalePayload = {
   customerId: "",
   bvn: "",
   saleItems: [],
+  nextOfKinDetails: {
+    fullName: "",
+    relationship: "",
+    phoneNumber: "",
+    email: "",
+    homeAddress: "",
+    dateOfBirth: "",
+    nationality: "",
+  },
+  identificationDetails: {
+    idType: "",
+    idNumber: "",
+    issuingCountry: "",
+    issueDate: "",
+    expirationDate: "",
+    fullNameAsOnID: "",
+    addressAsOnID: "",
+  },
+  guarantorDetails: {
+    fullName: "",
+    phoneNumber: "",
+    email: "",
+    homeAddress: "",
+    dateOfBirth: "",
+    nationality: "",
+    identificationDetails: {
+      idType: "",
+      idNumber: "",
+      issuingCountry: "",
+      issueDate: "",
+      expirationDate: "",
+      fullNameAsOnID: "",
+      addressAsOnID: "",
+    },
+  },
 };
