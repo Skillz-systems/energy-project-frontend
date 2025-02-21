@@ -21,6 +21,37 @@ export const ProductDetailRow = ({
   </div>
 );
 
+export const ExtraInfoSection = ({
+  label,
+  onClear,
+}: {
+  label: string;
+  onClear: () => void;
+}) => (
+  <div className="flex flex-col gap-2 w-full">
+    <div className="flex items-center justify-between w-full">
+      <div className="flex items-center justify-between w-max gap-2">
+        <p className="text-textDarkGrey text-sm font-semibold">{label}</p>
+        <SimpleTag
+          text={"SAVED"}
+          dotColour="#00AF50"
+          containerClass="bg-[#F6F8FA] text-success font-semibold px-2 py-1 border-[0.4px] border-strokeGreyThree rounded-full"
+        />
+      </div>
+      <button
+        type="button"
+        className="text-sm font-semibold text-errorTwo"
+        title={`Clear ${label}`}
+        onClick={() => {
+          onClear();
+        }}
+      >
+        Clear
+      </button>
+    </div>
+  </div>
+);
+
 const ProductSaleDisplay = observer(
   ({
     productData,
@@ -54,54 +85,8 @@ const ProductSaleDisplay = observer(
     const doesRecipientExist = Boolean(
       SaleStore.getRecipientByProductId(productId)
     );
-    const doesIdentityExist = Boolean(
-      SaleStore.getIdentityByProductId(productId)
-    );
-    const doesNextOfKinExist = Boolean(
-      SaleStore.getNextOfKinByProductId(productId)
-    );
-    const doesGuarantorExist = Boolean(
-      SaleStore.getGuarantorByProductId(productId)
-    );
 
-    const identityTypes = ["identification", "nextOfKin", "guarantor"];
     const types = ["parameters", "miscellaneous", "devices", "recipient"];
-
-    const filteredTypes = SaleStore.doesSaleItemHaveInstallment()
-      ? types.concat(identityTypes)
-      : types;
-
-    const ExtraInfoSection = ({
-      label,
-      onClear,
-    }: {
-      label: string;
-      onClear: () => void;
-    }) => (
-      <div className="flex flex-col gap-2 w-full">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center justify-between w-max gap-2">
-            <p className="text-textDarkGrey text-sm font-semibold">{label}</p>
-            <SimpleTag
-              text={"SAVED"}
-              dotColour="#00AF50"
-              containerClass="bg-[#F6F8FA] text-success font-semibold px-2 py-1 border-[0.4px] border-strokeGreyThree rounded-full"
-            />
-          </div>
-          <button
-            type="button"
-            className="text-sm font-semibold text-errorTwo"
-            title={`Clear ${label}`}
-            onClick={() => {
-              onClear();
-              getIsFormFilled();
-            }}
-          >
-            Clear
-          </button>
-        </div>
-      </div>
-    );
 
     const allErrors = [
       ...getFieldError("quantity", productId),
@@ -111,9 +96,6 @@ const ProductSaleDisplay = observer(
       ...getFieldError("devices", productId),
       ...getFieldError("miscellaneousPrices", productId),
       ...getFieldError("saleRecipient", productId),
-      ...getFieldError("identificationDetails", productId),
-      ...getFieldError("nextOfKinDetails", productId),
-      ...getFieldError("guarantorDetails", productId),
     ];
 
     return (
@@ -148,27 +130,9 @@ const ProductSaleDisplay = observer(
               onClear={() => SaleStore.removeRecipient(productId)}
             />
           )}
-          {doesIdentityExist && (
-            <ExtraInfoSection
-              label="Identification"
-              onClear={() => SaleStore.removeIdentificationDetails(productId)}
-            />
-          )}
-          {doesNextOfKinExist && (
-            <ExtraInfoSection
-              label="Next of Kin"
-              onClear={() => SaleStore.removeNextOfKinDetails(productId)}
-            />
-          )}
-          {doesGuarantorExist && (
-            <ExtraInfoSection
-              label="Guarantor"
-              onClear={() => SaleStore.removeGuarantorDetails(productId)}
-            />
-          )}
           <div className="flex items-center justify-between gap-2 w-full">
             <div className="flex flex-wrap items-center w-[90%] gap-3 gap-y-3">
-              {filteredTypes?.map((type) => (
+              {types?.map((type) => (
                 <div
                   key={type}
                   className={`flex items-center justify-center text-sm font-medium px-3 py-1 w-max rounded-full cursor-pointer transition-all
@@ -186,13 +150,7 @@ const ProductSaleDisplay = observer(
                     ? "Set Miscellaneous Costs"
                     : type === "devices"
                     ? "Link Device"
-                    : type === "recipient"
-                    ? "Set Recipient"
-                    : type === "identification"
-                    ? "Set Identity"
-                    : type === "nextOfKin"
-                    ? "Set Next of Kin"
-                    : "Set Guarantor"}
+                    : "Set Recipient"}
                 </div>
               ))}
             </div>

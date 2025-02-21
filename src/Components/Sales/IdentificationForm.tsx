@@ -17,15 +17,8 @@ const defaultFormData: FormData = {
   addressAsOnID: "",
 };
 
-const IdentificationForm = ({
-  handleClose,
-  currentProductId,
-}: {
-  handleClose: () => void;
-  currentProductId: string;
-}) => {
-  const savedData =
-    SaleStore.getIdentityByProductId(currentProductId) || defaultFormData;
+const IdentificationForm = ({ handleClose }: { handleClose: () => void }) => {
+  const savedData = SaleStore.identificationDetails || defaultFormData;
 
   const [formData, setFormData] = useState<FormData>({
     ...savedData,
@@ -33,31 +26,6 @@ const IdentificationForm = ({
     expirationDate: formatDateForInput(savedData.expirationDate),
   });
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-  };
-
-  const handleSelectChange = (name: string, values: string | string[]) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: values,
-    }));
-    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-  };
-
-  const isFormFilled = identificationDetailsSchema.safeParse(formData).success;
-
-  const getFieldError = (fieldName: string) => {
-    return formErrors.find((error) => error.path[0] === fieldName)?.message;
-  };
 
   const validateItems = () => {
     const result = identificationDetailsSchema.safeParse(formData);
@@ -68,10 +36,37 @@ const IdentificationForm = ({
     setFormErrors([]);
     return true;
   };
-  
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    validateItems();
+    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+  };
+
+  const handleSelectChange = (name: string, values: string | string[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: values,
+    }));
+    validateItems();
+    setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+  };
+
+  const isFormFilled = identificationDetailsSchema.safeParse(formData).success;
+
+  const getFieldError = (fieldName: string) => {
+    return formErrors.find((error) => error.path[0] === fieldName)?.message;
+  };
+
   const saveForm = () => {
     if (!validateItems()) return;
-    SaleStore.addOrUpdateIdentity(currentProductId, {
+    SaleStore.addIdentificationDetails({
       ...formData,
       issueDate: !formData.issueDate
         ? ""
@@ -80,7 +75,6 @@ const IdentificationForm = ({
         ? ""
         : new Date(formData.expirationDate)?.toISOString(),
     });
-    SaleStore.addSaleItem(currentProductId);
     handleClose();
   };
 
@@ -130,7 +124,7 @@ const IdentificationForm = ({
         value={formData.issueDate}
         onChange={handleInputChange}
         placeholder="Enter Issue Date"
-        required={false}
+        required={true}
         errorMessage={getFieldError("issueDate")}
         description={"Enter Issue Date"}
       />
@@ -141,7 +135,7 @@ const IdentificationForm = ({
         value={formData.expirationDate}
         onChange={handleInputChange}
         placeholder="Enter Expiration Date"
-        required={false}
+        required={true}
         errorMessage={getFieldError("expirationDate")}
         description={"Enter Expiration Date"}
       />
