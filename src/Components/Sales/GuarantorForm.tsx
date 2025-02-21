@@ -25,15 +25,8 @@ const defaultFormData: FormData = {
   },
 };
 
-const GuarantorForm = ({
-  handleClose,
-  currentProductId,
-}: {
-  handleClose: () => void;
-  currentProductId: string;
-}) => {
-  const savedData =
-    SaleStore.getGuarantorByProductId(currentProductId) || defaultFormData;
+const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
+  const savedData = SaleStore.guarantorDetails || defaultFormData;
   const [formData, setFormData] = useState<FormData>({
     ...savedData,
     dateOfBirth: savedData.dateOfBirth,
@@ -102,7 +95,7 @@ const GuarantorForm = ({
 
   const saveForm = () => {
     if (!validateItems()) return;
-    SaleStore.addUpdateGuarantorDetails(currentProductId, {
+    SaleStore.addGuarantorDetails({
       ...formData,
       dateOfBirth: !formData.dateOfBirth
         ? ""
@@ -119,7 +112,6 @@ const GuarantorForm = ({
             ).toISOString(),
       },
     });
-    SaleStore.addSaleItem(currentProductId);
     handleClose();
   };
 

@@ -9,7 +9,7 @@ import { SaleStore } from "@/stores/SaleStore";
 import SelectCustomerProductModal from "./SelectCustomerProductModal";
 import roletwo from "../../assets/table/roletwo.svg";
 import { observer } from "mobx-react-lite";
-import ProductSaleDisplay from "./ProductSaleDisplay";
+import ProductSaleDisplay, { ExtraInfoSection } from "./ProductSaleDisplay";
 import SetExtraInfoModal from "./SetExtraInfoModal";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import {
@@ -19,6 +19,7 @@ import {
   SaleItem,
 } from "./salesSchema";
 import { capitalizeFirstLetter, revalidateStore } from "@/utils/helpers";
+import { toast } from "react-toastify";
 
 type CreateSalesType = {
   isOpen: boolean;
@@ -77,7 +78,12 @@ const CreateNewSale = observer(
         customerId: SaleStore.customer?.customerId as string,
         saleItems: SaleStore.getTransformedSaleItems() as SaleItem[],
       };
-      if (SaleStore.doesSaleItemHaveInstallment()) payload.bvn = formData.bvn;
+      if (SaleStore.doesSaleItemHaveInstallment()) {
+        payload.bvn = formData.bvn;
+        payload.identificationDetails = SaleStore.identificationDetails;
+        payload.nextOfKinDetails = SaleStore.nextOfKinDetails;
+        payload.guarantorDetails = SaleStore.guarantorDetails;
+      }
       return payload;
     }, [formData]);
 
@@ -90,22 +96,48 @@ const CreateNewSale = observer(
     };
 
     const payload = getPayload();
+
+    // Utility function for opening links
+    const openInNewTab = (url: string): boolean => {
+      try {
+        window.open(url, "_blank", "noopener,noreferrer");
+        return true;
+      } catch (error) {
+        console.error("Failed to open link:", error);
+        toast.error("Could not open the link. Please try again.");
+        return false;
+      }
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setLoading(true);
+      let linkOpenedSuccessfully = false;
+
       try {
+        // Step 1: Validate data
         const validatedData = formSchema.parse(payload);
+
+        // Step 2: API call
         const response = await apiCall({
           endpoint: "/v1/sales/create",
           method: "post",
           data: validatedData,
           successMessage: "Sale created successfully!",
         });
+
+        // Step 3: Refresh sales list
         await allSalesRefresh();
+
+        // Step 4: Handle redirection
         const redirectLink = response?.data?.link;
-        if (redirectLink) window.open(redirectLink, "_blank");
-        setIsOpen(false);
-        SaleStore.purgeStore();
+        if (redirectLink) linkOpenedSuccessfully = openInNewTab(redirectLink);
+
+        // Step 5: Only reset state if link opened successfully
+        if (linkOpenedSuccessfully) {
+          setIsOpen(false);
+          SaleStore.purgeStore();
+        }
       } catch (error: any) {
         if (error instanceof z.ZodError) {
           setFormErrors(error.issues);
@@ -274,22 +306,101 @@ const CreateNewSale = observer(
                 }
               />
               {SaleStore.doesSaleItemHaveInstallment() && (
-                <Input
-                  type="text"
-                  name="bvn"
-                  label="BANK VERIFICATION NUUMBER"
-                  value={formData.bvn as string}
-                  onChange={(e) => {
-                    const numericValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
-                    if (numericValue.length <= 11) {
-                      handleInputChange(e.target.name, numericValue);
+                <>
+                  <Input
+                    type="text"
+                    name="bvn"
+                    label="BANK VERIFICATION NUUMBER"
+                    value={formData.bvn as string}
+                    onChange={(e) => {
+                      const numericValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+                      if (numericValue.length <= 11) {
+                        handleInputChange(e.target.name, numericValue);
+                      }
+                    }}
+                    placeholder="Enter 11 digit BVN"
+                    required={false}
+                    errorMessage={getFieldError("bvn")}
+                    maxLength={11}
+                  />
+                  <ModalInput
+                    type="button"
+                    name="identificationDetails"
+                    label="IDENTIFICATION DETAILS"
+                    onClick={() => {
+                      setExtraInfoModal("identification");
+                    }}
+                    placeholder="Enter Identification"
+                    required={false}
+                    isItemsSelected={Boolean(
+                      SaleStore.identificationDetails.idNumber
+                    )}
+                    customSelectedText="Update Identification Details"
+                    itemsSelected={
+                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
+                        {SaleStore.identificationDetails.idNumber && (
+                          <ExtraInfoSection
+                            label="Identification"
+                            onClear={() =>
+                              SaleStore.removeIdentificationDetails()
+                            }
+                          />
+                        )}
+                      </div>
                     }
-                  }}
-                  placeholder="Enter 11 digit BVN"
-                  required={false}
-                  errorMessage={getFieldError("bvn")}
-                  maxLength={11}
-                />
+                    errorMessage={getFieldError("identificationDetails")}
+                  />
+                  <ModalInput
+                    type="button"
+                    name="nextOfKinDetails"
+                    label="NEXT OF KIN DETAILS"
+                    onClick={() => {
+                      setExtraInfoModal("nextOfKin");
+                    }}
+                    placeholder="Enter Next of Kin"
+                    required={false}
+                    isItemsSelected={Boolean(
+                      SaleStore.nextOfKinDetails.fullName
+                    )}
+                    customSelectedText="Update Next of Kin"
+                    itemsSelected={
+                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
+                        {SaleStore.nextOfKinDetails.fullName && (
+                          <ExtraInfoSection
+                            label="Next of Kin"
+                            onClear={() => SaleStore.removeNextOfKinDetails()}
+                          />
+                        )}
+                      </div>
+                    }
+                    errorMessage={getFieldError("nextOfKinDetails")}
+                  />
+                  <ModalInput
+                    type="button"
+                    name="guarantorDetails"
+                    label="GUARANTOR DETAILS"
+                    onClick={() => {
+                      setExtraInfoModal("guarantor");
+                    }}
+                    placeholder="Enter Guarantor"
+                    required={false}
+                    isItemsSelected={Boolean(
+                      SaleStore.guarantorDetails.fullName
+                    )}
+                    customSelectedText="Update Guarantor"
+                    itemsSelected={
+                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
+                        {SaleStore.guarantorDetails.fullName && (
+                          <ExtraInfoSection
+                            label="Guarantor"
+                            onClear={() => SaleStore.removeGuarantorDetails()}
+                          />
+                        )}
+                      </div>
+                    }
+                    errorMessage={getFieldError("guarantorDetails")}
+                  />
+                </>
               )}
 
               {apiError !== "" && typeof apiError === "string" ? (

@@ -17,15 +17,8 @@ const defaultFormData: FormData = {
   nationality: "",
 };
 
-const NextOfKinForm = ({
-  handleClose,
-  currentProductId,
-}: {
-  handleClose: () => void;
-  currentProductId: string;
-}) => {
-  const savedData =
-    SaleStore.getNextOfKinByProductId(currentProductId) || defaultFormData;
+const NextOfKinForm = ({ handleClose }: { handleClose: () => void }) => {
+  const savedData = SaleStore.nextOfKinDetails || defaultFormData;
 
   const [formData, setFormData] = useState<FormData>({
     ...savedData,
@@ -62,13 +55,12 @@ const NextOfKinForm = ({
 
   const saveForm = () => {
     if (!validateItems()) return;
-    SaleStore.addNextOfKinDetails(currentProductId, {
+    SaleStore.addNextOfKinDetails({
       ...formData,
       dateOfBirth: !formData.dateOfBirth
         ? ""
         : new Date(formData.dateOfBirth).toISOString(),
     });
-    SaleStore.addSaleItem(currentProductId);
     handleClose();
   };
 

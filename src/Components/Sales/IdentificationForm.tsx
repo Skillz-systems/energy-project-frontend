@@ -17,15 +17,8 @@ const defaultFormData: FormData = {
   addressAsOnID: "",
 };
 
-const IdentificationForm = ({
-  handleClose,
-  currentProductId,
-}: {
-  handleClose: () => void;
-  currentProductId: string;
-}) => {
-  const savedData =
-    SaleStore.getIdentityByProductId(currentProductId) || defaultFormData;
+const IdentificationForm = ({ handleClose }: { handleClose: () => void }) => {
+  const savedData = SaleStore.identificationDetails || defaultFormData;
 
   const [formData, setFormData] = useState<FormData>({
     ...savedData,
@@ -68,10 +61,10 @@ const IdentificationForm = ({
     setFormErrors([]);
     return true;
   };
-  
+
   const saveForm = () => {
     if (!validateItems()) return;
-    SaleStore.addOrUpdateIdentity(currentProductId, {
+    SaleStore.addIdentificationDetails({
       ...formData,
       issueDate: !formData.issueDate
         ? ""
@@ -80,7 +73,6 @@ const IdentificationForm = ({
         ? ""
         : new Date(formData.expirationDate)?.toISOString(),
     });
-    SaleStore.addSaleItem(currentProductId);
     handleClose();
   };
 
