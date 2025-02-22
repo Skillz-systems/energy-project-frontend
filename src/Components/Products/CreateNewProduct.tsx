@@ -268,7 +268,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                 style={{ textShadow: "1px 1px grey" }}
                 className="text-xl text-textBlack font-semibold font-secondary"
               >
-                New Product {formType === "newCategory" && "Category"}
+                New Product{formType === "newCategory" && "Category"}
               </h2>
             </div>
             <div className="flex flex-col items-center justify-center w-full px-[2.5em] gap-4 py-8">

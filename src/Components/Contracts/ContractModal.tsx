@@ -1,4 +1,37 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { useApiCall } from "@/utils/useApiCall";
+
+interface CustomerData {
+  fullNameAsOnID: string;
+  createdAt: string;
+  sale: Array<{
+    customer: {
+      phone: string;
+      email: string;
+      location: string;
+    };
+    saleItems: Array<{
+      product: {
+        name: string;
+        description: string | null;
+        image: string;
+      };
+      quantity: number;
+    }>;
+  }>;
+  idType: string;
+  idNumber: string;
+  addressAsOnID: string;
+  nextOfKinFullName: string;
+  nextOfKinHomeAddress: string;
+  nextOfKinPhoneNumber: string;
+  signedAt?: string;
+  guarantorFullName: string;
+  guarantorHomeAddress: string;
+  guarantorIdType: string;
+  totalInstallmentMonths: number;
+  totalInitialPayment: number;
+}
 
 const ContractModal = ({
   setIsOpen,
@@ -7,13 +40,36 @@ const ContractModal = ({
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   contractDocData: {
     contractProducts: { name: string; components: string[] }[];
+    contractID: string;
   };
 }) => {
+  const [customerData, setCustomerData] = useState<CustomerData | null>(null);
+  const { apiCall } = useApiCall();
+
+  const fetchCustomerData = async () => {
+    try {
+      const response = await apiCall({
+        endpoint: `/v1/contract/${contractDocData.contractID}`,
+        method: "get",
+      });
+      setCustomerData({
+        ...response.data,
+        totalInstallmentMonths: response.data.sale[0]?.totalInstallmentDuration || 0,
+        totalInitialPayment: response.data.initialAmountPaid || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching customer data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCustomerData();
+  }, [contractDocData.contractID]);
+
   const handleClose = useCallback(() => {
     setIsOpen(false);
   }, [setIsOpen]);
 
-  // Close modal on ESC key
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") handleClose();
@@ -24,6 +80,25 @@ const ContractModal = ({
     };
   }, [handleClose]);
 
+  const calculateNextPaymentDate = (startDate: string, paymentPlan: string) => {
+    const date = new Date(startDate);
+    if (paymentPlan === "6 Months") {
+      date.setMonth(date.getMonth() + 6);
+    } else if (paymentPlan === "12 Months") {
+      date.setMonth(date.getMonth() + 12);
+    }
+    return date.toLocaleDateString();
+  };
+
+  const handleDownload = () => {
+    const element = document.createElement("a");
+    const file = new Blob([document.getElementById("contract-content")!.innerHTML], { type: 'text/html' });
+    element.href = URL.createObjectURL(file);
+    element.download = "contract.html";
+    document.body.appendChild(element);
+    element.click();
+  };
+
   const SectionHeader = ({ title }: { title: string }) => {
     return <header className="text-[1.15rem] font-bold">{title}</header>;
   };
@@ -31,6 +106,12 @@ const ContractModal = ({
   const FillInLine = () => (
     <span className="inline-block min-w-[150px] h-3 border-b border-black"></span>
   );
+
+  // Extract product information from the API response
+  const products = customerData?.sale[0]?.saleItems.map(item => ({
+    name: item.product.name,
+    components: [item.product.description || "No description available"],
+  })) || [];
 
   return (
     <div className="flex items-center justify-center w-full">
@@ -40,21 +121,21 @@ const ContractModal = ({
         aria-hidden="true"
       ></div>
       <section className="fixed inset-y-0 inset-x-[20%] z-50">
-        <div className="flex flex-col gap-4 w-full bg-white p-4 h-screen overflow-y-auto">
+        <div className="flex flex-col gap-4 w-full bg-white p-4 h-screen overflow-y-auto" id="contract-content">
           <h1 className="text-center font-bold text-[1.5rem]">
             END USER AGREEMENT
           </h1>
           <p>
             This <strong>AGREEMENT</strong> (the “Agreement”) is made between{" "}
             <strong>A4&T POWER SOLUTIONS LIMITED</strong>, (A4&T) and the{" "}
-            <strong>CUSTOMER</strong> as set out in the execution section (the
+            <strong>{customerData?.fullNameAsOnID || "CUSTOMER"}</strong> as set out in the execution section (the
             “Customer”) on the date appearing in the execution section below and
             sets out the terms and conditions upon which A4&T will sell its
             product(s) (the “Product”) to the Customer.
           </p>
           <section className="flex flex-col gap-2">
             <p>
-              The <strong>CUSTOMER</strong> hereby agrees as follows:
+              The <strong>{customerData?.fullNameAsOnID || "CUSTOMER"}</strong> hereby agrees as follows:
             </p>
             <div>
               <SectionHeader title="1. Product" />
@@ -62,7 +143,7 @@ const ContractModal = ({
                 A4&T will sell to the Customer and the Customer agrees to buy
                 from A4&T the following product(s):
               </p>
-              <ProductSelector products={contractDocData?.contractProducts} />
+              <ProductSelector products={products} />
             </div>
           </section>
           <section>
@@ -76,7 +157,7 @@ const ContractModal = ({
             <p className="leading-relaxed">
               The initial deposit shall be payable upon signing this Agreement.
               The 2nd installment of <FillInLine /> shall become payable on{" "}
-              <FillInLine /> and subsequent Installment of <FillInLine /> shall
+              {calculateNextPaymentDate(customerData?.createdAt || new Date().toISOString(), "6 Months")} and subsequent Installment of <FillInLine /> shall
               become payable on <FillInLine /> of every month until the purchase
               price of the product is fully recovered.
             </p>
@@ -88,184 +169,12 @@ const ContractModal = ({
               account. A4&T shall not be liable for such payments.
             </p>
           </section>
-          <section>
-            <SectionHeader title="3. Title" />
-            <p>
-              A4&T shall retain ownership, title and all interest to the Product
-              sold until full payment of the Purchase Price is received from
-              Customer in accordance with the terms of this Agreement.{" "}
-            </p>
-          </section>
-          <section>
-            <SectionHeader title="4. Liens & Encumbrances" />
-            <p>
-              Customer shall safely keep the Product free from any liens and
-              encumbrances at the location appearing in the execution section
-              (the “Installation Location”). Customer shall not remove the
-              Product from the Installation Location before the completion of
-              payment of the Purchase Price without A4&T's prior written
-              consent.{" "}
-            </p>
-          </section>
-          <section>
-            <SectionHeader title="5. Installation" />
-            <p>
-              Customer may self-install the Product or engage the services of an
-              Installer to install the Product at the Installation Location.
-              A4&T assumes no responsibility for the installation of the System
-              by the Customer or an Installer. Customer is solely liable.
-            </p>
-          </section>
-          <section>
-            <SectionHeader title="6. Product Warranty" />
-            <p>
-              The Product comes with a 3-year warranty which shall be activated
-              from the date of signing this Agreement and covers only a
-              technical malfunction of the Product that prevents the Customer
-              from using the Product, subject to normal wear and tear. Validity
-              of the product warranty is however subject to Customer's
-              compliance with the following terms:
-            </p>
-            <div className="pl-4 pt-2 list-[lower-roman]">
-              <li>
-                Before completion of payment of the Purchase Price, Customer
-                shall not sell, transfer or lease the Product to a third party;
-              </li>
-              <li>
-                Customer shall promptly report a case of technical malfunction
-                to A4&T by calling the customer experience helpline; and
-              </li>
-              <li>
-                Customer shall not open, repair or tamper with the Product or
-                cause a 3rd Party to open, repair or tamper with the Product.
-              </li>
-            </div>
-            <br />
-            <p>
-              Customer shall not be entitled to claim on the product warranty
-              where it is discovered that the Product has been damaged by
-              Customer or while in Customer's possession and Customer agrees to
-              pay the cost for the repair of the damage to the System or
-              purchase a new Product where a repair is impracticable.
-            </p>
-            <br />
-            <p>
-              Subject to Customer submitting the faulty Product at the location
-              advised by A4&T in order to access the product warranty, A4&T may
-              repair the Product if the warranty is valid or may replace the
-              Product if a repair is impracticable.{" "}
-            </p>
-          </section>
-          <section>
-            <SectionHeader title="7. Default & Conditional Refund" />
-            <p>
-              Upon any default by the Customer of the terms of this Agreement,
-              A4&T reserves the right to terminate this Agreement and forthwith:
-            </p>
-            <div className="pl-4 pt-2 list-[lower-roman]">
-              <li>
-                Demand the payment of the outstanding sum of the Purchase Price;
-              </li>
-              <li>
-                Demand the return of the Product at Customer's expense to a
-                location as directed by A4&T; or
-              </li>
-              <li>
-                This agreement may be terminated by A4&T with or without prior
-                notice to the customer if the customer fails, neglects, or is
-                unable to make payment for more than fifteen (15) consecutive
-                days from any due date in which case, A4&T shall deactivate,
-                recover or take back the A4&T item and the customer shall
-                forfeit any payment made hitherto and shall compensate A4&T
-                according to the market price for any damaged or missing parts,
-                accessories and/or components.
-              </li>
-            </div>
-          </section>
-          <section>
-            <SectionHeader title="8. Data Protection" />
-            <p>
-              By providing A4&T with personal data as requested and signing the
-              Agreement and subject to the relevant data protection laws of
-              Nigeria, Customer hereby agrees and accepts A4&T's Privacy Policy
-              as published on its website and as may be amended from time to
-              time.
-            </p>
-            <p>
-              Customer consents to receive any text messages, calls (including
-              automated messages and calls) and emails from A4&T and shall
-              promptly notify A4&T by calling the customer experience helpline
-              in the event that Customer wishes to withdraw this consent.
-            </p>
-            <p>
-              The Customer authorizes the release from time to time to A4&T's
-              affiliates, subsidiaries, 3rd parties, agents, investors, grantor
-              and financing institutions, his personal data for the
-              administration of this Agreement, for marketing purposes. Customer
-              shall have access to the personal data and reserves the right to
-              withdraw this consent.
-            </p>
-            <p>
-              A4&T may retain the Customer's personal data in accordance with
-              the applicable laws of Nigeria.
-            </p>
-          </section>{" "}
-          <section>
-            <SectionHeader title="9. Risk & Liability" />
-            <p>
-              The Product is entirely at the risk of the Customer from the
-              moment the Customer takes possession of the Product even when
-              title has not passed to the Customer. The Customer shall be solely
-              accountable and liable to A4&T for the outstanding value of the
-              Product in the event of loss and/or damage not covered by
-              warranty.
-            </p>
-          </section>
-          <section>
-            <SectionHeader title="10. Notices" />
-            <p>
-              A4&T and Customer choose as their respective addresses for the
-              purpose of notices under this Agreement, and the serving of any
-              process, the addresses set out below and in the execution section.
-              A Party may change its address upon 7 (seven) days’ written notice
-              to the other Party. Notice is deemed received if sent by post,
-              within seven (7) days of postage thereof, if hand delivered, on
-              the date of delivery at the address of the receiving Party.
-            </p>
-            <p>
-              <strong>A4&T</strong> <br />
-              27 Olumoroti Jayeisimi Street <br />
-              Gbagada Phase II <br />
-              Lagos
-            </p>
-          </section>
-          <section>
-            <SectionHeader title="11. Severability" />
-            <p>
-              If any term of this Agreement shall be held to be illegal, invalid
-              or unenforceable under present or future laws, such terms shall be
-              fully severable, this Agreement shall be construed and enforced as
-              if such illegal, invalid or unenforceable term had never comprised
-              a part of this Agreement; and, the remaining terms of this
-              Agreement shall remain in full force and effect.
-            </p>
-          </section>
-          <section>
-            <SectionHeader title="12. Governing Law" />
-            <p>
-              This Agreement shall be governed by, and construed in accordance
-              with, the laws of the Federal Republic of Nigeria.
-            </p>
-          </section>
-          <section>
-            <SectionHeader title="13. Dispute Resolution" />
-            <p>
-              Any and all disputes arising hereunder shall be resolved by a
-              competent court having jurisdiction over such matters in the
-              Federal Republic of Nigeria.
-            </p>
-          </section>
-          <TableOne />
+
+          <TableOne customerData={customerData} />
+         
+          <button onClick={handleDownload} className="mt-4 p-2 bg-blue-500 text-white rounded">
+            Download Contract
+          </button>
         </div>
       </section>
     </div>
@@ -307,7 +216,15 @@ const ProductSelector = ({
   );
 };
 
-const TableOne = () => {
+interface TableOneProps {
+  customerData: CustomerData | null;
+}
+
+const TableOne = ({ customerData }: TableOneProps) => {
+  if (!customerData) {
+    return <p>Loading customer data...</p>;
+  }
+
   return (
     <table className="w-full border-collapse border border-black">
       <thead>
@@ -325,43 +242,57 @@ const TableOne = () => {
           <td className="border border-black p-2 font-bold">
             Name of Customer
           </td>
-          <td className="border border-black p-2"></td>
+          <td className="border border-black p-2">
+            {customerData.fullNameAsOnID}
+          </td>
         </tr>
         <tr>
           <td className="border border-black p-2 font-bold">
             Phone Numbers (Main and Alternate)
           </td>
-          <td className="border border-black p-2"></td>
+          <td className="border border-black p-2">
+            {customerData.sale[0]?.customer?.phone}
+          </td>
         </tr>
         <tr>
           <td className="border border-black p-2 font-bold">Email Address</td>
-          <td className="border border-black p-2"></td>
+          <td className="border border-black p-2">
+            {customerData.sale[0]?.customer?.email}
+          </td>
         </tr>
-        <tr>
-          <td className="border border-black p-2 font-bold">Gender</td>
-          <td className="border border-black p-2"></td>
-        </tr>
+        
         <tr>
           <td className="border border-black p-2 font-bold">Type of ID & No</td>
-          <td className="border border-black p-2"></td>
+          <td className="border border-black p-2">
+            {customerData.idType} - {customerData.idNumber}
+          </td>
         </tr>
         <tr>
-          <td className="border border-black p-2 font-bold">NIN Number</td>
-          <td className="border border-black p-2"></td>
+          <td className="border border-black p-2 font-bold">Total Installment Months</td>
+          <td className="border border-black p-2">
+            {customerData.totalInstallmentMonths}
+          </td>
         </tr>
         <tr>
-          <td className="border border-black p-2 font-bold">BVN Number</td>
-          <td className="border border-black p-2"></td>
+          <td className="border border-black p-2 font-bold">Total Initial Payment</td>
+          <td className="border border-black p-2">
+            {customerData.totalInitialPayment}
+          </td>
         </tr>
+        
         <tr>
           <td className="border border-black p-2 font-bold">
             INSTALLATION ADDRESS
           </td>
-          <td className="border border-black p-2"></td>
+          <td className="border border-black p-2">
+            {customerData.addressAsOnID}
+          </td>
         </tr>
         <tr>
           <td className="border border-black p-2 font-bold">City/State</td>
-          <td className="border border-black p-2"></td>
+          <td className="border border-black p-2">
+            {customerData.sale[0]?.customer?.location}
+          </td>
         </tr>
         <tr>
           <td className="border border-black p-2 font-bold">
@@ -371,7 +302,11 @@ const TableOne = () => {
             <br />
             PHONE
           </td>
-          <td className="border border-black p-2"></td>
+          <td className="border border-black p-2">
+            <p>{customerData.nextOfKinFullName}</p>
+            <p>{customerData.nextOfKinHomeAddress}</p>
+            <p>{customerData.nextOfKinPhoneNumber}</p>
+          </td>
         </tr>
         <tr>
           <td className="border border-black p-2 font-bold">
@@ -399,30 +334,42 @@ const TableOne = () => {
           <td className="border border-black p-2 font-bold">
             Date of Collection
           </td>
-          <td className="border border-black p-2"></td>
+          <td className="border border-black p-2">
+            {new Date(customerData.createdAt).toLocaleDateString()}
+          </td>
         </tr>
         <tr>
           <td className="border border-black p-2 font-bold">Signature/Date</td>
-          <td className="border border-black p-2"></td>
+          <td className="border border-black p-2">
+            {customerData.signedAt
+              ? new Date(customerData.signedAt).toLocaleDateString()
+              : "Not signed"}
+          </td>
         </tr>
         <tr>
           <td className="border border-black p-2 font-bold">
             Guarantor's Name
           </td>
-          <td className="border border-black p-2"></td>
+          <td className="border border-black p-2">
+            {customerData.guarantorFullName}
+          </td>
         </tr>
         <tr>
           <td className="border border-black p-2 font-bold">
             Guarantor's Address
           </td>
-          <td className="border border-black p-2"></td>
+          <td className="border border-black p-2">
+            {customerData.guarantorHomeAddress}
+          </td>
         </tr>
         <tr>
           <td className="border border-black p-2 font-bold">
             Guarantor's ID TYPE
           </td>
           <td className="flex">
-            <div className="border-r border-black p-2 w-1/2"></div>
+            <div className="border-r border-black p-2 w-1/2">
+              {customerData.guarantorIdType}
+            </div>
             <div className="p-2 w-1/2">SIGN:</div>
           </td>
         </tr>

@@ -197,12 +197,14 @@ const Products = () => {
           </section>
         </div>
       </PageLayout>
-      <CreateNewProduct
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        refreshTable={allProductsRefresh}
-        formType={formType}
-      />
+      {isOpen && (
+        <CreateNewProduct
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          refreshTable={allProductsRefresh}
+          formType={formType}
+        />
+      )}
     </>
   );
 };
