@@ -7,6 +7,7 @@ import { Asterik } from "../InputComponent/Input";
 import { LuPlus } from "react-icons/lu";
 import { IoIosSearch } from "react-icons/io";
 import { SaleStore } from "@/stores/SaleStore";
+import { ProductDetailRow } from "./ProductSaleDisplay";
 
 type DeviceFormSchema = {
   serialNumber: string;
@@ -79,8 +80,11 @@ const UploadDevicesForm = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [selectedDevices, setSelectedDevices] = useState<string[]>([]);
+  const [selectedDevices, setSelectedDevices] = useState<string[]>(
+    SaleStore.getSelectedDevices(currentProductId) || []
+  );
   const [createDevice, setCreateDevice] = useState<boolean>(false);
+  const product = SaleStore.getProductById(currentProductId);
 
   const { data, mutate } = useGetRequest("/v1/device", true);
 
@@ -168,8 +172,10 @@ const UploadDevicesForm = ({
 
   const saveForm = () => {
     if (selectedDevices.length === 0) return;
-    SaleStore.addOrUpdateDevices(currentProductId, selectedDevices);
-    setFormData(defaultFormData);
+    // Ensure selectedDevices is a valid snapshot
+    const validDevices = selectedDevices.map((device) => `${device}`);
+    SaleStore.addOrUpdateDevices(currentProductId, validDevices);
+    SaleStore.addSaleItem(currentProductId);
     handleClose();
   };
 
@@ -464,6 +470,32 @@ const UploadDevicesForm = ({
                 </p>
               )}
             </div>
+
+            {!loading && filteredDevices === null && (
+              <div className="flex flex-col items-center justify-center w-full mt-6 gap-1">
+                <p className="text-sm text-textBlack font-medium">
+                  Link the Product Below
+                </p>
+                <div className="flex flex-col gap-2 w-full p-2.5 border-[0.6px] border-strokeGreyThree rounded-[20px]">
+                  <ProductDetailRow
+                    label="Product Category"
+                    value={product?.productTag || ""}
+                  />
+                  <ProductDetailRow
+                    label="Product Name"
+                    value={product?.productName || ""}
+                  />
+                  <ProductDetailRow
+                    label="Product Units"
+                    value={product?.productUnits || ""}
+                  />
+                  <ProductDetailRow
+                    label="Product Price"
+                    value={product?.productPrice || ""}
+                  />
+                </div>
+              </div>
+            )}
 
             {filteredDevices === null ||
             filteredDevices?.length === 0 ? null : (

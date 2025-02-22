@@ -12,6 +12,7 @@ const CustomerSalesTable = ({
     lastname: string;
     location: string;
     email: string;
+    phone:string;
     [key: string]: any;
   }[];
   customerSelected: {

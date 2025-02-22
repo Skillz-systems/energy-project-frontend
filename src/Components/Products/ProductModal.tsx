@@ -16,7 +16,7 @@ type ProductDetails = {
   name: string;
   description: string;
   image: string;
-  price: number;
+  priceRange: string;
   currency: string;
   paymentModes: string;
   creatorId: string;
@@ -60,25 +60,22 @@ const ProductModal = ({
       productImage: data?.image,
       productName: data?.name,
       productTag: data?.category?.name,
-      productPrice: data?.price,
+      productPrice: data?.priceRange,
       paymentModes: data?.paymentModes?.split(", ").map((mode) => mode.trim()),
       datetime: data?.createdAt,
-      name: `${data?.creatorDetails?.firstname} ${data?.creatorDetails?.lastname}`,
+      name: data?.creatorDetails?.firstname
+        ? `${data?.creatorDetails?.firstname} ${data?.creatorDetails?.lastname}`
+        : "N/A",
     };
   };
 
   const generateProductInventoryEntries = (data: any) => {
-    const entries = data?.inventoryBatches?.map(
-      (inventory: {
-        inventoryBatch: { image: any; name: any; price: any };
-      }) => {
-        return {
-          productImage: inventory?.inventoryBatch?.image,
-          productName: inventory?.inventoryBatch?.name,
-          productPrice: inventory?.inventoryBatch?.price,
-        };
-      }
-    );
+    const entries = data?.inventories?.map((item: any) => {
+      return {
+        productImage: item?.inventory?.image,
+        productName: item?.inventory?.name,
+      };
+    });
     return entries;
   };
 

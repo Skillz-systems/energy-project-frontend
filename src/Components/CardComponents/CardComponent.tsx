@@ -65,6 +65,7 @@ export type CardComponentProps = {
   onRemoveProduct?: (productId?: string) => void;
   isProductSelected?: boolean;
   readOnly?: boolean;
+  isSale?: boolean;
 };
 
 export const ProductTag = ({
@@ -218,36 +219,38 @@ interface QuantitySelectorProps {
   onValueChange: (value: number) => void;
   isSelected: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
+  initialQuantity?: number;
+  isSale?: boolean;
 }
 
 export default function QuantitySelector({
-  totalRemainingQuantities,
+  totalRemainingQuantities = 1,
   onValueChange,
   isSelected,
   onClick,
+  initialQuantity = 0,
+  isSale,
 }: QuantitySelectorProps) {
-  const [quantity, setQuantity] = useState<number>(1);
+  const [quantity, setQuantity] = useState<number>(initialQuantity);
 
   useEffect(() => {
-    if (!isSelected) {
-      setQuantity(1);
-      onValueChange(1);
-    }
-  }, [isSelected, quantity, onValueChange]);
+    setQuantity(initialQuantity);
+  }, [initialQuantity]);
 
   const updateQuantity = (adjustment: number) => {
     const newValue = quantity + adjustment;
 
-    if (totalRemainingQuantities) {
-      if (newValue >= 1 && newValue <= totalRemainingQuantities) {
-        setQuantity(newValue);
-        onValueChange(newValue);
-      }
+    if (
+      !isSale ||
+      (newValue >= 0 && newValue <= (totalRemainingQuantities ?? Infinity))
+    ) {
+      setQuantity(newValue);
+      onValueChange(newValue);
     }
   };
 
-  const isMinusDisabled = quantity === 1;
-  const isPlusDisabled = quantity === totalRemainingQuantities;
+  const isMinusDisabled = quantity === 0;
+  const isPlusDisabled = isSale && quantity === totalRemainingQuantities;
 
   return (
     <div
@@ -350,10 +353,13 @@ export const CardComponent = ({
   onSelectProduct,
   onRemoveProduct,
   isProductSelected,
+  isSale = false,
   readOnly = false,
 }: CardComponentProps) => {
   const inventoryMobile = useBreakpoint("max", 350);
-  const [_productUnits, setProductUnits] = useState<number | any>(productUnits);
+  const [_productUnits, setProductUnits] = useState<number | any>(
+    productUnits || 0
+  );
   const [_selected, setSelected] = useState<boolean>(
     isProductSelected || false
   );
@@ -367,7 +373,11 @@ export const CardComponent = ({
     productPrice,
   };
 
-  useEffect(() => {}, [_productUnits]);
+  useEffect(() => {
+    if (productUnits && productUnits > 0) {
+      setProductUnits(productUnits);
+    }
+  }, [productUnits]);
 
   const updatedProductInfo = {
     ...productInfo,
@@ -375,6 +385,7 @@ export const CardComponent = ({
   };
 
   const handleSelectProduct = () => {
+    if (totalRemainingQuantities === 0 && isSale) return;
     if (!_selected) {
       if (updatedProductInfo) {
         // Check if onSelectProduct is defined before calling it
@@ -408,6 +419,13 @@ export const CardComponent = ({
           : "w-[32%] min-w-[204px]"
       } bg-white border-[0.6px] rounded-[20px] ${
         _selected || readOnly ? "border-success" : "border-strokeGreyThree"
+      } ${
+        (variant === "inventoryOne" || variant === "inventoryTwo") &&
+        isSale &&
+        totalRemainingQuantities &&
+        totalRemainingQuantities > 0
+          ? "cursor-pointer"
+          : ""
       }`}
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovered(true)}
@@ -684,6 +702,23 @@ export const CardComponent = ({
                 </p>
               )}
               <p className="text-textDarkGrey text-xs">{productName}</p>
+              {isSale && (
+                <p
+                  className={`${
+                    totalRemainingQuantities === 0
+                      ? "text-red-500 font-semibold"
+                      : "text-textDarkGrey font-medium"
+                  } text-xs`}
+                >
+                  {totalRemainingQuantities === 0
+                    ? "Out of Stock"
+                    : `Qty remaining: ${
+                        totalRemainingQuantities &&
+                        totalRemainingQuantities -
+                          updatedProductInfo.productUnits
+                      }`}
+                </p>
+              )}
             </div>
           ) : null}
         </div>
@@ -691,7 +726,9 @@ export const CardComponent = ({
       {/* BOTTOM */}
       <div
         className={`flex items-center ${
-          variant === "transactions" || variant === "salesTransactions"
+          variant === "transactions" ||
+          variant === "salesTransactions" ||
+          variant === "inventoryOne"
             ? "justify-end"
             : "justify-between"
         } ${
@@ -720,11 +757,13 @@ export const CardComponent = ({
             containerClass="bg-successTwo text-textDarkGrey font-bold px-2 py-1 border border-successThree rounded-full"
           />
         ) : variant === "inventoryOne" ? (
-          <SimpleTag
-            text={productPrice}
-            showIcon={false}
-            containerClass="text-textBlack font-medium px-1 py-0.5 bg-[#eceef1] border-[0.4px] border-strokeGreyTwo rounded-full"
-          />
+          productPrice ? (
+            <SimpleTag
+              text={productPrice}
+              showIcon={false}
+              containerClass="text-textBlack font-medium px-1 py-0.5 bg-[#eceef1] border-[0.4px] border-strokeGreyTwo rounded-full"
+            />
+          ) : null
         ) : variant === "inventoryTwo" ? (
           <SimpleTag
             text={productPrice}
@@ -744,12 +783,19 @@ export const CardComponent = ({
 
         {variant === "inventoryTwo" ? (
           <QuantitySelector
-            totalRemainingQuantities={totalRemainingQuantities}
+            // totalRemainingQuantities={totalRemainingQuantities}
             onValueChange={(value) => {
               setProductUnits(value);
+              const updatedProductInfo = {
+                ...productInfo,
+                productUnits: value, // Include the updated quantity
+              };
+              onSelectProduct?.(updatedProductInfo); // Call onSelectProduct with the updated values
             }}
             isSelected={_selected}
             onClick={(e) => e.stopPropagation()}
+            initialQuantity={_productUnits}
+            isSale={isSale}
           />
         ) : (
           <DropDown {...dropDownList} cardData={productInfo} />

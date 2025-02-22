@@ -4,7 +4,9 @@ import { z } from "zod";
 import { SaleStore } from "@/stores/SaleStore";
 
 const formSchema = z.object({
-  paymentMode: z.string().trim().min(1, "Payment mode is required"),
+  paymentMode: z.enum(["INSTALLMENT", "ONE_OFF"], {
+    required_error: "Payment mode is required",
+  }),
   installmentDuration: z.number().nullable(),
   installmentStartingPrice: z.number().nullable(),
   address: z.string().trim().min(1, "Installation address is required"),
@@ -13,8 +15,8 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-const defaultFormData = {
-  paymentMode: "",
+const defaultFormData: FormData = {
+  paymentMode: "INSTALLMENT",
   installmentDuration: "" as unknown as number,
   installmentStartingPrice: "" as unknown as number,
   address: "",
@@ -28,7 +30,9 @@ const ParametersForm = ({
   handleClose: () => void;
   currentProductId: string;
 }) => {
-  const [formData, setFormData] = useState<FormData>(defaultFormData);
+  const [formData, setFormData] = useState<FormData>(
+    SaleStore.getParametersByProductId(currentProductId) || defaultFormData
+  );
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
 
   const handleInputChange = (
@@ -50,7 +54,15 @@ const ParametersForm = ({
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
   };
 
-  const isFormFilled = Boolean(formData.paymentMode && formData.address);
+  const isFormFilled =
+    formData.paymentMode === "ONE_OFF"
+      ? Boolean(formData.paymentMode && formData.address)
+      : Boolean(
+          formData.paymentMode &&
+            formData.installmentDuration &&
+            formData.installmentStartingPrice &&
+            formData.address
+        );
   const getFieldError = (fieldName: string) => {
     return formErrors.find((error) => error.path[0] === fieldName)?.message;
   };
@@ -83,7 +95,7 @@ const ParametersForm = ({
       installmentStartingPrice: Number(formData.installmentStartingPrice),
       discount: Number(formData.discount),
     });
-    setFormData(defaultFormData);
+    SaleStore.addSaleItem(currentProductId);
     handleClose();
   };
 
@@ -92,8 +104,8 @@ const ParametersForm = ({
       <SelectInput
         label="Payment Mode"
         options={[
-          { label: "Single Deposit", value: "Single Deposit" },
-          { label: "Instalmental", value: "Instalmental" },
+          { label: "Single Deposit", value: "ONE_OFF" },
+          { label: "Installment", value: "INSTALLMENT" },
         ]}
         value={formData.paymentMode}
         onChange={(selectedValue) =>
@@ -110,8 +122,13 @@ const ParametersForm = ({
         value={formData.installmentDuration as number}
         onChange={handleInputChange}
         placeholder="Number of Installments"
-        required={false}
+        required={formData.paymentMode === "INSTALLMENT" ? true : false}
         errorMessage={getFieldError("installmentDuration")}
+        description={
+          formData.installmentDuration === 0
+            ? "Enter Number of Installments"
+            : ""
+        }
       />
       <Input
         type="number"
@@ -120,16 +137,21 @@ const ParametersForm = ({
         value={formData.installmentStartingPrice as number}
         onChange={handleInputChange}
         placeholder="Initial Payment Amount"
-        required={false}
+        required={formData.paymentMode === "INSTALLMENT" ? true : false}
         errorMessage={getFieldError("installmentStartingPrice")}
+        description={
+          formData.installmentStartingPrice === 0
+            ? "Enter Initial Payment Amount"
+            : ""
+        }
       />
       <Input
         type="text"
         name="address"
-        label="INSTALLATION ADDRESS"
+        label="ADDRESS"
         value={formData.address}
         onChange={handleInputChange}
-        placeholder="Installment Address"
+        placeholder="Address"
         required={true}
         errorMessage={getFieldError("address")}
       />
@@ -142,6 +164,7 @@ const ParametersForm = ({
         placeholder="Discount"
         required={false}
         errorMessage={getFieldError("discount")}
+        description={formData.discount === 0 ? "Enter Discount Value" : ""}
       />
       <div className="flex items-center justify-between gap-1">
         <button

@@ -104,6 +104,21 @@ const Contracts = () => {
       link: "/contracts/cancelled",
       count: contractsData?.contracts?.filter((contract: any) => contract.status === "cancelled").length || 0, 
     },
+    // {
+    //   title: "Signed Contracts",
+    //   link: "/contracts/signed",
+    //   count: 75,
+    // },
+    // {
+    //   title: "Unsigned Contracts",
+    //   link: "/contracts/unsigned",
+    //   count: 50,
+    // },
+    // {
+    //   title: "Cancelled Contracts",
+    //   link: "/contracts/cancelled",
+    //   count: 25,
+    // },
   ];
 
   const dropDownList = {
@@ -123,7 +138,8 @@ const Contracts = () => {
     showCustomButton: true,
   };
 
-  const contractsPaths = ["all", "signed", "unsigned", "cancelled"];
+  // const contractsPaths = ["all", "signed", "unsigned", "cancelled"];
+  const contractsPaths = ["all"];
 
   return (
     <>

@@ -57,6 +57,9 @@ export type InputType = {
   className?: string;
   errorMessage?: string;
   errorClass?: string;
+  maxLength?: number;
+  description?: string;
+  descriptionClass?: string;
 };
 
 export const Input = ({
@@ -77,6 +80,9 @@ export const Input = ({
   className,
   errorMessage,
   errorClass,
+  maxLength,
+  description,
+  descriptionClass,
 }: InputType) => {
   const similarTypes = [
     "text",
@@ -133,10 +139,18 @@ export const Input = ({
             className={`w-full text-sm font-semibold ${
               value ? "text-textBlack" : "text-textGrey"
             } placeholder:text-textGrey placeholder:font-normal placeholder:italic`}
+            maxLength={maxLength}
           />
 
           {iconRight && iconRight}
         </div>
+        {description && (
+          <p
+            className={`mt-1 px-[1.3em] text-xs text-textDarkGrey font-semibold w-full ${descriptionClass}`}
+          >
+            {description}
+          </p>
+        )}
         {errorMessage && (
           <p
             className={`mt-1 px-[1.3em] text-xs text-errorTwo font-semibold w-full ${errorClass}`}
@@ -262,6 +276,7 @@ type ModalInputType = {
   errorMessage?: string;
   isItemsSelected?: boolean;
   itemsSelected: ReactNode;
+  customSelectedText?: string;
 };
 
 export const ModalInput = ({
@@ -275,6 +290,7 @@ export const ModalInput = ({
   errorMessage,
   isItemsSelected,
   itemsSelected,
+  customSelectedText,
 }: ModalInputType) => {
   return (
     <div className="w-full">
@@ -304,7 +320,9 @@ export const ModalInput = ({
                 className="w-full text-sm font-semibold text-textBlack cursor-pointer"
                 onClick={onClick}
               >
-                Change {label.toLowerCase()} selected
+                {customSelectedText
+                  ? customSelectedText
+                  : `Change ${label.toLowerCase()} selected`}
               </span>
             ) : (
               required && <Asterik />

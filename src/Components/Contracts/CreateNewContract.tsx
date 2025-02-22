@@ -255,8 +255,8 @@ const CreateNewContract = ({
             <SelectMultipleInput
               label="Payment Modes"
               options={[
-                { label: "Single Deposit", value: "Single Deposit" },
-                { label: "Instalmental", value: "Instalmental" },
+                { label: "Single Deposit", value: "ONE_OFF" },
+                { label: "Installment", value: "INSTALLMENT" },
               ]}
               value={paymentModes}
               onChange={(values) => setPaymentModes(values)}

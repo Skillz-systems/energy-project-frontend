@@ -1,4 +1,89 @@
-import { types, Instance } from "mobx-state-tree";
+import { toJS } from "mobx";
+import {
+  types,
+  Instance,
+  cast,
+  applySnapshot,
+  SnapshotIn,
+} from "mobx-state-tree";
+
+const defaultValues: SnapshotIn<typeof saleStore> = {
+  category: "PRODUCT",
+  customer: null,
+  bvn: "",
+  doesCustomerExist: false,
+  products: [],
+  doesProductCategoryExist: false,
+  parameters: [],
+  miscellaneousPrices: [],
+  devices: [],
+  saleItems: [],
+  identificationDetails: {
+    idType: "",
+    idNumber: "",
+    issuingCountry: "",
+    issueDate: "",
+    expirationDate: "",
+    fullNameAsOnID: "",
+    addressAsOnID: "",
+  },
+  nextOfKinDetails: {
+    fullName: "",
+    relationship: "",
+    phoneNumber: "",
+    email: "",
+    homeAddress: "",
+    dateOfBirth: "",
+    nationality: "",
+  },
+  guarantorDetails: {
+    fullName: "",
+    phoneNumber: "",
+    email: "",
+    homeAddress: "",
+    dateOfBirth: "",
+    nationality: "",
+    identificationDetails: {
+      idType: "",
+      idNumber: "",
+      issuingCountry: "",
+      issueDate: "",
+      expirationDate: "",
+      fullNameAsOnID: "",
+      addressAsOnID: "",
+    },
+  },
+};
+
+const IdentificationDetailsModel = types.model({
+  idType: types.string,
+  idNumber: types.string,
+  issuingCountry: types.string,
+  issueDate: types.string,
+  expirationDate: types.string,
+  fullNameAsOnID: types.string,
+  addressAsOnID: types.string,
+});
+
+const GuarantorModel = types.model({
+  fullName: types.string,
+  phoneNumber: types.string,
+  email: types.string,
+  homeAddress: types.string,
+  dateOfBirth: types.string,
+  nationality: types.string,
+  identificationDetails: IdentificationDetailsModel,
+});
+
+const NextOfKinDetailsModel = types.model({
+  fullName: types.string,
+  relationship: types.string,
+  phoneNumber: types.string,
+  email: types.string,
+  homeAddress: types.string,
+  dateOfBirth: types.string,
+  nationality: types.string,
+});
 
 const CustomerModel = types.model({
   customerId: types.string,
@@ -7,21 +92,21 @@ const CustomerModel = types.model({
   lastname: types.string,
   location: types.string,
   email: types.string,
+  phone: types.string,
 });
 
 const ProductModel = types.model({
   productId: types.string,
-  productCategory: types.number,
   productName: types.string,
   productUnits: types.number,
-  productPrice: types.number,
+  productPrice: types.string,
   productImage: types.string,
   productTag: types.string,
 });
 
 const ParametersModel = types.model({
   currentProductId: types.string,
-  paymentMode: types.string,
+  paymentMode: types.enumeration(["INSTALLMENT", "ONE_OFF"]),
   installmentDuration: types.maybeNull(types.number),
   installmentStartingPrice: types.maybeNull(types.number),
   address: types.string,
@@ -33,46 +118,232 @@ const MiscellaneousPricesModel = types.model({
   costs: types.map(types.number),
 });
 
+const SaleMiscellaneousPricesModel = types.model({
+  costs: types.map(types.number),
+});
+
 const DevicesModel = types.model({
   currentProductId: types.string,
   devices: types.array(types.string),
 });
 
+const SaleRecipientModel = types.model({
+  firstname: types.string,
+  lastname: types.string,
+  address: types.string,
+  phone: types.string,
+  email: types.string,
+});
+
+const RecipientModel = types.model({
+  currentProductId: types.string,
+  recipient: SaleRecipientModel,
+});
+
+const SaleItemsModel = types.model({
+  productId: types.string,
+  quantity: types.number,
+  paymentMode: types.enumeration(["INSTALLMENT", "ONE_OFF"]),
+  discount: types.number,
+  installmentDuration: types.number,
+  installmentStartingPrice: types.number,
+  devices: types.array(types.string),
+  miscellaneousPrices: SaleMiscellaneousPricesModel,
+  saleRecipient: SaleRecipientModel,
+});
+
 const saleStore = types
   .model({
+    category: types.enumeration(["PRODUCT"]),
     customer: types.maybeNull(CustomerModel),
+    bvn: types.string,
     doesCustomerExist: types.boolean,
     products: types.array(ProductModel),
     doesProductCategoryExist: types.boolean,
     parameters: types.array(ParametersModel),
     miscellaneousPrices: types.array(MiscellaneousPricesModel),
     devices: types.array(DevicesModel),
+    saleRecipient: types.array(RecipientModel),
+    saleItems: types.array(SaleItemsModel),
+    identificationDetails: IdentificationDetailsModel,
+    nextOfKinDetails: NextOfKinDetailsModel,
+    guarantorDetails: GuarantorModel,
   })
   .actions((self) => ({
-    addCustomer(customer: {
-      customerId: string;
-      customerName: string;
-      firstname: string;
-      lastname: string;
-      location: string;
-      email: string;
-    }) {
+    addSaleItem(productId: string) {
+      const product = self.products.find((p) => p.productId === productId);
+      if (!product) return;
+
+      const params = self.parameters.find(
+        (p) => p.currentProductId === productId
+      );
+      if (!params) return;
+
+      // Ensure devices is a plain array of strings
+      const devices = toJS(
+        self.devices.find((d) => d.currentProductId === productId)?.devices ||
+          []
+      );
+
+      // Convert `miscellaneousPrices` into a plain object, filtering based on the current productId
+      const miscellaneousCosts = self.miscellaneousPrices.reduce(
+        (acc, misc) => {
+          // Only include the costs that match the current productId
+          if (misc.currentProductId === productId) {
+            const plainCosts = toJS(misc.costs); // Convert to a plain object
+
+            plainCosts.forEach((cost, name) => {
+              if (typeof cost === "number") {
+                acc[name] = cost; // Use the name as the key and cost as the value
+              } else {
+                console.warn(`Invalid cost value for ${name}:`, cost);
+              }
+            });
+          }
+
+          return acc;
+        },
+        {} as Record<string, number>
+      );
+
+      // Fetch or create the saleRecipient for the given productId
+      const recipient = self.saleRecipient.find(
+        (recipient) => recipient.currentProductId === productId
+      );
+
+      // Ensure recipient is copied to avoid using a reference directly
+      const saleRecipient = recipient
+        ? { ...recipient.recipient } // Create a shallow copy of the recipient
+        : {
+            firstname: "",
+            lastname: "",
+            address: "",
+            phone: "",
+            email: "",
+          };
+
+      // Check if saleItem with the same productId exists
+      const existingSaleItem = self.saleItems.find(
+        (item) => item.productId === productId
+      );
+
+      if (existingSaleItem) {
+        // Update existing sale item instead of adding a new one
+        existingSaleItem.quantity = product.productUnits;
+        existingSaleItem.paymentMode = params.paymentMode;
+        existingSaleItem.discount = params.discount || 0;
+        existingSaleItem.installmentDuration = params.installmentDuration || 0;
+        existingSaleItem.installmentStartingPrice =
+          params.installmentStartingPrice || 0;
+        existingSaleItem.devices = cast(devices);
+        existingSaleItem.miscellaneousPrices = {
+          costs: cast(miscellaneousCosts),
+        };
+        existingSaleItem.saleRecipient = { ...saleRecipient };
+      } else {
+        // Add a new sale item if it doesn't exist
+        self.saleItems.push({
+          productId,
+          quantity: product.productUnits,
+          paymentMode: params.paymentMode,
+          discount: params.discount || 0,
+          installmentDuration: params.installmentDuration || 0,
+          installmentStartingPrice: params.installmentStartingPrice || 0,
+          devices: cast(devices),
+          miscellaneousPrices: { costs: cast(miscellaneousCosts) },
+          saleRecipient: { ...saleRecipient },
+        });
+      }
+    },
+    getTransformedSaleItems() {
+      return self.saleItems.map((item) => {
+        // Convert the whole `item` object to a plain object, including nested properties
+        const plainItem = toJS(item);
+
+        // Fetch the relevant miscellaneous prices for the current productId
+        const relevantMiscPrices = self.miscellaneousPrices.find(
+          (m) => m.currentProductId === plainItem.productId
+        ) || { costs: new Map() };
+
+        // Convert the `costs` Map to a plain object
+        const miscellaneousCosts = Array.from(
+          relevantMiscPrices.costs.entries()
+        ).reduce((acc, [name, cost]) => {
+          if (typeof cost === "number") {
+            acc[name] = cost; // Assign cost values directly
+          } else {
+            console.warn(`Invalid cost value for ${name}:`, cost);
+          }
+          return acc;
+        }, {} as Record<string, number>);
+
+        return {
+          ...plainItem,
+          miscellaneousPrices: miscellaneousCosts, // Use the filtered and converted prices
+        };
+      });
+    },
+    doesSaleItemHaveInstallment() {
+      const filteredArray = self.saleItems.filter(
+        (item) => item.paymentMode === "INSTALLMENT"
+      );
+      const installmentExists = filteredArray.length > 0;
+      return installmentExists;
+    },
+    removeSaleItem(productId: string) {
+      self.saleItems.replace(
+        self.saleItems.filter((item) => item.productId !== productId)
+      );
+    },
+    clearSaleItems() {
+      self.saleItems.clear();
+    },
+    addCustomer(customer: typeof self.customer) {
       self.customer = customer;
     },
     removeCustomer() {
       self.customer = null;
     },
+    addUpdateBVN(bvn: string) {
+      self.bvn = bvn;
+    },
+    addUpdateCategory(category: "PRODUCT") {
+      self.category = category;
+    },
     setCustomerExist(value: boolean) {
       self.doesCustomerExist = value;
     },
     addProduct(product: any) {
-      self.products.push(product);
+      const existingIndex = self.products.findIndex(
+        (p) => p.productId === product.productId
+      );
+
+      if (existingIndex !== -1) {
+        // Update existing product
+        self.products[existingIndex] = {
+          ...self.products[existingIndex],
+          ...product,
+        };
+      } else {
+        // Add new product
+        self.products.push(product);
+      }
     },
     removeProduct(productId?: string) {
       const index = self.products.findIndex((p) => p.productId === productId);
       if (index !== -1) {
         self.products.splice(index, 1);
       }
+    },
+    getProductById(productId?: string) {
+      const product = self.products.find((p) => p.productId === productId);
+      return product;
+    },
+    currentProductUnits(productId?: string) {
+      const currentUnits = self.products.find(
+        (p) => p.productId === productId
+      )?.productUnits;
+      return currentUnits;
     },
     emptyProducts() {
       self.products.clear();
@@ -82,7 +353,7 @@ const saleStore = types
     },
     addParameters(params: {
       currentProductId: string;
-      paymentMode: string;
+      paymentMode: "INSTALLMENT" | "ONE_OFF";
       installmentDuration: number | null;
       installmentStartingPrice: number | null;
       address: string;
@@ -90,13 +361,16 @@ const saleStore = types
     }) {
       self.parameters.push(params);
     },
-    removeParameter(currentProductId?: string) {
-      const index = self.parameters.findIndex(
-        (p) => p.currentProductId === currentProductId
+    getParametersByProductId(productId: string) {
+      const parameters = self.parameters.find(
+        (p) => p.currentProductId === productId
       );
-      if (index !== -1) {
-        self.parameters.splice(index, 1);
-      }
+      return parameters;
+    },
+    removeParameter(currentProductId?: string) {
+      self.parameters.replace(
+        self.parameters.filter((p) => p.currentProductId !== currentProductId)
+      );
     },
     addOrUpdateMiscellaneousPrice(
       currentProductId: string,
@@ -118,13 +392,19 @@ const saleStore = types
         );
       }
     },
-    removeMiscellaneousPrice(currentProductId?: string) {
-      const index = self.miscellaneousPrices.findIndex(
-        (p) => p.currentProductId === currentProductId
+    getMiscellaneousByProductId(productId: string) {
+      return (
+        self.miscellaneousPrices.find(
+          (m) => m.currentProductId === productId
+        ) || { costs: new Map() }
       );
-      if (index !== -1) {
-        self.miscellaneousPrices.splice(index, 1);
-      }
+    },
+    removeMiscellaneousPrice(currentProductId?: string) {
+      self.miscellaneousPrices.replace(
+        self.miscellaneousPrices.filter(
+          (p) => p.currentProductId !== currentProductId
+        )
+      );
     },
     addOrUpdateDevices(currentProductId: string, deviceList: string[]) {
       const existingIndex = self.devices.findIndex(
@@ -141,24 +421,158 @@ const saleStore = types
         );
       }
     },
+    getSelectedDevices(productId: string) {
+      const devices = self.devices.find(
+        (d) => d.currentProductId === productId
+      )?.devices;
+      return devices;
+    },
     removeDevices(currentProductId?: string) {
-      const index = self.devices.findIndex(
+      self.devices.replace(
+        self.devices.filter((d) => d.currentProductId !== currentProductId)
+      );
+    },
+    addIdentificationDetails(details: typeof self.identificationDetails) {
+      self.identificationDetails = details;
+    },
+    removeIdentificationDetails() {
+      self.identificationDetails = {
+        idType: "",
+        idNumber: "",
+        issuingCountry: "",
+        issueDate: "",
+        expirationDate: "",
+        fullNameAsOnID: "",
+        addressAsOnID: "",
+      };
+    },
+    addNextOfKinDetails(details: typeof self.nextOfKinDetails) {
+      self.nextOfKinDetails = details;
+    },
+    removeNextOfKinDetails() {
+      self.nextOfKinDetails = {
+        fullName: "",
+        relationship: "",
+        phoneNumber: "",
+        email: "",
+        homeAddress: "",
+        dateOfBirth: "",
+        nationality: "",
+      };
+    },
+    addGuarantorDetails(details: typeof self.guarantorDetails) {
+      self.guarantorDetails = details;
+    },
+    removeGuarantorDetails() {
+      self.guarantorDetails = {
+        fullName: "",
+        phoneNumber: "",
+        email: "",
+        homeAddress: "",
+        dateOfBirth: "",
+        nationality: "",
+        identificationDetails: {
+          idType: "",
+          idNumber: "",
+          issuingCountry: "",
+          issueDate: "",
+          expirationDate: "",
+          fullNameAsOnID: "",
+          addressAsOnID: "",
+        },
+      };
+    },
+    addOrUpdateRecipient(
+      currentProductId: string,
+      recipient: {
+        firstname: string;
+        lastname: string;
+        address: string;
+        phone: string;
+        email: string;
+      }
+    ) {
+      const existingIndex = self.saleRecipient.findIndex(
         (d) => d.currentProductId === currentProductId
       );
-      if (index !== -1) {
-        self.devices.splice(index, 1);
+
+      if (existingIndex !== -1) {
+        // Update the existing recipient using applySnapshot
+        applySnapshot(self.saleRecipient[existingIndex].recipient, recipient);
+      } else {
+        // Add new recipient if not found
+        self.saleRecipient.push(
+          RecipientModel.create({
+            currentProductId,
+            recipient,
+          })
+        );
       }
+    },
+    getRecipientByProductId(productId: string) {
+      const recipient = self.saleRecipient.find(
+        (r) => r.currentProductId === productId
+      )?.recipient;
+      return recipient;
+    },
+    removeRecipient(currentProductId: string) {
+      self.saleRecipient.replace(
+        self.saleRecipient.filter(
+          (d) => d.currentProductId !== currentProductId
+        )
+      );
+    },
+    purgeStore() {
+      applySnapshot(self, defaultValues);
     },
   }));
 
 export const SaleStore = saleStore.create({
+  category: "PRODUCT",
   customer: null,
+  bvn: "",
   doesCustomerExist: false,
   products: [],
   doesProductCategoryExist: false,
   parameters: [],
   miscellaneousPrices: [],
   devices: [],
+  saleItems: [],
+  identificationDetails: {
+    idType: "",
+    idNumber: "",
+    issuingCountry: "",
+    issueDate: "",
+    expirationDate: "",
+    fullNameAsOnID: "",
+    addressAsOnID: "",
+  },
+  nextOfKinDetails: {
+    fullName: "",
+    relationship: "",
+    phoneNumber: "",
+    email: "",
+    homeAddress: "",
+    dateOfBirth: "",
+    nationality: "",
+  },
+  guarantorDetails: {
+    fullName: "",
+    phoneNumber: "",
+    email: "",
+    homeAddress: "",
+    dateOfBirth: "",
+    nationality: "",
+    identificationDetails: {
+      idType: "",
+      idNumber: "",
+      issuingCountry: "",
+      issueDate: "",
+      expirationDate: "",
+      fullNameAsOnID: "",
+      addressAsOnID: "",
+    },
+  },
 });
 
 export type SaleStoreType = Instance<typeof saleStore>;

@@ -11,11 +11,11 @@ import {
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import SelectInventoryModal from "./SelectInventoryModal";
 import { observer } from "mobx-react-lite";
-import rootStore from "../../stores/rootStore";
 import { CardComponent } from "../CardComponents/CardComponent";
 import { Modal } from "@/Components/ModalComponent/Modal";
 import { z } from "zod";
 import { ProductStore } from "@/stores/ProductStore";
+import { toJS } from "mobx";
 
 export type ProductFormType = "newProduct" | "newCategory";
 
@@ -162,12 +162,10 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
 
           // Convert form data to an object
           const formFields = Object.fromEntries(formSubmissionData.entries());
-          const inventories = rootStore.productStore.products.map(
-            (product) => ({
-              inventoryId: product.productId,
-              quantity: product.productUnits,
-            })
-          );
+          const inventories = ProductStore.products.map((product) => ({
+            inventoryId: product.productId,
+            quantity: product.productUnits,
+          }));
 
           // Parse the data using the main schema
           const validatedData = mainSchema.parse({
@@ -221,7 +219,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
         setIsOpen(false);
         setFormData(defaultFormData);
         setPaymentModes([]);
-        rootStore.productStore.emptyProducts();
+        ProductStore.emptyProducts();
         setOtherFormData(OtherSubmissonData);
       } catch (error: any) {
         if (error instanceof z.ZodError) {
@@ -236,7 +234,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
       }
     };
 
-    const selectedProducts = rootStore.productStore.products;
+    const selectedProducts = ProductStore.products;
     const { categoryId, name, productImage } = formData;
     const isFormFilled =
       formType === "newProduct"
@@ -317,6 +315,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                     itemsSelected={
                       <div className="flex flex-wrap items-center w-full gap-4">
                         {selectedProducts?.map((data, index) => {
+                          console.log(toJS(selectedProducts));
                           return (
                             <CardComponent
                               key={`${data.productId}-${index}`}
@@ -329,7 +328,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                               productUnits={data.productUnits}
                               readOnly={true}
                               onRemoveProduct={(productId) =>
-                                rootStore.productStore.removeProduct(productId)
+                                ProductStore.removeProduct(productId)
                               }
                             />
                           );
@@ -345,8 +344,8 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                   <SelectMultipleInput
                     label="Payment Modes"
                     options={[
-                      { label: "Single Deposit", value: "Single Deposit" },
-                      { label: "Instalmental", value: "Instalmental" },
+                      { label: "Single Deposit", value: "ONE_OFF" },
+                      { label: "Installment", value: "INSTALLMENT" },
                     ]}
                     value={paymentModes}
                     onChange={(values) => setPaymentModes(values)}

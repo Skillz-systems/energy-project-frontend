@@ -10,7 +10,7 @@ import SaleDetails from "./SaleDetails";
 import SaleHistory from "./SaleHistory";
 import SaleTransactions from "./SaleTransactions";
 import { toast } from "react-toastify";
-import { useApiCall } from "@/utils/useApiCall";
+import { useApiCall, useGetRequest } from "@/utils/useApiCall";
 
 export type SaleDetailsType = {
   daysToNextInstallment: string;

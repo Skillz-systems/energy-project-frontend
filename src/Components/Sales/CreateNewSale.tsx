@@ -1,18 +1,19 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { KeyedMutator } from "swr";
 import { Modal } from "../ModalComponent/Modal";
 import { z } from "zod";
 import { useApiCall } from "@/utils/useApiCall";
-import { ModalInput, SelectInput } from "../InputComponent/Input";
+import { Input, ModalInput, SelectInput } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { SaleStore } from "@/stores/SaleStore";
 import SelectCustomerProductModal from "./SelectCustomerProductModal";
 import roletwo from "../../assets/table/roletwo.svg";
 import { observer } from "mobx-react-lite";
-import ProductSaleDisplay from "./ProductSaleDisplay";
+import ProductSaleDisplay, { ExtraInfoSection } from "./ProductSaleDisplay";
 import SetExtraInfoModal from "./SetExtraInfoModal";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import { toJS } from "mobx";
+import { formSchema, defaultSaleFormData } from "./salesSchema";
 
 type CreateSalesType = {
   isOpen: boolean;
@@ -20,178 +21,22 @@ type CreateSalesType = {
   allSalesRefresh: KeyedMutator<any>;
 };
 
-const formSchema = z.object({
-  saleCategory: z.string().trim().min(3, "Sale Category is required"),
-  customers: z.string().min(1, "Please select at least one customer"),
-  products: z.array(z.string()).min(3, "Please select at least one product"),
-});
-
 type FormData = z.infer<typeof formSchema>;
 
-const defaultFormData = {
-  saleCategory: "",
-  customers: "",
-  products: [""],
-};
-
-const testProducts = [
-  {
-    productId: "P001",
-    productCategory: "SHS",
-    productName: "Wireless Mouse",
-    productUnits: 50,
-    productPrice: 2999.99,
-    productImage: "https://example.com/images/wireless-mouse.jpg",
-    productTag: "electronics",
-  },
-  {
-    productId: "P002",
-    productCategory: "EAAS",
-    productName: "Running Shoes",
-    productUnits: 120,
-    productPrice: 6999.5,
-    productImage: "https://example.com/images/running-shoes.jpg",
-    productTag: "footwear",
-  },
-  {
-    productId: "P003",
-    productCategory: "SHS",
-    productName: "Gaming Chair",
-    productUnits: 30,
-    productPrice: 24999.0,
-    productImage: "https://example.com/images/gaming-chair.jpg",
-    productTag: "furniture",
-  },
-];
-
-export type ExtraInfoType = "parameters" | "miscellaneous" | "devices" | "";
-
-type SaleItem = {
-  productId: string;
-  quantity: number;
-  paymentMode: "INSTALLMENT" | "FULL_PAYMENT";
-  discount: number;
-  installmentDuration?: number;
-  installmentStartingPrice?: number;
-  devices: string[];
-  miscellaneousPrices?: {
-    [key: string]: number;
-  };
-  saleRecipient: {
-    firstname: string;
-    lastname: string;
-    address: string;
-    phone: string;
-    email: string;
-  };
-};
-
-type NextOfKinDetails = {
-  fullName: string;
-  relationship: string;
-  phoneNumber: string;
-  email: string;
-  homeAddress: string;
-  dateOfBirth: string;
-  nationality: string;
-};
-
-type IdentificationDetails = {
-  idType: string;
-  idNumber: string;
-  issuingCountry: string;
-  issueDate: string;
-  expirationDate: string;
-  fullNameAsOnID: string;
-  addressAsOnID: string;
-};
-
-type GuarantorDetails = {
-  fullName: string;
-  phoneNumber: string;
-  email: string;
-  homeAddress: string;
-  identificationDetails: IdentificationDetails;
-  dateOfBirth: string;
-  nationality: string;
-};
-
-type SalePayload = {
-  category: "PRODUCT" | "INVENTORY";
-  customerId: string;
-  bvn: string;
-  saleItems: SaleItem[];
-  nextOfKinDetails: NextOfKinDetails;
-  identificationDetails: IdentificationDetails;
-  guarantorDetails: GuarantorDetails;
-};
-
-const getSampleSalePayload = (): SalePayload => ({
-  category: "PRODUCT",
-  customerId: "605c72ef153207001f6480d",
-  bvn: "1234567890",
-  saleItems: [
-    {
-      productId: "507f191e810c19729de860ea",
-      quantity: 1,
-      paymentMode: "INSTALLMENT",
-      discount: 5,
-      installmentDuration: 6,
-      installmentStartingPrice: 200,
-      devices: ["device1", "device2"],
-      miscellaneousPrices: {
-        delivery: 20.5,
-      },
-      saleRecipient: {
-        firstname: "John",
-        lastname: "Doe",
-        address: "123 Street, City, Country",
-        phone: "+123456789",
-        email: "john.doe@example.com",
-      },
-    },
-  ],
-  nextOfKinDetails: {
-    fullName: "Jane Doe",
-    relationship: "Mother",
-    phoneNumber: "+2341234567890",
-    email: "jane.doe@example.com",
-    homeAddress: "123 Main Street, Lagos, Nigeria",
-    dateOfBirth: "1990-01-01T00:00:00.000Z",
-    nationality: "Nigeria",
-  },
-  identificationDetails: {
-    idType: "Nin",
-    idNumber: "123456789",
-    issuingCountry: "Nigeria",
-    issueDate: "1990-01-01T00:00:00.000Z",
-    expirationDate: "2030-01-01T00:00:00.000Z",
-    fullNameAsOnID: "John Doe",
-    addressAsOnID: "456 Elm Street, Abuja, Nigeria",
-  },
-  guarantorDetails: {
-    fullName: "John Smith",
-    phoneNumber: "+2349876543210",
-    email: "john.smith@example.com",
-    homeAddress: "789 Oak Avenue, Abuja, Nigeria",
-    identificationDetails: {
-      idType: "Nin",
-      idNumber: "987654321",
-      issuingCountry: "Nigeria",
-      issueDate: "1995-01-01T00:00:00.000Z",
-      expirationDate: "2035-01-01T00:00:00.000Z",
-      fullNameAsOnID: "John Smith",
-      addressAsOnID: "789 Oak Avenue, Abuja, Nigeria",
-    },
-    dateOfBirth: "1985-05-15T00:00:00.000Z",
-    nationality: "Nigeria",
-  },
-});
+export type ExtraInfoType =
+  | "parameters"
+  | "miscellaneous"
+  | "devices"
+  | "recipient"
+  | "identification"
+  | "nextOfKin"
+  | "guarantor"
+  | "";
 
 const CreateNewSale = observer(
   ({ isOpen, setIsOpen, allSalesRefresh }: CreateSalesType) => {
     const { apiCall } = useApiCall();
-    const [formData, setFormData] = useState<FormData>(defaultFormData);
+    const [formData, setFormData] = useState<FormData>(defaultSaleFormData);
     const [loading, setLoading] = useState(false);
     const [isCustomerProductModalOpen, setIsCustomerProductModalOpen] =
       useState<boolean>(false);
@@ -207,9 +52,16 @@ const CreateNewSale = observer(
     const selectedProducts = SaleStore.products;
 
     const resetFormErrors = (name: string) => {
-      // Clear the error for this field when the user starts typing
       setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
       setApiError(null);
+    };
+
+    const handleInputChange = (name: string, value: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+      resetFormErrors(name);
     };
 
     const handleSelectChange = (name: string, values: string | string[]) => {
@@ -220,25 +72,45 @@ const CreateNewSale = observer(
       resetFormErrors(name);
     };
 
-    const requestPayload = {
-      category: formData.saleCategory,
-      customerId: selectedCustomer?.customerId,
-      bvn: "",
-    };
+    const getPayload = useCallback(() => {
+      if (SaleStore.doesSaleItemHaveInstallment()) {
+        const payload = {
+          category: SaleStore.category,
+          customerId: SaleStore.customer?.customerId,
+          saleItems: SaleStore.getTransformedSaleItems(),
+          bvn: SaleStore.bvn,
+          nextOfKinDetails: SaleStore.nextOfKinDetails,
+          identificationDetails: SaleStore.identificationDetails,
+          guarantorDetails: SaleStore.guarantorDetails,
+        };
+        return payload;
+      } else {
+        const payload = {
+          category: SaleStore.category,
+          customerId: SaleStore.customer?.customerId,
+          saleItems: SaleStore.getTransformedSaleItems(),
+        };
+        return payload;
+      }
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setLoading(true);
       try {
-        await apiCall({
-          endpoint: "/v1/sale/create",
+        // const validatedData = formSchema.parse(getPayload());
+        const validatedData = toJS(getPayload());
+        const response = await apiCall({
+          endpoint: "/v1/sales/create",
           method: "post",
-          data: formData,
+          data: validatedData,
           successMessage: "Sale created successfully!",
         });
         await allSalesRefresh();
+        const redirectLink = response?.data?.link;
+        if (redirectLink) window.open(redirectLink, "_blank");
         setIsOpen(false);
-        setFormData(defaultFormData);
+        SaleStore.purgeStore();
       } catch (error: any) {
         if (error instanceof z.ZodError) {
           setFormErrors(error.issues);
@@ -252,18 +124,23 @@ const CreateNewSale = observer(
       }
     };
 
-    const isFormFilled = formSchema.safeParse(formData).success;
+    useEffect(() => {
+      if (loading && apiError) setApiError(null);
+    }, [getPayload, apiError, loading]);
+
+    const isFormFilled = formSchema.safeParse(toJS(getPayload())).success;
 
     const getFieldError = (fieldName: string) => {
       return formErrors.find((error) => error.path[0] === fieldName)?.message;
     };
 
-    console.log(
-      "EXTRAINFO:",
-      toJS(SaleStore.parameters),
-      toJS(SaleStore.miscellaneousPrices),
-      toJS(SaleStore.devices)
-    );
+    // console.log("CUSTOMER:", toJS(SaleStore.customer));
+    // console.log("SALE ITEMS:", toJS(SaleStore.getTransformedSaleItems()));
+    // console.log("BVN:", toJS(SaleStore.bvn));
+    // console.log("IDENTITY:", toJS(SaleStore.identificationDetails));
+    // console.log("NEXT OF KIN:", toJS(SaleStore.nextOfKinDetails));
+    // console.log("GUARANTOR:", toJS(SaleStore.guarantorDetails));
+    // console.log("MISC:", toJS(SaleStore.miscellaneousPrices));
 
     return (
       <>
@@ -296,21 +173,19 @@ const CreateNewSale = observer(
             <div className="flex flex-col items-center justify-center w-full px-[2.5em] gap-4 py-8">
               <SelectInput
                 label="Sale Category"
-                options={[
-                  { label: "Inventory", value: "INVENTORY" },
-                  { label: "Product", value: "PRODUCT" },
-                ]}
-                value={formData.saleCategory}
-                onChange={(selectedValue) =>
-                  handleSelectChange("saleCategory", selectedValue)
-                }
+                options={[{ label: "Product", value: "PRODUCT" }]}
+                value={formData.category}
+                onChange={(selectedValue) => {
+                  handleSelectChange("category", selectedValue);
+                  SaleStore.addUpdateCategory(selectedValue as "PRODUCT");
+                }}
                 required={true}
                 placeholder="Select Sale Category"
-                errorMessage={getFieldError("saleCategory")}
+                errorMessage={getFieldError("category")}
               />
               <ModalInput
                 type="button"
-                name="customers"
+                name="customerId"
                 label="CUSTOMER"
                 onClick={() => {
                   setIsCustomerProductModalOpen(true);
@@ -341,7 +216,7 @@ const CreateNewSale = observer(
                 errorMessage={
                   !SaleStore.doesCustomerExist
                     ? "Failed to fetch customers"
-                    : getFieldError("customers")
+                    : getFieldError("customerId")
                 }
               />
               <ModalInput
@@ -354,12 +229,10 @@ const CreateNewSale = observer(
                 }}
                 placeholder="Select Product"
                 required={true}
-                // isItemsSelected={selectedProducts.length > 0}
-                isItemsSelected={testProducts.length > 0}
+                isItemsSelected={selectedProducts.length > 0}
                 itemsSelected={
                   <div className="flex flex-wrap items-center w-full gap-4">
-                    {/* {selectedProducts?.map((data, index) => { */}
-                    {testProducts?.map((data, index) => {
+                    {selectedProducts?.map((data, index) => {
                       return (
                         <ProductSaleDisplay
                           key={index}
@@ -382,6 +255,104 @@ const CreateNewSale = observer(
                     : getFieldError("products")
                 }
               />
+              {SaleStore.doesSaleItemHaveInstallment() && (
+                <>
+                  <Input
+                    type="text"
+                    name="bvn"
+                    label="BANK VERIFICATION NUUMBER"
+                    value={SaleStore.bvn || (formData.bvn as string)}
+                    onChange={(e) => {
+                      const numericValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+                      if (numericValue.length <= 11) {
+                        handleInputChange(e.target.name, numericValue);
+                        SaleStore.addUpdateBVN(numericValue);
+                      }
+                    }}
+                    placeholder="Enter 11 digit BVN"
+                    required={false}
+                    errorMessage={getFieldError("bvn")}
+                    maxLength={11}
+                  />
+                  <ModalInput
+                    type="button"
+                    name="identificationDetails"
+                    label="IDENTIFICATION DETAILS"
+                    onClick={() => {
+                      setExtraInfoModal("identification");
+                    }}
+                    placeholder="Enter Identification"
+                    required={false}
+                    isItemsSelected={Boolean(
+                      SaleStore.identificationDetails.idNumber
+                    )}
+                    customSelectedText="Update Identification Details"
+                    itemsSelected={
+                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
+                        {SaleStore.identificationDetails.idNumber && (
+                          <ExtraInfoSection
+                            label="Identification"
+                            onClear={() =>
+                              SaleStore.removeIdentificationDetails()
+                            }
+                          />
+                        )}
+                      </div>
+                    }
+                    errorMessage={getFieldError("identificationDetails")}
+                  />
+                  <ModalInput
+                    type="button"
+                    name="nextOfKinDetails"
+                    label="NEXT OF KIN DETAILS"
+                    onClick={() => {
+                      setExtraInfoModal("nextOfKin");
+                    }}
+                    placeholder="Enter Next of Kin"
+                    required={false}
+                    isItemsSelected={Boolean(
+                      SaleStore.nextOfKinDetails.fullName
+                    )}
+                    customSelectedText="Update Next of Kin"
+                    itemsSelected={
+                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
+                        {SaleStore.nextOfKinDetails.fullName && (
+                          <ExtraInfoSection
+                            label="Next of Kin"
+                            onClear={() => SaleStore.removeNextOfKinDetails()}
+                          />
+                        )}
+                      </div>
+                    }
+                    errorMessage={getFieldError("nextOfKinDetails")}
+                  />
+                  <ModalInput
+                    type="button"
+                    name="guarantorDetails"
+                    label="GUARANTOR DETAILS"
+                    onClick={() => {
+                      setExtraInfoModal("guarantor");
+                    }}
+                    placeholder="Enter Guarantor"
+                    required={false}
+                    isItemsSelected={Boolean(
+                      SaleStore.guarantorDetails.fullName
+                    )}
+                    customSelectedText="Update Guarantor"
+                    itemsSelected={
+                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
+                        {SaleStore.guarantorDetails.fullName && (
+                          <ExtraInfoSection
+                            label="Guarantor"
+                            onClear={() => SaleStore.removeGuarantorDetails()}
+                          />
+                        )}
+                      </div>
+                    }
+                    errorMessage={getFieldError("guarantorDetails")}
+                  />
+                </>
+              )}
               {apiError && (
                 <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
                   {apiError}
@@ -391,7 +362,8 @@ const CreateNewSale = observer(
                 type="submit"
                 loading={loading}
                 variant={isFormFilled ? "gradient" : "gray"}
-                disabled={!isFormFilled}
+                // disabled={!isFormFilled}
+                disabled={false}
               />
             </div>
           </form>

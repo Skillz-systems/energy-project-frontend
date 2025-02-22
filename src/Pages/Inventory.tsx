@@ -35,14 +35,14 @@ const Inventory = () => {
     mutate: allInventoryRefresh,
     errorStates: allInventoryErrorStates,
   } = useGetRequest(
-    `/v1/inventory?page=${currentPage}&limit=${entriesPerPage}${
-      inventoryFilter && `?class=${inventoryFilter}`
+    `/v1/inventory?page=${currentPage}&limit=${entriesPerPage}&${
+      inventoryFilter && `class=${inventoryFilter}`
     }`,
     true,
     60000
   );
 
-  const fetchInventoryStats = useGetRequest("/v1/inventory/stats/all", true);
+  const fetchInventoryStats = useGetRequest("/v1/inventory/stats", true);
 
   const paginationInfo = () => {
     const total = inventoryData?.total;
