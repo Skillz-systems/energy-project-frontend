@@ -70,38 +70,39 @@ const TopNavComponent = () => {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 z-20 bg-white w-full flex items-start sm:items-center justify-between gap-1 px-2 md:px-8 py-4 h-max transition-shadow ${
+        className={`fixed top-0 left-0 z-20 bg-white flex items-center justify-center w-full px-2 md:px-8 py-4 h-max transition-shadow ${
           isScrolled ? "border-b border-b-strokeGreyThree shadow-md" : ""
         }`}
       >
-        <div className="flex flex-wrap sm:flex-nowrap items-center w-max gap-1 sm:gap-2">
-          <img
-            src={logoplain}
-            alt="Logo"
-            width="51px"
-            className="w-[25px] sm:w-[51px] cursor-pointer"
-            onClick={() => navigate("/home")}
-          />
-          <MenuButton />
-          <UserProfile role={role.role} />
-        </div>
-        <div className="flex items-center w-max max-w-[350px] gap-1 sm:gap-4">
-          <span className="hidden sm:flex items-center justify-center bg-[#F6F8FA] h-[32px] px-2 py-1 text-xs text-textDarkGrey border-[0.6px] border-strokeGreyThree rounded-full">
-            {currentDate}
-          </span>
-          {/* {showSearchInput ? null : (
+        <div className="flex items-start sm:items-center justify-between gap-1 w-full max-w-screen-2xl">
+          <div className="flex flex-wrap sm:flex-nowrap items-center w-max gap-1 sm:gap-2">
+            <img
+              src={logoplain}
+              alt="Logo"
+              width="51px"
+              className="w-[25px] sm:w-[51px] cursor-pointer"
+              onClick={() => navigate("/home")}
+            />
+            <MenuButton />
+            <UserProfile role={role.role} />
+          </div>
+          <div className="flex items-center w-max max-w-[350px] gap-1 sm:gap-4">
+            <span className="hidden sm:flex items-center justify-center bg-[#F6F8FA] h-[32px] px-2 py-1 text-xs text-textDarkGrey border-[0.6px] border-strokeGreyThree rounded-full">
+              {currentDate}
+            </span>
+            {/* {showSearchInput ? null : (
             <>
-              <span className="hidden sm:flex items-center justify-center bg-[#F6F8FA] h-[32px] px-2 py-1 text-xs text-textDarkGrey border-[0.6px] border-strokeGreyThree rounded-full">
+            <span className="hidden sm:flex items-center justify-center bg-[#F6F8FA] h-[32px] px-2 py-1 text-xs text-textDarkGrey border-[0.6px] border-strokeGreyThree rounded-full">
                 {currentDate}
-              </span>
+                </span>
               <div
-                className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom transition-all hover:bg-[#E2E4EB]"
+              className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom transition-all hover:bg-[#E2E4EB]"
                 onClick={() => setIsOpen(true)}
               >
-                <img
-                  src={notification}
-                  alt="Notification"
-                  className="w-[16px] cursor-pointer"
+              <img
+              src={notification}
+              alt="Notification"
+              className="w-[16px] cursor-pointer"
                 />
                 <span className="animate-ping -top-1.5 -right-1 absolute flex items-center justify-center bg-[#FEF5DA] text-transparent text-[8px] text-center font-medium min-w-4 min-h-4 p-[1px] border border-[#A58730] rounded-full shadow-innerCustom">
                   7
@@ -112,23 +113,23 @@ const TopNavComponent = () => {
               </div>
             </>
           )} */}
-          {/* {showSearchInput ? (
+            {/* {showSearchInput ? (
             <div className="flex w-full items-center gap-2">
               <input
-                type="search"
-                className="text-xs font-medium text-textDarkGrey w-full h-[32px] pl-2 pr-1 py-1 border-[0.6px] border-strokeGreyThree rounded-full"
-                value={query}
+              type="search"
+              className="text-xs font-medium text-textDarkGrey w-full h-[32px] pl-2 pr-1 py-1 border-[0.6px] border-strokeGreyThree rounded-full"
+              value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleSearch();
                 }}
                 autoFocus
                 placeholder="Enter your query"
-              />
-            </div>
-          ) : (
-            <div
-              className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom transition-all hover:bg-[#E2E4EB]"
+                />
+                </div>
+                ) : (
+                  <div
+                  className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom transition-all hover:bg-[#E2E4EB]"
               onClick={() => setSearchInput(true)}
             >
               <img
@@ -138,21 +139,22 @@ const TopNavComponent = () => {
               />
             </div>
           )} */}
-          {/* {showSearchInput ? (
+            {/* {showSearchInput ? (
             <div
-              className="flex items-center justify-center w-[40px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom  transition-all hover:bg-[#E2E4EB]"
-              onClick={() => setSearchInput(false)}
+            className="flex items-center justify-center w-[40px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom  transition-all hover:bg-[#E2E4EB]"
+            onClick={() => setSearchInput(false)}
             >
               <img
-                src={close}
-                alt="Close"
+              src={close}
+              alt="Close"
                 className="w-[20px] h-[20px] cursor-pointer"
-              />
-            </div>
-          ) : (
+                />
+                </div>
+                ) : (
+                  <DropDown {...dropDownList} />
+                  )} */}
             <DropDown {...dropDownList} />
-          )} */}
-          <DropDown {...dropDownList} />
+          </div>
         </div>
       </header>
       <Modal

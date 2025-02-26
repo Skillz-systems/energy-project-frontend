@@ -3,7 +3,12 @@ import { KeyedMutator } from "swr";
 import { Modal } from "../ModalComponent/Modal";
 import { z, ZodIssue } from "zod";
 import { useApiCall } from "@/utils/useApiCall";
-import { Input, ModalInput, SelectInput } from "../InputComponent/Input";
+import {
+  Input,
+  ModalInput,
+  SelectInput,
+  ToggleInput,
+} from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { SaleStore } from "@/stores/SaleStore";
 import SelectCustomerProductModal from "./SelectCustomerProductModal";
@@ -18,8 +23,13 @@ import {
   SalePayload,
   SaleItem,
 } from "./salesSchema";
-import { capitalizeFirstLetter, revalidateStore } from "@/utils/helpers";
-import { toast } from "react-toastify";
+import { revalidateStore } from "@/utils/helpers";
+import SalesSummary from "./SalesSummary";
+import ApiErrorMessage from "../ApiErrorMessage";
+import { FlutterwaveConfig } from "flutterwave-react-v3/dist/types";
+
+const public_key = import.meta.env.VITE_FLW_PUBLIC_KEY;
+const base_url = import.meta.env.VITE_API_BASE_URL;
 
 type CreateSalesType = {
   isOpen: boolean;
@@ -55,6 +65,7 @@ const CreateNewSale = observer(
     );
     const [extraInfoModal, setExtraInfoModal] = useState<ExtraInfoType>("");
     const [currentProductId, setCurrentProductId] = useState<string>("");
+    const [summaryState, setSummaryState] = useState<boolean>(false);
 
     const selectedCustomer = SaleStore.customer;
     const selectedProducts = SaleStore.products;
@@ -77,6 +88,7 @@ const CreateNewSale = observer(
         category: SaleStore.category,
         customerId: SaleStore.customer?.customerId as string,
         saleItems: SaleStore.getTransformedSaleItems() as SaleItem[],
+        applyMargin: formData.applyMargin,
       };
       if (SaleStore.doesSaleItemHaveInstallment()) {
         payload.bvn = formData.bvn;
@@ -87,7 +99,7 @@ const CreateNewSale = observer(
       return payload;
     }, [formData]);
 
-    const handleInputChange = (name: string, value: string) => {
+    const handleInputChange = (name: string, value: any) => {
       setFormData((prev) => ({
         ...prev,
         [name]: value,
@@ -97,22 +109,9 @@ const CreateNewSale = observer(
 
     const payload = getPayload();
 
-    // Utility function for opening links
-    const openInNewTab = (url: string): boolean => {
-      try {
-        window.open(url, "_blank", "noopener,noreferrer");
-        return true;
-      } catch (error) {
-        console.error("Failed to open link:", error);
-        toast.error("Could not open the link. Please try again.");
-        return false;
-      }
-    };
-
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setLoading(true);
-      let linkOpenedSuccessfully = false;
 
       try {
         // Step 1: Validate data
@@ -129,21 +128,27 @@ const CreateNewSale = observer(
         // Step 3: Refresh sales list
         await allSalesRefresh();
 
-        // Step 4: Handle redirection
-        const redirectLink = response?.data?.link;
-        if (redirectLink) linkOpenedSuccessfully = openInNewTab(redirectLink);
-
-        // Step 5: Only reset state if link opened successfully
-        if (linkOpenedSuccessfully) {
-          setIsOpen(false);
-          SaleStore.purgeStore();
+        // Step 4: Handle save payment information
+        const paymentData = response?.data?.paymentData;
+        const newPaymentData: FlutterwaveConfig = {
+          ...paymentData,
+          public_key,
+          redirect_url: `${base_url}/sales`,
+          customer: {
+            ...paymentData?.customer,
+            phone_number: SaleStore?.customer?.phone || "",
+            name: SaleStore.customer?.customerName || "",
+          },
+        };
+        if (paymentData?.amount) {
+          SaleStore.addPaymentDetails(newPaymentData);
         }
       } catch (error: any) {
         if (error instanceof z.ZodError) {
           setFormErrors(error.issues);
         } else {
           const message =
-            error?.response?.data?.error ||
+            error?.response?.data?.message ||
             "Sale Creation Failed: Internal Server Error";
           setApiError(message);
         }
@@ -152,13 +157,22 @@ const CreateNewSale = observer(
       }
     };
 
+    const resetSaleModalState = () => {
+      setIsOpen(false);
+      SaleStore.purgeStore();
+      setSummaryState(false);
+    };
+
     useEffect(() => {
       if (loading && apiError) setApiError("");
     }, [payload, apiError, loading]);
 
     const getIsFormFilled = () => {
       const isPayloadValid = formSchema.safeParse(payload).success;
-      return isPayloadValid;
+      const doesParamsExist =
+        SaleStore.parameters.length > 0 &&
+        SaleStore.parameters.every((param) => param.currentProductId !== "");
+      return isPayloadValid && doesParamsExist;
     };
 
     const getFieldError = (fieldName: string) => {
@@ -215,217 +229,236 @@ const CreateNewSale = observer(
                 style={{ textShadow: "1px 1px grey" }}
                 className="text-xl text-textBlack font-semibold font-secondary"
               >
-                New Sale
+                {!summaryState
+                  ? "New Sale"
+                  : !SaleStore.paymentDetails.tx_ref
+                  ? "Sale Summary"
+                  : "Proceed to Payment"}
               </h2>
             </div>
             <div className="flex flex-col items-center justify-center w-full px-[2.5em] gap-4 py-8">
-              <SelectInput
-                label="Sale Category"
-                options={[{ label: "Product", value: "PRODUCT" }]}
-                value={formData.category}
-                onChange={(selectedValue) => {
-                  handleSelectChange("category", selectedValue);
-                  SaleStore.addUpdateCategory(selectedValue as "PRODUCT");
-                }}
-                required={true}
-                placeholder="Select Sale Category"
-                errorMessage={getFieldError("category")}
-              />
-              <ModalInput
-                type="button"
-                name="customerId"
-                label="CUSTOMER"
-                onClick={() => {
-                  setIsCustomerProductModalOpen(true);
-                  setModalType("customer");
-                }}
-                placeholder="Select Customer"
-                required={true}
-                isItemsSelected={Boolean(selectedCustomer?.customerId)}
-                itemsSelected={
-                  <div className="w-full">
-                    {selectedCustomer?.customerId && (
-                      <div className="relative flex items-center gap-1 w-max">
-                        <img src={roletwo} alt="Icon" width="30px" />
-                        <span className="bg-[#EFF2FF] px-3 py-1.5 rounded-full text-xs font-bold text-textDarkGrey capitalize">
-                          {selectedCustomer?.customerName}
-                        </span>
-                        <span
-                          className="flex items-center justify-center w-7 h-7 bg-white cursor-pointer border-[0.6px] border-strokeGreyTwo rounded-full transition-all hover:opacity-50"
-                          title="Remove Customer"
-                          onClick={SaleStore.removeCustomer}
-                        >
-                          <RiDeleteBin5Fill color="#FC4C5D" />
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                }
-                errorMessage={
-                  !SaleStore.doesCustomerExist
-                    ? "Failed to fetch customers"
-                    : getFieldError("customerId")
-                }
-              />
-              <ModalInput
-                type="button"
-                name="products"
-                label="PRODUCTS"
-                onClick={() => {
-                  setIsCustomerProductModalOpen(true);
-                  setModalType("product");
-                }}
-                placeholder="Select Product"
-                required={true}
-                isItemsSelected={selectedProducts.length > 0}
-                itemsSelected={
-                  <div className="flex flex-wrap items-center w-full gap-6">
-                    {selectedProducts?.map((data, index) => {
-                      return (
-                        <ProductSaleDisplay
-                          key={index}
-                          productData={data}
-                          onRemoveProduct={(productId) =>
-                            SaleStore.removeProduct(productId)
-                          }
-                          setExtraInfoModal={(value) => {
-                            setCurrentProductId(data.productId);
-                            setExtraInfoModal(value);
-                          }}
-                          getIsFormFilled={getIsFormFilled}
-                          getFieldError={getSaleItemFieldErrorByIndex}
-                        />
-                      );
-                    })}
-                  </div>
-                }
-                errorMessage={
-                  !SaleStore.doesProductCategoryExist
-                    ? "Failed to fetch products"
-                    : getFieldError("products")
-                }
-              />
-              {SaleStore.doesSaleItemHaveInstallment() && (
+              {!summaryState ? (
                 <>
-                  <Input
-                    type="text"
-                    name="bvn"
-                    label="BANK VERIFICATION NUUMBER"
-                    value={formData.bvn as string}
-                    onChange={(e) => {
-                      const numericValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
-                      if (numericValue.length <= 11) {
-                        handleInputChange(e.target.name, numericValue);
-                      }
+                  <SelectInput
+                    label="Sale Category"
+                    options={[{ label: "Product", value: "PRODUCT" }]}
+                    value={formData.category}
+                    onChange={(selectedValue) => {
+                      handleSelectChange("category", selectedValue);
+                      SaleStore.addUpdateCategory(selectedValue as "PRODUCT");
                     }}
-                    placeholder="Enter 11 digit BVN"
-                    required={false}
-                    errorMessage={getFieldError("bvn")}
-                    maxLength={11}
+                    required={true}
+                    placeholder="Select Sale Category"
+                    errorMessage={getFieldError("category")}
                   />
                   <ModalInput
                     type="button"
-                    name="identificationDetails"
-                    label="IDENTIFICATION DETAILS"
+                    name="customerId"
+                    label="CUSTOMER"
                     onClick={() => {
-                      setExtraInfoModal("identification");
+                      setIsCustomerProductModalOpen(true);
+                      setModalType("customer");
                     }}
-                    placeholder="Enter Identification"
-                    required={false}
-                    isItemsSelected={Boolean(
-                      SaleStore.identificationDetails.idNumber
-                    )}
-                    customSelectedText="Update Identification Details"
+                    placeholder="Select Customer"
+                    required={true}
+                    isItemsSelected={Boolean(selectedCustomer?.customerId)}
                     itemsSelected={
-                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
-                        {SaleStore.identificationDetails.idNumber && (
-                          <ExtraInfoSection
-                            label="Identification"
-                            onClear={() =>
-                              SaleStore.removeIdentificationDetails()
-                            }
-                          />
+                      <div className="w-full">
+                        {selectedCustomer?.customerId && (
+                          <div className="relative flex items-center gap-1 w-max">
+                            <img src={roletwo} alt="Icon" width="30px" />
+                            <span className="bg-[#EFF2FF] px-3 py-1.5 rounded-full text-xs font-bold text-textDarkGrey capitalize">
+                              {selectedCustomer?.customerName}
+                            </span>
+                            <span
+                              className="flex items-center justify-center w-7 h-7 bg-white cursor-pointer border-[0.6px] border-strokeGreyTwo rounded-full transition-all hover:opacity-50"
+                              title="Remove Customer"
+                              onClick={SaleStore.removeCustomer}
+                            >
+                              <RiDeleteBin5Fill color="#FC4C5D" />
+                            </span>
+                          </div>
                         )}
                       </div>
                     }
-                    errorMessage={getFieldError("identificationDetails")}
+                    errorMessage={
+                      !SaleStore.doesCustomerExist
+                        ? "Failed to fetch customers"
+                        : getFieldError("customerId")
+                    }
                   />
                   <ModalInput
                     type="button"
-                    name="nextOfKinDetails"
-                    label="NEXT OF KIN DETAILS"
+                    name="products"
+                    label="PRODUCTS"
                     onClick={() => {
-                      setExtraInfoModal("nextOfKin");
+                      setIsCustomerProductModalOpen(true);
+                      setModalType("product");
                     }}
-                    placeholder="Enter Next of Kin"
-                    required={false}
-                    isItemsSelected={Boolean(
-                      SaleStore.nextOfKinDetails.fullName
-                    )}
-                    customSelectedText="Update Next of Kin"
+                    placeholder="Select Product"
+                    required={true}
+                    isItemsSelected={selectedProducts.length > 0}
                     itemsSelected={
-                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
-                        {SaleStore.nextOfKinDetails.fullName && (
-                          <ExtraInfoSection
-                            label="Next of Kin"
-                            onClear={() => SaleStore.removeNextOfKinDetails()}
-                          />
-                        )}
+                      <div className="flex flex-wrap items-center w-full gap-6">
+                        {selectedProducts?.map((data, index) => {
+                          return (
+                            <ProductSaleDisplay
+                              key={index}
+                              productData={data}
+                              onRemoveProduct={(productId) =>
+                                SaleStore.removeProduct(productId)
+                              }
+                              setExtraInfoModal={(value) => {
+                                setCurrentProductId(data.productId);
+                                setExtraInfoModal(value);
+                              }}
+                              getIsFormFilled={getIsFormFilled}
+                              getFieldError={getSaleItemFieldErrorByIndex}
+                            />
+                          );
+                        })}
                       </div>
                     }
-                    errorMessage={getFieldError("nextOfKinDetails")}
+                    errorMessage={
+                      !SaleStore.doesProductCategoryExist
+                        ? "Failed to fetch products"
+                        : getFieldError("products")
+                    }
                   />
-                  <ModalInput
-                    type="button"
-                    name="guarantorDetails"
-                    label="GUARANTOR DETAILS"
-                    onClick={() => {
-                      setExtraInfoModal("guarantor");
-                    }}
-                    placeholder="Enter Guarantor"
-                    required={false}
-                    isItemsSelected={Boolean(
-                      SaleStore.guarantorDetails.fullName
-                    )}
-                    customSelectedText="Update Guarantor"
-                    itemsSelected={
-                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
-                        {SaleStore.guarantorDetails.fullName && (
-                          <ExtraInfoSection
-                            label="Guarantor"
-                            onClear={() => SaleStore.removeGuarantorDetails()}
-                          />
+                  {SaleStore.doesSaleItemHaveInstallment() && (
+                    <>
+                      <Input
+                        type="text"
+                        name="bvn"
+                        label="BANK VERIFICATION NUUMBER"
+                        value={formData.bvn as string}
+                        onChange={(e) => {
+                          const numericValue = e.target.value.replace(
+                            /\D/g,
+                            ""
+                          ); // Remove non-numeric characters
+                          if (numericValue.length <= 11) {
+                            handleInputChange(e.target.name, numericValue);
+                          }
+                        }}
+                        placeholder="Enter 11 digit BVN"
+                        required={false}
+                        errorMessage={getFieldError("bvn")}
+                        maxLength={11}
+                      />
+                      <ModalInput
+                        type="button"
+                        name="identificationDetails"
+                        label="IDENTIFICATION DETAILS"
+                        onClick={() => {
+                          setExtraInfoModal("identification");
+                        }}
+                        placeholder="Enter Identification"
+                        required={false}
+                        isItemsSelected={Boolean(
+                          SaleStore.identificationDetails.idNumber
                         )}
-                      </div>
-                    }
-                    errorMessage={getFieldError("guarantorDetails")}
+                        customSelectedText="Update Identification Details"
+                        itemsSelected={
+                          <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
+                            {SaleStore.identificationDetails.idNumber && (
+                              <ExtraInfoSection
+                                label="Identification"
+                                onClear={() =>
+                                  SaleStore.removeIdentificationDetails()
+                                }
+                              />
+                            )}
+                          </div>
+                        }
+                        errorMessage={getFieldError("identificationDetails")}
+                      />
+                      <ModalInput
+                        type="button"
+                        name="nextOfKinDetails"
+                        label="NEXT OF KIN DETAILS"
+                        onClick={() => {
+                          setExtraInfoModal("nextOfKin");
+                        }}
+                        placeholder="Enter Next of Kin"
+                        required={false}
+                        isItemsSelected={Boolean(
+                          SaleStore.nextOfKinDetails.fullName
+                        )}
+                        customSelectedText="Update Next of Kin"
+                        itemsSelected={
+                          <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
+                            {SaleStore.nextOfKinDetails.fullName && (
+                              <ExtraInfoSection
+                                label="Next of Kin"
+                                onClear={() =>
+                                  SaleStore.removeNextOfKinDetails()
+                                }
+                              />
+                            )}
+                          </div>
+                        }
+                        errorMessage={getFieldError("nextOfKinDetails")}
+                      />
+                      <ModalInput
+                        type="button"
+                        name="guarantorDetails"
+                        label="GUARANTOR DETAILS"
+                        onClick={() => {
+                          setExtraInfoModal("guarantor");
+                        }}
+                        placeholder="Enter Guarantor"
+                        required={false}
+                        isItemsSelected={Boolean(
+                          SaleStore.guarantorDetails.fullName
+                        )}
+                        customSelectedText="Update Guarantor"
+                        itemsSelected={
+                          <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
+                            {SaleStore.guarantorDetails.fullName && (
+                              <ExtraInfoSection
+                                label="Guarantor"
+                                onClear={() =>
+                                  SaleStore.removeGuarantorDetails()
+                                }
+                              />
+                            )}
+                          </div>
+                        }
+                        errorMessage={getFieldError("guarantorDetails")}
+                      />
+                    </>
+                  )}
+
+                  <div className="flex items-center justify-between gap-2 w-full">
+                    <p className="text-sm text-textBlack font-semibold">
+                      Apply Margin
+                    </p>
+                    <ToggleInput
+                      defaultChecked={formData.applyMargin}
+                      onChange={(checked: boolean) => {
+                        handleInputChange("applyMargin", checked);
+                      }}
+                    />
+                  </div>
+
+                  <ProceedButton
+                    type="button"
+                    loading={false}
+                    variant={getIsFormFilled() ? "gradient" : "gray"}
+                    disabled={!getIsFormFilled()}
+                    onClick={() => setSummaryState(true)}
                   />
                 </>
-              )}
-
-              {apiError !== "" && typeof apiError === "string" ? (
-                <div className="p-3 mt-4 border border-red-500 rounded-md bg-red-50">
-                  <p className="text-sm text-red-600">{apiError}</p>
-                </div>
               ) : (
-                Object.keys(apiError).length > 0 && (
-                  <div className="p-3 mt-4 border border-red-500 rounded-md bg-red-50">
-                    {Object.entries(apiError).map(([key, errors]) => (
-                      <p key={key} className="text-sm text-red-600">
-                        <strong>{capitalizeFirstLetter(key)}:</strong>{" "}
-                        {errors.join(", ")}
-                      </p>
-                    ))}
-                  </div>
-                )
+                <SalesSummary
+                  setSummaryState={setSummaryState}
+                  resetSaleModalState={resetSaleModalState}
+                  loading={loading}
+                  getIsFormFilled={getIsFormFilled}
+                  apiErrorMessage={<ApiErrorMessage apiError={apiError} />}
+                />
               )}
-
-              <ProceedButton
-                type="submit"
-                loading={loading}
-                variant={getIsFormFilled() ? "gradient" : "gray"}
-                disabled={!getIsFormFilled()}
-              />
             </div>
           </form>
         </Modal>

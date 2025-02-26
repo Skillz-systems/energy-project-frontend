@@ -375,10 +375,20 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
               <SelectInput
                 label="Category"
                 options={
-                  fetchInventoryCategories.data?.map((category: Category) => ({
-                    label: category.name,
-                    value: category.id,
-                  })) || [{ label: "", value: "" }]
+                  fetchInventoryCategories?.data &&
+                  fetchInventoryCategories?.data?.length > 0
+                    ? fetchInventoryCategories?.data?.map(
+                        (category: Category) => ({
+                          label: category?.name,
+                          value: category?.id,
+                        })
+                      )
+                    : [
+                        {
+                          label: "No Category Available",
+                          value: "",
+                        },
+                      ]
                 }
                 value={formData.inventoryCategoryId}
                 onChange={(selectedValue) =>
@@ -404,15 +414,32 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                 <SelectInput
                   label="Sub-Category"
                   options={
-                    fetchInventoryCategories.data
-                      ?.find(
-                        (category: Category) =>
-                          category.id === formData.inventoryCategoryId
-                      )
-                      ?.children?.map((child: { name: any; id: any }) => ({
-                        label: child.name,
-                        value: child.id,
-                      })) || []
+                    (
+                      fetchInventoryCategories?.data
+                        ?.find(
+                          (category: Category) =>
+                            category?.id === formData?.inventoryCategoryId
+                        )
+                        ?.children?.map((child: { name: any; id: any }) => ({
+                          label: child?.name,
+                          value: child?.id,
+                        })) || []
+                    )?.length > 0
+                      ? fetchInventoryCategories?.data
+                          ?.find(
+                            (category: Category) =>
+                              category?.id === formData?.inventoryCategoryId
+                          )
+                          ?.children?.map((child: { name: any; id: any }) => ({
+                            label: child?.name,
+                            value: child?.id,
+                          }))
+                      : [
+                          {
+                            label: "No Sub-Category Available",
+                            value: "",
+                          },
+                        ]
                   }
                   value={formData.inventorySubCategoryId}
                   onChange={(selectedValue) =>

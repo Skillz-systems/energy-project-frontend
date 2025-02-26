@@ -23,6 +23,16 @@ const SaleDetails = ({ data }: { data: SaleDetailsType }) => {
           <img src={producticon} alt="Product Icon" /> PRODUCT DETAILS
         </p>
         <div className="flex items-center justify-between">
+          <Tag name="Product Image" />
+          <div className="flex items-center justify-center w-full p-2 max-w-[100px] h-[100px] gap-2 border-[0.6px] border-strokeCream rounded-full overflow-clip">
+            <img
+              src={data.image}
+              alt="Product Image"
+              className="w-full h-full object-cover rounded-full"
+            />
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
           <Tag name="Product Category" />
           <ProductTag productTag={data.productCategory} />
         </div>
@@ -41,15 +51,66 @@ const SaleDetails = ({ data }: { data: SaleDetailsType }) => {
           </div>
         </div>
         <div className="flex items-center justify-between">
-          <Tag name="Price" />
-          <div className="flex items-center justify-end w-max gap-1">
-            <NairaSymbol />
-            <p className="text-textDarkGrey text-xs font-bold">
-              {formatNumberWithCommas(data.salePrice)}
+          <Tag name="Quantity" />
+          <p className="text-textDarkGrey text-xs font-bold">
+            {formatNumberWithCommas(data.productQuantity)}
+          </p>
+        </div>
+      </div>
+
+      {data?.paymentMode === "INSTALLMENT" && (
+        <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
+          <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
+            <img src={creditcardicon} alt="Card Icon" /> INSTALLMENT DETAILS
+          </p>
+          <div className="flex items-center justify-between">
+            <Tag name="Total Price" />
+            <div className="flex items-center justify-end w-max gap-1">
+              <NairaSymbol />
+              <p className="text-xs font-bold text-textDarkGrey">
+                {formatNumberWithCommas(data.installmentData.totalPrice)}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <Tag name="Total Paid" />
+            <div className="flex items-center justify-end w-max gap-1">
+              <NairaSymbol />
+              <p className="text-xs font-bold text-textDarkGrey">
+                {formatNumberWithCommas(data.installmentData.totalPaid)}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <Tag name="Total Monthly Payment" />
+            <div className="flex items-center justify-end w-max gap-1">
+              <NairaSymbol />
+              <p className="text-xs font-bold text-textDarkGrey">
+                {formatNumberWithCommas(
+                  data.installmentData.totalMonthlyPayment
+                )}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <Tag name="Installment Starting Price" />
+            <div className="flex items-center justify-end w-max gap-1">
+              <NairaSymbol />
+              <p className="text-xs font-bold text-textDarkGrey">
+                {formatNumberWithCommas(
+                  data.installmentData.installmentStartingPrice
+                )}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <Tag name="Total Installment Duration" />
+            <p className="text-xs font-bold text-textDarkGrey">
+              {data.installmentData.totalInstallmentDuration} Months
             </p>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
         <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
@@ -62,6 +123,14 @@ const SaleDetails = ({ data }: { data: SaleDetailsType }) => {
         <div className="flex items-center justify-between">
           <Tag name="Installation Address" />
           <p className="text-xs font-bold text-textDarkGrey">{data.address}</p>
+        </div>
+        <div className="flex items-center justify-between">
+          <Tag name="Phone Number" />
+          <p className="text-xs font-bold text-textDarkGrey">{data.phone}</p>
+        </div>
+        <div className="flex items-center justify-between">
+          <Tag name="Email Address" />
+          <p className="text-xs font-bold text-textDarkGrey">{data.email}</p>
         </div>
       </div>
 

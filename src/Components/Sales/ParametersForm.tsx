@@ -37,6 +37,31 @@ const ParametersForm = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+
+    // Special handling for installmentStartingPrice
+    if (name === "installmentStartingPrice") {
+      const numericValue = parseFloat(value);
+
+      // If the value is greater than 100, set it to zero
+      if (numericValue > 100) {
+        setFormData((prev) => ({
+          ...prev,
+          [name]: 0, // Transform back to zero
+        }));
+        setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+        return;
+      }
+
+      // Otherwise, update the value as usual
+      setFormData((prev) => ({
+        ...prev,
+        [name]: numericValue,
+      }));
+      setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+      return;
+    }
+
+    // Handle other fields
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -133,7 +158,7 @@ const ParametersForm = ({
           <Input
             type="number"
             name="installmentStartingPrice"
-            label="INITIAL PAYMENT AMOUNT"
+            label="INITIAL PAYMENT AMOUNT (PERCENTAGE)"
             value={formData.installmentStartingPrice as number}
             onChange={handleInputChange}
             placeholder="Initial Payment Amount"
@@ -141,9 +166,10 @@ const ParametersForm = ({
             errorMessage={getFieldError("installmentStartingPrice")}
             description={
               formData.installmentStartingPrice === 0
-                ? "Enter Initial Payment Amount"
+                ? "Enter Initial Payment Amount (Percentage)"
                 : ""
             }
+            max={100}
           />
         ) : null}
         <Input

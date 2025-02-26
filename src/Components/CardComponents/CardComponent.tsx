@@ -10,7 +10,11 @@ import checkers from "../../assets/table/checkers.svg";
 import { GoDotFill } from "react-icons/go";
 // import { Icon } from "../Settings/UserModal";
 import { DropDown } from "../DropDownComponent/DropDown";
-import { formatDateTime, formatNumberWithCommas } from "../../utils/helpers";
+import {
+  formatDateTime,
+  formatNumberWithCommas,
+  truncateTextByWord,
+} from "../../utils/helpers";
 import useBreakpoint from "../../hooks/useBreakpoint";
 
 export type CardComponentProps = {
@@ -67,6 +71,8 @@ export type CardComponentProps = {
   readOnly?: boolean;
   isSale?: boolean;
   quantity?: number;
+  showDropdown?: boolean;
+  noAction?: boolean;
 };
 
 export const ProductTag = ({
@@ -367,6 +373,8 @@ export const CardComponent = ({
   isSale = false,
   readOnly = false,
   quantity,
+  showDropdown = true,
+  noAction = false,
 }: CardComponentProps) => {
   const inventoryMobile = useBreakpoint("max", 350);
   const [_productUnits, setProductUnits] = useState<number | any>(
@@ -415,7 +423,7 @@ export const CardComponent = ({
   };
 
   const handleCardClick = () => {
-    if (!readOnly) {
+    if (!readOnly && !noAction) {
       if (variant === "inventoryTwo") handleSelectProduct();
     }
   };
@@ -517,19 +525,22 @@ export const CardComponent = ({
         ) : variant === "salesTransactions" ? (
           <div className="flex flex-col gap-2 w-full">
             <div className="flex items-center justify-between w-full gap-1">
-              <p className="flex items-center justify-center bg-paleLightBlue w-max p-2 h-[24px] text-xs font-bold rounded-full">
-                {transactionId}
+              <p
+                className="flex items-center bg-paleLightBlue w-max p-2 h-[24px] text-xs font-bold rounded-full truncate"
+                title={transactionId}
+              >
+                {transactionId && truncateTextByWord(transactionId, 18)}
               </p>
               <SimpleTag
                 text={transactionStatus}
                 dotColour={
-                  transactionStatus?.toLocaleLowerCase() === "successful"
+                  transactionStatus?.toLocaleLowerCase() === "completed"
                     ? "#00AF50"
                     : "#FC4C5D"
                 }
                 containerClass={`bg-[#F6F8FA]  px-2 py-1 border-[0.4px] border-strokeGreyTwo rounded-full
                   ${
-                    transactionStatus?.toLocaleLowerCase() === "successful"
+                    transactionStatus?.toLocaleLowerCase() === "completed"
                       ? "text-success"
                       : "text-errorTwo"
                   }`}
@@ -812,7 +823,7 @@ export const CardComponent = ({
             initialQuantity={_productUnits}
             isSale={isSale}
           />
-        ) : (
+        ) : !showDropdown ? null : (
           <DropDown {...dropDownList} cardData={productInfo} />
         )}
       </div>

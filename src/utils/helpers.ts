@@ -128,3 +128,15 @@ export const formatDateForInput = (isoDate: string | undefined): string => {
 };
 
 export const revalidateStore = (store: any) => toJS(store);
+
+export function truncateTextByWord(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+
+  const truncated = text.slice(0, maxLength).trim();
+  const lastSpaceIndex = truncated.lastIndexOf(" ");
+
+  // If there's no space, just cut at maxLength
+  if (lastSpaceIndex === -1) return truncated + "...";
+
+  return truncated.substring(0, lastSpaceIndex) + "...";
+}
