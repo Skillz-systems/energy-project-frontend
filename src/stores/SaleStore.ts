@@ -122,6 +122,7 @@ const ProductModel = types.model({
   productPrice: types.string,
   productImage: types.string,
   productTag: types.string,
+  productPaymentModes: types.string,
 });
 
 const ParamModel = types.model({

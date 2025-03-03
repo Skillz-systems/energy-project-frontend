@@ -22,7 +22,6 @@ const base_url = import.meta.env.VITE_API_BASE_URL;
 
 const SaleTransactions = ({
   data,
-  status,
 }: {
   data: {
     entries: SaleTransactionsType[];
@@ -33,7 +32,6 @@ const SaleTransactions = ({
       email: any;
     };
   };
-  status: string;
 }) => {
   const [paymentConfig, setPaymentConfig] = useState<FlutterwaveConfig>();
 
@@ -120,7 +118,7 @@ const SaleTransactions = ({
           productTag={item?.paymentMode}
           transactionAmount={item?.amount}
           dropDownList={dropDownList}
-          showDropdown={status === "COMPLETED" ? false : true}
+          showDropdown={item?.paymentStatus === "COMPLETED" ? false : true}
         />
       ))}
     </div>

@@ -10,7 +10,24 @@ import { formatDateTime, formatNumberWithCommas } from "@/utils/helpers";
 import customericon from "../../assets/customers/customericon.svg";
 import creditcardicon from "../../assets/creditcardgrey.svg";
 
+type InstallmentAccountDetails = {
+  id: string;
+  flw_ref: string;
+  order_ref: string;
+  account_number: string;
+  account_status: string;
+  frequency: number;
+  bank_name: string;
+  expiry_date: string;
+  note: string;
+  amount: string;
+  createdAt: string;
+};
+
 const SaleDetails = ({ data }: { data: SaleDetailsType }) => {
+  const iDetails: InstallmentAccountDetails =
+    data?.sale?.installmentAccountDetails;
+
   return (
     <div className="flex flex-col w-full gap-4">
       <div className="flex items-center justify-between h-[44px] p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-full">
@@ -107,6 +124,60 @@ const SaleDetails = ({ data }: { data: SaleDetailsType }) => {
             <Tag name="Total Installment Duration" />
             <p className="text-xs font-bold text-textDarkGrey">
               {data.installmentData.totalInstallmentDuration} Months
+            </p>
+          </div>
+        </div>
+      )}
+
+      {data?.paymentMode === "INSTALLMENT" && iDetails && (
+        <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
+          <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
+            <img src={creditcardicon} alt="Card Icon" /> INSTALLMENT ACCOUNT
+            DETAILS
+          </p>
+          <div className="flex items-center justify-between">
+            <Tag name="Account Number" />
+            <p className="text-xs font-bold text-textDarkGrey">
+              {iDetails.account_number}
+            </p>
+          </div>
+          <div className="flex items-center justify-between">
+            <Tag name="Bank Name" />
+            <p className="text-xs font-bold text-textDarkGrey">
+              {iDetails.bank_name}
+            </p>
+          </div>
+          <div className="flex items-center justify-between">
+            <Tag name="Account Status" />
+            <p className="text-xs font-bold text-textDarkGrey">
+              {iDetails.account_status}
+            </p>
+          </div>
+          <div className="flex items-center justify-between">
+            <Tag name="Frequency" />
+            <p className="text-xs font-bold text-textDarkGrey">
+              {iDetails.frequency}
+            </p>
+          </div>
+          <div className="flex items-center justify-between">
+            <Tag name="Expiry Date" />
+            <p className="text-xs font-bold text-textDarkGrey">
+              {iDetails.expiry_date}
+            </p>
+          </div>
+          <div className="flex items-center justify-between">
+            <Tag name="Amount" />
+            <div className="flex items-center justify-end w-max gap-1">
+              <NairaSymbol />
+              <p className="text-xs font-bold text-textDarkGrey">
+                {formatNumberWithCommas(iDetails.amount)}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <Tag name="Created At" />
+            <p className="text-xs font-bold text-textDarkGrey">
+              {formatDateTime("date", iDetails.createdAt)}
             </p>
           </div>
         </div>

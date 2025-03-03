@@ -120,15 +120,29 @@ const ParametersForm = ({
     handleClose();
   };
 
+  const rawPaymentModes =
+    SaleStore.getProductById(currentProductId)?.productPaymentModes;
+  const paymentModesArray = rawPaymentModes
+    ?.split(",")
+    .map((mode) => mode.trim().toLowerCase());
+
+  const hasInstallment = paymentModesArray?.includes("installment");
+  const hasMultipleModes = paymentModesArray && paymentModesArray.length > 1;
+
+  const paymentOptions =
+    hasInstallment && hasMultipleModes
+      ? [
+          { label: "Single Deposit", value: "ONE_OFF" },
+          { label: "Installment", value: "INSTALLMENT" },
+        ]
+      : [{ label: "Single Deposit", value: "ONE_OFF" }];
+
   return (
     <div className="flex flex-col justify-between w-full h-full min-h-[360px]">
       <div className="flex flex-col gap-3">
         <SelectInput
           label="Payment Mode"
-          options={[
-            { label: "Single Deposit", value: "ONE_OFF" },
-            { label: "Installment", value: "INSTALLMENT" },
-          ]}
+          options={paymentOptions}
           value={formData.paymentMode}
           onChange={(selectedValue) =>
             handleSelectChange("paymentMode", selectedValue)

@@ -58,6 +58,7 @@ export type CardComponentProps = {
   productName?: string;
   productUnits?: number;
   totalRemainingQuantities?: number;
+  productPaymentModes?: string;
   onSelectProduct?: (productInfo: {
     productPrice: any;
     productUnits: any;
@@ -367,6 +368,7 @@ export const CardComponent = ({
   productName,
   productUnits,
   totalRemainingQuantities,
+  productPaymentModes,
   onSelectProduct,
   onRemoveProduct,
   isProductSelected,
@@ -391,6 +393,7 @@ export const CardComponent = ({
     productTag,
     productName,
     productPrice,
+    productPaymentModes,
   };
 
   useEffect(() => {

@@ -1,8 +1,6 @@
 import React, { useState } from "react";
-import { KeyedMutator } from "swr";
 import { Modal } from "../ModalComponent/Modal";
 import { ProductTag, SimpleTag } from "../CardComponents/CardComponent";
-// import { DropDown } from "../DropDownComponent/DropDown";
 import TabComponent from "../TabComponent/TabComponent";
 import { TabNamesType } from "../Inventory/InventoryDetailModal";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
@@ -50,12 +48,10 @@ const SalesDetailsModal = ({
   isOpen,
   setIsOpen,
   salesID,
-}: // refreshTable,
-{
+}: {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   salesID: string;
-  refreshTable: KeyedMutator<any>;
 }) => {
   const [tabContent, setTabContent] = useState<string>("details");
 
@@ -96,6 +92,7 @@ const SalesDetailsModal = ({
         installmentStartingPrice: data?.sale?.installmentStartingPrice || 0,
         totalInstallmentDuration: data?.sale?.totalInstallmentDuration || 0,
       },
+      sale: data?.sale,
     };
   };
 
@@ -124,41 +121,6 @@ const SalesDetailsModal = ({
     return { entries, paymentInfo: data?.sale?.payment, customer };
   };
 
-  // const cancelSale = async () => {
-  //   const confirmation = prompt(
-  //     `Are you sure you want to cancel sale with ID "${data?.saleId}"? This action is irreversible! Enter "Yes" or "No".`,
-  //     "No"
-  //   );
-
-  //   if (confirmation?.trim()?.toLowerCase() === "yes") {
-  //     toast.info(`Cancelling sale ${data?.saleId}`);
-  //     apiCall({
-  //       endpoint: "/v1/sales/cancel",
-  //       method: "post",
-  //       data: { id: salesID },
-  //       successMessage: "Sale cancelled successfully!",
-  //     })
-  //       .then(async () => {
-  //         await refreshTable();
-  //       })
-  //       .catch((error: any) => console.error(error));
-  //   }
-  // };
-
-  // const dropDownList = {
-  //   items: ["Make Payment"],
-  //   onClickLink: (index: number) => {
-  //     switch (index) {
-  //       case 0:
-  //         break;
-  //       default:
-  //         break;
-  //     }
-  //   },
-  //   defaultStyle: true,
-  //   showCustomButton: true,
-  // };
-
   const tabNames: TabNamesType[] = [
     { name: "Sale Details", key: "details", count: null },
     {
@@ -169,7 +131,7 @@ const SalesDetailsModal = ({
     {
       name: "Sale Devices",
       key: "devices",
-      count: fetchSingleSale?.data?.devices.length || 0,
+      count: fetchSingleSale?.data?.devices?.length || 0,
     },
     {
       name: "Sale Transactions",
@@ -248,10 +210,7 @@ const SalesDetailsModal = ({
             ) : tabContent === "devices" ? (
               <SaleDevices data={fetchSingleSale?.data?.devices} />
             ) : (
-              <SaleTransactions
-                data={generateSaleTransactionEntries()}
-                status={fetchSingleSale?.data?.sale?.status}
-              />
+              <SaleTransactions data={generateSaleTransactionEntries()} />
             )}
           </DataStateWrapper>
         </div>
