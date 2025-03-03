@@ -3,12 +3,10 @@ import PageLayout from "./PageLayout";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-// import cancelled from "../assets/cancelled.svg";
 import gradientcontract from "../assets/contracts/gradientcontract.svg";
 import contractsbadge from "../assets/contracts/contractsbadge.png";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
-// import CreateNewContract from "@/Components/Contracts/CreateNewContract";
 import { useGetRequest } from "@/utils/useApiCall";
 
 const ContractsTable = lazy(
@@ -17,11 +15,17 @@ const ContractsTable = lazy(
 
 const Contracts = () => {
   const location = useLocation();
-  // const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [_contractsData, setContractsData] = useState<any>(null);
-  const [contractsFilter, setContractsFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
+  const [tableQueryParams, setTableQueryParams] = useState<Record<
+    string,
+    any
+  > | null>({});
+
+  const queryString = Object.entries(tableQueryParams || {})
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .join("&");
+
   const {
     data: contractsData,
     isLoading: contractsLoading,
@@ -29,8 +33,8 @@ const Contracts = () => {
     error: allContractsError,
     errorStates: allContractsErrorStates,
   } = useGetRequest(
-    `/v1/contract?page=${currentPage}&limit=${entriesPerPage}&${
-      contractsFilter && `status=${contractsFilter}`
+    `/v1/contract?page=${currentPage}&limit=${entriesPerPage}${
+      queryString && `&${queryString}`
     }`,
     true,
     60000
@@ -50,28 +54,16 @@ const Contracts = () => {
   useEffect(() => {
     switch (location.pathname) {
       case "/contracts/all":
-        setContractsFilter("");
-        setContractsData(contractsData);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+        }));
         break;
-      // case "/contracts/signed":
-      //   setContractsFilter("signed");
-      //   setContractsData(contractsData);
-
-      //   break;
-      // case "/contracts/unsigned":
-      //   setContractsFilter("unsigned");
-      //   setContractsData(contractsData);
-
-      //   break;
-      // case "/contracts/cancelled":
-      //   setContractsFilter("cancelled");
-      //   setContractsData(contractsData);
-      //   break;
       default:
-        setContractsFilter("");
-        setContractsData(contractsData);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+        }));
     }
-  }, [contractsData, location.pathname]);
+  }, [location.pathname]);
 
   const navigationList = [
     {
@@ -79,21 +71,6 @@ const Contracts = () => {
       link: "/contracts/all",
       count: contractsData?.total || 0,
     },
-    // {
-    //   title: "Signed Contracts",
-    //   link: "/contracts/signed",
-    //   count: 75,
-    // },
-    // {
-    //   title: "Unsigned Contracts",
-    //   link: "/contracts/unsigned",
-    //   count: 50,
-    // },
-    // {
-    //   title: "Cancelled Contracts",
-    //   link: "/contracts/cancelled",
-    //   count: 25,
-    // },
   ];
 
   const dropDownList = {
@@ -113,7 +90,6 @@ const Contracts = () => {
     showCustomButton: true,
   };
 
-  // const contractsPaths = ["all", "signed", "unsigned", "cancelled"];
   const contractsPaths = ["all"];
 
   return (
@@ -128,22 +104,8 @@ const Contracts = () => {
               bottomText="CONTRACTS"
               value={contractsData?.total}
             />
-            {/*<TitlePill
-              icon={cancelled}
-              iconBgColor="bg-[#FFDBDE]"
-              topText="Cancelled"
-              bottomText="CONTRACTS"
-              value={120}
-            />*/}
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
-            {/* <ActionButton
-              label="New Contract"
-              icon={<img src={circleAction} />}
-              onClick={() => {
-                setIsOpen(true);
-              }}
-            /> */}
             <DropDown {...dropDownList} />
           </div>
         </section>
@@ -166,12 +128,13 @@ const Contracts = () => {
                     path={path}
                     element={
                       <ContractsTable
-                        contractsData={_contractsData}
+                        contractsData={contractsData}
                         isLoading={contractsLoading}
                         refreshTable={allContractsRefresh}
                         error={allContractsError}
                         errorData={allContractsErrorStates}
                         paginationInfo={paginationInfo}
+                        setTableQueryParams={setTableQueryParams}
                       />
                     }
                   />
@@ -181,11 +144,6 @@ const Contracts = () => {
           </section>
         </div>
       </PageLayout>
-      {/* <CreateNewContract
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        allContractsRefresh={allContractsRefresh}
-      /> */}
     </>
   );
 };
