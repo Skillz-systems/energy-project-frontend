@@ -52,6 +52,17 @@ const defaultValues: SnapshotIn<typeof saleStore> = {
       addressAsOnID: "",
     },
   },
+  paymentDetails: {
+    public_key: "",
+    tx_ref: "",
+    amount: 0,
+    currency: "NGN",
+    customer: { email: "", phone_number: "", name: "" },
+    customizations: { title: "", description: "", logo: "" },
+    meta: {},
+    redirect_url: "",
+    payment_options: "card, ussd, mobilemoney",
+  },
 };
 
 const IdentificationDetailsModel = types.model({
@@ -111,6 +122,7 @@ const ProductModel = types.model({
   productPrice: types.string,
   productImage: types.string,
   productTag: types.string,
+  productPaymentModes: types.string,
 });
 
 const ParamModel = types.model({
@@ -164,6 +176,28 @@ const SaleItemsModel = types.model({
   saleRecipient: types.maybe(SaleRecipientModel),
 });
 
+const CustomizationsModel = types.model({
+  title: types.string,
+  description: types.string,
+  logo: types.string,
+});
+
+const PaymentDataModel = types.model({
+  public_key: types.string,
+  tx_ref: types.string,
+  amount: types.number,
+  currency: types.string,
+  customer: types.model({
+    email: types.string,
+    phone_number: types.string,
+    name: types.string,
+  }),
+  customizations: CustomizationsModel,
+  meta: types.maybe(types.frozen()), // Accepts any JSON object
+  redirect_url: types.string,
+  payment_options: types.string,
+});
+
 const saleStore = types
   .model({
     category: types.enumeration(["PRODUCT"]),
@@ -179,16 +213,16 @@ const saleStore = types
     identificationDetails: IdentificationDetailsModel,
     nextOfKinDetails: NextOfKinDetailsModel,
     guarantorDetails: GuarantorDetailsModel,
+    paymentDetails: PaymentDataModel,
   })
   .actions((self) => ({
     addSaleItem(productId: string) {
       const product = self.products.find((p) => p.productId === productId);
-      // if (!product) return;
+      if (!product?.productId) return;
 
       const params = self.parameters.find(
         (p) => p.currentProductId === productId
       );
-      // if (!params) return;
 
       // Ensure devices is a plain array of strings
       const devices = toJS(
@@ -578,6 +612,9 @@ const saleStore = types
         }
       });
     },
+    addPaymentDetails(data: any) {
+      self.paymentDetails = data;
+    },
     purgeStore() {
       applySnapshot(self, defaultValues);
     },
@@ -628,6 +665,17 @@ export const SaleStore = saleStore.create({
       fullNameAsOnID: "",
       addressAsOnID: "",
     },
+  },
+  paymentDetails: {
+    public_key: "",
+    tx_ref: "",
+    amount: 0,
+    currency: "NGN",
+    customer: { email: "", phone_number: "", name: "" },
+    customizations: { title: "", description: "", logo: "" },
+    meta: {},
+    redirect_url: "",
+    payment_options: "card, ussd, mobilemoney",
   },
 });
 

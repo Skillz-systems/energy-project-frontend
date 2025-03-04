@@ -1,17 +1,14 @@
 import React, { useState } from "react";
-import { KeyedMutator } from "swr";
 import { Modal } from "../ModalComponent/Modal";
 import { ProductTag, SimpleTag } from "../CardComponents/CardComponent";
-// import { DropDown } from "../DropDownComponent/DropDown";
 import TabComponent from "../TabComponent/TabComponent";
 import { TabNamesType } from "../Inventory/InventoryDetailModal";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import SaleDetails from "./SaleDetails";
-import SaleHistory from "./SaleHistory";
 import SaleTransactions from "./SaleTransactions";
-// import { toast } from "react-toastify";
-// import { useApiCall, useGetRequest } from "@/utils/useApiCall";
 import { useGetRequest } from "@/utils/useApiCall";
+import SaleDevices from "./SaleDevices";
+import SaleInventory from "./SaleInventory";
 
 export type SaleDetailsType = {
   daysToNextInstallment: string;
@@ -20,11 +17,22 @@ export type SaleDetailsType = {
   paymentMode: string;
   saleId: string;
   productName: string;
-  salePrice: number;
   customer: string;
   address: string;
+  phone: string;
+  email: string;
   datetime: string;
   agent: string;
+  sale?: any;
+  image: string;
+  productQuantity: string;
+  installmentData: {
+    totalPrice: number;
+    totalPaid: number;
+    totalMonthlyPayment: number;
+    installmentStartingPrice: number;
+    totalInstallmentDuration: number;
+  };
 };
 
 export type SaleTransactionsType = {
@@ -40,109 +48,96 @@ const SalesDetailsModal = ({
   isOpen,
   setIsOpen,
   salesID,
-}: // refreshTable,
-{
+}: {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   salesID: string;
-  refreshTable: KeyedMutator<any>;
 }) => {
-  // const { apiCall } = useApiCall();
   const [tabContent, setTabContent] = useState<string>("details");
 
   const fetchSingleSale = useGetRequest(`/v1/sales/${salesID}`, false);
 
+  const fetchProductCategories = useGetRequest(
+    `/v1/products/categories/all`,
+    false
+  );
   const generateSaleEntries = (): SaleDetailsType => {
     const data = fetchSingleSale?.data;
     const customerKey = data?.sale?.customer;
     const customerName = `${customerKey?.firstname} ${customerKey?.lastname}`;
+    const productCategory =
+      fetchProductCategories?.data?.find(
+        (item: { id: any }) => item?.id === data?.product?.categoryId
+      )?.name || "";
+
     return {
-      daysToNextInstallment: "29 DAYS",
-      status: data?.sale?.status,
-      productCategory: data?.product?.categoryName || "N/A",
-      paymentMode: data?.paymentMode,
-      saleId: data?.id,
-      productName: data?.product?.name,
-      salePrice: 290000,
+      daysToNextInstallment: "N/A", // FIX LATER
+      status: data?.sale?.status || "",
+      productCategory: productCategory || "N/A",
+      paymentMode: data?.paymentMode || "",
+      saleId: data?.id || "",
+      productName: data?.product?.name || "",
       customer: customerName,
-      address: customerKey?.location,
-      datetime: data?.createdAt,
+      address: customerKey?.location || "",
+      phone: customerKey?.phone || "",
+      email: customerKey?.email || "",
+      datetime: data?.createdAt || "",
       agent: data?.agent || "N/A",
+      image: data?.product?.image || "",
+      productQuantity: data?.quantity || 0,
+      installmentData: {
+        totalPrice: data?.sale?.totalPrice || 0,
+        totalPaid: data?.sale?.totalPaid || 0,
+        totalMonthlyPayment: data?.sale?.totalMonthlyPayment || 0,
+        installmentStartingPrice: data?.sale?.installmentStartingPrice || 0,
+        totalInstallmentDuration: data?.sale?.totalInstallmentDuration || 0,
+      },
+      sale: data?.sale,
     };
   };
 
   const data = generateSaleEntries();
 
-  const generateSaleTransactionEntries = (): SaleTransactionsType[] => {
-    return [
-      {
-        transactionId: "362328hsdda",
-        paymentStatus: "Successful",
-        datetime: "2024-12-23T12:34:56",
-        productCategory: "EAAS",
-        paymentMode: "RECHARGE",
-        amount: 60500,
-      },
-      {
-        transactionId: "562328hsdda",
-        paymentStatus: "Failed",
-        datetime: "2024-12-23T12:34:56",
-        productCategory: "SHS",
-        paymentMode: "RECHARGE",
-        amount: 50500,
-      },
-    ];
+  const generateSaleTransactionEntries = () => {
+    const data = fetchSingleSale?.data;
+    const entries = data?.sale?.payment.map(
+      (p: { id: any; paymentStatus: any; paymentDate: any; amount: any }) => ({
+        transactionId: p?.id,
+        paymentStatus: p?.paymentStatus,
+        datetime: p?.paymentDate,
+        productCategory: data?.sale?.category,
+        paymentMode: data?.paymentMode,
+        amount: p?.amount,
+      })
+    );
+
+    const customerKey = data?.sale?.customer;
+    const customerName = `${customerKey?.firstname} ${customerKey?.lastname}`;
+    const customer = {
+      name: customerName,
+      phone_number: customerKey?.phone,
+      email: customerKey?.email,
+    };
+    return { entries, paymentInfo: data?.sale?.payment, customer };
   };
-
-  // const cancelSale = async () => {
-  //   const confirmation = prompt(
-  //     `Are you sure you want to cancel sale with ID "${data?.saleId}"? This action is irreversible! Enter "Yes" or "No".`,
-  //     "No"
-  //   );
-
-  //   if (confirmation?.trim()?.toLowerCase() === "yes") {
-  //     toast.info(`Cancelling sale ${data?.saleId}`);
-  //     apiCall({
-  //       endpoint: "/v1/sales/cancel",
-  //       method: "post",
-  //       data: { id: salesID },
-  //       successMessage: "Sale cancelled successfully!",
-  //     })
-  //       .then(async () => {
-  //         await refreshTable();
-  //       })
-  //       .catch((error: any) => console.error(error));
-  //   }
-  // };
-
-  // const dropDownList = {
-  //   items: ["View Product", "View Agent", "View Customer", "Cancel Sale"],
-  //   onClickLink: (index: number) => {
-  //     switch (index) {
-  //       case 0:
-  //         console.log("View Product");
-  //         break;
-  //       case 1:
-  //         console.log("View Agent");
-  //         break;
-  //       case 2:
-  //         console.log("View Customer");
-  //         break;
-  //       case 3:
-  //         cancelSale();
-  //         break;
-  //       default:
-  //         break;
-  //     }
-  //   },
-  //   defaultStyle: true,
-  //   showCustomButton: true,
-  // };
 
   const tabNames: TabNamesType[] = [
     { name: "Sale Details", key: "details", count: null },
-    { name: "Sale History", key: "history", count: null },
-    { name: "Sale Transactions", key: "transactions", count: 2 },
+    {
+      name: "Sale Inventory",
+      key: "inventory",
+      count: fetchSingleSale?.data?.product?.inventories?.length || 0,
+    },
+    {
+      name: "Sale Devices",
+      key: "devices",
+      count: fetchSingleSale?.data?.devices?.length || 0,
+    },
+    {
+      name: "Sale Transactions",
+      key: "transactions",
+      count: fetchSingleSale?.data?.sale?.payment?.length || 0,
+    },
   ];
 
   return (
@@ -158,14 +153,17 @@ const SalesDetailsModal = ({
       leftHeaderComponents={
         data?.status ? (
           <div className="flex items-center gap-3">
-            {[data?.daysToNextInstallment, data?.status].map((item, index) => (
-              <SimpleTag
-                key={index}
-                text={item}
-                dotColour="#9BA4BA"
-                containerClass="bg-[#F6F8FA] font-light text-textDarkGrey px-2 py-1 border-[0.4px] border-strokeGreyThree rounded-full"
-              />
-            ))}
+            {[data?.daysToNextInstallment, data?.status].map((item, index) =>
+              index === 0 &&
+              fetchSingleSale?.data.paymentMode === "ONE_OFF" ? null : (
+                <SimpleTag
+                  key={index}
+                  text={item}
+                  dotColour="#9BA4BA"
+                  containerClass="bg-[#F6F8FA] font-light text-textDarkGrey px-2 py-1 border-[0.4px] border-strokeGreyThree rounded-full"
+                />
+              )
+            )}
           </div>
         ) : null
       }
@@ -183,7 +181,9 @@ const SalesDetailsModal = ({
               <p className="text-textBlack text-xs">{data?.paymentMode}</p>
             </div>
           )}
-          {/* <DropDown {...dropDownList} /> */}
+          {/* {fetchSingleSale?.data?.sale?.status === "COMPLETED" ? null : (
+            <DropDown {...dropDownList} />
+          )} */}
         </header>
         <div className="flex flex-col w-full gap-4 px-4 py-2">
           <TabComponent
@@ -203,8 +203,12 @@ const SalesDetailsModal = ({
           >
             {tabContent === "details" ? (
               <SaleDetails data={data} />
-            ) : tabContent === "history" ? (
-              <SaleHistory />
+            ) : tabContent === "inventory" ? (
+              <SaleInventory
+                data={fetchSingleSale?.data?.product?.inventories}
+              />
+            ) : tabContent === "devices" ? (
+              <SaleDevices data={fetchSingleSale?.data?.devices} />
             ) : (
               <SaleTransactions data={generateSaleTransactionEntries()} />
             )}
