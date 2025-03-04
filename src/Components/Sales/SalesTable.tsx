@@ -221,7 +221,6 @@ const SalesTable = ({
               isOpen={isOpen}
               setIsOpen={setIsOpen}
               salesID={salesID}
-              refreshTable={refreshTable}
             />
           )}
         </div>

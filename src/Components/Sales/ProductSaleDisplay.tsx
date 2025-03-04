@@ -1,6 +1,10 @@
 import React from "react";
 import { Tag } from "../Products/ProductDetails";
-import { ProductTag, SimpleTag } from "../CardComponents/CardComponent";
+import {
+  NairaSymbol,
+  ProductTag,
+  SimpleTag,
+} from "../CardComponents/CardComponent";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import { ExtraInfoType } from "./CreateNewSale";
 import { SaleStore } from "@/stores/SaleStore";
@@ -9,13 +13,16 @@ import { observer } from "mobx-react-lite";
 export const ProductDetailRow = ({
   label,
   value,
+  showNaira = false,
 }: {
   label: string;
   value: string | number;
+  showNaira?: boolean;
 }) => (
   <div className="flex items-center justify-between w-full">
     <Tag name={label} />
-    <p className="text-xs font-bold text-textDarkGrey">
+    <p className="flex gap-1 items-center text-xs font-bold text-textDarkGrey">
+      {showNaira && <NairaSymbol />}
       {label === "Product Category" ? <ProductTag productTag={value} /> : value}
     </p>
   </div>

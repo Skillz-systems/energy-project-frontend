@@ -70,7 +70,7 @@ type Customer = {
   deletedAt: string | null; // ISO date string
 };
 
-type SaleItem = {
+export type SaleItem = {
   id: string;
   productId: string;
   quantity: number;

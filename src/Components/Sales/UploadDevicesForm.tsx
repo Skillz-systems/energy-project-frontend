@@ -2,6 +2,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { FaPlus } from "react-icons/fa";
 import { MdFilterList, MdFilterListOff } from "react-icons/md";
+import { HiPlus } from "react-icons/hi2";
 import { useApiCall, useGetRequest } from "@/utils/useApiCall";
 import { Asterik } from "../InputComponent/Input";
 import { LuPlus } from "react-icons/lu";
@@ -58,7 +59,7 @@ const filterShape = [
   { name: "Firmware Version", value: "firmwareVersion" },
 ];
 
-const text = "Fill device information.";
+// const text = "Fill device information.";
 
 const UploadDevicesForm = ({
   handleClose,
@@ -84,6 +85,7 @@ const UploadDevicesForm = ({
     SaleStore.getSelectedDevices(currentProductId) || []
   );
   const [createDevice, setCreateDevice] = useState<boolean>(false);
+  const [linkView, setLinkView] = useState<string>("");
   const product = SaleStore.getProductById(currentProductId);
 
   const { data, mutate } = useGetRequest("/v1/device", true);
@@ -135,6 +137,8 @@ const UploadDevicesForm = ({
       });
       await mutate();
       setCreateDevice(false);
+      setLinkView("selectDevice");
+      setDescription("Select Device");
       setFormData(defaultFormData);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
@@ -184,9 +188,24 @@ const UploadDevicesForm = ({
     handleClose();
   };
 
+  const handleCancel = () => {
+    setSearchTerm("");
+    setFilterKey("search");
+    setCreateDevice(false);
+    setToggleFilter(false);
+    setFormData(defaultFormData);
+    setFormErrors([]);
+    setApiError(null);
+    setSelectedDevices([]);
+    setFilteredDevices(null);
+    setCreateDevice(false);
+    setLinkView("");
+    setDescription("Link Device(s)");
+  };
+
   return (
     <form className="flex flex-col justify-between h-full max-h-[400px] gap-2">
-      {createDevice ? (
+      {createDevice && linkView === "createDevice" ? (
         <div className="space-y-4 max-h-[360px] overflow-y-auto">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -357,7 +376,8 @@ const UploadDevicesForm = ({
               type="button"
               onClick={() => {
                 setCreateDevice(false);
-                setDescription(text);
+                setLinkView("selectDevice");
+                setDescription("Select Device");
               }}
               className="w-max min-w-[150px] bg-white text-textDarkGrey font-medium px-8 py-3 border-[0.6px] border-strokeGreyTwo shadow-sm rounded-full hover:bg-slate-50 transition-all"
             >
@@ -376,98 +396,110 @@ const UploadDevicesForm = ({
       ) : (
         <>
           <div>
-            <div className="space-y-2">
-              {toggleFilter && (
-                <div className="flex items-center justify-between w-full gap-1 transition-all">
-                  <p className="w-[25%] font-semibold">Set Filter:</p>
-                  <select
-                    value={filterKey}
-                    onChange={(e) => {
-                      e.preventDefault();
-                      setFilterKey(e.target.value as keyof DeviceFormSchema);
-                    }}
-                    className="w-[75%] px-3 py-2 border rounded-md outline-none transition-colors border-gray-300 focus:border-blue-500"
-                  >
-                    {filterShape.map((filter, index) => (
-                      <option key={index} value={filter.value}>
-                        {filter.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              <div className="relative">
-                <input
-                  type="text"
-                  name="searchTerm"
-                  value={searchTerm}
-                  onChange={handleInputChange}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      filterDevices();
-                      fetchDevice();
-                    }
-                  }}
-                  onBlur={() => {
-                    if (searchTerm) {
-                      filterDevices();
-                      fetchDevice();
-                    }
-                  }}
-                  placeholder="Search devices..."
-                  className="w-full px-4 py-2 pr-10 border rounded-md outline-none transition-colors border-gray-300 focus:border-blue-500"
-                />
-                <div className="flex items-center justify-between absolute right-3 top-1/2 -translate-y-1/2 w-max gap-2 cursor-pointer">
-                  <IoIosSearch
-                    className="text-textDarkGrey w-5 h-5"
-                    title={`${
-                      filterKey === "search"
-                        ? "Perform Search"
-                        : `Search by ${
-                            filterShape.find(
-                              (filter) => filter.value === filterKey
-                            )?.name
-                          }`
-                    }`}
-                    onClick={() => {
-                      filterDevices();
-                      fetchDevice();
-                    }}
-                  />
-                  <span
-                    title={toggleFilter ? "Reset Filter" : "Apply Filter"}
-                    onClick={() => {
-                      if (toggleFilter) {
-                        setFilterKey("search");
-                        setFilteredDevices(null);
+            {linkView === "" ? null : (
+              <div className="space-y-2">
+                {toggleFilter && (
+                  <div className="flex items-center justify-between w-full gap-1 transition-all">
+                    <p className="w-[25%] font-semibold">Set Filter:</p>
+                    <select
+                      value={filterKey}
+                      onChange={(e) => {
+                        e.preventDefault();
+                        setFilterKey(e.target.value as keyof DeviceFormSchema);
+                      }}
+                      className="w-[75%] px-3 py-2 border rounded-md outline-none transition-colors border-gray-300 focus:border-blue-500"
+                    >
+                      {filterShape.map((filter, index) => (
+                        <option key={index} value={filter.value}>
+                          {filter.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="searchTerm"
+                    value={searchTerm}
+                    onChange={handleInputChange}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        filterDevices();
+                        fetchDevice();
                       }
-                      setToggleFilter(!toggleFilter);
                     }}
-                  >
-                    {toggleFilter ? (
-                      <MdFilterListOff className="text-errorTwo w-5 h-5" />
-                    ) : (
-                      <MdFilterList className="text-textDarkGrey w-5 h-5" />
-                    )}
-                  </span>
+                    onBlur={() => {
+                      if (searchTerm) {
+                        filterDevices();
+                        fetchDevice();
+                      }
+                    }}
+                    placeholder="Search devices..."
+                    className="w-full px-4 py-2 pr-10 border rounded-md outline-none transition-colors border-gray-300 focus:border-blue-500"
+                  />
+                  <div className="flex items-center justify-between absolute right-3 top-1/2 -translate-y-1/2 w-max gap-2 cursor-pointer">
+                    <IoIosSearch
+                      className="text-textDarkGrey w-5 h-5"
+                      title={`${
+                        filterKey === "search"
+                          ? "Perform Search"
+                          : `Search by ${
+                              filterShape.find(
+                                (filter) => filter.value === filterKey
+                              )?.name
+                            }`
+                      }`}
+                      onClick={() => {
+                        filterDevices();
+                        fetchDevice();
+                      }}
+                    />
+                    <span
+                      title={toggleFilter ? "Reset Filter" : "Apply Filter"}
+                      onClick={() => {
+                        if (toggleFilter) {
+                          setFilterKey("search");
+                          setFilteredDevices(null);
+                        }
+                        setToggleFilter(!toggleFilter);
+                      }}
+                    >
+                      {toggleFilter ? (
+                        <MdFilterListOff className="text-errorTwo w-5 h-5" />
+                      ) : (
+                        <MdFilterList className="text-textDarkGrey w-5 h-5" />
+                      )}
+                    </span>
+                    <span
+                      title="Create Device"
+                      onClick={() => {
+                        setCreateDevice(true);
+                        setLinkView("createDevice");
+                        setDescription("Create Device");
+                      }}
+                    >
+                      <HiPlus className="text-textDarkGrey w-5 h-5" />
+                    </span>
+                  </div>
                 </div>
+                {loading && (
+                  <p className="text-xs text-textBlack text-center font-medium">
+                    Searching...
+                  </p>
+                )}
+                {filteredDevices !== null && !loading && (
+                  <p className="text-xs text-textBlack text-center font-medium">
+                    {filteredDevices?.length === 0
+                      ? "No results found."
+                      : `${filteredDevices?.length} result${
+                          filteredDevices?.length > 1 ? "s" : ""
+                        } found.`}
+                  </p>
+                )}
               </div>
-              {loading && (
-                <p className="text-xs text-textBlack text-center font-medium">
-                  Searching...
-                </p>
-              )}
-              {filteredDevices !== null && !loading && (
-                <p className="text-xs text-textBlack text-center font-medium">
-                  {filteredDevices?.length === 0
-                    ? "No results found."
-                    : `${filteredDevices?.length} result${
-                        filteredDevices?.length > 1 ? "s" : ""
-                      } found.`}
-                </p>
-              )}
-            </div>
+            )}
 
             {!loading &&
               filteredDevices === null &&
@@ -479,12 +511,12 @@ const UploadDevicesForm = ({
                 <p className="text-sm text-textBlack font-medium text-center mt-6">
                   Failed to load product inventories
                 </p>
-              ) : (
-                <div className="flex flex-col items-center justify-center w-full mt-6 gap-1">
+              ) : linkView === "" ? (
+                <div className="flex flex-col items-center justify-center w-full mt-2 gap-1">
                   <p className="text-sm text-textBlack font-medium">
                     Link the Product Inventories Below
                   </p>
-                  <div className="flex flex-col gap-2 items-center justify-center w-full h-full pt-12 pr-3 max-h-[250px] overflow-y-auto">
+                  <div className="flex flex-col gap-2 items-center justify-center w-full h-full pt-2 pr-3 max-h-[300px] overflow-y-auto">
                     {productData?.inventories?.map((item: any) => (
                       <div
                         key={item.id}
@@ -511,10 +543,10 @@ const UploadDevicesForm = ({
                         <div className="flex items-center justify-center p-0.5 bg-slate-200 rounded-full border-[0.6px] border-strokeGreyTwo cursor-pointer">
                           <LuPlus
                             className="text-textDarkGrey w-4 h-4"
-                            title="Create New Device"
+                            title="Link Device"
                             onClick={() => {
-                              setCreateDevice(true);
-                              setDescription("Create New Device");
+                              setLinkView("selectDevice");
+                              setDescription("Select Device");
                             }}
                           />
                         </div>
@@ -522,10 +554,10 @@ const UploadDevicesForm = ({
                     ))}
                   </div>
                 </div>
-              ))}
+              ) : null)}
 
-            {filteredDevices === null ||
-            filteredDevices?.length === 0 ? null : (
+            {linkView === "" ? null : filteredDevices === null ||
+              filteredDevices?.length === 0 ? null : (
               <div className="overflow-auto max-h-[220px] border border-strokeGreyTwo rounded-md bg-white mt-2">
                 <table className="w-full border-collapse">
                   <thead className="bg-gray-100 sticky top-0 z-10">
@@ -573,51 +605,59 @@ const UploadDevicesForm = ({
                 </table>
               </div>
             )}
-            {data?.length === 0 && (
-              <div className="text-center pt-2">
-                <p className="mb-2">No devices available.</p>
-                <button
-                  type="button"
-                  className="px-4 py-2 bg-success hover:bg-green-500 text-white rounded-md transition-colors flex items-center justify-center mx-auto"
-                  onClick={() => {
-                    setCreateDevice(true);
-                    setDescription("Link Device");
-                  }}
-                >
-                  <FaPlus className="mr-2" />
-                  Create Device
-                </button>
-              </div>
-            )}
+
+            {linkView === ""
+              ? null
+              : data?.length === 0 && (
+                  <div className="text-center pt-2">
+                    <p className="mb-2">No devices available.</p>
+                    <button
+                      type="button"
+                      className="px-4 py-2 bg-success hover:bg-green-500 text-white rounded-md transition-colors flex items-center justify-center mx-auto"
+                      onClick={() => {
+                        setCreateDevice(true);
+                        setLinkView("createDevice");
+                        setDescription("Create Device");
+                      }}
+                    >
+                      <FaPlus className="mr-2" />
+                      Create Device
+                    </button>
+                  </div>
+                )}
           </div>
 
-          {filteredDevices !== null && filteredDevices?.length > 0 && (
-            <div className="flex flex-col w-full gap-1 px-5 pb-4 mt-4 absolute bottom-0 left-0">
-              <p className="text-sm text-textBlack font-medium">
-                {selectedDevices?.length === 0
-                  ? "No device selected"
-                  : `${selectedDevices?.length} device${
-                      selectedDevices?.length > 1 ? "s" : ""
-                    } selected.`}
-              </p>
-              <div className="flex items-center justify-between gap-1">
-                <button
-                  className="w-max min-w-[150px] bg-white text-textDarkGrey font-medium px-8 py-3 border-[0.6px] border-strokeGreyTwo shadow-sm rounded-full hover:bg-slate-50 transition-all"
-                  onClick={handleClose}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  disabled={selectedDevices.length === 0}
-                  className="w-max min-w-[150px] bg-primaryGradient text-white text-center font-medium px-8 py-3 shadow-sm rounded-full hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={saveForm}
-                >
-                  {`Link Device${selectedDevices?.length > 1 ? "s" : ""}`}
-                </button>
-              </div>
-            </div>
-          )}
+          {linkView === ""
+            ? null
+            : filteredDevices !== null &&
+              filteredDevices?.length > 0 && (
+                <div className="flex flex-col w-full gap-1 px-5 pb-4 mt-4 absolute bottom-0 left-0">
+                  <p className="text-sm text-textBlack font-medium">
+                    {selectedDevices?.length === 0
+                      ? "No device selected"
+                      : `${selectedDevices?.length} device${
+                          selectedDevices?.length > 1 ? "s" : ""
+                        } selected.`}
+                  </p>
+                  <div className="flex items-center justify-between gap-1">
+                    <button
+                      type="button"
+                      className="w-max min-w-[150px] bg-white text-textDarkGrey font-medium px-8 py-3 border-[0.6px] border-strokeGreyTwo shadow-sm rounded-full hover:bg-slate-50 transition-all"
+                      onClick={handleCancel}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      disabled={selectedDevices.length === 0}
+                      className="w-max min-w-[150px] bg-primaryGradient text-white text-center font-medium px-8 py-3 shadow-sm rounded-full hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={saveForm}
+                    >
+                      {`Link Device${selectedDevices?.length > 1 ? "s" : ""}`}
+                    </button>
+                  </div>
+                </div>
+              )}
         </>
       )}
     </form>

@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { ApiErrorStatesType, useApiCall } from "@/utils/useApiCall";
+import { ApiErrorStatesType } from "@/utils/useApiCall";
 import { KeyedMutator } from "swr";
 import { ErrorComponent } from "@/Pages/ErrorPage";
 import { PaginationType, Table } from "../TableComponent/Table";
 import gradientcontract from "../../assets/contracts/gradientcontract.svg";
-// import { ProductTag } from "../CardComponents/CardComponent";
 import roletwo from "../../assets/table/roletwo.svg";
 import ContractModal from "./ContractModal";
 import { Contract } from "./contractType";
@@ -14,6 +13,7 @@ type ContractEntries = {
   paymentMode: string;
   customer: string;
   contractSigned: string;
+  contractId: string;
 };
 
 // Helper function to map the API data to the desired format
@@ -24,6 +24,7 @@ const generateContractEntries = (data: any): ContractEntries[] => {
       paymentMode: "",
       customer: item?.fullNameAsOnID,
       contractSigned: Boolean(item?.signedAt),
+      contractId: item?.id,
     };
   });
   return entries;
@@ -36,6 +37,7 @@ const ContractsTable = ({
   error,
   errorData,
   paginationInfo,
+  setTableQueryParams,
 }: {
   contractsData: any;
   isLoading: boolean;
@@ -43,102 +45,32 @@ const ContractsTable = ({
   error: any;
   errorData: ApiErrorStatesType;
   paginationInfo: PaginationType;
+  setTableQueryParams: React.Dispatch<
+    React.SetStateAction<Record<string, any> | null>
+  >;
 }) => {
-  const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [contractID, setContractID] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
-  const [queryData, setQueryData] = useState<any>(null);
-  const [queryLoading, setQueryLoading] = useState<boolean>(false);
   const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
 
   const filterList = [
     {
-      name: "Categories",
-      items: ["SHS", "EAAS", "Rooftop"],
-      onClickLink: async (index: number) => {
-        const data = ["SHS", "EAAS", "Rooftop"].map((item) =>
-          item.toLocaleLowerCase()
-        );
-        const query = data[index];
-        setQueryValue(query);
-        if (queryData) setQueryData(null);
-        setQueryLoading(true);
-        setQueryValue(query);
-        try {
-          const response = await apiCall({
-            endpoint: `/v1/contracts?status=${encodeURIComponent(query)}`,
-            method: "get",
-            successMessage: "",
-            showToast: false,
-          });
-          setQueryData(response.data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setQueryLoading(false);
-        }
-      },
-    },
-    {
-      name: "Search",
-      onSearch: async (query: string) => {
-        setQueryValue(query);
-        setIsSearchQuery(true);
-        if (queryData) setQueryData(null);
-        setQueryLoading(true);
-        setQueryValue(query);
-        try {
-          const response = await apiCall({
-            endpoint: `/v1/contracts?search=${encodeURIComponent(query)}`,
-            method: "get",
-            successMessage: "",
-            showToast: false,
-          });
-          setQueryData(response.data);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setQueryLoading(false);
-        }
-      },
-      isSearch: true,
-    },
-    {
       onDateClick: (date: string) => {
-        console.log("Date:", date);
+        setQueryValue(date);
+        setIsSearchQuery(false);
+        setTableQueryParams((prevParams) => ({
+          ...prevParams,
+          createdAt: date.split("T")[0],
+        }));
       },
       isDate: true,
     },
   ];
 
   const getTableData = () => {
-    if (queryValue && queryData) {
-      return generateContractEntries(queryData);
-    } else return generateContractEntries(contractsData);
+    return generateContractEntries(contractsData);
   };
-
-  const contractProducts = [
-    {
-      name: "Lemi 10W",
-      components: [
-        "(1) Solar Unit",
-        "(1) Solar Panel",
-        "(2) LED Bulbs",
-        "Phone Charging Cables",
-      ],
-    },
-    {
-      name: "Lemi 30W",
-      components: [
-        "(1) Solar Unit",
-        "(1) Solar Panel",
-        "(1) Fan",
-        "(3) LED Bulbs",
-        "Phone Charging Cables",
-      ],
-    },
-  ];
 
   return (
     <>
@@ -149,7 +81,7 @@ const ContractsTable = ({
             tableTitle="ALL CONTRACTS"
             tableClassname="flex flex-wrap items-center gap-4"
             tableData={getTableData()}
-            loading={queryLoading || isLoading}
+            loading={isLoading}
             filterList={filterList}
             cardComponent={(data) => {
               return data?.map((item: ContractEntries, index) => (
@@ -158,23 +90,20 @@ const ContractsTable = ({
                   {...item}
                   handleContractClick={() => {
                     setIsOpen(true);
-                    setContractID(index.toLocaleString());
+                    setContractID(item.contractId);
                   }}
                 />
               ));
             }}
             refreshTable={async () => {
               await refreshTable();
-              setQueryData(null);
             }}
             queryValue={isSearchQuery ? queryValue : ""}
             paginationInfo={paginationInfo}
+            clearFilters={() => setTableQueryParams({})}
           />
           {isOpen && contractID && (
-            <ContractModal
-              setIsOpen={setIsOpen}
-              contractDocData={{ contractProducts }}
-            />
+            <ContractModal setIsOpen={setIsOpen} contractId={contractID} />
           )}
         </div>
       ) : (
@@ -220,11 +149,11 @@ export const ContractCardComponent = (
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <g clip-path="url(#clip0_4112_52364)">
+            <g clipPath="url(#clip0_4112_52364)">
               <path
                 d="M17.3523 12.4938C16.9471 12.2101 16.6223 11.3861 16.3982 10.6253C16.1076 9.64544 15.9718 8.62253 16.0352 7.60325C16.0828 6.83902 16.2231 5.97038 16.5887 5.44831M16.5887 5.44831C16.2231 5.97038 15.4544 6.39983 14.753 6.70541C13.8163 7.11326 12.8086 7.33546 11.7896 7.39834C10.9975 7.44755 10.111 7.4234 9.70688 7.14043M16.5887 5.44831L7.41144 18.5547"
                 stroke="#E0E0E0"
-                stroke-width="1.33333"
+                strokeWidth="1.33333"
               />
             </g>
             <defs>
