@@ -1,5 +1,11 @@
-import { lazy, Suspense, useEffect, useState } from "react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom";
 import PageLayout from "./PageLayout";
 import transactionsbadge from "../assets/transactions/transactionsbadge.png";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
@@ -10,7 +16,7 @@ import gradientsales from "../assets/sales/gradientsales.svg";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import CreateNewSale from "@/Components/Sales/CreateNewSale";
-import { useGetRequest } from "@/utils/useApiCall";
+import { useGetRequest, useApiCall } from "@/utils/useApiCall";
 import { observer } from "mobx-react-lite";
 import { SaleStore } from "@/stores/SaleStore";
 
@@ -18,6 +24,8 @@ const SalesTable = lazy(() => import("@/Components/Sales/SalesTable"));
 
 const Sales = observer(() => {
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
@@ -97,6 +105,30 @@ const Sales = observer(() => {
   };
 
   const salesPaths = ["all"];
+
+  const tx_ref_param = searchParams.get("tx_ref")?.toString();
+  const transaction_id = searchParams.get("transaction_id")?.toString();
+
+  const verifyPayment = useCallback(async () => {
+    try {
+      apiCall({
+        endpoint: "/v1/payment/verify/callback",
+        method: "get",
+        params: {
+          tx_ref: tx_ref_param,
+          transaction_id: transaction_id,
+        },
+        showToast: false,
+      });
+      console.log("VERIFIED SUCCESSFULLY");
+    } catch (error) {
+      console.error("Failed to verify payment:", error);
+    }
+  }, [apiCall, transaction_id, tx_ref_param]);
+
+  useEffect(() => {
+    if (tx_ref_param && transaction_id) verifyPayment();
+  }, [tx_ref_param, transaction_id, verifyPayment]);
 
   return (
     <>

@@ -37,6 +37,31 @@ const ParametersForm = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+
+    // Special handling for installmentStartingPrice
+    if (name === "installmentStartingPrice") {
+      const numericValue = parseFloat(value);
+
+      // If the value is greater than 100, set it to zero
+      if (numericValue > 100) {
+        setFormData((prev) => ({
+          ...prev,
+          [name]: 0, // Transform back to zero
+        }));
+        setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+        return;
+      }
+
+      // Otherwise, update the value as usual
+      setFormData((prev) => ({
+        ...prev,
+        [name]: numericValue,
+      }));
+      setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+      return;
+    }
+
+    // Handle other fields
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -95,15 +120,29 @@ const ParametersForm = ({
     handleClose();
   };
 
+  const rawPaymentModes =
+    SaleStore.getProductById(currentProductId)?.productPaymentModes;
+  const paymentModesArray = rawPaymentModes
+    ?.split(",")
+    .map((mode) => mode.trim().toLowerCase());
+
+  const hasInstallment = paymentModesArray?.includes("installment");
+  const hasMultipleModes = paymentModesArray && paymentModesArray.length > 1;
+
+  const paymentOptions =
+    hasInstallment && hasMultipleModes
+      ? [
+          { label: "Single Deposit", value: "ONE_OFF" },
+          { label: "Installment", value: "INSTALLMENT" },
+        ]
+      : [{ label: "Single Deposit", value: "ONE_OFF" }];
+
   return (
     <div className="flex flex-col justify-between w-full h-full min-h-[360px]">
       <div className="flex flex-col gap-3">
         <SelectInput
           label="Payment Mode"
-          options={[
-            { label: "Single Deposit", value: "ONE_OFF" },
-            { label: "Installment", value: "INSTALLMENT" },
-          ]}
+          options={paymentOptions}
           value={formData.paymentMode}
           onChange={(selectedValue) =>
             handleSelectChange("paymentMode", selectedValue)
@@ -133,7 +172,7 @@ const ParametersForm = ({
           <Input
             type="number"
             name="installmentStartingPrice"
-            label="INITIAL PAYMENT AMOUNT"
+            label="INITIAL PAYMENT AMOUNT (PERCENTAGE)"
             value={formData.installmentStartingPrice as number}
             onChange={handleInputChange}
             placeholder="Initial Payment Amount"
@@ -141,9 +180,10 @@ const ParametersForm = ({
             errorMessage={getFieldError("installmentStartingPrice")}
             description={
               formData.installmentStartingPrice === 0
-                ? "Enter Initial Payment Amount"
+                ? "Enter Initial Payment Amount (Percentage)"
                 : ""
             }
+            max={100}
           />
         ) : null}
         <Input

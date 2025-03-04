@@ -53,6 +53,7 @@ const generateListDataEntries = (data: any): ListDataType[] => {
             product?.priceRange?.maximumInventoryBatchPrice
           )}`,
     totalRemainingQuantities: product?.inventories[0]?.totalRemainingQuantities,
+    productPaymentModes: product?.paymentModes,
   }));
 };
 
@@ -324,6 +325,7 @@ const SelectCustomerProductModal = observer(
                         productUnits={SaleStore.currentProductUnits(
                           data.productId
                         )}
+                        productPaymentModes={data.productPaymentModes}
                         totalRemainingQuantities={data.totalRemainingQuantities}
                         onSelectProduct={(productInfo) => {
                           if (productInfo) SaleStore.addProduct(productInfo);

@@ -60,6 +60,7 @@ export type InputType = {
   maxLength?: number;
   description?: string;
   descriptionClass?: string;
+  max?: number;
 };
 
 export const Input = ({
@@ -83,6 +84,7 @@ export const Input = ({
   maxLength,
   description,
   descriptionClass,
+  max,
 }: InputType) => {
   const similarTypes = [
     "text",
@@ -140,6 +142,7 @@ export const Input = ({
               value ? "text-textBlack" : "text-textGrey"
             } placeholder:text-textGrey placeholder:font-normal placeholder:italic`}
             maxLength={maxLength}
+            max={max}
           />
 
           {iconRight && iconRight}

@@ -76,6 +76,8 @@ const LoginPage = () => {
       };
       Cookies.set("userData", JSON.stringify(userData), {
         expires: 7,
+        path: "/",
+        sameSite: "Lax",
       }); // Token expires in 7 days
       navigate(redirectPath || "/home");
     } catch (error: any) {

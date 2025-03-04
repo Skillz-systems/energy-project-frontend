@@ -144,6 +144,7 @@ export const formSchema = z
     identificationDetails: identificationDetailsSchema.optional(),
     nextOfKinDetails: nextOfKinDetailsSchema.optional(),
     guarantorDetails: guarantorDetailsSchema.optional(),
+    applyMargin: z.boolean().default(true),
   })
   .superRefine((data, ctx) => {
     // Check if any sale item has paymentMode as "INSTALLMENT"
@@ -280,11 +281,13 @@ export type SalePayload = {
   nextOfKinDetails?: NextOfKinDetails;
   identificationDetails?: IdentificationDetails;
   guarantorDetails?: GuarantorDetails;
+  applyMargin: boolean;
 };
 
 export const defaultSaleFormData: SalePayload = {
   category: "PRODUCT",
   customerId: "",
+  applyMargin: true,
   bvn: "",
   saleItems: [],
   nextOfKinDetails: {
