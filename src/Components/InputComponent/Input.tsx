@@ -183,7 +183,7 @@ export const SmallInput = ({
 }: {
   type: AllowedInputTypes;
   name: string;
-  value: string | number;
+  value?: string | number;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
   placeholder?: string;
