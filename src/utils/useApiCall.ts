@@ -126,7 +126,7 @@ export const useGetRequest = (
     }
   };
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const swrResponse = useSWR(
     `${apiClient.defaults.baseURL}/api${endpoint}`,
     fetcher,
     {
@@ -137,10 +137,7 @@ export const useGetRequest = (
   );
 
   return {
-    data,
-    error,
-    isLoading,
-    mutate,
+    ...swrResponse,
     errorStates: { errorStates, isNetworkError },
   };
 };

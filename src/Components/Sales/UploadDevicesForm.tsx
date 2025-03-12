@@ -9,6 +9,7 @@ import { LuPlus } from "react-icons/lu";
 import { IoIosSearch } from "react-icons/io";
 import { SaleStore } from "@/stores/SaleStore";
 import { ProductDetailRow } from "./ProductSaleDisplay";
+import SecondaryButton from "../SecondaryButton/SecondaryButton";
 
 type DeviceFormSchema = {
   serialNumber: string;
@@ -372,25 +373,22 @@ const UploadDevicesForm = ({
 
           {apiError && <p className="text-sm text-red-500 mt-2">{apiError}</p>}
           <div className="flex items-center justify-between gap-1">
-            <button
-              type="button"
+            <SecondaryButton
+              variant="secondary"
+              children="Cancel"
               onClick={() => {
                 setCreateDevice(false);
                 setLinkView("selectDevice");
                 setDescription("Select Device");
               }}
-              className="w-max min-w-[150px] bg-white text-textDarkGrey font-medium px-8 py-3 border-[0.6px] border-strokeGreyTwo shadow-sm rounded-full hover:bg-slate-50 transition-all"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
+            />
+            <SecondaryButton
               disabled={!isFormFilled}
-              className="w-max min-w-[150px] bg-primaryGradient text-white font-medium px-8 py-3 shadow-sm rounded-full hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              loading={loading}
+              loadingText="Creating"
+              children="Create Device"
               onClick={handleCreateDevice}
-            >
-              {loading ? "Creating..." : "Create Device"}
-            </button>
+            />
           </div>
         </div>
       ) : (
@@ -640,21 +638,18 @@ const UploadDevicesForm = ({
                         } selected.`}
                   </p>
                   <div className="flex items-center justify-between gap-1">
-                    <button
-                      type="button"
-                      className="w-max min-w-[150px] bg-white text-textDarkGrey font-medium px-8 py-3 border-[0.6px] border-strokeGreyTwo shadow-sm rounded-full hover:bg-slate-50 transition-all"
+                    <SecondaryButton
+                      variant="secondary"
+                      children="Cancel"
                       onClick={handleCancel}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
+                    />
+                    <SecondaryButton
                       disabled={selectedDevices.length === 0}
-                      className="w-max min-w-[150px] bg-primaryGradient text-white text-center font-medium px-8 py-3 shadow-sm rounded-full hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      children={`Link Device${
+                        selectedDevices?.length > 1 ? "s" : ""
+                      }`}
                       onClick={saveForm}
-                    >
-                      {`Link Device${selectedDevices?.length > 1 ? "s" : ""}`}
-                    </button>
+                    />
                   </div>
                 </div>
               )}
