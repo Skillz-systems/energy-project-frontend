@@ -7,6 +7,7 @@ import { KeyedMutator } from "swr";
 import { Tag } from "../Products/ProductDetails";
 import { z } from "zod";
 import { SmallInput, SmallSelectInput } from "../InputComponent/Input";
+import ApiErrorMessage from "../ApiErrorMessage";
 
 // Define the validation schema using Zod
 const userSchema = z
@@ -52,7 +53,9 @@ const StaffDetails = ({
   const [formData, setFormData] = useState<FormData>(defaultData);
   const [loading, setLoading] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | Record<string, string[]>>(
+    ""
+  );
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
   const [designation, setDesignation] = useState<string>(data.role.id);
 
@@ -80,13 +83,13 @@ const StaffDetails = ({
     }
     // Clear the error for this field when the user starts typing
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-    setApiError(null);
+    setApiError("");
   };
 
   const resetForm = () => {
     setLoading(false);
     setFormErrors([]);
-    setApiError(null);
+    setApiError("");
     setUnsavedChanges(false);
     setDisplayInput(false);
     setFormData(defaultData);
@@ -95,7 +98,7 @@ const StaffDetails = ({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setApiError(null);
+    setApiError("");
 
     if (designationChanged) {
       setLoading(true);
@@ -121,8 +124,9 @@ const StaffDetails = ({
             setFormErrors(error.issues);
           } else {
             const message =
-              error?.response?.data?.message || "Internal Server Error";
-            setApiError(`Failed to update user designation: ${message}.`);
+              error?.response?.data?.message ||
+              "Failed to update user designation: Internal Server Error";
+            setApiError(message);
           }
         });
     }
@@ -145,8 +149,9 @@ const StaffDetails = ({
           setFormErrors(error.issues);
         } else {
           const message =
-            error?.response?.data?.message || "Internal Server Error";
-          setApiError(`Failed to update user: ${message}.`);
+            error?.response?.data?.message ||
+            "Failed to update user: Internal Server Error";
+          setApiError(message);
         }
       }
     }
@@ -225,11 +230,9 @@ const StaffDetails = ({
           </div>
         ))}
       </div>
-      {apiError && (
-        <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
-          {apiError}
-        </div>
-      )}
+
+      <ApiErrorMessage apiError={apiError} />
+
       {displayInput ? (
         <div className="flex items-center justify-center w-full pt-5 pb-5">
           <ProceedButton

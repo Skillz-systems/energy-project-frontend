@@ -5,6 +5,7 @@ import { Input, SelectInput } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { Modal } from "../ModalComponent/Modal";
 import { KeyedMutator } from "swr";
+import ApiErrorMessage from "../ApiErrorMessage";
 
 const formSchema = z.object({
   email: z.string().trim().email("Invalid email address"),
@@ -48,7 +49,9 @@ const CreateNewUserModal = ({
   const [formData, setFormData] = useState<FormData>(defaultFormData);
   const [loading, setLoading] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | Record<string, string[]>>(
+    ""
+  );
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -60,7 +63,7 @@ const CreateNewUserModal = ({
     }));
     // Clear the error for this field when the user starts typing
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-    setApiError(null);
+    setApiError("");
   };
 
   const handleSelectChange = (name: string, values: string | string[]) => {
@@ -70,21 +73,21 @@ const CreateNewUserModal = ({
     }));
     // Clear the error for this field when the user selects a value
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-    setApiError(null);
+    setApiError("");
   };
 
   const resetForm = () => {
     setLoading(false);
     setFormData(defaultFormData);
     setFormErrors([]);
-    setApiError(null);
+    setApiError("");
     setIsOpen(false);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setApiError(null);
+    setApiError("");
 
     try {
       const validatedData = formSchema.parse(formData);
@@ -97,14 +100,16 @@ const CreateNewUserModal = ({
       await allUsersRefresh();
       resetForm();
     } catch (error: any) {
-      setLoading(false);
       if (error instanceof z.ZodError) {
         setFormErrors(error.issues);
       } else {
         const message =
-          error?.response?.data?.message || "Internal Server Error";
-        setApiError(`User creation failed: ${message}.`);
+          error?.response?.data?.message ||
+          "User creation failed: Internal Server Error";
+        setApiError(message);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -202,11 +207,9 @@ const CreateNewUserModal = ({
             required={true}
             errorMessage={getFieldError("location")}
           />
-          {apiError && (
-            <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
-              {apiError}
-            </div>
-          )}
+
+          <ApiErrorMessage apiError={apiError} />
+
           <ProceedButton
             type="submit"
             variant={isFormFilled ? "gradient" : "gray"}
