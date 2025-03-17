@@ -373,6 +373,8 @@ export type FileInputType = {
   style?: string;
   accept?: string;
   errorMessage?: string;
+  description?: string;
+  descriptionClass?: string;
 };
 
 export const FileInput = ({
@@ -386,6 +388,8 @@ export const FileInput = ({
   style,
   accept = "*/*",
   errorMessage,
+  description = "",
+  descriptionClass,
 }: FileInputType) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -465,6 +469,13 @@ export const FileInput = ({
           </span>
         </div>
       </div>
+      {description && (
+        <p
+          className={`mt-1 px-[1.3em] text-xs text-textDarkGrey font-semibold w-full ${descriptionClass}`}
+        >
+          {description}
+        </p>
+      )}
       {errorMessage && (
         <p className="mt-1 px-[1.3em] text-xs text-errorTwo font-semibold w-full">
           {errorMessage}

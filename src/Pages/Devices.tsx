@@ -12,13 +12,14 @@ import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import { useGetRequest } from "@/utils/useApiCall";
 import CreateNewDevice from "@/Components/Devices/CreateNewDevice";
 
-const DevicesTable = lazy(
-  () => import("@/Components/Devices/DevicesTable")
-);
+const DevicesTable = lazy(() => import("@/Components/Devices/DevicesTable"));
 
 const Devices = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [formType, setFormType] = useState<"singleUpload" | "batchUpload">(
+    "singleUpload"
+  );
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   const [tableQueryParams, setTableQueryParams] = useState<Record<
@@ -43,7 +44,6 @@ const Devices = () => {
     60000
   );
 
-
   const paginationInfo = () => {
     const total = deviceData?.total;
     return {
@@ -59,7 +59,7 @@ const Devices = () => {
     {
       title: "All Devices",
       link: "/devices/all",
-      count:  deviceData?.total || 0,
+      count: deviceData?.total || 0,
     },
   ];
 
@@ -79,13 +79,14 @@ const Devices = () => {
   }, [location.pathname]);
 
   const dropDownList = {
-    items: ["Create New Device"],
+    items: ["Create New Devices (Batch)"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
+          setFormType("batchUpload");
           setIsOpen(true);
           break;
-        case 2:
+        case 1:
           console.log("Exporting list...");
           break;
         default:
@@ -115,6 +116,7 @@ const Devices = () => {
               label="New Device"
               icon={<img src={circleAction} />}
               onClick={() => {
+                setFormType("singleUpload");
                 setIsOpen(true);
               }}
             />
@@ -159,6 +161,7 @@ const Devices = () => {
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         allDevicesRefresh={allDeviceRefresh}
+        formType={formType}
       />
     </>
   );
