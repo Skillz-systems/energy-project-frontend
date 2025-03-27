@@ -60,8 +60,6 @@ const filterShape = [
   { name: "Firmware Version", value: "firmwareVersion" },
 ];
 
-// const text = "Fill device information.";
-
 const UploadDevicesForm = ({
   handleClose,
   setDescription,
@@ -87,7 +85,11 @@ const UploadDevicesForm = ({
   );
   const [createDevice, setCreateDevice] = useState<boolean>(false);
   const [linkView, setLinkView] = useState<string>("");
+  const [prevDescription, setPrevDescription] = useState<string>("");
+  const [requiredQuantity, setRequiredQuantity] = useState<number>(0);
   const product = SaleStore.getProductById(currentProductId);
+
+  const linkedDevices = SaleStore.tentativeDevices.length || 0;
 
   const { data, mutate } = useGetRequest("/v1/device", true);
   const {
@@ -139,7 +141,7 @@ const UploadDevicesForm = ({
       await mutate();
       setCreateDevice(false);
       setLinkView("selectDevice");
-      setDescription("Select Device");
+      setDescription(prevDescription ? prevDescription : "Select Device");
       setFormData(defaultFormData);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
@@ -180,10 +182,18 @@ const UploadDevicesForm = ({
     );
   };
 
-  const saveForm = () => {
-    if (selectedDevices.length === 0) return;
+  const linkDevice = () => {
+    if (selectedDevices.length !== requiredQuantity) return;
     // Ensure selectedDevices is a valid snapshot
-    const validDevices = selectedDevices.map((device) => `${device}`);
+    const validDevices = selectedDevices.map((device) => device.toString());
+    SaleStore.addOrUpdateTentativeDevices(currentProductId, validDevices);
+    handleCancel();
+  };
+
+  const saveForm = () => {
+    if (linkedDevices !== productData?.inventories?.length) return;
+    // Ensure selectedDevices is a valid snapshot
+    const validDevices = SaleStore.tentativeDevices.flatMap((t) => t.devices);
     SaleStore.addOrUpdateDevices(currentProductId, validDevices);
     SaleStore.addSaleItem(currentProductId);
     handleClose();
@@ -202,6 +212,8 @@ const UploadDevicesForm = ({
     setCreateDevice(false);
     setLinkView("");
     setDescription("Link Device(s)");
+    setPrevDescription("");
+    setRequiredQuantity(0);
   };
 
   return (
@@ -379,7 +391,9 @@ const UploadDevicesForm = ({
               onClick={() => {
                 setCreateDevice(false);
                 setLinkView("selectDevice");
-                setDescription("Select Device");
+                setDescription(
+                  prevDescription ? prevDescription : "Select Device"
+                );
               }}
             />
             <SecondaryButton
@@ -512,7 +526,9 @@ const UploadDevicesForm = ({
               ) : linkView === "" ? (
                 <div className="flex flex-col items-center justify-center w-full mt-2 gap-1">
                   <p className="text-sm text-textBlack font-medium">
-                    Link the Product Inventories Below
+                    {`Link the Product Inventor${
+                      productData?.inventories?.length > 1 ? "ies" : "y"
+                    } Below`}
                   </p>
                   <div className="flex flex-col gap-2 items-center justify-center w-full h-full pt-2 pr-3 max-h-[300px] overflow-y-auto">
                     {productData?.inventories?.map((item: any) => (
@@ -544,12 +560,39 @@ const UploadDevicesForm = ({
                             title="Link Device"
                             onClick={() => {
                               setLinkView("selectDevice");
-                              setDescription("Select Device");
+                              setDescription(
+                                `Select Devices for ${item?.name}`
+                              );
+                              setPrevDescription(
+                                `Select Devices for ${item?.name}`
+                              );
+                              setRequiredQuantity(
+                                item?.totalRemainingQuantities
+                              );
                             }}
                           />
                         </div>
                       </div>
                     ))}
+                  </div>
+                  <div className="flex items-center justify-center py-4">
+                    <SecondaryButton
+                      disabled={
+                        linkedDevices !== productData?.inventories?.length
+                      }
+                      children={
+                        linkedDevices === productData?.inventories?.length
+                          ? `Save Linked Device${
+                              productData?.inventories?.length > 1 ? "s" : ""
+                            }`
+                          : `Saved ${linkedDevices} of ${
+                              productData?.inventories?.length
+                            } Linked Device${
+                              productData?.inventories?.length > 1 ? "s" : ""
+                            } `
+                      }
+                      onClick={saveForm}
+                    />
                   </div>
                 </div>
               ) : null)}
@@ -625,34 +668,27 @@ const UploadDevicesForm = ({
                 )}
           </div>
 
-          {linkView === ""
-            ? null
-            : filteredDevices !== null &&
-              filteredDevices?.length > 0 && (
-                <div className="flex flex-col w-full gap-1 px-5 pb-4 mt-4 absolute bottom-0 left-0">
-                  <p className="text-sm text-textBlack font-medium">
-                    {selectedDevices?.length === 0
-                      ? "No device selected"
-                      : `${selectedDevices?.length} device${
-                          selectedDevices?.length > 1 ? "s" : ""
-                        } selected.`}
-                  </p>
-                  <div className="flex items-center justify-between gap-1">
-                    <SecondaryButton
-                      variant="secondary"
-                      children="Cancel"
-                      onClick={handleCancel}
-                    />
-                    <SecondaryButton
-                      disabled={selectedDevices.length === 0}
-                      children={`Link Device${
-                        selectedDevices?.length > 1 ? "s" : ""
-                      }`}
-                      onClick={saveForm}
-                    />
-                  </div>
-                </div>
-              )}
+          {linkView === "" ? null : (
+            <div className="flex flex-col w-full gap-1 px-5 pb-4 mt-4 absolute bottom-0 left-0">
+              <p className="text-sm text-textBlack font-medium">
+                {`Selected ${selectedDevices?.length} device${
+                  requiredQuantity > 1 ? "s" : ""
+                } out of the required ${requiredQuantity}.`}
+              </p>
+              <div className="flex items-center justify-between gap-1">
+                <SecondaryButton
+                  variant="secondary"
+                  children="Back"
+                  onClick={handleCancel}
+                />
+                <SecondaryButton
+                  disabled={selectedDevices.length !== requiredQuantity}
+                  children={`Link Device${requiredQuantity > 1 ? "s" : ""}`}
+                  onClick={linkDevice}
+                />
+              </div>
+            </div>
+          )}
         </>
       )}
     </form>

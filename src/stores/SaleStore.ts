@@ -151,6 +151,11 @@ const DevicesModel = types.model({
   devices: types.array(types.string),
 });
 
+const TentativeDevicesModel = types.model({
+  currentProductId: types.string,
+  devices: types.array(types.string),
+});
+
 const SaleRecipientModel = types.model({
   firstname: types.string,
   lastname: types.string,
@@ -208,6 +213,7 @@ const saleStore = types
     parameters: types.array(ParametersModel),
     miscellaneousPrices: types.array(MiscellaneousPricesModel),
     devices: types.array(DevicesModel),
+    tentativeDevices: types.array(TentativeDevicesModel),
     saleRecipient: types.array(RecipientModel),
     saleItems: types.array(SaleItemsModel),
     identificationDetails: IdentificationDetailsModel,
@@ -516,6 +522,40 @@ const saleStore = types
           item.devices.replace([]); // Use `replace` to clear the array
         }
       });
+    },
+    addOrUpdateTentativeDevices(
+      currentProductId: string,
+      deviceList: string[]
+    ) {
+      const existingIndex = self.tentativeDevices.findIndex(
+        (d) => d.currentProductId === currentProductId
+      );
+
+      if (existingIndex !== -1) {
+        // Update existing device list
+        self.tentativeDevices[existingIndex].devices.replace(deviceList);
+      } else {
+        // Add new device list
+        self.tentativeDevices.push(
+          TentativeDevicesModel.create({
+            currentProductId,
+            devices: deviceList,
+          })
+        );
+      }
+    },
+    getSelectedTentativeDevices(productId: string) {
+      const devices = self.tentativeDevices.find(
+        (d) => d.currentProductId === productId
+      )?.devices;
+      return devices;
+    },
+    removeTentativeDevices(currentProductId?: string) {
+      self.tentativeDevices.replace(
+        self.tentativeDevices.filter(
+          (d) => d.currentProductId !== currentProductId
+        )
+      );
     },
     addIdentificationDetails(details: typeof self.identificationDetails) {
       self.identificationDetails = details;
