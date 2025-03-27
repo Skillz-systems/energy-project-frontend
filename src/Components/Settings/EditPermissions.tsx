@@ -9,6 +9,7 @@ import { KeyedMutator } from "swr";
 import { z } from "zod";
 import TabComponent from "../TabComponent/TabComponent";
 import { toast } from "react-toastify";
+import ApiErrorMessage from "../ApiErrorMessage";
 
 export interface Permission {
   id: string;
@@ -60,7 +61,9 @@ const EditPermissions = ({
   const [permissionIds, setPermissionIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | Record<string, string[]>>(
+    ""
+  );
   const [tabContent, setTabContent] = useState<string>("newRole");
   const [permissionErrors, setPermissionErrors] = useState<any[]>([]);
   const [toggledPermissions, setToggledPermissions] = useState<{
@@ -96,7 +99,7 @@ const EditPermissions = ({
   const resetErrors = (name: string) => {
     // Clear the error for this field when the user selects a value
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-    setApiError(null);
+    setApiError("");
   };
 
   const handleSubmitRoleCreation = async (event: React.FormEvent) => {
@@ -145,7 +148,7 @@ const EditPermissions = ({
     fieldId: string
   ) => {
     setFormErrors([]);
-    setApiError(null);
+    setApiError("");
 
     try {
       await apiCall({
@@ -466,11 +469,9 @@ const EditPermissions = ({
           ) : (
             <AllPermissions />
           )}
-          {apiError && (
-            <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
-              {apiError}
-            </div>
-          )}
+
+          <ApiErrorMessage apiError={apiError} />
+
           {isFormFilled && (
             <ProceedButton
               type="submit"

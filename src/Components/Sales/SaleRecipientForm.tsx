@@ -3,6 +3,7 @@ import { Input } from "../InputComponent/Input";
 import { z } from "zod";
 import { saleRecipientSchema } from "./salesSchema";
 import { SaleStore } from "@/stores/SaleStore";
+import SecondaryButton from "../SecondaryButton/SecondaryButton";
 
 type FormData = z.infer<typeof saleRecipientSchema>;
 
@@ -149,21 +150,16 @@ const SaleRecipientForm = ({
         errorMessage={getFieldError("email")}
       />
       <div className="flex items-center justify-between gap-1 mt-4">
-        <button
-          type="button"
-          className="w-max min-w-[150px] bg-white text-textDarkGrey font-medium px-8 py-3 border-[0.6px] border-strokeGreyTwo shadow-sm rounded-full hover:bg-slate-50 transition-all"
+        <SecondaryButton
+          variant="secondary"
+          children="Cancel"
           onClick={handleClose}
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
+        />
+        <SecondaryButton
           disabled={!isFormFilled}
-          className="w-max min-w-[150px] bg-primaryGradient text-white font-medium px-8 py-3 shadow-sm rounded-full hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          children="Save"
           onClick={saveForm}
-        >
-          Save
-        </button>
+        />
       </div>
     </div>
   );

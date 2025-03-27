@@ -5,33 +5,55 @@ import { formatDateTime, formatNumberWithCommas } from "@/utils/helpers";
 import roletwo from "../../assets/table/roletwo.svg";
 import { GoDotFill } from "react-icons/go";
 
-// interface InventoryHistoryEntries {
-//   datetime: string;
-//   stockNumber: number;
-//   stockValue: number;
-//   staffName: string;
-// }
+interface BatchHistoryEntries {
+  datetime: string;
+  stockNumber: number;
+  stockValue: string;
+  staffName: string;
+}
+
+export interface Batch {
+  id: string;
+  costOfItem: number;
+  price: number;
+  batchNumber: number;
+  numberOfStock: number;
+  remainingQuantity: number;
+  creatorId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  inventoryId: string;
+  creatorDetails: {
+    firstname: string;
+    lastname: string;
+  } | null;
+  stockValue: string;
+}
 
 // Helper function to map the API data to the desired format
-// const generateInventoryEntries = (data: any): InventoryHistoryEntries[] => {
-//   const entries: InventoryHistoryEntries[] = data?.map((item: any) => {
-//     return {
-//       datetime: item.date,
-//       stockNumber: item.stockNumber,
-//       stockValue: item.stockValue,
-//       staffName: item.staffName,
-//     };
-//   });
+const generateBatchEntries = (data: Batch[]): BatchHistoryEntries[] => {
+  const entries: BatchHistoryEntries[] = data?.map((item) => {
+    return {
+      datetime: item.createdAt,
+      stockNumber: item.numberOfStock || 0,
+      stockValue: item.stockValue || "0",
+      staffName: item?.creatorDetails
+        ? `${item.creatorDetails?.firstname} ${item.creatorDetails?.lastname}`
+        : "N/A",
+    };
+  });
 
-//   return entries;
-// };
+  return entries;
+};
 
 const InventoryHistory = ({
   historyData,
   paginationInfo,
+  isLoading,
 }: {
-  historyData: any;
+  historyData: Batch[];
   paginationInfo: PaginationType;
+  isLoading: boolean;
 }) => {
   // const [historyId, setHistoryID] = useState<string | number>("");
   // const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -74,7 +96,7 @@ const InventoryHistory = ({
       key: "stockValue",
       styles: "w-[15%]",
       valueIsAComponent: true,
-      customValue: (value: number) => {
+      customValue: (value: string) => {
         return (
           <div className="flex items-center gap-1">
             <NairaSymbol color="#A58730" />
@@ -128,8 +150,8 @@ const InventoryHistory = ({
         <Table
           showHeader={false}
           columnList={columnList}
-          loading={!historyData}
-          tableData={historyData}
+          loading={isLoading}
+          tableData={generateBatchEntries(historyData)}
           paginationInfo={paginationInfo}
         />
       </div>

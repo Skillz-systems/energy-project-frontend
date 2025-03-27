@@ -5,6 +5,7 @@ import { Input, SelectInput } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { useApiCall } from "../../utils/useApiCall";
 import { z } from "zod";
+import ApiErrorMessage from "../ApiErrorMessage";
 
 interface CreateNewAgentsProps {
   isOpen: boolean;
@@ -58,7 +59,9 @@ const CreateNewAgents = ({
   );
   const [loading, setLoading] = useState(false);
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | Record<string, string[]>>(
+    ""
+  );
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -82,7 +85,7 @@ const CreateNewAgents = ({
   const resetFormErrors = (name: string) => {
     // Clear the error for this field when the user starts typing
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-    setApiError(null);
+    setApiError("");
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -106,8 +109,9 @@ const CreateNewAgents = ({
         setFormErrors(error.issues);
       } else {
         const message =
-          error?.response?.data?.message || "Internal Server Error";
-        setApiError(`Agent creation failed: ${message}.`);
+          error?.response?.data?.message ||
+          "Agent Creation Failed: Internal Server Error";
+        setApiError(message);
       }
     } finally {
       setLoading(false);
@@ -211,11 +215,9 @@ const CreateNewAgents = ({
         </div>
         <div className="flex flex-col items-center justify-center w-full px-4 gap-4 py-8">
           {renderForm()}
-          {apiError && (
-            <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
-              {apiError}
-            </div>
-          )}
+
+          <ApiErrorMessage apiError={apiError} />
+
           <ProceedButton
             type="submit"
             loading={loading}

@@ -75,6 +75,7 @@ const ProductModal = ({
   const generateProductInventoryEntries = (data: any) => {
     const entries = data?.inventories?.map((item: any) => {
       return {
+        id: item?.inventory?.id,
         productImage: item?.inventory?.image,
         productName: item?.inventory?.name,
         quantity: item?.quantity,
