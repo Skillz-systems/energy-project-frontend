@@ -5,6 +5,7 @@ import { Modal } from "../ModalComponent/Modal";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { Input, SelectInput } from "../InputComponent/Input";
 import { z } from "zod";
+import ApiErrorMessage from "../ApiErrorMessage";
 
 interface CreatNewCustomerProps {
   isOpen: boolean;
@@ -52,7 +53,9 @@ const CreateNewCustomer = ({
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CustomerFormData>(defaultFormData);
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | Record<string, string[]>>(
+    ""
+  );
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -76,7 +79,7 @@ const CreateNewCustomer = ({
   const resetFormErrors = (name: string) => {
     // Clear the error for this field when the user starts typing
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-    setApiError(null);
+    setApiError("");
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -100,8 +103,9 @@ const CreateNewCustomer = ({
         setFormErrors(error.issues);
       } else {
         const message =
-          error?.response?.data?.message || "Internal Server Error";
-        setApiError(`Customer creation failed: ${message}.`);
+          error?.response?.data?.message ||
+          "Customer Creation Failed: Internal Server Error";
+        setApiError(message);
       }
     } finally {
       setLoading(false);
@@ -205,11 +209,9 @@ const CreateNewCustomer = ({
             required={true}
             errorMessage={getFieldError("location")}
           />
-          {apiError && (
-            <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
-              {apiError}
-            </div>
-          )}
+
+          <ApiErrorMessage apiError={apiError} />
+
           <ProceedButton
             type="submit"
             loading={loading}

@@ -142,7 +142,7 @@ export const Table = (props: TableType) => {
       {loading ? (
         <SkeletonLoader />
       ) : totalEntries === 0 ? (
-        <div className="flex flex-col items-center justify-center pt-10">
+        <div className="flex flex-col items-center justify-center px-4 py-16 w-full border-[0.6px] border-strokeGreyThree rounded-[20px]">
           <img src={wrong} alt="No data available" className="w-[100px]" />
           <p className="text-textBlack font-medium">No data available</p>
           <button

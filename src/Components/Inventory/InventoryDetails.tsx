@@ -17,10 +17,12 @@ type InventoryDetailsProps = {
   inventoryCategory: string;
   sku: string;
   manufacturerName: string;
-  dateOfManufacture: string;
+  dateOfManufacture: string | null;
   numberOfStock: number;
+  remainingQuantity: number;
   costPrice: number;
   salePrice: number;
+  stockValue: string;
   displayInput?: boolean;
   tagStyle: (value: string) => string;
   refreshTable: KeyedMutator<any>;
@@ -36,8 +38,10 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
   manufacturerName = "",
   dateOfManufacture = "",
   numberOfStock = 0,
+  remainingQuantity = 0,
   costPrice = 0,
   salePrice = 0,
+  stockValue,
   displayInput = false,
   tagStyle,
   refreshTable,
@@ -234,7 +238,7 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
             <input
               type="date"
               name="dateOfManufacture"
-              value={formData.dateOfManufacture}
+              value={formData.dateOfManufacture || ""}
               onChange={handleChange}
               placeholder="Enter Date of Manufacture"
               required={false}
@@ -251,10 +255,11 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
       </div>
       <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
         <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
-          <img src={inventoryIcon} alt="Inventory Icon" /> STOCK DETAILS
+          <img src={inventoryIcon} alt="Inventory Icon" />
+          CURRENT BATCH STOCK DETAILS
         </p>
         <div className="flex items-center justify-between">
-          <Tag name="Number of Stock" />
+          <Tag name="Total Quantity of Stock" />
           {displayInput ? (
             <input
               type="number"
@@ -270,6 +275,12 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
               {formatNumberWithCommas(numberOfStock)}
             </p>
           )}
+        </div>
+        <div className="flex items-center justify-between">
+          <Tag name="Remaining Quantity of Stock" />
+          <p className="text-xs font-bold text-textDarkGrey">
+            {formatNumberWithCommas(remainingQuantity)}
+          </p>
         </div>
         <div className="flex items-center justify-between">
           <Tag name="Cost of Stock" />
@@ -308,6 +319,13 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
               {formatNumberWithCommas(salePrice)}
             </p>
           )}
+        </div>
+        <div className="flex items-center justify-between">
+          <Tag name="Stock Value" />
+          <p className="flex items-center justify-end gap-1 w-max text-xs font-bold text-textDarkGrey">
+            <NairaSymbol color="#828DA9" />
+            {formatNumberWithCommas(stockValue)}
+          </p>
         </div>
       </div>
 

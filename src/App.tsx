@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Home from "./Pages/Home";
 // import Dashboard from "./Pages/Dashboard";
 import Sales from "./Pages/Sales";
@@ -7,6 +7,7 @@ import Customers from "./Pages/Customers";
 import Agent from "./Pages/Agent";
 import Products from "./Pages/Products";
 import Inventory from "./Pages/Inventory";
+import Devices from "./Pages/Devices";
 import Contracts from "./Pages/Contracts";
 import Settings from "./Pages/Settings";
 import LoginPage from "./Pages/LoginPage";
@@ -39,13 +40,14 @@ function App() {
             <Route path="/agents/*" element={<Agent />} />
             <Route path="/products/*" element={<Products />} />
             <Route path="/inventory/*" element={<Inventory />} />
+            <Route path="/devices/*" element={<Devices />} />
             <Route path="/contracts/*" element={<Contracts />} />
             <Route path="/settings/*" element={<Settings />} />
             {/* Other protected routes */}
           </Route>
 
           {/* Public Routes */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route
             path="/create-password/:id/:token"
