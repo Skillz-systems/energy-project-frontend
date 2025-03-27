@@ -30,9 +30,10 @@ const Home = () => {
     Agents: 0,
     Products: 10,
     Inventory: 15,
+    Devices: 10,
     Contracts: 2,
-    // Support: 3,
-    // Communication: 4,
+    Support: 3,
+    Communication: 4,
     Settings: 0,
   };
   const homeData = [
@@ -53,6 +54,11 @@ const Home = () => {
       sectionName: "Inventory",
       sectionImage: inventory,
       location: "/inventory",
+    },
+    {
+      sectionName: "Devices",
+      sectionImage: inventory,
+      location: "/devices",
     },
     {
       sectionName: "Contracts",

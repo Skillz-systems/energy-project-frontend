@@ -6,6 +6,7 @@ import { Modal } from "../ModalComponent/Modal";
 import { useApiCall, useGetRequest } from "@/utils/useApiCall";
 import { Category } from "../Products/CreateNewProduct";
 import { z } from "zod";
+import ApiErrorMessage from "../ApiErrorMessage";
 
 export type InventoryFormType =
   | "newInventory"
@@ -172,7 +173,9 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
     useState<SubCategoryFormData>(defaultSubCategoryData);
   const [loading, setLoading] = useState(false);
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | Record<string, string[]>>(
+    ""
+  );
 
   const fetchInventoryCategories = useGetRequest(
     "/v1/inventory/categories/all",
@@ -190,7 +193,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
   const resetFormErrors = (name: string) => {
     // Clear the error for this field when the user starts typing
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-    setApiError(null);
+    setApiError("");
   };
 
   const handleInputChange = (e: any) => {
@@ -310,8 +313,11 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
         setFormErrors(error.issues);
       } else {
         const message =
-          error?.response?.data?.message || "Internal Server Error";
-        setApiError(`Inventory creation failed: ${message}.`);
+          error?.response?.data?.message ||
+          `Inventory ${
+            formType !== "newInventory" && "Category"
+          } Creation Failed: Internal Server Error`;
+        setApiError(message);
       }
     } finally {
       setLoading(false);
@@ -616,11 +622,9 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
               />
             </>
           )}
-          {apiError && (
-            <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
-              {apiError}
-            </div>
-          )}
+
+          <ApiErrorMessage apiError={apiError} />
+
           <ProceedButton
             type="submit"
             loading={loading}

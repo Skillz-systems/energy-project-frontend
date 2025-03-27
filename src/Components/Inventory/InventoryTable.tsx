@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { KeyedMutator } from "swr";
 import { PaginationType, Table } from "../TableComponent/Table";
 import { GoDotFill } from "react-icons/go";
@@ -78,8 +79,10 @@ const generateInventoryEntries = (data: any): InventoryEntries[] => {
         salePrice: item?.salePrice,
         inventoryValue: item?.inventoryValue,
         stockLevel: {
-          totalUnits: item?.totalInitialQuantities,
-          currentUnits: item?.totalRemainingQuantities,
+          totalUnits:
+            item?.batches[item.batches.length - 1]?.numberOfStock || 1,
+          currentUnits:
+            item?.batches[item.batches.length - 1]?.remainingQuantity ?? 0,
         },
       };
     }
@@ -109,6 +112,16 @@ const InventoryTable = ({
   const [inventoryID, setInventoryID] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
   const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
+  const [urlSearchParams] = useSearchParams();
+
+  const inventoryIdParam = urlSearchParams.get("inventoryId") || "";
+
+  useEffect(() => {
+    if (inventoryIdParam) {
+      setInventoryID(inventoryIdParam);
+      setIsOpen(true);
+    }
+  }, [inventoryIdParam]);
 
   const filterList = [
     {
@@ -357,6 +370,7 @@ const InventoryTable = ({
               setIsOpen={setIsOpen}
               inventoryID={inventoryID}
               refreshTable={refreshTable}
+              inventoryIdParamExists={Boolean(inventoryIdParam)}
             />
           )}
         </div>

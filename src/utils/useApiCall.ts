@@ -126,7 +126,7 @@ export const useGetRequest = (
     }
   };
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const swrResponse = useSWR(
     `${apiClient.defaults.baseURL}/api${endpoint}`,
     fetcher,
     {
@@ -137,10 +137,7 @@ export const useGetRequest = (
   );
 
   return {
-    data,
-    error,
-    isLoading,
-    mutate,
+    ...swrResponse,
     errorStates: { errorStates, isNetworkError },
   };
 };
@@ -242,13 +239,13 @@ const handleApiError = (
           setErrorState(true);
           break;
         case 401:
-          if (location.pathname !== "/login") {
+          if (location.pathname !== "/") {
             if (!errorStates.find((e) => e.endpoint === endpoint)?.toastShown) {
               toast.error("Unauthorized: Please log in again.");
               setToastShown(endpoint);
             }
             Cookies.remove("userData");
-            window.location.href = "/login";
+            window.location.href = "/";
           }
           setErrorState(true);
           break;
@@ -260,7 +257,7 @@ const handleApiError = (
             setToastShown(endpoint);
           }
           Cookies.remove("userData");
-          window.location.href = "/login";
+          window.location.href = "/";
           setErrorState(true);
           break;
         default:

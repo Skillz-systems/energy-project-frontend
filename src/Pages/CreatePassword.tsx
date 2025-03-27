@@ -73,7 +73,7 @@ const LoginPage = () => {
           ? "Password successfully updated!"
           : "Password succesfully created!",
       });
-      navigate("/login");
+      navigate("/");
     } catch (error) {
       console.error("Error:", error);
     }

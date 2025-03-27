@@ -6,6 +6,7 @@ import eyeopen from "../../assets/eyeopen.svg";
 import { Input } from "../InputComponent/Input";
 import { useApiCall } from "../../utils/useApiCall";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
+import ApiErrorMessage from "../ApiErrorMessage";
 
 const changePasswordSchema = z
   .object({
@@ -47,7 +48,9 @@ const ChangePassword: React.FC = () => {
     useState<ChangePasswordFormData>(defaultFormData);
   const [loading, setLoading] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | Record<string, string[]>>(
+    ""
+  );
   const [passwordVisibility, setPasswordVisibility] = useState({
     oldPassword: false,
     newPassword: false,
@@ -62,7 +65,7 @@ const ChangePassword: React.FC = () => {
 
   const resetFormErrors = (name: string) => {
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-    setApiError(null);
+    setApiError("");
   };
 
   const togglePasswordVisibility = (field: keyof typeof passwordVisibility) => {
@@ -95,7 +98,7 @@ const ChangePassword: React.FC = () => {
       } else {
         const message =
           error?.response?.data?.message || "Failed to change password";
-        setApiError(`Password change failed: ${message}.`);
+        setApiError(message);
       }
     } finally {
       setLoading(false);
@@ -177,11 +180,9 @@ const ChangePassword: React.FC = () => {
             />
           }
         />
-        {apiError && (
-          <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
-            {apiError}
-          </div>
-        )}
+
+        <ApiErrorMessage apiError={apiError} />
+
         <div className="flex items-center justify-center w-full pt-5 pb-5">
           <ProceedButton
             type="submit"

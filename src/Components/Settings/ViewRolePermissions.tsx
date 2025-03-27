@@ -183,7 +183,9 @@ export const DetailComponent = ({
 }) => {
   return (
     <div
-      className={`${parentClass} flex items-center justify-between bg-white w-full p-2.5 text-textDarkGrey text-xs rounded-full border-[0.6px] border-strokeGreyThree`}
+      className={`${
+        parentClass ? parentClass : "p-2.5"
+      } flex items-center justify-between bg-white w-full text-textDarkGrey text-xs rounded-full border-[0.6px] border-strokeGreyThree`}
     >
       <span
         className={`${labelClass} flex items-center justify-center bg-[#F6F8FA] text-textBlack text-xs p-2 h-[24px] rounded-full`}

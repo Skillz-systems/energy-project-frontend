@@ -10,6 +10,7 @@ import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { SmallInput, RadioInput } from "../InputComponent/Input";
 import GroupDisplay from "../GroupComponent/GroupDisplay";
 import { Permission, PermissionComponent } from "./EditPermissions";
+import ApiErrorMessage from "../ApiErrorMessage";
 
 const formSchema = z.object({
   role: z.string().trim().optional().default(""),
@@ -75,7 +76,9 @@ const RoleDetails = ({
   const [formData, setFormData] = useState<FormData>(defaultFormData);
   const [loading, setLoading] = useState<boolean>(false);
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | Record<string, string[]>>(
+    ""
+  );
   const [permissionIds, setPermissionIds] = useState<string[]>(
     defaultFormData.permissionIds
   );
@@ -88,7 +91,7 @@ const RoleDetails = ({
   const resetFormErrors = (name: string) => {
     // Clear the error for this field when the user starts typing
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-    setApiError(null);
+    setApiError("");
   };
 
   const handleInputChange = (
@@ -105,7 +108,7 @@ const RoleDetails = ({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setApiError(null);
+    setApiError("");
 
     try {
       // Validate the form data before proceeding
@@ -151,8 +154,9 @@ const RoleDetails = ({
         setFormErrors(error.issues);
       } else {
         const message =
-          error?.response?.data?.message || "Internal Server Error";
-        setApiError(`Updating role failed: ${message}.`);
+          error?.response?.data?.message ||
+          "Updating role failed: Internal Server Error";
+        setApiError(message);
       }
     } finally {
       setLoading(false);
@@ -204,7 +208,6 @@ const RoleDetails = ({
     );
   };
 
-  console.log(fetchSingleUser?.data);
   return (
     <form
       className="flex flex-col items-center gap-4 w-full bg-white"
@@ -308,11 +311,9 @@ const RoleDetails = ({
           <DetailComponent label="Assigned Users" value={userCount} />
         </>
       )}
-      {apiError && (
-        <div className="text-errorTwo text-sm mt-2 text-center font-medium w-full">
-          {apiError}
-        </div>
-      )}
+
+      <ApiErrorMessage apiError={apiError} />
+
       {editInput && (
         <ProceedButton
           type="submit"
