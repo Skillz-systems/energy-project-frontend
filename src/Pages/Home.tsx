@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import PageLayout from "./PageLayout";
 import sales from "@/assets/home/sales.svg";
-import transactions from "@/assets/home/transactions.svg";
+// import transactions from "@/assets/home/transactions.svg";
 import customers from "@/assets/home/customers.svg";
 import agents from "@/assets/home/agents.svg";
 import products from "@/assets/home/products.svg";
@@ -38,11 +38,11 @@ const Home = () => {
   };
   const homeData = [
     { sectionName: "Sales", sectionImage: sales, location: "/sales" },
-    {
-      sectionName: "Transactions",
-      sectionImage: transactions,
-      location: "/transactions",
-    },
+    // {
+    //   sectionName: "Transactions",
+    //   sectionImage: transactions,
+    //   location: "/transactions",
+    // },
     {
       sectionName: "Customers",
       sectionImage: customers,

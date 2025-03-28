@@ -17,7 +17,9 @@ type PaymentInfo = {
   deletedAt: string | null;
 };
 
-const public_key = import.meta.env.VITE_FLW_PUBLIC_KEY;
+const public_key =
+  import.meta.env.VITE_FLW_PUBLIC_KEY ||
+  "FLWPUBK_TEST-720d3bd8434091e9b28a01452ebdd2e0-X";
 const base_url = import.meta.env.VITE_API_BASE_URL;
 
 const SaleTransactions = ({
