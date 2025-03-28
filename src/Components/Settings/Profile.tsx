@@ -1,7 +1,7 @@
 import { useState } from "react";
 import lightCheckeredBg from "../../assets/lightCheckeredBg.png";
 import role from "../../assets/table/role.svg";
-import addButton from "../../assets/settings/addbutton.svg";
+import { BiSolidPlusCircle } from "react-icons/bi";
 import editInput from "../../assets/settings/editInput.svg";
 import { MdCancel } from "react-icons/md";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
@@ -21,8 +21,9 @@ const profileSchema = z
     phone: z
       .string()
       .trim()
-      .transform((val) => val.replace(/\s+/g, "")),
-    location: z.string().trim(),
+      .transform((val) => val.replace(/\s+/g, ""))
+      .optional(),
+    location: z.string().trim().optional(),
   })
   .partial();
 
@@ -80,10 +81,16 @@ const Profile = () => {
     if (unsavedChanges) {
       try {
         const validatedData = profileSchema.parse(formData);
+        const newValidatedData = Object.fromEntries(
+          Object.entries(validatedData).filter(
+            ([, value]) => value !== "" && value !== undefined
+          )
+        );
+
         await apiCall({
           endpoint: "/v1/users",
           method: "patch",
-          data: validatedData,
+          data: newValidatedData,
           successMessage: "User updated successfully!",
         });
 
@@ -203,17 +210,12 @@ const Profile = () => {
                 {fieldLabels[fieldName]}
               </span>
               {!displayInput ? (
-                <span className="text-xs font-bold text-textDarkGrey">
-                  {fieldValue || (
-                    <img
-                      src={addButton}
-                      alt="Add Button"
-                      width="24px"
-                      className="cursor-pointer"
-                      onClick={() => setDisplayInput(true)}
-                    />
-                  )}
-                </span>
+                fieldValue || (
+                  <BiSolidPlusCircle
+                    className="cursor-pointer w-5 h-5 text-textLightGrey"
+                    onClick={() => setDisplayInput(true)}
+                  />
+                )
               ) : (
                 <SmallInput
                   type="text"
