@@ -2,7 +2,7 @@ import {
   HomeIcon,
   // DashboardIcon,
   SalesIcon,
-  TransactionsIcon,
+  // TransactionsIcon,
   CustomersIcon,
   AgentsIcon,
   ProductsIcon,
@@ -29,11 +29,11 @@ export const navData = [
     icon: SalesIcon,
     link: "/sales",
   },
-  {
-    title: "Transactions",
-    icon: TransactionsIcon,
-    link: "/transactions",
-  },
+  // {
+  //   title: "Transactions",
+  //   icon: TransactionsIcon,
+  //   link: "/transactions",
+  // },
   {
     title: "Customers",
     icon: CustomersIcon,
