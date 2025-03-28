@@ -106,14 +106,14 @@ const Transactions = () => {
               iconBgColor="bg-[#E3FAD6]"
               topText="All"
               bottomText="TRANSACTIONS"
-              value={100}
+              value={0}
             />
             <TitlePill
               icon={redwallet}
               iconBgColor="bg-[#FFDBDE]"
               topText="Reversed"
               bottomText="TRANSACTIONS"
-              value={25}
+              value={0}
             />
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
@@ -146,7 +146,8 @@ const Transactions = () => {
                     path={path}
                     element={
                       <TransactionTable
-                        transactionData={_transactionsData}
+                        // transactionData={_transactionsData}
+                        transactionData={[]}
                         isLoading={false}
                         refreshTable={() => Promise.resolve()}
                         error={""}
