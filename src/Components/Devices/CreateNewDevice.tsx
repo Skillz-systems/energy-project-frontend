@@ -26,9 +26,9 @@ const DeviceFormSchema = z.object({
     .refine((val) => !val || /^\d+$/.test(val), {
       message: "Device Count must be a valid integer",
     })
-    .refine((val) => !val || val.length >= 2, {
-      message: "Device Count must be at least 2 characters long",
-    })
+    // .refine((val) => !val || val.length >= 2, {
+    //   message: "Device Count must be at least 2 characters long",
+    // })
     .transform((val) => (val ? Number(val).toString() : val)),
   timeDivider: z.string(),
   restrictedDigitMode: z.boolean(),
@@ -289,7 +289,6 @@ const CreateNewDevice: React.FC<CreatNewDeviceProps> = ({
                 placeholder="Enter Count"
                 required={false}
                 errorMessage={getFieldError("count")}
-                description="Enter Count"
               />
 
               <Input

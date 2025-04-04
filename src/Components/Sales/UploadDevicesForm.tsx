@@ -550,7 +550,7 @@ const UploadDevicesForm = ({
                             value={item?.status || ""}
                           />
                           <ProductDetailRow
-                            label="Total Qty Remaining"
+                            label="Quantity"
                             value={item?.totalRemainingQuantities || ""}
                           />
                         </div>

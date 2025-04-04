@@ -734,7 +734,7 @@ export const CardComponent = ({
               <p className="text-textDarkGrey text-xs">{productName}</p>
               {quantity && (
                 <p className="text-textDarkGrey font-medium text-xs">
-                  Qty remaining: {quantity}
+                  Quantity: {quantity}
                 </p>
               )}
               {isSale && (
@@ -747,7 +747,7 @@ export const CardComponent = ({
                 >
                   {totalRemainingQuantities === 0
                     ? "Out of Stock"
-                    : `Qty remaining: ${
+                    : `Quantity: ${
                         totalRemainingQuantities &&
                         totalRemainingQuantities -
                           updatedProductInfo.productUnits

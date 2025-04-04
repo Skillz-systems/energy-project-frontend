@@ -27,6 +27,7 @@ export const useApiCall = () => {
   const { token } = useTokens();
   const location = useLocation();
   const [isNetworkError, setIsNetworkError] = useState(false);
+  const [isPermissionError, setIsPermissionError] = useState(false);
   const { errorStates, updateErrorState, setToastShown } = useEndpointErrors();
 
   const apiCall = async ({
@@ -38,6 +39,9 @@ export const useApiCall = () => {
     successMessage = "Successful",
     showToast = true,
   }: ApiCallOptions): Promise<any> => {
+    setIsNetworkError(false);
+    setIsPermissionError(false);
+
     const url = import.meta.env.VITE_API_URL;
     const baseURL = `${url}/api`;
 
@@ -58,13 +62,14 @@ export const useApiCall = () => {
       if (response.status >= 200 && response.status < 300 && showToast) {
         toast.success(successMessage);
       }
-      updateErrorState(endpoint, false, true); // Reset error state on success
+      updateErrorState(endpoint, false, true);
       return response;
     } catch (error: any) {
       handleApiError(
         error,
         location,
         setIsNetworkError,
+        setIsPermissionError,
         endpoint,
         errorStates,
         updateErrorState,
@@ -77,6 +82,7 @@ export const useApiCall = () => {
   return {
     apiCall,
     isNetworkError,
+    isPermissionError,
   };
 };
 
@@ -90,55 +96,59 @@ export const useGetRequest = (
   const location = useLocation();
   const { errorStates, updateErrorState, setToastShown } = useEndpointErrors();
   const [isNetworkError, setIsNetworkError] = useState<boolean>(false);
-
-  // Check error state before making the call
-  const endpointState = errorStates.find(
-    (entry) => entry.endpoint === endpoint
-  );
+  const [isPermissionError, setIsPermissionError] = useState<boolean>(false);
 
   const fetcher = async (url: string): Promise<any> => {
-    if (endpointState?.errorExists && endpointState.errorCount >= 5) {
-      console.warn(`Blocked fetch for ${endpoint} due to repeated errors.`);
-      throw new Error(`Blocked fetch for ${endpoint}`);
-    }
+    setIsNetworkError(false);
+    setIsPermissionError(false);
 
-    // SWR fetcher function with axios
     try {
       const response = await apiClient.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      updateErrorState(endpoint, false, true); // Reset error state on success
-      setIsNetworkError(false);
+      updateErrorState(endpoint, false, true);
       return response.data;
     } catch (error: any) {
       handleApiError(
         error,
         location,
         setIsNetworkError,
+        setIsPermissionError,
         endpoint,
         errorStates,
         updateErrorState,
         setToastShown
       );
+
+      // Throw a special error for permission errors to prevent SWR from retrying
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        throw new Error("PERMISSION_DENIED");
+      }
+
       throw error;
     }
   };
 
-  const swrResponse = useSWR(
-    `${apiClient.defaults.baseURL}/api${endpoint}`,
-    fetcher,
-    {
-      revalidateOnFocus: revalidate,
-      revalidateOnReconnect: revalidate,
-      refreshInterval,
-    }
-  );
+  // Custom SWR configuration that won't retry on permission errors
+  const swrConfig = {
+    revalidateOnFocus: revalidate && !isPermissionError,
+    revalidateOnReconnect: revalidate && !isPermissionError,
+    refreshInterval: isPermissionError ? undefined : refreshInterval,
+    shouldRetryOnError: (error: any) => {
+      // Don't retry if it's a permission error
+      return error.message !== "PERMISSION_DENIED";
+    },
+  };
 
   return {
-    ...swrResponse,
-    errorStates: { errorStates, isNetworkError },
+    ...useSWR(
+      `${apiClient.defaults.baseURL}/api${endpoint}`,
+      fetcher,
+      swrConfig
+    ),
+    errorStates: { errorStates, isNetworkError, isPermissionError },
   };
 };
 
@@ -150,6 +160,7 @@ export type ApiErrorStatesType = {
     toastShown: boolean;
   }[];
   isNetworkError: boolean;
+  isPermissionError: boolean;
 };
 
 // Hook to manage error states for endpoints
@@ -208,6 +219,7 @@ const handleApiError = (
   error: AxiosError | Error,
   location: Location<any>,
   setIsNetworkError: (value: boolean) => void,
+  setIsPermissionError: (value: boolean) => void,
   endpoint: string,
   errorStates: Array<{
     endpoint: string;
@@ -250,14 +262,7 @@ const handleApiError = (
           setErrorState(true);
           break;
         case 403:
-          if (!errorStates.find((e) => e.endpoint === endpoint)?.toastShown) {
-            toast.error(
-              "Forbidden: You don't have permission to perform this action."
-            );
-            setToastShown(endpoint);
-          }
-          Cookies.remove("userData");
-          window.location.href = "/";
+          setIsPermissionError(true);
           setErrorState(true);
           break;
         default:

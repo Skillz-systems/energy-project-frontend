@@ -116,8 +116,8 @@ const ProductModal = ({
 
   const tabNames = [
     { name: "Product Details", key: "productDetails", count: null },
-    { name: "Stats", key: "stats", count: null },
     { name: "Inventory Details", key: "inventoryDetails", count: null },
+    { name: "Stats", key: "stats", count: null },
     { name: "Customers", key: "customers", count: 0 },
   ];
 
@@ -189,8 +189,6 @@ const ProductModal = ({
                 refreshTable={refreshTable}
               />
             </DataStateWrapper>
-          ) : tabContent === "stats" ? (
-            <StatsDetails />
           ) : tabContent === "inventoryDetails" ? (
             <DataStateWrapper
               isLoading={fetchProductInventories?.isLoading}
@@ -201,6 +199,8 @@ const ProductModal = ({
             >
               <InventoryDetails inventoryData={inventoryData} />
             </DataStateWrapper>
+          ) : tabContent === "stats" ? (
+            <StatsDetails />
           ) : (
             <CustomerDetails />
           )}

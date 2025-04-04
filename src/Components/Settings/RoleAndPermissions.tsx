@@ -67,7 +67,11 @@ const RoleAndPermissions = ({
         errorStates={allRolesErrorStates}
         refreshData={allRolesRefresh}
         errorClass="rounded-[20px]"
-        errorMessage="Failed to fetch roles list."
+        errorMessage={
+          allRolesErrorStates.isPermissionError
+            ? "You don't have the right permission"
+            : "Failed to fetch roles list."
+        }
       >
         <div className="relative flex flex-col justify-end bg-white p-2 sm:p-4 w-full lg:max-w-[700px] min-h-[414px] border-[0.6px] border-strokeGreyThree rounded-[20px] overflow-x-auto max-w-full">
           <img

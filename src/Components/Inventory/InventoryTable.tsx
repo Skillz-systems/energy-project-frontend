@@ -77,12 +77,10 @@ const generateInventoryEntries = (data: any): InventoryEntries[] => {
         name: { image: item?.image, text: item?.name },
         class: item?.class,
         salePrice: item?.salePrice,
-        inventoryValue: item?.inventoryValue,
+        inventoryValue: item?.inventoryValue || 0,
         stockLevel: {
-          totalUnits:
-            item?.batches[item.batches.length - 1]?.numberOfStock || 1,
-          currentUnits:
-            item?.batches[item.batches.length - 1]?.remainingQuantity ?? 0,
+          totalUnits: item?.totalInitialQuantities || 0,
+          currentUnits: item?.totalRemainingQuantities || 0,
         },
       };
     }

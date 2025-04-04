@@ -74,14 +74,11 @@ const Contracts = () => {
   ];
 
   const dropDownList = {
-    items: ["Add New Template", "Export List"],
+    items: ["Add New Template"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
           console.log("Adding template...");
-          break;
-        case 1:
-          console.log("Exporting list...");
           break;
         default:
           break;

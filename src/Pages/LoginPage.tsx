@@ -1,7 +1,6 @@
 import { Suspense, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
-import useTokens from "../hooks/useTokens";
 import loginbg from "../assets/loginbg.png";
 import logo from "../assets/logo.svg";
 import eyeclosed from "../assets/eyeclosed.svg";
@@ -30,7 +29,6 @@ const defaultLoginFormData: LoginFormData = {
 };
 
 const LoginPage = () => {
-  const { token } = useTokens();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { apiCall } = useApiCall();
@@ -42,7 +40,6 @@ const LoginPage = () => {
   const [apiError, setApiError] = useState<string | null>(null);
 
   useIsLoggedIn("/home");
-  if (token) return null;
 
   const redirectPath = searchParams.get("redirect");
 
