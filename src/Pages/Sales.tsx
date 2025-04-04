@@ -10,7 +10,7 @@ import PageLayout from "./PageLayout";
 import transactionsbadge from "../assets/transactions/transactionsbadge.png";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
-import { DropDown } from "@/Components/DropDownComponent/DropDown";
+// import { DropDown } from "@/Components/DropDownComponent/DropDown";
 import circleAction from "../assets/settings/addCircle.svg";
 import gradientsales from "../assets/sales/gradientsales.svg";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
@@ -90,19 +90,19 @@ const Sales = observer(() => {
     },
   ];
 
-  const dropDownList = {
-    items: ["Export List"],
-    onClickLink: (index: number) => {
-      switch (index) {
-        case 0:
-          console.log("Exporting list...");
-          break;
-        default:
-          break;
-      }
-    },
-    showCustomButton: true,
-  };
+  // const dropDownList = {
+  //   items: ["Export List"],
+  //   onClickLink: (index: number) => {
+  //     switch (index) {
+  //       case 0:
+  //         console.log("Exporting list...");
+  //         break;
+  //       default:
+  //         break;
+  //     }
+  //   },
+  //   showCustomButton: true,
+  // };
 
   const salesPaths = ["all"];
 
@@ -151,7 +151,7 @@ const Sales = observer(() => {
                 setIsOpen(true);
               }}
             />
-            <DropDown {...dropDownList} />
+            {/* <DropDown {...dropDownList} /> */}
           </div>
         </section>
         <div className="flex flex-col w-full px-2 py-8 gap-4 lg:flex-row md:p-8">

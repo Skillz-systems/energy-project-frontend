@@ -4,7 +4,7 @@ import PageLayout from "./PageLayout";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import transactionsbadge from "../assets/transactions/transactionsbadge.png";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
-import { DropDown } from "@/Components/DropDownComponent/DropDown";
+// import { DropDown } from "@/Components/DropDownComponent/DropDown";
 // import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 // import reversal from "../assets/transactions/reversalactionicon.svg";
 import wallet from "../assets/agents/wallet.svg";
@@ -80,19 +80,19 @@ const Transactions = () => {
     },
   ];
 
-  const dropDownList = {
-    items: ["Export List"],
-    onClickLink: (index: number) => {
-      switch (index) {
-        case 0:
-          console.log("Exporting list...");
-          break;
-        default:
-          break;
-      }
-    },
-    showCustomButton: true,
-  };
+  // const dropDownList = {
+  //   items: ["Export List"],
+  //   onClickLink: (index: number) => {
+  //     switch (index) {
+  //       case 0:
+  //         console.log("Exporting list...");
+  //         break;
+  //       default:
+  //         break;
+  //     }
+  //   },
+  //   showCustomButton: true,
+  // };
 
   const transactionPaths = ["all", "reversed"];
 
@@ -124,7 +124,7 @@ const Transactions = () => {
                 setIsOpen(true);
               }}
             /> */}
-            <DropDown {...dropDownList} />
+            {/* <DropDown {...dropDownList} /> */}
           </div>
         </section>
         <div className="flex flex-col w-full px-2 py-8 gap-4 lg:flex-row md:p-8">

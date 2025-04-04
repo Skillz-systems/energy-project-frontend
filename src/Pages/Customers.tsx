@@ -8,7 +8,7 @@ import customerbadge from "../assets/customers/customerbadge.png";
 import cancelled from "../assets/cancelled.svg";
 import greencustomer from "../assets/customers/greencustomer.svg";
 import gradientcustomer from "../assets/customers/gradientcustomer.svg";
-import { DropDown } from "@/Components/DropDownComponent/DropDown";
+// import { DropDown } from "@/Components/DropDownComponent/DropDown";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import { useGetRequest } from "@/utils/useApiCall";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
@@ -101,19 +101,19 @@ const Customers = () => {
     },
   ];
 
-  const dropDownList = {
-    items: ["Export List"],
-    onClickLink: (index: number) => {
-      switch (index) {
-        case 0:
-          console.log("Exporting list...");
-          break;
-        default:
-          break;
-      }
-    },
-    showCustomButton: true,
-  };
+  // const dropDownList = {
+  //   items: ["Export List"],
+  //   onClickLink: (index: number) => {
+  //     switch (index) {
+  //       case 0:
+  //         console.log("Exporting list...");
+  //         break;
+  //       default:
+  //         break;
+  //     }
+  //   },
+  //   showCustomButton: true,
+  // };
 
   const customerPaths = ["all", "active", "barred"];
 
@@ -159,7 +159,7 @@ const Customers = () => {
                 setIsOpen(true);
               }}
             />
-            <DropDown {...dropDownList} />
+            {/* <DropDown {...dropDownList} /> */}
           </div>
         </section>
         <div className="flex flex-col w-full px-2 py-8 gap-4 lg:flex-row md:p-8">

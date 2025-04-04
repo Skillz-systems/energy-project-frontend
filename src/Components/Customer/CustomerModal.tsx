@@ -40,6 +40,8 @@ const CustomerModal = ({
       phoneNumber: data?.phone,
       addressType: data?.addressType ?? "",
       location: data?.location,
+      longitude: data?.longitude || "",
+      latitude: data?.latitude || "",
     };
   };
 

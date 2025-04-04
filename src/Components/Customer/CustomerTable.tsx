@@ -57,8 +57,8 @@ export type CustomerType = {
   location: string;
   addressType: string | null;
   staffId: string | null;
-  longitude: string | null;
-  latitude: string | null;
+  longitude: string;
+  latitude: string;
   emailVerified: boolean;
   isBlocked: boolean;
   status: string;

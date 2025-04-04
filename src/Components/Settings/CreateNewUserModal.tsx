@@ -6,6 +6,7 @@ import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { Modal } from "../ModalComponent/Modal";
 import { KeyedMutator } from "swr";
 import ApiErrorMessage from "../ApiErrorMessage";
+import { GooglePlacesInput } from "../InputComponent/GooglePlacesInput";
 
 const formSchema = z.object({
   email: z.string().trim().email("Invalid email address"),
@@ -18,6 +19,8 @@ const formSchema = z.object({
     .transform((val) => val.replace(/\s+/g, "")),
   role: z.string().trim().min(1, "Role is required"),
   location: z.string().trim().min(1, "Location is required"),
+  longitude: z.string().optional(),
+  latitude: z.string().optional(),
 });
 
 const defaultFormData = {
@@ -122,7 +125,7 @@ const CreateNewUserModal = ({
   return (
     <Modal
       isOpen={isOpen}
-      onClose={() => setIsOpen(false)}
+      onClose={() => resetForm()}
       layout="right"
       bodyStyle="pb-44"
     >
@@ -172,6 +175,23 @@ const CreateNewUserModal = ({
             required={true}
             errorMessage={getFieldError("email")}
           />
+          <GooglePlacesInput
+            type="text"
+            name="location"
+            label="Location"
+            value={formData.location}
+            placeholder="Search for a location"
+            required={true}
+            errorMessage={getFieldError("location")}
+            onChange={(value, _place, coordinates) => {
+              setFormData((prev) => ({
+                ...prev,
+                location: value,
+                longitude: coordinates?.lng || "",
+                latitude: coordinates?.lat || "",
+              }));
+            }}
+          />
           <Input
             type="text"
             name="phone"
@@ -197,19 +217,7 @@ const CreateNewUserModal = ({
                 : getFieldError("role")
             }
           />
-          <Input
-            type="text"
-            name="location"
-            label="LOCATION"
-            value={formData.location}
-            onChange={handleInputChange}
-            placeholder="Location"
-            required={true}
-            errorMessage={getFieldError("location")}
-          />
-
           <ApiErrorMessage apiError={apiError} />
-
           <ProceedButton
             type="submit"
             variant={isFormFilled ? "gradient" : "gray"}

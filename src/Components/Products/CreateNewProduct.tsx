@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useApiCall, useGetRequest } from "../../utils/useApiCall";
+import React, { useState, useEffect, useCallback } from "react";
+import { useApiCall } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
 import {
   FileInput,
@@ -99,7 +99,7 @@ export type FormData = z.infer<typeof formSchema>;
 type OtherFormData = z.infer<typeof otherFormSchema>;
 
 const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
-  ({ isOpen, setIsOpen, refreshTable, formType }) => {
+  ({ isOpen, setIsOpen, refreshTable, formType = "newProduct" }) => {
     const { apiCall } = useApiCall();
     const [formData, setFormData] = useState<FormData>(defaultFormData);
     const [paymentModes, setPaymentModes] = useState<any>([]);
@@ -111,12 +111,29 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
     const [apiError, setApiError] = useState<string | Record<string, string[]>>(
       ""
     );
+    const [productCategories, setProductCategories] = useState<Category[]>([]);
 
-    const fetchAllProductCategories = useGetRequest(
-      "/v1/products/categories/all",
-      true,
-      60000
-    );
+    // Fetch product categories using apiCall
+    const fetchProductCategories = useCallback(async () => {
+      try {
+        const response = await apiCall({
+          endpoint: "/v1/products/categories/all",
+          method: "get",
+          showToast: false,
+        });
+        setProductCategories(response.data || []);
+      } catch (error) {
+        console.error("Failed to fetch product categories:", error);
+        setProductCategories([]);
+      }
+    }, [isOpen]);
+
+    // Load categories when modal opens
+    useEffect(() => {
+      if (isOpen) {
+        fetchProductCategories();
+      }
+    }, [isOpen, fetchProductCategories]);
 
     const handleInputChange = (e: {
       target: { name: any; value: any; files: any };
@@ -145,7 +162,6 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
     };
 
     const resetFormErrors = (name: string) => {
-      // Clear the error for this field when the user starts typing
       setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
       setApiError("");
     };
@@ -157,15 +173,12 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
       try {
         if (formType === "newProduct") {
           const formSubmissionData = new FormData(e.currentTarget);
-
-          // Convert form data to an object
           const formFields = Object.fromEntries(formSubmissionData.entries());
           const inventories = ProductStore.products.map((product) => ({
             inventoryId: product.productId,
             quantity: product.productUnits,
           }));
 
-          // Parse the data using the main schema
           const validatedData = mainSchema.parse({
             ...formFields,
             categoryId: formData.categoryId,
@@ -175,7 +188,6 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
 
           const submissionData = new FormData();
 
-          // Iterate and append validated data to FormData
           Object.entries(validatedData).forEach(([key, value]) => {
             if (key !== "inventories") {
               if (value instanceof File) {
@@ -190,7 +202,6 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
             JSON.stringify(validatedData.inventories)
           );
 
-          // Make the API call
           await apiCall({
             endpoint: "/v1/products",
             method: "post",
@@ -211,6 +222,9 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
             data: submissionData,
             successMessage: "Product category created successfully!",
           });
+
+          // Refresh categories after creating a new one
+          await fetchProductCategories();
         }
 
         await refreshTable!();
@@ -226,7 +240,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
           const message =
             error?.response?.data?.message ||
             `Product ${
-              formType === "newCategory" && "Category"
+              formType === "newCategory" ? "Category" : ""
             } Creation Failed: Internal Server Error`;
           setApiError(message);
         }
@@ -281,12 +295,14 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                 <>
                   <SelectInput
                     label="Product Category"
-                    options={fetchAllProductCategories?.data?.map(
-                      (category: Category) => ({
-                        label: category.name,
-                        value: category.id,
-                      })
-                    )}
+                    options={
+                      productCategories.length > 0
+                        ? productCategories.map((category: Category) => ({
+                            label: category.name,
+                            value: category.id,
+                          }))
+                        : []
+                    }
                     value={categoryId}
                     onChange={(selectedValue) =>
                       handleSelectChange("categoryId", selectedValue)
@@ -335,11 +351,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                         })}
                       </div>
                     }
-                    errorMessage={
-                      !ProductStore.doesProductCategoriesExist
-                        ? "Failed to fetch inventory categories"
-                        : getFieldError("inventories")
-                    }
+                    errorMessage={getFieldError("inventories")}
                   />
                   <SelectMultipleInput
                     label="Payment Modes"

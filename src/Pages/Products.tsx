@@ -90,15 +90,12 @@ const Products = () => {
   }, [location.pathname]);
 
   const dropDownList = {
-    items: ["Create New Category", "Export List"],
+    items: ["Create New Category"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
           setFormType("newCategory");
           setIsOpen(true);
-          break;
-        case 1:
-          console.log("Exporting list...");
           break;
         default:
           break;

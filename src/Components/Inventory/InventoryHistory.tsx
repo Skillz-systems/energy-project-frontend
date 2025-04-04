@@ -32,8 +32,9 @@ export interface Batch {
 
 // Helper function to map the API data to the desired format
 const generateBatchEntries = (data: Batch[]): BatchHistoryEntries[] => {
-  const entries: BatchHistoryEntries[] = data?.map((item) => {
+  const entries: BatchHistoryEntries[] = data?.map((item, index) => {
     return {
+      serialNumber: index + 1,
       datetime: item.createdAt,
       stockNumber: item.numberOfStock || 0,
       stockValue: item.stockValue || "0",
@@ -59,6 +60,7 @@ const InventoryHistory = ({
   // const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const columnList = [
+    { title: "S/N", key: "serialNumber" },
     {
       title: "DATE & TIME",
       key: "datetime",
@@ -108,7 +110,7 @@ const InventoryHistory = ({
       },
     },
     {
-      title: "STAFF",
+      title: "Created By",
       key: "staffName",
       styles: "w-[25%]",
       valueIsAComponent: true,
