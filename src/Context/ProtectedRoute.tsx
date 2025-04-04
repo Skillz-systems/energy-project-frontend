@@ -1,41 +1,56 @@
-import React, { useEffect } from "react";
-import { Navigate, useLocation, Outlet } from "react-router-dom";
+import React, { useEffect, useMemo } from "react";
+import { Navigate, useLocation, Outlet, matchPath } from "react-router-dom";
 import useTokens from "../hooks/useTokens";
 import { toast } from "react-toastify";
 
 const ProtectedRouteWrapper: React.FC = () => {
   const { token } = useTokens();
   const location = useLocation();
-  const unprotectedRoutes = [
-    "/",
-    "/create-password/:id/:token",
-    "/reset-password/:id/:token",
-  ];
+  const unprotectedRoutes = useMemo(
+    () => [
+      "/",
+      "/login",
+      "/create-password/:id/:token",
+      "/reset-password/:id/:token",
+    ],
+    []
+  );
 
   useEffect(() => {
-    if (!token) {
+    if (
+      !token &&
+      !unprotectedRoutes.some((route) => matchPath(route, location.pathname))
+    ) {
       const toastId = toast.warning("You are not logged in!");
-      // Cleanup function to dismiss the toast if needed
       return () => toast.dismiss(toastId);
     }
-  }, [token]);
+  }, [token, location.pathname, unprotectedRoutes]);
 
-  if (token && !unprotectedRoutes.includes(location.pathname)) {
-    /* 
-      If the user is logged in and tries to access "/" route, 
-      save the current route to session to be redirected back to in the login page.
-    */
-    sessionStorage.setItem("redirect", location.pathname);
+  // If not authenticated and trying to access protected route, redirect to login
+  if (
+    !token &&
+    !unprotectedRoutes.some((route) => matchPath(route, location.pathname))
+  ) {
+    return (
+      <Navigate
+        to={`/?redirect=${encodeURIComponent(location.pathname)}`}
+        replace
+      />
+    );
   }
 
-  if (!token) {
-    // If the user is not authenticated, redirect to login with the current path as a redirect query param
-    const loginRoute = `?redirect=${encodeURIComponent(location.pathname)}`;
-    return <Navigate to={loginRoute} replace />;
-  } else {
-    // If authenticated and not on an unprotected route, render the nested routes
-    return <Outlet />;
+  // If authenticated but trying to access login page, redirect to home or saved redirect
+  if (
+    token &&
+    unprotectedRoutes.some((route) => matchPath(route, location.pathname))
+  ) {
+    const redirectPath = sessionStorage.getItem("redirect") || "/home";
+    sessionStorage.removeItem("redirect");
+    return <Navigate to={redirectPath} replace />;
   }
+
+  // Otherwise, render the protected content
+  return <Outlet />;
 };
 
 export default ProtectedRouteWrapper;
