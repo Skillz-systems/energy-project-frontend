@@ -551,7 +551,8 @@ const UploadDevicesForm = ({
                           />
                           <ProductDetailRow
                             label="Quantity"
-                            value={item?.totalRemainingQuantities || ""}
+                            // value={item?.totalRemainingQuantities || ""}
+                            value={"3"}
                           />
                         </div>
                         <div className="flex items-center justify-center p-0.5 bg-slate-200 rounded-full border-[0.6px] border-strokeGreyTwo cursor-pointer">
@@ -567,7 +568,8 @@ const UploadDevicesForm = ({
                                 `Select Devices for ${item?.name}`
                               );
                               setRequiredQuantity(
-                                item?.totalRemainingQuantities
+                                // item?.totalRemainingQuantities
+                                3
                               );
                             }}
                           />
