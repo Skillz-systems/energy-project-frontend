@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { z } from "zod";
-import { useApiCall } from "@/utils/useApiCall";
+import { ApiErrorStatesType, useApiCall } from "@/utils/useApiCall";
 import { Input, SelectInput } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { Modal } from "../ModalComponent/Modal";
@@ -41,12 +41,14 @@ const CreateNewUserModal = ({
   rolesList,
   allUsersRefresh,
   allRolesError,
+  allRolesErrorStates,
 }: {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   rolesList: { label: string; value: string }[];
   allUsersRefresh: KeyedMutator<any>;
   allRolesError: any;
+  allRolesErrorStates: ApiErrorStatesType;
 }) => {
   const { apiCall } = useApiCall();
   const [formData, setFormData] = useState<FormData>(defaultFormData);
@@ -212,7 +214,9 @@ const CreateNewUserModal = ({
             required={true}
             placeholder="Select a role"
             errorMessage={
-              allRolesError
+              allRolesErrorStates.isPermissionError
+                ? "You don't have permission to create a new user"
+                : allRolesError
                 ? "Failed to fetch user roles."
                 : getFieldError("role")
             }
@@ -222,7 +226,7 @@ const CreateNewUserModal = ({
             type="submit"
             variant={isFormFilled ? "gradient" : "gray"}
             loading={loading}
-            disabled={!isFormFilled}
+            disabled={allRolesErrorStates.isPermissionError || !isFormFilled}
             onClick={handleSubmit}
           />
         </div>

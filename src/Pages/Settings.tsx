@@ -170,6 +170,7 @@ const Settings = () => {
         rolesList={rolesList}
         allUsersRefresh={fetchAllUsers.mutate}
         allRolesError={fetchAllRoles.error}
+        allRolesErrorStates={fetchAllRoles.errorStates}
       />
     </>
   );

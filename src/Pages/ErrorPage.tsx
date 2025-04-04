@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { TbAlertTriangleFilled } from "react-icons/tb";
 import { KeyedMutator } from "swr";
@@ -117,75 +117,81 @@ export const ErrorComponent = ({
   errorData: ApiErrorStatesType;
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
-  const previousErrorCount = useRef(errorData?.errorStates[0]?.errorCount);
 
   const handleRefetch = async () => {
+    // Don't allow refetch for permission errors
+    if (errorData?.isPermissionError) return;
+
     setLoading(true);
     try {
-      if (refreshData && errorData?.errorStates[0]?.errorCount < 5) {
+      if (refreshData) {
         await refreshData();
-      } else window.location.reload();
-    } catch {
+      } else {
+        window.location.reload();
+      }
+    } finally {
       setLoading(false);
     }
-    // Check if error count has changed, and if so, stop the loading state
-    if (errorData?.errorStates[0]?.errorCount !== previousErrorCount?.current) {
-      setLoading(false);
+  };
+
+  // Determine error messages based on error type
+  const getMainMessage = () => {
+    if (errorData?.isPermissionError) {
+      return "Access Denied";
     }
-    // Update the previous error count for future comparisons
-    previousErrorCount.current = errorData?.errorStates[0]?.errorCount;
+    if (errorData?.isNetworkError) {
+      return "No Internet Connection";
+    }
+    return "Something Went Wrong";
+  };
+
+  const getSecondaryMessage = () => {
+    if (errorData?.isPermissionError) {
+      return "Your current permissions don't allow access to this resource.";
+    }
+    if (errorData?.isNetworkError) {
+      return "Try checking your network configuration.";
+    }
+    return message;
+  };
+
+  const getActionMessage = () => {
+    if (errorData?.isPermissionError) {
+      return "Please contact your administrator to request access.";
+    }
+    return null;
   };
 
   return (
     <div
       className={`flex flex-col items-center justify-center w-full h-full py-12 px-4 bg-gray-100 ${className}`}
     >
-      <div className="relative">
-        <svg height="0" width="0">
-          <defs>
-            <linearGradient
-              id="errorGradient"
-              x1="0%"
-              y1="0%"
-              x2="100%"
-              y2="0%"
-            >
-              <stop
-                offset="0%"
-                style={{ stopColor: "#982214", stopOpacity: 1 }}
-              />
-              <stop
-                offset="100%"
-                style={{ stopColor: "#473b15", stopOpacity: 1 }}
-              />
-            </linearGradient>
-          </defs>
-        </svg>
-        <TbAlertTriangleFilled
-          className="mx-auto h-16 w-16"
-          style={{ fill: "url(#errorGradient)" }}
-        />
-      </div>
+      <TbAlertTriangleFilled className="mx-auto h-16 w-16 text-primary" />
+
       <p className="mt-2 text-base sm:text-lg text-primary text-center font-semibold sm:max-w-[65%]">
-        {errorData?.isNetworkError
-          ? "No Internet Connection, Try checking your network configuration."
-          : "Internal Server Error."}
+        {getMainMessage()}
       </p>
+
       <p className="text-sm text-textBlack text-center">
-        {errorData?.errorStates[0]?.errorCount < 5
-          ? message
-          : "Blocked fetch dues to multiple failed errors. Try again later."}
+        {getSecondaryMessage()}
       </p>
-      <div
-        className="mt-6 inline-flex items-center px-5 py-2 text-base font-medium rounded-md text-white bg-errorGradient hover:bg-inversedErrorGradient transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary cursor-pointer"
-        onClick={handleRefetch}
-      >
-        {loading
-          ? "Refetching..."
-          : errorData?.errorStates[0]?.errorCount < 5
-          ? "Refetch"
-          : "Refresh"}
-      </div>
+
+      {getActionMessage() && (
+        <p className="text-sm text-textBlack text-center">
+          {getActionMessage()}
+        </p>
+      )}
+
+      {/* Only show retry button for non-permission errors */}
+      {!errorData?.isPermissionError && (
+        <button
+          onClick={handleRefetch}
+          disabled={loading}
+          className="mt-6 px-5 py-2 text-white bg-red-500 rounded-md hover:bg-red-600 transition-colors"
+        >
+          {loading ? "Retrying..." : "Try Again"}
+        </button>
+      )}
     </div>
   );
 };

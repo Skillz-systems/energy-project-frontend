@@ -161,6 +161,7 @@ const Transactions = () => {
                             },
                           ],
                           isNetworkError: false,
+                          isPermissionError: false,
                         }}
                         paginationInfo={paginationInfo}
                       />
