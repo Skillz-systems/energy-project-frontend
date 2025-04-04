@@ -108,11 +108,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col w-full gap-4">
-      <div className="flex items-center justify-between h-[44px] p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-full">
-        <Tag name="Product ID" />
-        <p className="text-textDarkGrey text-xs font-bold">{productId}</p>
-      </div>
-
       <div className="flex items-center justify-between p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
         <Tag name="Product Picture" variant="ink" />
         {displayInput ? (
@@ -173,8 +168,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
 
       <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
         <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
-          <img src={creditcardicon} alt="Credit Card Icon" /> TRANSACTIONS
-          DETAILS
+          <img src={creditcardicon} alt="Credit Card Icon" /> Payment Mode
         </p>
         <div className="flex items-center justify-between">
           <Tag name="Product Price" />
@@ -202,9 +196,10 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
           ) : (
             <div className="flex items-center w-max gap-1">
               <div className="flex items-center w-max gap-1">
-                {(Array.isArray(paymentModes) &&
-                typeof paymentModes[0] === "string"
-                  ? paymentModes[0].split(",")
+                {(typeof paymentModes === "string"
+                  ? paymentModes.split(",")
+                  : Array.isArray(paymentModes)
+                  ? paymentModes
                   : []
                 ).map((payment, index) => (
                   <Tag key={index} name={payment.trim().toLocaleUpperCase()} />

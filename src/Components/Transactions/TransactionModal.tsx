@@ -147,6 +147,7 @@ const TransactionModal = ({
                 },
               ],
               isNetworkError: false,
+              isPermissionError: false,
             }}
             refreshData={() => Promise.resolve()}
             errorMessage="Failed to fetch transaction details"

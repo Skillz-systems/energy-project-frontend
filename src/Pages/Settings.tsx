@@ -79,14 +79,11 @@ const Settings = () => {
   ];
 
   const dropDownList = {
-    items: ["Add new user", "Export List"],
-    onClickLink: (index: number, cardData: any) => {
+    items: ["Add new user"],
+    onClickLink: (index: number) => {
       switch (index) {
         case 0:
           setIsOpen(true);
-          break;
-        case 1:
-          console.log(cardData);
           break;
         default:
           break;
@@ -171,8 +168,9 @@ const Settings = () => {
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         rolesList={rolesList}
-        allUsersRefresh={fetchAllRoles.mutate}
+        allUsersRefresh={fetchAllUsers.mutate}
         allRolesError={fetchAllRoles.error}
+        allRolesErrorStates={fetchAllRoles.errorStates}
       />
     </>
   );

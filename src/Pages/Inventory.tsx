@@ -127,7 +127,7 @@ const Inventory = () => {
   }, [location.pathname]);
 
   const dropDownList = {
-    items: ["Create New Category", "Create New Sub-Category", "Export List"],
+    items: ["Create New Category", "Create New Sub-Category"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
@@ -137,9 +137,6 @@ const Inventory = () => {
         case 1:
           setFormType("newSubCategory");
           setIsOpen(true);
-          break;
-        case 2:
-          console.log("Exporting list...");
           break;
         default:
           break;

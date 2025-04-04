@@ -73,7 +73,9 @@ export function useIsLoggedIn(route: string) {
 
   useEffect(() => {
     if (token) {
-      navigate(sessionRedirect || route);
+      const redirectTo = sessionRedirect || route;
+      sessionStorage.removeItem("redirect");
+      navigate(redirectTo);
     }
   }, [token, navigate, route, sessionRedirect]);
 }

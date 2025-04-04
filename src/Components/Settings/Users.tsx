@@ -197,7 +197,11 @@ const Users = ({
         </div>
       ) : (
         <ErrorComponent
-          message="Failed to fetch user list."
+          message={
+            errorData.isPermissionError
+              ? "You dont't have permission to view users"
+              : "Failed to fetch user list."
+          }
           className="rounded-[20px]"
           refreshData={refreshTable}
           errorData={errorData}

@@ -1,4 +1,4 @@
-import { ChangeEvent, ReactNode, useEffect, useRef } from "react";
+import { ChangeEvent, ReactNode, useEffect, useRef, forwardRef } from "react";
 import { CgChevronDown } from "react-icons/cg";
 import { useState } from "react";
 import { LuImagePlus } from "react-icons/lu";
@@ -47,6 +47,7 @@ export type InputType = {
   onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   onClick?: (event?: any) => void;
+  onBlur?: (event?: any) => void;
   disabled?: boolean;
   required: boolean;
   checked?: boolean;
@@ -63,110 +64,120 @@ export type InputType = {
   max?: number;
 };
 
-export const Input = ({
-  type = "text",
-  name,
-  label,
-  value,
-  onChange,
-  placeholder = "Enter your firstname",
-  onClick,
-  disabled = false,
-  required = false,
-  checked,
-  readOnly = false,
-  iconLeft,
-  iconRight,
-  style,
-  className,
-  errorMessage,
-  errorClass,
-  maxLength,
-  description,
-  descriptionClass,
-  max,
-}: InputType) => {
-  const similarTypes = [
-    "text",
-    "number",
-    "email",
-    "password",
-    "search",
-    "hidden",
-    "tel",
-    "url",
-    "date",
-    "file",
-  ];
+export const Input = forwardRef<HTMLInputElement, InputType>(
+  (
+    {
+      type = "text",
+      name,
+      label,
+      value,
+      onChange,
+      placeholder = "Enter your firstname",
+      onClick,
+      onBlur,
+      disabled = false,
+      required = false,
+      checked,
+      readOnly = false,
+      iconLeft,
+      iconRight,
+      style,
+      className,
+      errorMessage,
+      errorClass,
+      maxLength,
+      description,
+      descriptionClass,
+      max,
+    },
+    ref
+  ) => {
+    const similarTypes = [
+      "text",
+      "number",
+      "email",
+      "password",
+      "search",
+      "hidden",
+      "tel",
+      "url",
+      "date",
+      "file",
+    ];
 
-  if (similarTypes.includes(type)) {
-    return (
-      <div className={`w-full ${className}`}>
-        <div
-          className={`relative autofill-parent ${
-            type === "hidden" ? "hidden" : "flex"
-          } ${style ? style : "max-w-full"} ${
-            disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"
-          }
+    if (similarTypes.includes(type)) {
+      return (
+        <div className={`w-full ${className}`}>
+          <div
+            className={`relative autofill-parent ${
+              type === "hidden" ? "hidden" : "flex"
+            } ${style ? style : "max-w-full"} ${
+              disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"
+            }
         ${value ? "border-strokeCream" : "border-strokeGrey"}
           items-center w-full  px-[1.1em] py-[1.25em] gap-1 rounded-3xl h-[48px] border-[0.6px]
           transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent`}
-          onClick={onClick}
-        >
-          <span
-            className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out
+            onClick={onClick}
+          >
+            <span
+              className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out
             ${value ? "opacity-100" : "opacity-0"}
             `}
-          >
-            {label.toUpperCase()}
-          </span>
+            >
+              {label.toUpperCase()}
+            </span>
 
-          {iconLeft && iconLeft}
+            {iconLeft && iconLeft}
 
-          {required && <Asterik />}
+            {required && <Asterik />}
 
-          <input
-            type={type}
-            id={name}
-            name={name}
-            value={value}
-            onChange={onChange}
-            placeholder={placeholder}
-            onClick={onClick}
-            disabled={disabled}
-            required={required}
-            checked={checked}
-            readOnly={readOnly}
-            min={0}
-            className={`w-full text-sm font-semibold ${
-              value ? "text-textBlack" : "text-textGrey"
-            } placeholder:text-textGrey placeholder:font-normal placeholder:italic`}
-            maxLength={maxLength}
-            max={max}
-          />
+            <input
+              ref={ref}
+              type={type}
+              id={name}
+              name={name}
+              value={value}
+              onChange={onChange}
+              placeholder={placeholder}
+              onClick={onClick}
+              onBlur={onBlur}
+              disabled={disabled}
+              required={required}
+              checked={checked}
+              readOnly={readOnly}
+              min={0}
+              className={`w-full text-sm font-semibold ${
+                value ? "text-textBlack" : "text-textGrey"
+              } placeholder:text-textGrey placeholder:font-normal placeholder:italic`}
+              maxLength={maxLength}
+              max={max}
+            />
 
-          {iconRight && iconRight}
+            {iconRight && iconRight}
+          </div>
+          {description && (
+            <p
+              className={`mt-1 px-[1.3em] text-xs text-textDarkGrey font-semibold w-full ${descriptionClass}`}
+            >
+              {description}
+            </p>
+          )}
+          {errorMessage && (
+            <p
+              className={`mt-1 px-[1.3em] text-xs text-errorTwo font-semibold w-full ${errorClass}`}
+            >
+              {errorMessage}
+            </p>
+          )}
         </div>
-        {description && (
-          <p
-            className={`mt-1 px-[1.3em] text-xs text-textDarkGrey font-semibold w-full ${descriptionClass}`}
-          >
-            {description}
-          </p>
-        )}
-        {errorMessage && (
-          <p
-            className={`mt-1 px-[1.3em] text-xs text-errorTwo font-semibold w-full ${errorClass}`}
-          >
-            {errorMessage}
-          </p>
-        )}
-      </div>
-    );
-  } else {
-    return "Input Type Not Allowed";
+      );
+    } else {
+      return "Input Type Not Allowed";
+    }
   }
-};
+);
+
+Input.displayName = "Input";
 
 export const SmallInput = ({
   type = "text",
@@ -667,8 +678,8 @@ export const RadioInput = ({
 };
 
 export type SelectOption = {
-  label: string;
-  value: string;
+  label: string | any;
+  value: string | any;
 };
 
 export type SelectInputType = {

@@ -32,6 +32,8 @@ const AgentModal = ({
       email: data?.user?.email,
       phone: data?.user?.phone,
       location: data?.user?.location,
+      longitude: data?.user?.longitude,
+      latitude: data?.user?.latitude,
       addressType: data?.user?.addressType,
       status: data?.user?.status,
       emailVerified: data?.user?.emailVerified,
