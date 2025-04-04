@@ -6,6 +6,7 @@ import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { useApiCall } from "../../utils/useApiCall";
 import { z } from "zod";
 import ApiErrorMessage from "../ApiErrorMessage";
+import { GooglePlacesInput } from "../InputComponent/GooglePlacesInput";
 
 interface CreateNewAgentsProps {
   isOpen: boolean;
@@ -91,7 +92,6 @@ const CreateNewAgents = ({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const validatedData = agentSchema.parse(formData);
       await apiCall({
@@ -117,7 +117,6 @@ const CreateNewAgents = ({
       setLoading(false);
     }
   };
-
   const isFormFilled = agentSchema.safeParse(formData).success;
 
   const getFieldError = (fieldName: string) => {
@@ -157,6 +156,23 @@ const CreateNewAgents = ({
           required={true}
           errorMessage={getFieldError("email")}
         />
+        <GooglePlacesInput
+          type="text"
+          name="location"
+          label="Location"
+          value={formData.location}
+          placeholder="Search for a location"
+          required={true}
+          errorMessage={getFieldError("location")}
+          onChange={(value, _place, coordinates) => {
+            setFormData((prev) => ({
+              ...prev,
+              location: value,
+              longitude: coordinates?.lng || "",
+              latitude: coordinates?.lat || "",
+            }));
+          }}
+        />
         <SelectInput
           label="Address Type (Home/Work)"
           options={[
@@ -170,16 +186,6 @@ const CreateNewAgents = ({
           required={true}
           placeholder="Address type (Home/Work)"
           errorMessage={getFieldError("addressType")}
-        />
-        <Input
-          type="text"
-          name="location"
-          label="Location"
-          value={formData.location}
-          onChange={handleInputChange}
-          placeholder="Location"
-          required={true}
-          errorMessage={getFieldError("location")}
         />
       </>
     );

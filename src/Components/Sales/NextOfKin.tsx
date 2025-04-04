@@ -5,6 +5,7 @@ import { nextOfKinDetailsSchema } from "./salesSchema";
 import { SaleStore } from "@/stores/SaleStore";
 import { formatDateForInput } from "@/utils/helpers";
 import SecondaryButton from "../SecondaryButton/SecondaryButton";
+import { GooglePlacesInput } from "../InputComponent/GooglePlacesInput";
 
 type FormData = z.infer<typeof nextOfKinDetailsSchema>;
 
@@ -108,7 +109,7 @@ const NextOfKinForm = ({ handleClose }: { handleClose: () => void }) => {
         required={false}
         errorMessage={getFieldError("email")}
       />
-      <Input
+      {/* <Input
         type="text"
         name="homeAddress"
         label="Home Address"
@@ -117,6 +118,23 @@ const NextOfKinForm = ({ handleClose }: { handleClose: () => void }) => {
         placeholder="Enter Home Address"
         required={false}
         errorMessage={getFieldError("homeAddress")}
+      /> */}
+      <GooglePlacesInput
+        type="text"
+        name="homeAddress"
+        label="Home Address"
+        value={formData.homeAddress}
+        placeholder="Search for a location"
+        required={true}
+        errorMessage={getFieldError("homeAddress")}
+        onChange={(value, _place, coordinates) => {
+          setFormData((prev) => ({
+            ...prev,
+            homeAddress: value,
+            longitude: coordinates?.lng || "",
+            latitude: coordinates?.lat || "",
+          }));
+        }}
       />
       <Input
         type="date"

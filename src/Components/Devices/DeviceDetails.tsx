@@ -162,8 +162,6 @@ const DeviceDetails = ({
       onSubmit={handleSubmit}
       className="flex flex-col items-center justify-center w-full gap-4"
     >
-      <DetailComponent label="Device ID" value={deviceData?.id} />
-
       <div className="flex flex-col w-full p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
         <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
           <img src={inventoryIcon} alt="Device Icon" /> DEVICE DETAILS

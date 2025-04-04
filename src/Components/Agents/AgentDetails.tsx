@@ -11,6 +11,8 @@ export interface AgentUserType {
   email: string;
   phone: string;
   location: string;
+  longitude: string;
+  latitude: string;
   addressType: string;
   status: string;
   emailVerified: boolean;
@@ -32,6 +34,8 @@ const AgentDetails = ({
     email: data.email,
     phone: data.phone,
     location: data.location,
+    longitude: data.longitude,
+    latitude: data.latitude,
     addressType: data.addressType,
     status: data.status,
     emailVerified: data.emailVerified,
@@ -69,10 +73,6 @@ const AgentDetails = ({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col w-full gap-4">
-      <div className="flex items-center justify-between h-[44px] p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-full">
-        <Tag name="Agent ID" />
-        <p className="text-textDarkGrey text-xs font-bold">{data.id}</p>
-      </div>
       <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
         <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
           <img src={customericon} alt="Settings Icon" /> PERSONAL DETAILS
@@ -181,6 +181,40 @@ const AgentDetails = ({
           ) : (
             <p className="text-xs font-bold text-textDarkGrey">
               {data.location || "N/A"}
+            </p>
+          )}
+        </div>
+        <div className="flex items-center justify-between">
+          <Tag name="Longitude" />
+          {displayInput ? (
+            <input
+              type="text"
+              name="longitude"
+              value={formData.longitude}
+              onChange={handleChange}
+              placeholder="Enter Longitude"
+              className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
+            />
+          ) : (
+            <p className="text-xs font-bold text-textDarkGrey">
+              {data.longitude || "N/A"}
+            </p>
+          )}
+        </div>
+        <div className="flex items-center justify-between">
+          <Tag name="Latitude" />
+          {displayInput ? (
+            <input
+              type="text"
+              name="latitude"
+              value={formData.latitude}
+              onChange={handleChange}
+              placeholder="Enter Latitude"
+              className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
+            />
+          ) : (
+            <p className="text-xs font-bold text-textDarkGrey">
+              {data.latitude || "N/A"}
             </p>
           )}
         </div>

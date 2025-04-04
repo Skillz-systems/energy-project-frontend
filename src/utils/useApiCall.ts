@@ -250,14 +250,14 @@ const handleApiError = (
           setErrorState(true);
           break;
         case 403:
-          if (!errorStates.find((e) => e.endpoint === endpoint)?.toastShown) {
-            toast.error(
-              "Forbidden: You don't have permission to perform this action."
-            );
-            setToastShown(endpoint);
-          }
-          Cookies.remove("userData");
-          window.location.href = "/";
+          // if (!errorStates.find((e) => e.endpoint === endpoint)?.toastShown) {
+          //   toast.error(
+          //     "Forbidden: You don't have permission to perform this action."
+          //   );
+          //   setToastShown(endpoint);
+          // }
+          // Cookies.remove("userData");
+          // window.location.href = "/";
           setErrorState(true);
           break;
         default:

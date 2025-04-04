@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { KeyedMutator } from "swr";
-import { FileInput, Input, SelectInput } from "../InputComponent/Input";
+import {
+  FileInput,
+  Input,
+  SelectInput,
+  SelectOption,
+} from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { Modal } from "../ModalComponent/Modal";
-import { useApiCall, useGetRequest } from "@/utils/useApiCall";
+import { useApiCall } from "@/utils/useApiCall";
 import { Category } from "../Products/CreateNewProduct";
 import { z } from "zod";
 import ApiErrorMessage from "../ApiErrorMessage";
@@ -176,11 +181,31 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
   const [apiError, setApiError] = useState<string | Record<string, string[]>>(
     ""
   );
-
-  const fetchInventoryCategories = useGetRequest(
-    "/v1/inventory/categories/all",
-    false
+  const [inventoryCategories, setInventoryCategories] = useState<Category[]>(
+    []
   );
+
+  // Fetch inventory categories using apiCall
+  const fetchInventoryCategories = useCallback(async () => {
+    try {
+      const response = await apiCall({
+        endpoint: "/v1/inventory/categories/all",
+        method: "get",
+        showToast: false,
+      });
+      setInventoryCategories(response.data || []);
+    } catch (error) {
+      console.error("Failed to fetch inventory categories:", error);
+      setInventoryCategories([]);
+    }
+  }, []);
+
+  // Load categories when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      fetchInventoryCategories();
+    }
+  }, [isOpen, fetchInventoryCategories]);
 
   const isFormFilled =
     formType === "newInventory"
@@ -191,7 +216,6 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
       : createSubCategoryDataSchema.safeParse(subCategoryFormData).success;
 
   const resetFormErrors = (name: string) => {
-    // Clear the error for this field when the user starts typing
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
     setApiError("");
   };
@@ -201,7 +225,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
     if (name === "inventoryImage" && files && files.length > 0) {
       setFormData((prev) => ({
         ...prev,
-        itemPicture: files[0],
+        inventoryImage: files[0],
       }));
     } else {
       setFormData((prev) => ({
@@ -216,7 +240,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
     setFormData((prev) => ({
       ...prev,
       [name]: values,
-      ...(name === "inventoryCategoryId" && { inventorySubCategoryId: "" }), // Clear subCategory if category changes
+      ...(name === "inventoryCategoryId" && { inventorySubCategoryId: "" }),
     }));
     resetFormErrors(name);
   };
@@ -227,8 +251,6 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
     try {
       if (formType === "newInventory") {
         const formSubmissionData = new FormData(e.currentTarget);
-
-        // Convert form data to an object
         const formFields = Object.fromEntries(formSubmissionData.entries());
         const validatedData = formSchema.parse({
           class: formData.class,
@@ -238,7 +260,6 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
         });
         const submissionData = new FormData();
 
-        // Iterate and append validated data to FormData
         Object.entries(validatedData).forEach(([key, value]) => {
           if (value instanceof File) {
             submissionData.append(key, value);
@@ -303,11 +324,14 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
             formType === "newSubCategory" ? "Sub-" : ""
           } Category created successfully!`,
         });
+
+        // Refresh both inventory and categories
+        await Promise.all([allInventoryRefresh(), fetchInventoryCategories()]);
+
+        setCatgoryFormData(defaultCategoryData);
+        setSubCatgoryFormData(defaultSubCategoryData);
+        setIsOpen(false);
       }
-      await allInventoryRefresh();
-      setCatgoryFormData(defaultCategoryData);
-      setSubCatgoryFormData(defaultSubCategoryData);
-      setIsOpen(false);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         setFormErrors(error.issues);
@@ -315,7 +339,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
         const message =
           error?.response?.data?.message ||
           `Inventory ${
-            formType !== "newInventory" && "Category"
+            formType !== "newInventory" ? "Category" : ""
           } Creation Failed: Internal Server Error`;
         setApiError(message);
       }
@@ -381,14 +405,11 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
               <SelectInput
                 label="Category"
                 options={
-                  fetchInventoryCategories?.data &&
-                  fetchInventoryCategories?.data?.length > 0
-                    ? fetchInventoryCategories?.data?.map(
-                        (category: Category) => ({
-                          label: category?.name,
-                          value: category?.id,
-                        })
-                      )
+                  inventoryCategories.length > 0
+                    ? inventoryCategories.map((category: Category) => ({
+                        label: category?.name,
+                        value: category?.id,
+                      }))
                     : [
                         {
                           label: "No Category Available",
@@ -420,9 +441,9 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                 <SelectInput
                   label="Sub-Category"
                   options={
-                    (
-                      fetchInventoryCategories?.data
-                        ?.find(
+                    ((
+                      inventoryCategories
+                        .find(
                           (category: Category) =>
                             category?.id === formData?.inventoryCategoryId
                         )
@@ -431,8 +452,8 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                           value: child?.id,
                         })) || []
                     )?.length > 0
-                      ? fetchInventoryCategories?.data
-                          ?.find(
+                      ? inventoryCategories
+                          .find(
                             (category: Category) =>
                               category?.id === formData?.inventoryCategoryId
                           )
@@ -445,13 +466,13 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                             label: "No Sub-Category Available",
                             value: "",
                           },
-                        ]
+                        ]) as SelectOption[]
                   }
                   value={formData.inventorySubCategoryId}
                   onChange={(selectedValue) =>
                     handleSelectChange("inventorySubCategoryId", selectedValue)
                   }
-                  required={!!formData.inventoryCategoryId} // Required only if a category is selected
+                  required={!!formData.inventoryCategoryId}
                   placeholder="Choose Item Sub-Category"
                   errorMessage={getFieldError("inventorySubCategoryId")}
                 />
@@ -570,12 +591,10 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
                   <SelectInput
                     label="Category"
                     options={
-                      fetchInventoryCategories.data?.map(
-                        (category: Category) => ({
-                          label: category.name,
-                          value: category.id,
-                        })
-                      ) || [{ label: "", value: "" }]
+                      inventoryCategories.map((category: Category) => ({
+                        label: category.name,
+                        value: category.id,
+                      })) || [{ label: "", value: "" }]
                     }
                     value={subCategoryFormData.parentId}
                     onChange={(selectedValue) => {

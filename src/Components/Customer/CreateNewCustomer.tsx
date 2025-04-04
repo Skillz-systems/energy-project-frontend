@@ -6,6 +6,7 @@ import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { Input, SelectInput } from "../InputComponent/Input";
 import { z } from "zod";
 import ApiErrorMessage from "../ApiErrorMessage";
+import { GooglePlacesInput } from "../InputComponent/GooglePlacesInput";
 
 interface CreatNewCustomerProps {
   isOpen: boolean;
@@ -185,6 +186,23 @@ const CreateNewCustomer = ({
             required={true}
             errorMessage={getFieldError("phone")}
           />
+          <GooglePlacesInput
+            type="text"
+            name="location"
+            label="Location"
+            value={formData.location}
+            placeholder="Search for a location"
+            required={true}
+            errorMessage={getFieldError("location")}
+            onChange={(value, _place, coordinates) => {
+              setFormData((prev) => ({
+                ...prev,
+                location: value,
+                longitude: coordinates?.lng || "",
+                latitude: coordinates?.lat || "",
+              }));
+            }}
+          />
           <SelectInput
             label="Address Type"
             options={[
@@ -198,16 +216,6 @@ const CreateNewCustomer = ({
             required={false}
             placeholder="Choose Address Type"
             errorMessage={getFieldError("addressType")}
-          />
-          <Input
-            type="text"
-            name="location"
-            label="Address"
-            value={formData.location}
-            onChange={handleInputChange}
-            placeholder="Address"
-            required={true}
-            errorMessage={getFieldError("location")}
           />
 
           <ApiErrorMessage apiError={apiError} />
