@@ -20,6 +20,7 @@ export type ListDataType = {
   productName: string;
   productPrice: string;
   totalRemainingQuantities: number;
+  productInventoryQuantity: number;
 };
 
 type ProductInventoryType = {

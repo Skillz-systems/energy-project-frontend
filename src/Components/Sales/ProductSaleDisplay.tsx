@@ -14,14 +14,19 @@ export const ProductDetailRow = ({
   label,
   value,
   showNaira = false,
+  title
 }: {
   label: string;
   value: string | number;
   showNaira?: boolean;
+  title?: string;
 }) => (
-  <div className="flex items-center justify-between w-full">
+  <div className="flex items-center justify-between gap-2 w-full">
     <Tag name={label} />
-    <p className="flex gap-1 items-center text-xs font-bold text-textDarkGrey">
+    <p
+      className="flex gap-1 items-center justify-end text-xs font-bold text-textDarkGrey"
+      title={title}
+    >
       {showNaira && <NairaSymbol />}
       {label === "Product Category" ? <ProductTag productTag={value} /> : value}
     </p>

@@ -532,10 +532,16 @@ const saleStore = types
       );
 
       if (existingIndex !== -1) {
-        // Update existing device list
-        self.tentativeDevices[existingIndex].devices.replace(deviceList);
+        // Get existing devices and merge with new ones, avoiding duplicates
+        const existingDevices = self.tentativeDevices[existingIndex].devices;
+        const combinedDevices = [
+          ...new Set([...existingDevices, ...deviceList]),
+        ];
+
+        // Update with combined list
+        self.tentativeDevices[existingIndex].devices.replace(combinedDevices);
       } else {
-        // Add new device list
+        // Add new device list if no existing entry
         self.tentativeDevices.push(
           TentativeDevicesModel.create({
             currentProductId,
