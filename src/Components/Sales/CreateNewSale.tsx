@@ -27,6 +27,7 @@ import { revalidateStore } from "@/utils/helpers";
 import SalesSummary from "./SalesSummary";
 import ApiErrorMessage from "../ApiErrorMessage";
 import { FlutterwaveConfig } from "flutterwave-react-v3/dist/types";
+import { toJS } from "mobx";
 
 const public_key =
   import.meta.env.VITE_FLW_PUBLIC_KEY ||
@@ -205,6 +206,7 @@ const CreateNewSale = observer(
     };
 
     revalidateStore(SaleStore);
+    console.log("Sale Items:", toJS(SaleStore.getTransformedSaleItems()));
 
     return (
       <>

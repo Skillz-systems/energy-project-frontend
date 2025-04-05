@@ -731,13 +731,13 @@ export const CardComponent = ({
                   {productTag}
                 </p>
               )}
-              <p className="text-textDarkGrey text-xs">{productName}</p>
+              <p className="text-textDarkGrey text-xs capitalize">{productName}</p>
               {quantity && (
                 <p className="text-textDarkGrey font-medium text-xs">
                   Quantity: {quantity}
                 </p>
               )}
-              {isSale && (
+              {/* {isSale && (
                 <p
                   className={`${
                     totalRemainingQuantities === 0
@@ -753,7 +753,7 @@ export const CardComponent = ({
                           updatedProductInfo.productUnits
                       }`}
                 </p>
-              )}
+              )} */}
             </div>
           ) : null}
         </div>
