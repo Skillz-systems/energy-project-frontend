@@ -97,8 +97,8 @@ const UploadDevicesForm = observer(
     );
     const [showLinkedDevices, setShowLinkedDevices] = useState(false);
 
-    const linkedDevices =
-      SaleStore.getSelectedTentativeDevices(currentProductId)?.length || 0;
+    // const linkedDevices =
+    //   SaleStore.getSelectedTentativeDevices(currentProductId)?.length || 0;
 
     const { data, mutate } = useGetRequest("/v1/device", true);
     const {
@@ -117,13 +117,6 @@ const UploadDevicesForm = observer(
         )
       : [];
 
-    useEffect(() => {
-      const initialIds = toJS(
-        SaleStore.getSelectedTentativeDevices(currentProductId)
-      );
-      setSelectedDeviceIds(Array.isArray(initialIds) ? initialIds : []);
-    }, [currentProductId]);
-
     const addDeviceId = (id: string) => {
       setSelectedDeviceIds((prev) => {
         const newIds = Array.from(new Set([...prev, id])); // avoid duplicates
@@ -135,11 +128,11 @@ const UploadDevicesForm = observer(
       setSelectedDeviceIds((prev) => prev.filter((item) => item !== id));
     };
 
-    const requiredDevices: number =
-      productData?.inventories?.reduce((sum: number, inventory: any) => {
-        const quantity = Number(inventory?.productInventoryQuantity) || 0;
-        return sum + quantity;
-      }, 0) || 0;
+    // const requiredDevices: number =
+    //   productData?.inventories?.reduce((sum: number, inventory: any) => {
+    //     const quantity = Number(inventory?.productInventoryQuantity) || 0;
+    //     return sum + quantity;
+    //   }, 0) || 0;
 
     const filterDevices = async () => {
       const newParams: Record<string, string> = {};
@@ -163,10 +156,10 @@ const UploadDevicesForm = observer(
         const devices = response.data?.devices || [];
         setFilteredDevices(devices);
 
-        // Get all linked device IDs from sale items
-        const linkedDeviceIds = SaleStore.getTransformedSaleItems().flatMap(
-          (item) => item.devices || []
-        );
+        // Get all linked device IDs from sale items FOR CURRENT PRODUCT
+        const linkedDeviceIds = SaleStore.getTransformedSaleItems()
+          .filter((item) => item.productId === currentProductId)
+          .flatMap((item) => item.devices || []);
 
         // Set available devices (not selected and not linked)
         const filtered = devices.filter(
@@ -244,15 +237,28 @@ const UploadDevicesForm = observer(
       return formErrors.find((error) => error.path[0] === fieldName)?.message;
     };
 
-    const toggleDeviceSelection = (id: string) => {
-      setSelectedDevices((prev) =>
-        prev.includes(id) ? prev.filter((sn) => sn !== id) : [...prev, id]
-      );
-    };
-
-    // const toggleDeviceView = () => {
-    //   setShowLinkedDevices(!showLinkedDevices);
+    // const toggleDeviceSelection = (id: string) => {
+    //   setSelectedDevices((prev) =>
+    //     prev.includes(id) ? prev.filter((sn) => sn !== id) : [...prev, id]
+    //   );
     // };
+
+    const toggleDeviceSelection = (id: string) => {
+      setSelectedDevices((prev) => {
+        const newSelected = prev.includes(id)
+          ? prev.filter((sn) => sn !== id)
+          : [...prev, id];
+
+        // Sync with selectedDeviceIds
+        if (newSelected.includes(id)) {
+          addDeviceId(id);
+        } else {
+          removeDeviceId(id);
+        }
+
+        return newSelected;
+      });
+    };
 
     const linkDevice = () => {
       if (selectedDevices.length !== requiredQuantity) return;
@@ -262,7 +268,7 @@ const UploadDevicesForm = observer(
     };
 
     const saveForm = () => {
-      if (linkedDevices !== requiredDevices) return;
+      // if (linkedDevices !== requiredDevices) return;
       // Ensure selectedDevices is a valid snapshot
       const validDevices = SaleStore.tentativeDevices.flatMap((t) => t.devices);
       SaleStore.addOrUpdateDevices(currentProductId, validDevices);
@@ -285,6 +291,8 @@ const UploadDevicesForm = observer(
       setDescription("Link Device(s)");
       setPrevDescription("");
       setRequiredQuantity(0);
+      setSelectedDevices([]);
+      setSelectedDeviceIds([]);
     };
 
     console.log(
@@ -310,6 +318,10 @@ const UploadDevicesForm = observer(
     }, [filteredDevices, selectedDevices, SaleStore.getTransformedSaleItems()]);
 
     console.log("LINKED DEVICES:", availableDevices);
+
+    const filteredAvailableDevices = availableDevices.filter(
+      (avail) => !selectedLinkedDevices.some((device) => device.id === avail.id)
+    );
 
     return (
       <form className="flex flex-col justify-between h-full max-h-[400px] gap-2">
@@ -634,9 +646,8 @@ const UploadDevicesForm = observer(
                             onClick={() => setShowLinkedDevices(true)}
                           >
                             {selectedLinkedDevices?.length === 0 ? "" : "View"}{" "}
-                            {filteredDevices &&
-                              filteredDevices?.length -
-                                availableDevices?.length}{" "}
+                            {selectedLinkedDevices &&
+                              selectedLinkedDevices.length}{" "}
                             linked device
                             {selectedLinkedDevices?.length > 1 ? "s" : ""}
                           </span>
@@ -718,16 +729,18 @@ const UploadDevicesForm = observer(
                     </div>
                     <div className="flex items-center justify-center py-4">
                       <SecondaryButton
-                        disabled={linkedDevices !== requiredDevices}
-                        children={
-                          linkedDevices === requiredDevices
-                            ? `Save Linked Device${
-                                requiredDevices > 1 ? "s" : ""
-                              }`
-                            : `Saved ${linkedDevices} of ${requiredDevices} Linked Device${
-                                requiredDevices > 1 ? "s" : ""
-                              } `
-                        }
+                        // disabled={linkedDevices !== requiredDevices}
+                        disabled={false}
+                        // children={
+                        //   linkedDevices === requiredDevices
+                        //     ? `Save Linked Device${
+                        //         requiredDevices > 1 ? "s" : ""
+                        //       }`
+                        //     : `Saved ${linkedDevices} of ${requiredDevices} Linked Device${
+                        //         requiredDevices > 1 ? "s" : ""
+                        //       } `
+                        // }
+                        children="Save Devices"
                         onClick={saveForm}
                       />
                     </div>
@@ -805,7 +818,7 @@ const UploadDevicesForm = observer(
                               </td>
                             </tr>
                           ))
-                        : availableDevices?.map((device) => (
+                        : filteredAvailableDevices?.map((device) => (
                             <tr
                               key={device.serialNumber}
                               onClick={() => {
