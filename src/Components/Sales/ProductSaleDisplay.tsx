@@ -14,7 +14,7 @@ export const ProductDetailRow = ({
   label,
   value,
   showNaira = false,
-  title
+  title,
 }: {
   label: string;
   value: string | number;
@@ -133,7 +133,10 @@ const ProductSaleDisplay = observer(
           {doesDevicesExist && (
             <ExtraInfoSection
               label="Devices"
-              onClear={() => SaleStore.removeDevices(productId)}
+              onClear={() => {
+                SaleStore.removeDevices(productId);
+                SaleStore.removeTentativeDevices(productId);
+              }}
             />
           )}
           {doesRecipientExist && (
