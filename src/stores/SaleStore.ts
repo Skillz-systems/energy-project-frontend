@@ -151,9 +151,15 @@ const DevicesModel = types.model({
   devices: types.array(types.string),
 });
 
+const TentativeDeviceInventory = types.model({
+  inventoryId: types.string,
+  devices: types.array(types.string),
+});
+
 const TentativeDevicesModel = types.model({
   currentProductId: types.string,
   devices: types.array(types.string),
+  inventories: types.array(TentativeDeviceInventory),
 });
 
 const SaleRecipientModel = types.model({
@@ -387,6 +393,7 @@ const saleStore = types
       this.removeParameter(productId);
       this.removeMiscellaneousPrice(productId);
       this.removeDevices(productId);
+      this.removeTentativeDevices(productId);
       this.removeRecipient(productId);
 
       const index = self.products.findIndex((p) => p.productId === productId);
@@ -496,13 +503,28 @@ const saleStore = types
         (d) => d.currentProductId === currentProductId
       );
 
+      // Normalize all device IDs to strings
+      const normalizedDevices = deviceList.map((d) => String(d));
+
       if (existingIndex !== -1) {
-        // Update existing device list
-        self.devices[existingIndex].devices.replace(deviceList);
+        // Get current devices and merge with new ones
+        const currentDevices = [...self.devices[existingIndex].devices];
+        const mergedDevices = [
+          ...new Set([...currentDevices, ...normalizedDevices]),
+        ];
+
+        // Use put to update the array in a MobX-friendly way
+        self.devices[existingIndex].devices.clear();
+        mergedDevices.forEach((deviceId) => {
+          self.devices[existingIndex].devices.push(deviceId);
+        });
       } else {
-        // Add new device list
+        // Create new entry with normalized devices
         self.devices.push(
-          DevicesModel.create({ currentProductId, devices: deviceList })
+          DevicesModel.create({
+            currentProductId,
+            devices: normalizedDevices,
+          })
         );
       }
     },
@@ -523,39 +545,305 @@ const saleStore = types
         }
       });
     },
+    // addOrUpdateTentativeDevices(
+    //   currentProductId: string,
+    //   deviceList: string[]
+    // ) {
+    //   const existingIndex = self.tentativeDevices.findIndex(
+    //     (d) => d.currentProductId === currentProductId
+    //   );
+
+    //   // Normalize all device IDs to strings
+    //   const normalizedDevices = deviceList.map((d) => String(d));
+
+    //   if (existingIndex !== -1) {
+    //     // Get current devices and merge with new ones
+    //     const currentDevices = [
+    //       ...self.tentativeDevices[existingIndex].devices,
+    //     ];
+    //     const mergedDevices = [
+    //       ...new Set([...currentDevices, ...normalizedDevices]),
+    //     ];
+
+    //     // Use put to update the array in a MobX-friendly way
+    //     self.tentativeDevices[existingIndex].devices.clear();
+    //     mergedDevices.forEach((deviceId) => {
+    //       self.tentativeDevices[existingIndex].devices.push(deviceId);
+    //     });
+    //   } else {
+    //     // Create new entry with normalized devices
+    //     self.tentativeDevices.push(
+    //       TentativeDevicesModel.create({
+    //         currentProductId,
+    //         devices: normalizedDevices,
+    //       })
+    //     );
+    //   }
+    // },
     addOrUpdateTentativeDevices(
       currentProductId: string,
-      deviceList: string[]
+      deviceList: string[],
+      inventoryId?: string // Optional inventory ID
     ) {
       const existingIndex = self.tentativeDevices.findIndex(
         (d) => d.currentProductId === currentProductId
       );
 
+      const normalizedDevices = deviceList.map((d) => String(d));
+
       if (existingIndex !== -1) {
-        // Update existing device list
-        self.tentativeDevices[existingIndex].devices.replace(deviceList);
+        // Update main devices list
+        const currentDevices = [
+          ...self.tentativeDevices[existingIndex].devices,
+        ];
+        const mergedDevices = [
+          ...new Set([...currentDevices, ...normalizedDevices]),
+        ];
+
+        self.tentativeDevices[existingIndex].devices.clear();
+        mergedDevices.forEach((deviceId) => {
+          self.tentativeDevices[existingIndex].devices.push(deviceId);
+        });
+
+        // Update inventory-specific devices if provided
+        if (inventoryId) {
+          const inventoryIndex = self.tentativeDevices[
+            existingIndex
+          ].inventories.findIndex((inv) => inv.inventoryId === inventoryId);
+
+          if (inventoryIndex !== -1) {
+            const currentInventoryDevices = [
+              ...self.tentativeDevices[existingIndex].inventories[
+                inventoryIndex
+              ].devices,
+            ];
+            const mergedInventoryDevices = [
+              ...new Set([...currentInventoryDevices, ...normalizedDevices]),
+            ];
+
+            self.tentativeDevices[existingIndex].inventories[
+              inventoryIndex
+            ].devices.clear();
+            mergedInventoryDevices.forEach((deviceId) => {
+              self.tentativeDevices[existingIndex].inventories[
+                inventoryIndex
+              ].devices.push(deviceId);
+            });
+          } else {
+            self.tentativeDevices[existingIndex].inventories.push(
+              TentativeDeviceInventory.create({
+                inventoryId,
+                devices: normalizedDevices,
+              })
+            );
+          }
+        }
       } else {
-        // Add new device list
-        self.tentativeDevices.push(
-          TentativeDevicesModel.create({
-            currentProductId,
-            devices: deviceList,
-          })
+        // Create new entry
+        const newEntry: any = {
+          currentProductId,
+          devices: normalizedDevices,
+          inventories: [],
+        };
+
+        if (inventoryId) {
+          newEntry.inventories.push({
+            inventoryId,
+            devices: normalizedDevices,
+          });
+        }
+
+        self.tentativeDevices.push(TentativeDevicesModel.create(newEntry));
+      }
+    },
+    // getSelectedTentativeDevices(productId: string) {
+    //   const devices = self.tentativeDevices.find(
+    //     (d) => d.currentProductId === productId
+    //   )?.devices;
+    //   return devices;
+    // },
+    getAllTentativeDevices(productId: string) {
+      const productEntry = self.tentativeDevices.find(
+        (d) => d.currentProductId === productId
+      );
+
+      return productEntry ? productEntry.devices : [];
+    },
+    getSelectedTentativeDevices(productId: string, inventoryId?: string) {
+      const productEntry = self.tentativeDevices.find(
+        (d) => d.currentProductId === productId
+      );
+
+      if (!productEntry) return [];
+
+      // Return inventory-specific devices if requested
+      if (inventoryId) {
+        const inventory = productEntry.inventories.find(
+          (inv) => inv.inventoryId === inventoryId
+        );
+        return inventory ? [...inventory.devices] : [];
+      }
+
+      // Default to all devices for product
+      return [...productEntry.devices];
+    },
+    // removeSingleTentativeDevice(
+    //   currentProductId: string,
+    //   deviceIdToRemove: string
+    // ) {
+    //   const existingIndex = self.tentativeDevices.findIndex(
+    //     (d) => d.currentProductId === currentProductId
+    //   );
+
+    //   if (existingIndex !== -1) {
+    //     // Filter out the specific device ID
+    //     const updatedDevices = self.tentativeDevices[
+    //       existingIndex
+    //     ].devices.filter((deviceId) => deviceId !== deviceIdToRemove);
+
+    //     // Update the devices array
+    //     self.tentativeDevices[existingIndex].devices.replace(updatedDevices);
+
+    //     // If no devices left, remove the entire entry
+    //     if (updatedDevices.length === 0) {
+    //       self.tentativeDevices.replace(
+    //         self.tentativeDevices.filter(
+    //           (d) => d.currentProductId !== currentProductId
+    //         )
+    //       );
+    //     }
+    //   }
+    // },
+    removeSingleTentativeDevice(
+      currentProductId: string,
+      deviceIdToRemove: string,
+      inventoryId?: string
+    ) {
+      const productIndex = self.tentativeDevices.findIndex(
+        (d) => d.currentProductId === currentProductId
+      );
+
+      if (productIndex !== -1) {
+        // Remove from main devices list
+        const updatedDevices = self.tentativeDevices[
+          productIndex
+        ].devices.filter((deviceId) => deviceId !== deviceIdToRemove);
+        self.tentativeDevices[productIndex].devices.replace(updatedDevices);
+
+        // Remove from specific inventory if provided
+        if (inventoryId) {
+          const inventoryIndex = self.tentativeDevices[
+            productIndex
+          ].inventories.findIndex((inv) => inv.inventoryId === inventoryId);
+
+          if (inventoryIndex !== -1) {
+            const updatedInventoryDevices = self.tentativeDevices[
+              productIndex
+            ].inventories[inventoryIndex].devices.filter(
+              (deviceId) => deviceId !== deviceIdToRemove
+            );
+
+            self.tentativeDevices[productIndex].inventories[
+              inventoryIndex
+            ].devices.replace(updatedInventoryDevices);
+
+            // Remove inventory entry if empty
+            if (updatedInventoryDevices.length === 0) {
+              self.tentativeDevices[productIndex].inventories.splice(
+                inventoryIndex,
+                1
+              );
+            }
+          }
+        }
+
+        // Remove entire product entry if no devices left
+        if (
+          updatedDevices.length === 0 &&
+          self.tentativeDevices[productIndex].inventories.length === 0
+        ) {
+          self.tentativeDevices.splice(productIndex, 1);
+        }
+      }
+    },
+    // removeTentativeDevices(currentProductId?: string) {
+    //   self.tentativeDevices.replace(
+    //     self.tentativeDevices.filter(
+    //       (d) => d.currentProductId !== currentProductId
+    //     )
+    //   );
+    // },
+    removeTentativeDevices(currentProductId?: string, inventoryId?: string) {
+      if (!currentProductId) return;
+
+      if (inventoryId) {
+        // Remove specific inventory devices only
+        const productIndex = self.tentativeDevices.findIndex(
+          (d) => d.currentProductId === currentProductId
+        );
+
+        if (productIndex !== -1) {
+          const inventoryIndex = self.tentativeDevices[
+            productIndex
+          ].inventories.findIndex((inv) => inv.inventoryId === inventoryId);
+
+          if (inventoryIndex !== -1) {
+            // Remove devices from main list that only belong to this inventory
+            const inventoryDevices = new Set(
+              self.tentativeDevices[productIndex].inventories[
+                inventoryIndex
+              ].devices
+            );
+
+            const updatedDevices = self.tentativeDevices[
+              productIndex
+            ].devices.filter((deviceId) => {
+              // Check if device exists in other inventories
+              const inOtherInventories = self.tentativeDevices[
+                productIndex
+              ].inventories.some(
+                (inv, idx) =>
+                  idx !== inventoryIndex && inv.devices.includes(deviceId)
+              );
+              return !inventoryDevices.has(deviceId) || inOtherInventories;
+            });
+
+            self.tentativeDevices[productIndex].devices.replace(updatedDevices);
+            self.tentativeDevices[productIndex].inventories.splice(
+              inventoryIndex,
+              1
+            );
+
+            // Remove product entry if empty
+            if (
+              updatedDevices.length === 0 &&
+              self.tentativeDevices[productIndex].inventories.length === 0
+            ) {
+              self.tentativeDevices.splice(productIndex, 1);
+            }
+          }
+        }
+      } else {
+        // Remove all devices for product
+        self.tentativeDevices.replace(
+          self.tentativeDevices.filter(
+            (d) => d.currentProductId !== currentProductId
+          )
         );
       }
     },
-    getSelectedTentativeDevices(productId: string) {
-      const devices = self.tentativeDevices.find(
+    getTentativeDevicesByInventory(productId: string, inventoryId: string) {
+      const productEntry = self.tentativeDevices.find(
         (d) => d.currentProductId === productId
-      )?.devices;
-      return devices;
-    },
-    removeTentativeDevices(currentProductId?: string) {
-      self.tentativeDevices.replace(
-        self.tentativeDevices.filter(
-          (d) => d.currentProductId !== currentProductId
-        )
       );
+
+      if (!productEntry) return [];
+
+      const inventory = productEntry.inventories.find(
+        (inv) => inv.inventoryId === inventoryId
+      );
+
+      return inventory ? [...inventory.devices] : [];
     },
     addIdentificationDetails(details: typeof self.identificationDetails) {
       self.identificationDetails = details;
