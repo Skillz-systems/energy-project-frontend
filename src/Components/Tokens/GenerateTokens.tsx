@@ -7,6 +7,7 @@ import { FileInput, Input, SelectInput } from "../InputComponent/Input";
 import ApiErrorMessage from "../ApiErrorMessage";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { RxFilePlus } from "react-icons/rx";
+import { FiCopy, FiDownload, FiRefreshCw } from "react-icons/fi";
 import jsPDF from "jspdf";
 
 interface GenerateTokensProps {
@@ -24,6 +25,9 @@ const DeviceFormSchema = z.object({
         .min(1, "Token duration is required")
         .refine((val) => /^\d+$/.test(val), {
             message: "Token duration must be a valid number (days)",
+        })
+        .refine((val) => parseInt(val) > 0 && parseInt(val) <= 365, {
+            message: "Token duration must be between 1 and 365 days",
         }),
 });
 
@@ -33,6 +37,7 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType }: Gene
     const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
     const [apiError, setApiError] = useState<string | Record<string, string[]>>("");
     const [generatedToken, setGeneratedToken] = useState<any>(null);
+    const [copySuccess, setCopySuccess] = useState(false);
     const [formData, setFormData] = useState({
         deviceID: "",
         tokenDuration: "",
@@ -43,17 +48,40 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType }: Gene
     const {
         data: devicesData,
         isLoading: devicesLoading,
+        error: devicesError,
+        mutate: refreshDevices,
     } = useGetRequest("/v1/device", isOpen);
 
     // Convert devices data to options for SelectInput
     const deviceOptions = devicesData?.devices?.map((device: any) => ({
-        label: `${device.serialNumber} (${device.hardwareModel})`,
+        label: `${device.serialNumber} - ${device.hardwareModel}`,
         value: device.id,
     })) || [];
+
+    const handleCopyToClipboard = async (text: string) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000); // Reset after 2 seconds
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
+        setApiError("");
+        setFormErrors([]);
 
         try {
             if (formType === "singleUpload") {
@@ -66,15 +94,14 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType }: Gene
 
                 const validatedData = result.data;
                 
-                // Find the selected device to get its key
+                // Find the selected device to get its details
                 const selectedDevice = devicesData?.devices?.find((device: any) => device.id === validatedData.deviceID);
                 if (!selectedDevice) {
                     throw new Error("Selected device not found");
                 }
                 
-                // Send deviceId and tokenDuration to match API spec
+                // Send only tokenDuration in body, deviceId in URL path
                 const apiData = {
-                    deviceId: validatedData.deviceID,
                     tokenDuration: Number(validatedData.tokenDuration)
                 };
                 
@@ -91,9 +118,15 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType }: Gene
                     successMessage: "Token generated successfully!",
                 });
 
-                // Store the generated token response - extract data from Axios response
+                // Store the generated token response with device info
                 console.log('Token generation response:', response);
-                setGeneratedToken(response?.data || response);
+                const tokenData = {
+                    ...response?.data,
+                    deviceSerialNumber: selectedDevice.serialNumber,
+                    deviceModel: selectedDevice.hardwareModel,
+                    deviceId: selectedDevice.id,
+                };
+                setGeneratedToken(tokenData);
                 
             } else {
                 // For batch upload
@@ -114,13 +147,12 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType }: Gene
                     successMessage: "Tokens generated successfully!",
                 });
 
-                // Store the batch generation response - extract data from Axios response
+                // Store the batch generation response
                 console.log('Batch token generation response:', response);
                 setGeneratedToken(response?.data || response);
             }
 
             await allDevicesRefresh();
-            // Don't close modal immediately - let user see the token
             
         } catch (error: any) {
             if (error instanceof z.ZodError) {
@@ -128,6 +160,7 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType }: Gene
             } else {
                 const message =
                     error?.response?.data?.message ||
+                    error?.message ||
                     `Token${formType === "batchUpload" ? "s" : ""} Generation Failed: Internal Server Error`;
                 setApiError(message);
             }
@@ -177,7 +210,8 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType }: Gene
         });
         setFormErrors([]);
         setApiError("");
-        setGeneratedToken(null); // Clear generated token when closing
+        setGeneratedToken(null);
+        setCopySuccess(false); // Reset copy success state
     };
 
     const handleGenerateAnother = () => {
@@ -188,7 +222,8 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType }: Gene
         });
         setFormErrors([]);
         setApiError("");
-        setGeneratedToken(null); // Clear generated token to show form again
+        setGeneratedToken(null);
+        setCopySuccess(false); // Reset copy success state
     };
 
     const handleExportToPDF = () => {
@@ -268,6 +303,14 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType }: Gene
         doc.save(fileName);
     };
 
+    const handleRefreshDevices = async () => {
+        try {
+            await refreshDevices();
+        } catch (error) {
+            console.error('Failed to refresh devices:', error);
+        }
+    };
+
     return (
         <Modal
             isOpen={isOpen}
@@ -321,11 +364,12 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType }: Gene
                                             type="button"
                                             onClick={() => {
                                                 const tokenText = generatedToken?.deviceToken || generatedToken?.token || generatedToken?.tokenValue || 'Token not found';
-                                                navigator.clipboard.writeText(tokenText);
+                                                handleCopyToClipboard(tokenText);
                                             }}
-                                            className="mt-3 text-sm text-primary hover:text-primaryDark underline font-medium"
+                                            className="mt-3 flex items-center gap-2 text-sm text-primary hover:text-primaryDark underline font-medium transition-colors"
                                         >
-                                            Copy to clipboard
+                                            <FiCopy className="w-4 h-4" />
+                                            {copySuccess ? "Copied!" : "Copy to clipboard"}
                                         </button>
                                     </div>
                                     
@@ -393,8 +437,9 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType }: Gene
                                     <button
                                         type="button"
                                         onClick={handleExportToPDF}
-                                        className="bg-gradient-to-r from-[#982214] to-[#F8CB48] text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity font-medium text-sm"
+                                        className="bg-gradient-to-r from-[#982214] to-[#F8CB48] text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity font-medium text-sm flex items-center gap-2"
                                     >
+                                        <FiDownload className="w-4 h-4" />
                                         Export to PDF
                                     </button>
                                     <button
@@ -412,16 +457,49 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType }: Gene
                         <>
                             {formType === "singleUpload" ? (
                                 <>
-                                    <SelectInput
-                                        label="Select Device"
-                                        value={formData.deviceID}
-                                        onChange={handleDeviceSelect}
-                                        required={true}
-                                        errorMessage={getFieldError("deviceID")}
-                                        options={deviceOptions}
-                                        placeholder={devicesLoading ? "Loading devices..." : "Select a device"}
-                                        disabled={devicesLoading}
-                                    />
+                                    <div className="w-full">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <label className="text-sm font-medium text-textDarkGrey">
+                                                Select Device *
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={handleRefreshDevices}
+                                                disabled={devicesLoading}
+                                                className="p-1 text-primary hover:text-primaryDark disabled:opacity-50 transition-colors"
+                                                title="Refresh devices list"
+                                            >
+                                                <FiRefreshCw className={`w-4 h-4 ${devicesLoading ? 'animate-spin' : ''}`} />
+                                            </button>
+                                        </div>
+                                        
+                                        {devicesError ? (
+                                            <div className="p-3 bg-red-50 border border-red-200 rounded-md mb-4">
+                                                <p className="text-sm text-red-600">
+                                                    Failed to load devices. Please try refreshing.
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <SelectInput
+                                                label=""
+                                                value={formData.deviceID}
+                                                onChange={handleDeviceSelect}
+                                                required={true}
+                                                errorMessage={getFieldError("deviceID")}
+                                                options={deviceOptions}
+                                                placeholder={devicesLoading ? "Loading devices..." : "Select a device"}
+                                                disabled={devicesLoading || deviceOptions.length === 0}
+                                            />
+                                        )}
+                                        
+                                        {deviceOptions.length === 0 && !devicesLoading && !devicesError && (
+                                            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                                                <p className="text-sm text-yellow-600">
+                                                    No devices available. Please add devices first.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
 
                                     <Input
                                         type="text"
@@ -429,7 +507,7 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType }: Gene
                                         label="Token Duration (days)"
                                         value={formData.tokenDuration}
                                         onChange={handleInputChange}
-                                        placeholder="Enter duration in days (e.g., 30)"
+                                        placeholder="Enter duration in days (1-365)"
                                         required={true}
                                         errorMessage={getFieldError("tokenDuration")}
                                     />
