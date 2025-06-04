@@ -125,7 +125,7 @@ const Devices = () => {
   }, [location.pathname]);
 
   const dropDownList = {
-    items: ["Create New Devices (Batch)", "Generate Tokens (Batch)"],
+    items: ["Create New Devices (Batch)", "Generate Tokens (Batch)", "Tokens History", "Generate Tokens (Single)"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
@@ -136,9 +136,16 @@ const Devices = () => {
           setTokensFormType("batchUpload");
           setIsTokensOpen(true);
           break;
+        case 2:
+          setIsTokensHistoryOpen(true);
+          break;
         default:
+          setTokensFormType("singleUpload");
+          setIsTokensOpen(true);
           break;
       }
+     
+     
     },
     showCustomButton: true,
   };
@@ -167,7 +174,7 @@ const Devices = () => {
                 setIsOpen(true);
               }}
             />
-            <ActionButton
+            {/* <ActionButton
               label="Generate Tokens"
               icon={<img src={circleAction} />}
               onClick={() => {
@@ -181,7 +188,7 @@ const Devices = () => {
               onClick={() => {
                 setIsTokensHistoryOpen(true);
               }}
-            />
+            /> */}
             <DropDown {...dropDownList} />
           </div>
         </section>
